@@ -1,0 +1,24 @@
+{
+  "objects": 294,
+  "primitives": 4246,
+  "modes": {
+    "2101": 7,
+    "3501": 352,
+    "3d01": 2214,
+    "2501": 239,
+    "2901": 10,
+    "2d01": 1420,
+    "3901": 1,
+    "3101": 3
+  },
+  "materials": 51,
+  "player": {
+    "ranges": 15,
+    "frames": 90,
+    "texture_blocks": 277
+  },
+  "texture_blocks": 166,
+  "source": "https://github.com/coalslav/hmbtn-decomp",
+  "disc_sha256": "41f81532a5fd70d6f79e7b5750513c35eee732d5e31ba144a1db7e90d84d97de",
+  "note": "Farm section 0. Original assets extracted locally. Native Godot runtime does not read the disc."
+}

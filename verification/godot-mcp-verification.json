@@ -1,0 +1,189 @@
+[
+  {
+    "tool": "project_manage",
+    "is_error": false,
+    "data": {
+      "readiness_after": "ready",
+      "reason": "Play/stop is a runtime action",
+      "stopped": true,
+      "undoable": false,
+      "was_running": true
+    }
+  },
+  {
+    "tool": "project_run",
+    "is_error": false,
+    "data": {
+      "autosave": false,
+      "current_run_errors": [],
+      "game_status": {
+        "active": true,
+        "editor_log_cursor": 0,
+        "elapsed_msec": 1257,
+        "helper_expected": true,
+        "helper_live": true,
+        "ready": true,
+        "ready_wait_msec": 3000,
+        "run_started_msec": 628658,
+        "run_token": 4,
+        "session_active": true,
+        "status": "live"
+      },
+      "helper_live": true,
+      "mode": "main",
+      "reason": "Game launched and the Godot AI game helper is live.",
+      "recent_errors": [],
+      "recent_errors_may_predate_run": false,
+      "recent_errors_scope": "none",
+      "recent_errors_truncated": false,
+      "retained_errors": [],
+      "scene": "",
+      "session_active": true,
+      "undoable": false,
+      "was_already_running": false
+    }
+  },
+  {
+    "tool": "editor_manage",
+    "is_error": false,
+    "data": {
+      "result": {
+        "landed": true,
+        "position": "(0.0, 0.000141, 0.0)"
+      },
+      "source": "game"
+    }
+  },
+  {
+    "tool": "game_manage",
+    "is_error": false,
+    "data": {
+      "actions_pressed_at_end": [],
+      "applied": [
+        {
+          "action": "move_right",
+          "at_frame": 0.0,
+          "pressed": true
+        },
+        {
+          "action": "move_right",
+          "at_frame": 60.0,
+          "pressed": false
+        }
+      ],
+      "completed": true,
+      "frames_elapsed": 63.0,
+      "op": "input_sequence",
+      "source": "game",
+      "steps_applied": 2.0
+    }
+  },
+  {
+    "tool": "editor_manage",
+    "is_error": false,
+    "data": {
+      "result": {
+        "floor": true,
+        "fps": 60.0,
+        "input_distance": 2.60002541542053,
+        "native_mesh_surfaces": 51.0
+      },
+      "source": "game"
+    }
+  },
+  {
+    "tool": "editor_screenshot",
+    "is_error": false,
+    "data": null,
+    "text": "{\"source\": \"game\", \"width\": 800, \"height\": 500, \"original_width\": 1152, \"original_height\": 720, \"format\": \"png\", \"stale_frame\": false, \"frames_drawn\": 151}",
+    "image": "C:\\Users\\kottalo\\Documents\\Codex\\2026-10-27\\c-users-kottalo-downloads-harvest-moon\\work\\godot-follow-final.png"
+  },
+  {
+    "tool": "editor_manage",
+    "is_error": false,
+    "data": {
+      "result": "overview",
+      "source": "game"
+    }
+  },
+  {
+    "tool": "editor_screenshot",
+    "is_error": false,
+    "data": null,
+    "text": "{\"source\": \"game\", \"width\": 800, \"height\": 500, \"original_width\": 1152, \"original_height\": 720, \"format\": \"png\", \"stale_frame\": false, \"frames_drawn\": 181}",
+    "image": "C:\\Users\\kottalo\\Documents\\Codex\\2026-10-27\\c-users-kottalo-downloads-harvest-moon\\work\\godot-overview-final.png"
+  },
+  {
+    "tool": "editor_manage",
+    "is_error": false,
+    "data": {
+      "result": "follow camera restored",
+      "source": "game"
+    }
+  },
+  {
+    "tool": "logs_read",
+    "is_error": false,
+    "data": {
+      "source": "editor",
+      "lines": [],
+      "total_count": 0,
+      "returned_count": 0,
+      "offset": 0,
+      "limit": 20,
+      "has_more": false,
+      "run_id": "",
+      "is_running": false,
+      "dropped_count": 0,
+      "stale_run_id": false,
+      "next_cursor": 0,
+      "appended_total": 0
+    }
+  },
+  {
+    "tool": "logs_read",
+    "is_error": false,
+    "data": {
+      "source": "game",
+      "lines": [
+        {
+          "level": "info",
+          "run_id": "r628658-4",
+          "source": "game",
+          "text": "[godot_ai game_helper] registered mcp capture (debugger active=true, logger=true)\n"
+        },
+        {
+          "level": "info",
+          "run_id": "r628658-4",
+          "source": "game",
+          "text": "FARM_READY: native meshes loaded, no disc reader or PS1 runtime\n"
+        }
+      ],
+      "total_count": 2,
+      "returned_count": 2,
+      "offset": 0,
+      "limit": 20,
+      "has_more": false,
+      "run_id": "r628658-4",
+      "is_running": true,
+      "dropped_count": 0,
+      "stale_run_id": false,
+      "current_run_id": "r628658-4",
+      "helper_live": true,
+      "session_active": true,
+      "game_status": {
+        "active": true,
+        "editor_log_cursor": 0,
+        "elapsed_msec": 5262,
+        "helper_expected": true,
+        "helper_live": true,
+        "ready": true,
+        "ready_wait_msec": 20000,
+        "run_started_msec": 628658,
+        "run_token": 4,
+        "session_active": true,
+        "status": "live"
+      }
+    }
+  }
+]
