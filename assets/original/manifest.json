@@ -12,6 +12,8 @@
     "3101": 3
   },
   "materials": 51,
+  "scene_entries": 8,
+  "coordinate_conversion": "(x, -y, -z) / 1000",
   "player": {
     "ranges": 15,
     "frames": 90,

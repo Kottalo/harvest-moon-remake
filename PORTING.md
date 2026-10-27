@@ -20,16 +20,25 @@
 | 贴图与调色板 | `src/main/graphics/texture_pack.c/.h` | 166 个农场数据块，支持 raw、行 RLE、列 RLE、4/8/16 位纹理 |
 | 主角动画 | `src/main/graphics/anim.c/.h`、`src/overlay/27_GF_TITLE/title.c` | A_FILE 偏移 0x2A800，图像库偏移 0xBE08；277 个数据块，前 15 组 / 90 帧 |
 | 站立、走、跑映射 | `src/overlay/11_GF_FARM/people/player.c` | 站立组 0 按朝向；走 1+朝向；跑 6+朝向；保留帧控制与半刻时长规则 |
-| 镜头方向 | `src/overlay/11_GF_FARM/world/scene_view.c` | yaw -512，眼点高度 4500、距离 9000 的方向；Godot 使用正交投影 |
+| 镜头与坐标 | `src/overlay/11_GF_FARM/world/scene_view.c`、`src/main/geometry/model.c` | yaw -512，PS1 眼点约 (6363,-4500,-6363)，H=1000、320×240；Godot 坐标 (x,-y,-z)/1000，垂直视角约 13.68555°，4:3 画幅 |
+| 场景物件 | `src/overlay/11_GF_FARM/world/scene.c/.h` | 读取 FarmModeScript 末尾 15 条 44 字节记录，按 absent/hidden/slot 标志装入 8 个可见物件，保留原始位置与角度 |
 
 TMD 使用本游戏定长 primitive 布局，不能把头部前两个字节当作标准 TMD packet 长度。转换器对未知模式、越界索引、纹理边界及截断数据报错。
 
 ## 检查
 
 1. `python tools/import_disc.py --check`：RLE、原始/列图像库、颜色与截断检查。
-2. `godot --headless --path . --script tools/verify_runtime.gd`：实际场景、输入与物理集成检查。60 个物理帧分别行走 2.6000、斜走 2.6000、跑步 4.7999 世界单位；落地且真实网格墙体阻挡角色。
+2. `godot --headless --path . --script tools/verify_runtime.gd`：实际场景、输入与物理集成检查。验证上下左右的屏幕位移符号为东北、西南、西北、东南及对应四种姿态；Godot 透视投影与独立实现的原版 camera_build_view/GTE 公式误差小于 0.05 原始像素；检查原始场景物件位置。60 个物理帧行走 1.2301、组合方向行走 1.2301、跑步 2.1902 世界单位；速度取自 player.c 中 41/73 单位每 30 Hz 帧。落地且真实网格墙体阻挡角色。
 3. 另建只含 `assets`、`scripts`、`scenes`、检查脚本的隔离目录；没有 ROM、反编译仓库、转换器和 MCP 插件。重新导入后相同运行检查通过。
-4. Godot AI MCP 通过认证 stdio attach：编辑器状态、启动活性、真实 InputMap 操作序列、游戏画面截图。MCP 输入 60 帧移动距离 2.6000，地面状态为 true；运行快照为 60 FPS。此为单场景采样，非整机性能保证。
+4. Godot AI MCP 通过认证 stdio attach：编辑器状态、启动活性、真实 InputMap 操作序列、游戏画面截图。校正后重新启动，确认 fov=13.685546875、透视投影、逻辑画面 960×720、物件 0 位置 (-4.78,0,-4.28)，编辑器错误日志为空。早期 verification 中的 2.6000 移动距离记录属于校正前版本，不代表当前原版速度。
+
+## 2026-10-28 还原校正
+
+早期只反转了 Y 轴，并把输入旋转成屏幕正方向，造成地图左右镜像和方向错误；正交 size=12 也是未经原版投影计算的近似。现已统一使用 (x,-y,-z)/1000，方向键沿原始世界轴走；组合键按 player_dpad_facing 的四向选择规则处理。默认镜头恢复透视，Tab 全景仅用于检查地图。
+
+主角原本由 player_draw 投影 (x+150,y-100,z-150) 后以固定屏幕像素绘制；现在同步恢复这个锚点，并按相机深度调整 billboard 的 pixel_size，避免镜头校正后角色比例错误。
+
+8 个场景物件单独保存在 ZoneModel_00…07 节点中，位置与旋转来自文件；没有为修正画面而手动调换建筑。还没有完整恢复它们的动态交互。
 
 高分辨率截图可能超过 MCP 的 1 MiB 单事件限制，验证截图使用最长边 800 像素。未提高服务器限制。
 

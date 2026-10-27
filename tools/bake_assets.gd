@@ -4,8 +4,30 @@ extends SceneTree
 func _initialize() -> void:
 	var source = JSON.parse_string(FileAccess.get_file_as_string("res://assets/original/farm.json"))
 	assert(source is Dictionary, "Run tools/import_disc.py first")
+	var farm := Node3D.new()
+	farm.name = "OriginalFarm"
+	_add_mesh(farm, farm, source.surfaces)
+	for entry in source.entries:
+		var node := Node3D.new()
+		node.name = "ZoneModel_%02d" % int(entry.index)
+		node.position = Vector3(entry.position[0], entry.position[1], entry.position[2])
+		node.rotation_order = EULER_ORDER_ZXY
+		node.rotation = Vector3(entry.angle[0], entry.angle[1], entry.angle[2]) * TAU / 4096.0
+		node.set_meta("source_position", entry.source_position)
+		node.set_meta("source_flags", entry.flags)
+		farm.add_child(node)
+		node.owner = farm
+		_add_mesh(farm, node, entry.surfaces)
+	var scene := PackedScene.new()
+	assert(scene.pack(farm) == OK)
+	assert(ResourceSaver.save(scene, "res://scenes/original_farm.scn") == OK)
+	print("BAKE_OK: native farm and ", source.entries.size(), " positioned zone models saved")
+	farm.free()
+	quit()
+
+func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array) -> void:
 	var mesh := ArrayMesh.new()
-	for surface in source.surfaces:
+	for surface in surfaces:
 		var vertices := PackedVector3Array()
 		var colors := PackedColorArray()
 		var uv := PackedVector2Array()
@@ -30,12 +52,10 @@ func _initialize() -> void:
 			material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 			material.alpha_scissor_threshold = 0.5
 		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
-	var farm := Node3D.new()
-	farm.name = "OriginalFarm"
 	var instance := MeshInstance3D.new()
 	instance.name = "Geometry"
 	instance.mesh = mesh
-	farm.add_child(instance)
+	parent.add_child(instance)
 	instance.owner = farm
 	var body := StaticBody3D.new()
 	body.name = "Collision"
@@ -44,13 +64,7 @@ func _initialize() -> void:
 	var collision := mesh.create_trimesh_shape()
 	collision.backface_collision = true
 	shape.shape = collision
-	farm.add_child(body)
+	parent.add_child(body)
 	body.owner = farm
 	body.add_child(shape)
 	shape.owner = farm
-	var scene := PackedScene.new()
-	assert(scene.pack(farm) == OK)
-	assert(ResourceSaver.save(scene, "res://scenes/original_farm.scn") == OK)
-	print("BAKE_OK: ", mesh.get_surface_count(), " native mesh surfaces and collision saved")
-	farm.free()
-	quit()

@@ -139,10 +139,10 @@ LAYOUTS = {
 }
 
 
-def farm_mesh(data, vram, out):
-    assert struct.unpack_from('<I', data, 0x2000)[0] == 0x42
-    base = 0x200c
-    objects = struct.unpack_from('<I', data, 0x2008)[0]
+def model_mesh(data, vram, out, offset=0x2000):
+    assert struct.unpack_from('<I', data, offset)[0] == 0x42
+    base = offset + 12
+    objects = struct.unpack_from('<I', data, offset + 8)[0]
     groups, types = {}, Counter()
     for obj in range(objects):
         vp, nv, _, _, pp, np, _ = struct.unpack_from('<7I', data, base + obj * 28)
@@ -168,7 +168,9 @@ def farm_mesh(data, vram, out):
             group = groups[name]
             for corner in ((0, 1, 2) if count == 3 else (0, 1, 2, 1, 3, 2)):
                 x, y, z = points[indices[corner]]
-                group['vertices'].extend((x / 1000, -y / 1000, z / 1000))
+                # PS1 camera looks along +Z with Y down. Godot uses -Z, Y up.
+                # Flipping only Y mirrored the entire farm in the previous build.
+                group['vertices'].extend((x / 1000, -y / 1000, -z / 1000))
                 color = packet[ci + (corner * 4 if gouraud else 0):][:3]
                 # PS1 textured color 128 is neutral; solid colors use the full 255 range.
                 divisor = 128 if textured else 255
@@ -180,8 +182,29 @@ def farm_mesh(data, vram, out):
                     group['uv'].extend((0, 0))
             types[f'{key:04x}'] += 1
             pos += size
-    (out / 'farm.json').write_text(json.dumps(dict(surfaces=list(groups.values())), separators=(',', ':')))
-    return dict(objects=objects, primitives=sum(types.values()), modes=types, materials=len(groups))
+    return list(groups.values()), dict(objects=objects, primitives=sum(types.values()), modes=types, materials=len(groups))
+
+
+def farm_mesh(data, vram, out):
+    surfaces, report = model_mesh(data, vram, out)
+    entries = []
+    # FarmModeScript is 0xBDC bytes, ending with 15 FarmZoneModel records of 44 bytes.
+    for index in range(15):
+        record = 0xbdc - 15 * 44 + index * 44
+        flags, name = struct.unpack_from('<II', data, record)
+        # scene_populate_objects / scene_assign_slots hide absent and slot 1/2 entries.
+        if flags & (0x8000 | 0x1000) or flags & 0x100 and flags & 15 in (1, 2):
+            continue
+        position = struct.unpack_from('<3h', data, record + 20)
+        angle = struct.unpack_from('<3h', data, record + 28)
+        parts, info = model_mesh(data, vram, out, 0x2000 + name)
+        x, y, z = position
+        entries.append(dict(index=index, flags=flags, source_position=position,
+                            position=[x / 1000, -y / 1000, -z / 1000],
+                            angle=[angle[0], -angle[1], -angle[2]], surfaces=parts))
+    (out / 'farm.json').write_text(json.dumps(dict(surfaces=surfaces, entries=entries), separators=(',', ':')))
+    report.update(scene_entries=len(entries), coordinate_conversion='(x, -y, -z) / 1000')
+    return report
 
 
 def player_sprites(data, out):
