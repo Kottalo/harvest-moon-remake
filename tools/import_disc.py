@@ -14,6 +14,7 @@ import struct
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
+WRITTEN_TEXTURES = set()
 
 
 class Disc:
@@ -112,15 +113,17 @@ def texture_page(vram, page, clut):
     assert depth < 3, 'Reserved PS1 texture depth'
     words = memoryview(vram).cast('H')
     cx, cy = (clut & 63) * 16, (clut >> 6) & 511
+    palette = [rgba(words[(cy * 1024 + cx + i) % len(words)]) for i in range(16 if depth == 0 else 256)] if depth < 2 else []
     colors = []
     for v in range(256):
         for u in range(256):
             word = words[((y + v) & 511) * 1024 + ((x + (u >> (2 - depth))) & 1023)]
             if depth == 0:
-                word = words[(cy * 1024 + cx + ((word >> ((u & 3) * 4)) & 15)) % len(words)]
+                colors.append(palette[(word >> ((u & 3) * 4)) & 15])
             elif depth == 1:
-                word = words[(cy * 1024 + cx + ((word >> ((u & 1) * 8)) & 255)) % len(words)]
-            colors.append(rgba(word))
+                colors.append(palette[(word >> ((u & 1) * 8)) & 255])
+            else:
+                colors.append(rgba(word))
     image = Image.new('RGBA', (256, 256))
     image.putdata(colors)
     return image
@@ -139,11 +142,13 @@ LAYOUTS = {
 }
 
 
-def model_mesh(data, vram, out, offset=0x2000):
-    assert struct.unpack_from('<I', data, offset)[0] == 0x42
+def model_mesh(data, vram, out, offset=0x2000, texture_names=None):
+    assert struct.unpack_from('<I', data, offset)[0] in (0x41, 0x42)
     base = offset + 12
     objects = struct.unpack_from('<I', data, offset + 8)[0]
     groups, types = {}, Counter()
+    if texture_names is None:
+        texture_names = {}
     for obj in range(objects):
         vp, nv, _, _, pp, np, _ = struct.unpack_from('<7I', data, base + obj * 28)
         points = [struct.unpack_from('<3h', data, base + vp + i * 8) for i in range(nv)]
@@ -161,9 +166,12 @@ def model_mesh(data, vram, out, offset=0x2000):
             clut = struct.unpack_from('<H', packet, 6)[0] if textured else 0
             name = f'p{page:04x}_c{clut:04x}' if textured else 'solid'
             if name not in groups:
-                filename = f'textures/{name}.png' if textured else ''
-                if textured:
+                if textured and name not in texture_names:
+                    texture_names[name] = f'textures/{out.name}_atlas_{len(texture_names) + 1:02d}.png'
+                filename = texture_names[name] if textured else ''
+                if textured and out / filename not in WRITTEN_TEXTURES:
                     texture_page(vram, page, clut).save(out / filename)
+                    WRITTEN_TEXTURES.add(out / filename)
                 groups[name] = dict(texture=filename, vertices=[], colors=[], uv=[])
             group = groups[name]
             for corner in ((0, 1, 2) if count == 3 else (0, 1, 2, 1, 3, 2)):
@@ -185,8 +193,9 @@ def model_mesh(data, vram, out, offset=0x2000):
     return list(groups.values()), dict(objects=objects, primitives=sum(types.values()), modes=types, materials=len(groups))
 
 
-def farm_mesh(data, vram, out):
-    surfaces, report = model_mesh(data, vram, out)
+def farm_mesh(data, vram, out, json_output=None):
+    texture_names = {}
+    surfaces, report = model_mesh(data, vram, out, texture_names=texture_names)
     entries = []
     # FarmModeScript is 0xBDC bytes, ending with 15 FarmZoneModel records of 44 bytes.
     for index in range(15):
@@ -197,14 +206,78 @@ def farm_mesh(data, vram, out):
             continue
         position = struct.unpack_from('<3h', data, record + 20)
         angle = struct.unpack_from('<3h', data, record + 28)
-        parts, info = model_mesh(data, vram, out, 0x2000 + name)
+        parts, info = model_mesh(data, vram, out, 0x2000 + name, texture_names)
         x, y, z = position
         entries.append(dict(index=index, flags=flags, source_position=position,
                             position=[x / 1000, -y / 1000, -z / 1000],
                             angle=[angle[0], -angle[1], -angle[2]], surfaces=parts))
-    (out / 'farm.json').write_text(json.dumps(dict(surfaces=surfaces, entries=entries), separators=(',', ':')))
-    report.update(scene_entries=len(entries), coordinate_conversion='(x, -y, -z) / 1000')
+    (json_output or out / 'farm.json').write_text(json.dumps(dict(surfaces=surfaces, entries=entries), separators=(',', ':')))
+    report.update(scene_entries=len(entries), coordinate_conversion='(x, -y, -z) / 1000', texture_sources=texture_names)
     return report
+
+
+def scene_exits(data, count):
+    """farm_zone_find: skip dead, marker and event-only trigger zones; id is destination."""
+    result = []
+    for index in range(50):
+        offset = 16 + index * 44
+        flags, target = struct.unpack_from('<2H', data, offset)
+        low = struct.unpack_from('<3h', data, offset + 14)
+        high = struct.unpack_from('<3h', data, offset + 20)
+        if flags & 0x6188 or target >= count or low[0] >= high[0] or low[2] >= high[2]:
+            continue
+        # Farm zones intentionally test X/Z only, including boxes with zero Y thickness.
+        entry = struct.unpack_from('<3h', data, offset + 38)
+        result.append(dict(index=index, target=target, facing=struct.unpack_from('<h', data, offset + 8)[0],
+                           requires_action=bool(flags & 0x1000),
+                           min=[low[0] / 1000, -high[2] / 1000],
+                           max=[high[0] / 1000, -low[2] / 1000],
+                           entry=[entry[0] / 1000, -entry[1] / 1000, -entry[2] / 1000]))
+    return result
+
+
+def import_world(disc, offsets, out):
+    count = (len(offsets) - 1) // 4
+    # Follow the actual default spring exits, rather than importing seasonal duplicates.
+    headers = [disc.asset(offsets[i * 4], 0xbdc) for i in range(count)]
+    exits = [scene_exits(header, count) for header in headers]
+    connected, pending = {0}, [0]
+    while pending:
+        for exit in exits[pending.pop()]:
+            if exit['target'] not in connected:
+                connected.add(exit['target'])
+                pending.append(exit['target'])
+    names = json.loads((ROOT / 'tools/location_names.json').read_text(encoding='utf-8'))
+    intermediate = ROOT / 'tools/generated/locations'
+    intermediate.mkdir(parents=True, exist_ok=True)
+    (intermediate.parent / '.gdignore').write_text('')
+    world, reports = {}, []
+    for area in sorted(connected):
+        start, texture, event = offsets[area * 4:area * 4 + 3]
+        data = disc.asset(start, texture - start)
+        slug = names[str(area)]['slug']
+        directory = out / slug
+        (directory / 'textures').mkdir(parents=True, exist_ok=True)
+        vram, blocks = texture_bank(disc.asset(texture, event - texture))
+        report = farm_mesh(data, vram, directory, intermediate / f'{slug}.json')
+        report.update(area=area, texture_blocks=blocks)
+        reports.append(report)
+        value, location = struct.unpack_from('<2H', data)
+        world[str(area)] = dict(id=area, slug=slug, name=names[str(area)]['name'],
+                                place=value, location=location,
+                                scene=f'res://game/locations/{slug}/{slug}.scn',
+                                source_json=f'res://tools/generated/locations/{slug}.json',
+                                texture_base=f'res://game/locations/{slug}/',
+                                exits=exits[area], spawn=[0, 0.05, 0])
+        print(f"AREA_EXTRACTED {area}: {report['objects']} objects, {len(exits[area])} exits", flush=True)
+    # Entry coordinates are stored in the source exit, in the destination's coordinate system.
+    for info in world.values():
+        for exit in info['exits']:
+            if exit['target'] != 0:
+                world[str(exit['target'])]['spawn'] = exit['entry']
+    assert all(str(exit['target']) in world for info in world.values() for exit in info['exits'])
+    (ROOT / 'game/world/location_catalog.json').write_text(json.dumps(world, ensure_ascii=False, indent=2), encoding='utf-8')
+    return reports
 
 
 def player_sprites(data, out):
@@ -253,8 +326,8 @@ def player_sprites(data, out):
     atlas = Image.new('RGBA', (1024, ((len(rendered) + 7) // 8) * 128))
     for tile, image in enumerate(rendered):
         atlas.paste(image, (tile % 8 * 128, tile // 8 * 128))
-    atlas.save(out / 'player.png')
-    (out / 'player.json').write_text(json.dumps(dict(cell=128, columns=8, origin=[64, 112], animations=animations)))
+    atlas.save(out / 'player_atlas.png')
+    (out / 'player_animations.json').write_text(json.dumps(dict(cell=128, columns=8, origin=[64, 112], animations=animations)))
     return dict(ranges=len(animations), frames=len(rendered), texture_blocks=blocks)
 
 
@@ -291,17 +364,15 @@ def main():
     disc = Disc(args.disc)
     table = (ROOT / 'reference/hmbtn-decomp/src/overlay/common/farm_section_table.h').read_text()
     offsets = [int(v, 16) for v in re.findall(r'0x[0-9a-fA-F]+', table.split('= {', 1)[1])]
-    start, texture, event = offsets[:3]
-    out = ROOT / 'assets/original'
-    (out / 'textures').mkdir(parents=True, exist_ok=True)
-    bank, count = texture_bank(disc.asset(texture, event - texture))
-    report = farm_mesh(disc.asset(start, texture - start), bank, out)
+    out = ROOT / 'game/locations'
+    areas = import_world(disc, offsets, out)
+    report = dict(areas=areas, area_count=len(areas))
     player = disc.asset(0x2a800, 0x49000)
-    report['player'] = player_sprites(player, out)
-    report.update(texture_blocks=count, source='https://github.com/coalslav/hmbtn-decomp',
+    report['player'] = player_sprites(player, ROOT / 'game/player')
+    report.update(source='https://github.com/coalslav/hmbtn-decomp',
                   disc_sha256=hashlib.file_digest(open(args.disc, 'rb'), 'sha256').hexdigest(),
-                  note='Farm section 0. Original assets extracted locally. Native Godot runtime does not read the disc.')
-    (out / 'manifest.json').write_text(json.dumps(report, indent=2))
+                  note='Default spring areas connected by source exits. Original assets extracted locally. Native Godot runtime does not read the disc.')
+    (ROOT / 'tools/generated/source_manifest.json').write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
 
 

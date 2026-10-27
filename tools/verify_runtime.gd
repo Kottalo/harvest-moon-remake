@@ -17,7 +17,7 @@ func _require(condition: bool, message: String) -> bool:
 	return condition
 
 func _run() -> void:
-	var farm = load("res://scenes/farm.tscn").instantiate()
+	var farm = load("res://game/world/world.tscn").instantiate()
 	root.add_child(farm)
 	await _frames(90)
 	if not _require(farm.player.is_on_floor(), "Player did not land on the imported farm"):
@@ -38,7 +38,7 @@ func _run() -> void:
 		Input.action_release(directions[i])
 		var delta: Vector3 = farm.player.position - start
 		var projected := Vector2(farm.camera.basis.x.dot(delta), -farm.camera.basis.y.dot(delta))
-		if not _require(projected.x * screen_signs[i].x > 0 and projected.y * screen_signs[i].y > 0 and farm.facing == facings[i], "Wrong screen direction or pose: " + directions[i] + str(projected)):
+		if not _require(projected.x * screen_signs[i].x > 0 and projected.y * screen_signs[i].y > 0 and farm.player.facing == facings[i], "Wrong screen direction or pose: " + directions[i] + str(projected)):
 			return
 	# Compare Godot projection to the original camera_build_view + GTE H=1000 equations.
 	farm.player.position = start
@@ -56,8 +56,8 @@ func _run() -> void:
 		actual /= size / Vector2(320, 240)
 		if not _require(actual.distance_to(expected) < 0.05, "Original projection mismatch: " + str([actual, expected, size])):
 			return
-	var entry0: Node3D = farm.get_node("OriginalFarm/ZoneModel_00")
-	var entry1: Node3D = farm.get_node("OriginalFarm/ZoneModel_01")
+	var entry0: Node3D = farm.get_node("Location/ZoneModel_00")
+	var entry1: Node3D = farm.get_node("Location/ZoneModel_01")
 	if not _require(entry0.position.is_equal_approx(Vector3(-4.78, 0, -4.28)) and entry1.position.is_equal_approx(Vector3(1.53, 0.04, -3.18)), "Original scene-object placement changed"):
 		return
 	var distances := []

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Harvest Moon BTN - Godot Remake"
-run/main_scene="res://scenes/farm.tscn"
+run/main_scene="res://game/world/world.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
@@ -21,8 +21,6 @@ _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 [display]
 
 window/size/viewport_width=960
-window/stretch/aspect="keep"
-
 window/size/viewport_height=720
 window/size/window_width_override=1152
 window/size/window_height_override=720

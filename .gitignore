@@ -1,5 +1,9 @@
 .godot/
 tools/player-source.bin
 tools/__pycache__/
+tools/generated/
 *.log
-reference/hmbtn-decomp/
+*.bin
+*.cue
+*.iso
+*.env

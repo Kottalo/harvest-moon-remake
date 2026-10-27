@@ -1,15 +1,36 @@
-# Harvest Moon BTN · Godot 原生移植工程
+# Harvest Moon Remake
 
-工程实际位于桌面 `HarvestMoonBTN\GodotRemake`。
+《牧场物语：回归自然》的 Godot 原生移植工程，当前 checkpoint 见 [CHECKPOINT.md](CHECKPOINT.md)。
 
-- 双击 `Play-Godot.cmd`：运行当前初版。
-- 双击 `Open-Editor.cmd`：打开 Godot 编辑器，启用 Godot AI MCP。
-- WASD / 方向键：上=东北、下=西南、左=西北、右=东南，只使用四个斜向；Shift 跑步，Tab 切换原版透视镜头与调试全景。
+现有 43 个原版春季地点、94 个出入口，支持移动、跑步、碰撞、原版镜头和主角动画。沿道路进入边缘自动换区，门口按 E 或 Enter 进出，Tab 查看当前地点全景。方向键：上东北、下西南、左西北、右东南。
 
-目前已导入原版农场模型、贴图、8 个场景物件和主角动画，可行走、跑步并与地面、墙体碰撞。已修正早期版本的地图镜像和镜头缩放，采用原版 320×240、焦距 1000 的透视投影及 4:3 画幅。**这是移植初版，尚不是完整游戏**：种植、物品、NPC、对话、剧情、室内、存档、音频和季节变化尚未接入；场景物件的交互、形变和动态行为也尚未完整恢复。当前碰撞由场景网格生成，尚未逐项移植原游戏的碰撞与出入口规则。
+这是场景与移动阶段的移植，NPC、对话、剧情、营业时间、种植、物品、动物、音频和完整存档尚未实现。
 
-运行加载 Godot 原生场景和 PNG，不读取 `.bin` / `.cue`，不使用 PS1 CPU 解释器。只有重新提取素材时，`Import-Assets.ps1` 需要原版 USA 光盘镜像；保留的旧 Windows 版有自己的镜像依赖。
+## 运行
 
-Godot 4.7.2 位于相邻的 `Tools\Godot`，采用兼容性渲染器。Godot AI 插件及 Python 服务端版本均为 4.3.1；已加入 Codex MCP 设置，且实际通过认证连接完成启动、输入操作与截图。连接需保持 Godot 编辑器打开。已有对话若未刷新工具列表，可在下次重新打开对话时载入配置。
+使用 Godot 4.7.2 打开 `project.godot`，主场景为 `game/world/world.tscn`。兼容性渲染器适用于当前电脑。桌面环境也可以运行 `Play-Godot.cmd` / `Open-Editor.cmd`，它们使用相邻的 `../Tools/Godot` 便携版。
 
-源码参考为你提供的 [coalslav/hmbtn-decomp](https://github.com/coalslav/hmbtn-decomp)，完整本地副本在 `reference/hmbtn-decomp`。转换过程和验证记录见 `PORTING.md`。素材从本机镜像提取，未上传。
+二进制场景、贴图及媒体使用 Git LFS。克隆时运行：
+
+```sh
+git lfs install
+git clone --recurse-submodules https://github.com/Kottalo/harvest-moon-remake.git
+git -C harvest-moon-remake lfs pull
+```
+
+## 目录
+
+- `game/player/`：角色场景、输入、移动、动画、共享角色素材。
+- `game/camera/`：原版镜头投影、跟随和检查全景。
+- `game/world/`：主场景、地点目录、出入口切换。
+- `game/locations/<名称>/`：每个地点的原生场景、贴图图集和材质；例如 `farmhouse`、`library`、`clinic`。
+- `tools/`：离线提取、转换及检查；`tools/generated/` 是可重新生成的中间文件，不提交。
+- `reference/hmbtn-decomp/`：原版反编译源码，固定版本的只读 Git submodule。
+- `addons/`：第三方 Godot AI MCP 插件。
+- `verification/`：检查记录。
+
+`AGENTS.md` 定义目录职责和模块边界，`python tools/check_structure.py` 检查归属、命名和资源引用。旧 `scenes/`、`scripts/farm.gd` 与农场素材别名保留给现有编辑器标签页，运行入口已迁移到 `game/`，旧脚本只做跳转。
+
+运行时只使用 Godot 场景、PNG 和 JSON，不读取 ROM 或执行 PS1 指令。重新转换素材才需要本机 USA 镜像、Python/Pillow 和参考源码；入口是 `Import-Assets.ps1`。当前使用 Godot AI MCP 4.3.1，编辑器保持打开时通过 MCP 刷新素材。
+
+这个私有 checkpoint 包含用户授权保存的项目素材，不包含 ROM；不要改为公开仓库。历史实现记录见 `PORTING.md`，当前目录及进度以本文件和 `CHECKPOINT.md` 为准。

@@ -6,9 +6,19 @@ $ErrorActionPreference = 'Stop'
 $godotExe = Join-Path $PSScriptRoot '..\Tools\Godot\Godot_v4.7.2-stable_win64_console.exe'
 & $Python (Join-Path $PSScriptRoot 'tools\import_disc.py') $Disc
 if ($LASTEXITCODE -ne 0) { throw 'Disc conversion failed' }
-& $godotExe --headless --path $PSScriptRoot --editor --import --quit
-if ($LASTEXITCODE -ne 0) { throw 'Godot PNG import failed' }
+$openEditor = Get-Process Godot* -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -match 'Harvest Moon BTN - Godot Remake.*Godot Engine' }
+if ($openEditor) {
+    $mcpPython = Join-Path $env:APPDATA 'uv\tools\godot-ai\Scripts\python.exe'
+    & $mcpPython (Join-Path $PSScriptRoot 'tools\scan_editor.py')
+} else {
+    & $godotExe --headless --path $PSScriptRoot --editor --import --quit
+}
+if ($LASTEXITCODE -ne 0) { throw 'Godot asset refresh failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/bake_assets.gd
 if ($LASTEXITCODE -ne 0) { throw 'Native scene baking failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_runtime.gd
 if ($LASTEXITCODE -ne 0) { throw 'Native runtime check failed' }
+& $godotExe --headless --path $PSScriptRoot --script tools/verify_world.gd
+if ($LASTEXITCODE -ne 0) { throw 'World navigation check failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\check_structure.py')
+if ($LASTEXITCODE -ne 0) { throw 'Directory structure check failed' }

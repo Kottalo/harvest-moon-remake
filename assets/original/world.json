@@ -1,0 +1,2433 @@
+{
+  "0": {
+    "id": 0,
+    "name": "农场",
+    "place": 0,
+    "location": 1,
+    "scene": "res://scenes/original_farm.scn",
+    "source_json": "res://assets/original/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 80,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -4.944,
+          -4.228
+        ],
+        "max": [
+          -4.608,
+          -3.84
+        ],
+        "entry": [
+          1.377,
+          0.0,
+          0.842
+        ]
+      },
+      {
+        "index": 2,
+        "target": 112,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -6.096,
+          6.864
+        ],
+        "max": [
+          -5.808,
+          7.248
+        ],
+        "entry": [
+          1.619,
+          0.0,
+          1.255
+        ]
+      },
+      {
+        "index": 3,
+        "target": 96,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          0.96,
+          -3.264
+        ],
+        "max": [
+          1.584,
+          -2.832
+        ],
+        "entry": [
+          1.534,
+          0.0,
+          2.611
+        ]
+      },
+      {
+        "index": 4,
+        "target": 92,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          4.25,
+          -3.744
+        ],
+        "max": [
+          4.896,
+          -3.36
+        ],
+        "entry": [
+          -0.173,
+          0.0,
+          0.981
+        ]
+      },
+      {
+        "index": 5,
+        "target": 32,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -5.3,
+          -8.1
+        ],
+        "max": [
+          -2.8,
+          -6.3
+        ],
+        "entry": [
+          1.132,
+          0.8,
+          6.378
+        ]
+      },
+      {
+        "index": 6,
+        "target": 72,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -5.5,
+          11.5
+        ],
+        "max": [
+          -4.2,
+          12.8
+        ],
+        "entry": [
+          -3.299,
+          0.349,
+          -10.28
+        ]
+      }
+    ],
+    "spawn": [
+      0,
+      0.05,
+      0
+    ]
+  },
+  "24": {
+    "id": 24,
+    "name": "镇外区域",
+    "place": 47,
+    "location": 48,
+    "scene": "res://scenes/areas/area_024.scn",
+    "source_json": "res://assets/original/areas/024/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 128,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          1.575,
+          -1.8
+        ],
+        "max": [
+          2.026,
+          -1.489
+        ],
+        "entry": [
+          0.406,
+          0.0,
+          1.462
+        ]
+      },
+      {
+        "index": 1,
+        "target": 28,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.92,
+          -4.45
+        ],
+        "max": [
+          5.42,
+          -3.45
+        ],
+        "entry": [
+          -2.61,
+          0.0,
+          -3.549
+        ]
+      },
+      {
+        "index": 2,
+        "target": 32,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -3.72,
+          -4.45
+        ],
+        "max": [
+          -3.22,
+          -3.45
+        ],
+        "entry": [
+          3.514,
+          0.8,
+          5.538
+        ]
+      },
+      {
+        "index": 3,
+        "target": 76,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          3.04,
+          5.81
+        ],
+        "max": [
+          3.77,
+          6.31
+        ],
+        "entry": [
+          -4.114,
+          -0.046,
+          -10.11
+        ]
+      }
+    ],
+    "spawn": [
+      1.78,
+      0.1,
+      -1.325
+    ]
+  },
+  "28": {
+    "id": 28,
+    "name": "镇外区域",
+    "place": 7,
+    "location": 8,
+    "scene": "res://scenes/areas/area_028.scn",
+    "source_json": "res://assets/original/areas/028/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 136,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -1.44,
+          -1.872
+        ],
+        "max": [
+          -1.104,
+          -1.296
+        ],
+        "entry": [
+          1.92,
+          0.0,
+          0.528
+        ]
+      },
+      {
+        "index": 1,
+        "target": 24,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -3.61,
+          -4.1
+        ],
+        "max": [
+          -3.11,
+          -2.85
+        ],
+        "entry": [
+          4.42,
+          0.0,
+          -3.958
+        ]
+      },
+      {
+        "index": 2,
+        "target": 52,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -0.95,
+          -8.526
+        ],
+        "max": [
+          0.2,
+          -8.026
+        ],
+        "entry": [
+          2.749,
+          0.0,
+          4.4
+        ]
+      },
+      {
+        "index": 3,
+        "target": 136,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -3.45,
+          0.05
+        ],
+        "max": [
+          -3.0,
+          0.25
+        ],
+        "entry": [
+          -0.416,
+          0.0,
+          2.937
+        ]
+      }
+    ],
+    "spawn": [
+      -3.2,
+      0.0,
+      0.456
+    ]
+  },
+  "32": {
+    "id": 32,
+    "name": "镇南街区",
+    "place": 19,
+    "location": 34,
+    "scene": "res://scenes/areas/area_032.scn",
+    "source_json": "res://assets/original/areas/032/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 156,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.25,
+          2.566
+        ],
+        "max": [
+          0.0,
+          3.017
+        ],
+        "entry": [
+          1.261,
+          0.0,
+          -0.006
+        ]
+      },
+      {
+        "index": 1,
+        "target": 144,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.912,
+          -0.96
+        ],
+        "max": [
+          -0.528,
+          -0.624
+        ],
+        "entry": [
+          2.0,
+          0.0,
+          -0.005
+        ]
+      },
+      {
+        "index": 2,
+        "target": 152,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -1.44,
+          -2.688
+        ],
+        "max": [
+          -1.104,
+          -2.352
+        ],
+        "entry": [
+          0.542,
+          0.0,
+          0.875
+        ]
+      },
+      {
+        "index": 3,
+        "target": 36,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          0.63,
+          -8.4
+        ],
+        "max": [
+          1.73,
+          -7.9
+        ],
+        "entry": [
+          -2.688,
+          0.0,
+          7.43
+        ]
+      },
+      {
+        "index": 4,
+        "target": 0,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          0.53,
+          6.878
+        ],
+        "max": [
+          1.73,
+          7.378
+        ],
+        "entry": [
+          -3.888,
+          0.0,
+          -5.804
+        ]
+      },
+      {
+        "index": 5,
+        "target": 24,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.014,
+          5.1
+        ],
+        "max": [
+          4.514,
+          6.0
+        ],
+        "entry": [
+          -2.61,
+          0.0,
+          -4.04
+        ]
+      }
+    ],
+    "spawn": [
+      0.288,
+      0.2,
+      2.812
+    ]
+  },
+  "36": {
+    "id": 36,
+    "name": "城镇街区",
+    "place": 19,
+    "location": 20,
+    "scene": "res://scenes/areas/area_036.scn",
+    "source_json": "res://assets/original/areas/036/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 164,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -4.32,
+          3.216
+        ],
+        "max": [
+          -3.984,
+          3.696
+        ],
+        "entry": [
+          1.403,
+          0.0,
+          0.377
+        ]
+      },
+      {
+        "index": 1,
+        "target": 160,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -4.128,
+          1.056
+        ],
+        "max": [
+          -3.888,
+          1.44
+        ],
+        "entry": [
+          2.208,
+          0.0,
+          -0.037
+        ]
+      },
+      {
+        "index": 2,
+        "target": 172,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -2.16,
+          -0.768
+        ],
+        "max": [
+          -1.68,
+          -0.576
+        ],
+        "entry": [
+          -0.018,
+          0.0,
+          1.495
+        ]
+      },
+      {
+        "index": 3,
+        "target": 176,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          0.24,
+          -0.816
+        ],
+        "max": [
+          0.672,
+          -0.576
+        ],
+        "entry": [
+          -0.018,
+          0.0,
+          1.495
+        ]
+      },
+      {
+        "index": 4,
+        "target": 40,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.752,
+          -0.12
+        ],
+        "max": [
+          5.252,
+          1.35
+        ],
+        "entry": [
+          -6.068,
+          0.0,
+          0.672
+        ]
+      },
+      {
+        "index": 5,
+        "target": 32,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -3.42,
+          7.93
+        ],
+        "max": [
+          -2.15,
+          8.43
+        ],
+        "entry": [
+          1.148,
+          0.0,
+          -7.4
+        ]
+      }
+    ],
+    "spawn": [
+      0.446,
+      0.0,
+      -0.427
+    ]
+  },
+  "40": {
+    "id": 40,
+    "name": "城镇街区",
+    "place": 19,
+    "location": 29,
+    "scene": "res://scenes/areas/area_040.scn",
+    "source_json": "res://assets/original/areas/040/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 180,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -2.537,
+          -0.968
+        ],
+        "max": [
+          -2.168,
+          -0.681
+        ],
+        "entry": [
+          0.04,
+          0.0,
+          1.862
+        ]
+      },
+      {
+        "index": 1,
+        "target": 188,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          2.208,
+          -0.8
+        ],
+        "max": [
+          2.736,
+          -0.432
+        ],
+        "entry": [
+          0.378,
+          0.0,
+          1.868
+        ]
+      },
+      {
+        "index": 2,
+        "target": 36,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -7.068,
+          -0.15
+        ],
+        "max": [
+          -6.568,
+          1.36
+        ],
+        "entry": [
+          4.252,
+          0.0,
+          0.672
+        ]
+      },
+      {
+        "index": 3,
+        "target": 44,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          7.204,
+          -0.15
+        ],
+        "max": [
+          7.704,
+          1.36
+        ],
+        "entry": [
+          -5.654,
+          0.0,
+          2.996
+        ]
+      },
+      {
+        "index": 4,
+        "target": 48,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          0.26,
+          5.248
+        ],
+        "max": [
+          1.74,
+          5.748
+        ],
+        "entry": [
+          0.246,
+          0.0,
+          -3.78
+        ]
+      }
+    ],
+    "spawn": [
+      2.41,
+      0.0,
+      -0.353
+    ]
+  },
+  "44": {
+    "id": 44,
+    "name": "城镇街区",
+    "place": 19,
+    "location": 39,
+    "scene": "res://scenes/areas/area_044.scn",
+    "source_json": "res://assets/original/areas/044/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 196,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          1.098,
+          1.3
+        ],
+        "max": [
+          1.672,
+          1.498
+        ],
+        "entry": [
+          0.005,
+          0.0,
+          2.262
+        ]
+      },
+      {
+        "index": 1,
+        "target": 200,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          3.869,
+          -3.951
+        ],
+        "max": [
+          4.156,
+          -3.869
+        ],
+        "entry": [
+          -0.002,
+          0.0,
+          1.335
+        ]
+      },
+      {
+        "index": 2,
+        "target": 40,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -6.654,
+          2.24
+        ],
+        "max": [
+          -6.154,
+          3.76
+        ],
+        "entry": [
+          6.068,
+          0.0,
+          0.533
+        ]
+      },
+      {
+        "index": 3,
+        "target": 52,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          1.02,
+          6.832
+        ],
+        "max": [
+          2.16,
+          7.332
+        ],
+        "entry": [
+          2.809,
+          0.0,
+          -4.282
+        ]
+      }
+    ],
+    "spawn": [
+      4.033,
+      0.0,
+      -3.623
+    ]
+  },
+  "48": {
+    "id": 48,
+    "name": "城镇街区",
+    "place": 19,
+    "location": 26,
+    "scene": "res://scenes/areas/area_048.scn",
+    "source_json": "res://assets/original/areas/048/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 204,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -1.106,
+          -0.306
+        ],
+        "max": [
+          -0.86,
+          0.35
+        ],
+        "entry": [
+          4.017,
+          0.0,
+          0.326
+        ]
+      },
+      {
+        "index": 1,
+        "target": 40,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -0.6,
+          -4.68
+        ],
+        "max": [
+          0.99,
+          -4.18
+        ],
+        "entry": [
+          1.037,
+          0.0,
+          4.748
+        ]
+      },
+      {
+        "index": 2,
+        "target": 52,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          6.142,
+          1.8
+        ],
+        "max": [
+          6.642,
+          2.946
+        ],
+        "entry": [
+          -4.888,
+          0.0,
+          -0.016
+        ]
+      }
+    ],
+    "spawn": [
+      -0.63,
+      0.0,
+      0.078
+    ]
+  },
+  "52": {
+    "id": 52,
+    "name": "广场道路",
+    "place": 19,
+    "location": 42,
+    "scene": "res://scenes/areas/area_052.scn",
+    "source_json": "res://assets/original/areas/052/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 28,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          2.26,
+          4.9
+        ],
+        "max": [
+          3.36,
+          5.4
+        ],
+        "entry": [
+          -0.458,
+          -0.72,
+          -7.526
+        ]
+      },
+      {
+        "index": 1,
+        "target": 44,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          2.26,
+          -5.282
+        ],
+        "max": [
+          3.36,
+          -4.782
+        ],
+        "entry": [
+          1.625,
+          0.0,
+          6.332
+        ]
+      },
+      {
+        "index": 2,
+        "target": 48,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -5.888,
+          -0.56
+        ],
+        "max": [
+          -5.388,
+          0.54
+        ],
+        "entry": [
+          5.642,
+          0.0,
+          2.4
+        ]
+      },
+      {
+        "index": 3,
+        "target": 56,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.6,
+          -0.65
+        ],
+        "max": [
+          5.0,
+          0.6
+        ],
+        "entry": [
+          -7.486,
+          0.0,
+          -0.786
+        ]
+      }
+    ],
+    "spawn": [
+      4.4,
+      0.0,
+      0.0
+    ]
+  },
+  "56": {
+    "id": 56,
+    "name": "海边",
+    "place": 43,
+    "location": 44,
+    "scene": "res://scenes/areas/area_056.scn",
+    "source_json": "res://assets/original/areas/056/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 52,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -7.95,
+          -1.2
+        ],
+        "max": [
+          -7.65,
+          -0.35
+        ],
+        "entry": [
+          4.4,
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "spawn": [
+      -7.486,
+      0.0,
+      -0.786
+    ]
+  },
+  "60": {
+    "id": 60,
+    "name": "山顶",
+    "place": 11,
+    "location": 15,
+    "scene": "res://scenes/areas/area_060.scn",
+    "source_json": "res://assets/original/areas/060/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 64,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -10.83,
+          0.608
+        ],
+        "max": [
+          -8.48,
+          1.108
+        ],
+        "entry": [
+          -11.103,
+          1.381,
+          -11.3
+        ]
+      }
+    ],
+    "spawn": [
+      -9.742,
+      -0.496,
+      0.108
+    ]
+  },
+  "64": {
+    "id": 64,
+    "name": "山路",
+    "place": 11,
+    "location": 14,
+    "scene": "res://scenes/areas/area_064.scn",
+    "source_json": "res://assets/original/areas/064/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 60,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -11.55,
+          -13.0
+        ],
+        "max": [
+          -10.658,
+          -11.892
+        ],
+        "entry": [
+          -9.742,
+          -0.496,
+          0.108
+        ]
+      },
+      {
+        "index": 1,
+        "target": 68,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -5.26,
+          -0.87
+        ],
+        "max": [
+          -3.8,
+          -0.37
+        ],
+        "entry": [
+          -4.303,
+          2.2,
+          -10.568
+        ]
+      }
+    ],
+    "spawn": [
+      -4.587,
+      0.121,
+      -1.27
+    ]
+  },
+  "68": {
+    "id": 68,
+    "name": "湖畔山路",
+    "place": 11,
+    "location": 13,
+    "scene": "res://scenes/areas/area_068.scn",
+    "source_json": "res://assets/original/areas/068/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 64,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -4.69,
+          -11.568
+        ],
+        "max": [
+          -3.83,
+          -11.068
+        ],
+        "entry": [
+          -4.587,
+          0.121,
+          -1.27
+        ]
+      },
+      {
+        "index": 1,
+        "target": 72,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          -0.806,
+          -2.156
+        ],
+        "max": [
+          -0.306,
+          -0.926
+        ],
+        "entry": [
+          -10.19,
+          1.183,
+          -0.688
+        ]
+      },
+      {
+        "index": 2,
+        "target": 234,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -11.214,
+          -9.924
+        ],
+        "max": [
+          -10.845,
+          -9.473
+        ],
+        "entry": [
+          -0.097,
+          0.0,
+          2.009
+        ]
+      }
+    ],
+    "spawn": [
+      -10.911,
+      1.685,
+      -9.242
+    ]
+  },
+  "72": {
+    "id": 72,
+    "name": "山麓",
+    "place": 11,
+    "location": 12,
+    "scene": "res://scenes/areas/area_072.scn",
+    "source_json": "res://assets/original/areas/072/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -3.99,
+          -11.28
+        ],
+        "max": [
+          -2.48,
+          -10.78
+        ],
+        "entry": [
+          -4.638,
+          0.06,
+          11.01
+        ]
+      },
+      {
+        "index": 1,
+        "target": 68,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -11.19,
+          -1.6
+        ],
+        "max": [
+          -10.69,
+          -0.12
+        ],
+        "entry": [
+          -1.306,
+          0.061,
+          -1.558
+        ]
+      },
+      {
+        "index": 2,
+        "target": 76,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          -0.8,
+          -9.16
+        ],
+        "max": [
+          -0.3,
+          -7.53
+        ],
+        "entry": [
+          -13.72,
+          0.062,
+          -2.132
+        ]
+      },
+      {
+        "index": 8,
+        "target": 245,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -12.246,
+          -10.0
+        ],
+        "max": [
+          -11.877,
+          -9.4
+        ],
+        "entry": [
+          1.862,
+          0.0,
+          0.013
+        ]
+      }
+    ],
+    "spawn": [
+      -11.453,
+      1.892,
+      -9.706
+    ]
+  },
+  "76": {
+    "id": 76,
+    "name": "镇外区域",
+    "place": 51,
+    "location": 52,
+    "scene": "res://scenes/areas/area_076.scn",
+    "source_json": "res://assets/original/areas/076/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 212,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -6.888,
+          -3.926
+        ],
+        "max": [
+          -6.396,
+          -3.639
+        ],
+        "entry": [
+          0.424,
+          0.0,
+          1.471
+        ]
+      },
+      {
+        "index": 1,
+        "target": 24,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -5.3,
+          -11.11
+        ],
+        "max": [
+          -3.24,
+          -10.61
+        ],
+        "entry": [
+          3.442,
+          0.0,
+          5.31
+        ]
+      },
+      {
+        "index": 2,
+        "target": 72,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -14.72,
+          -2.99
+        ],
+        "max": [
+          -14.22,
+          -1.1
+        ],
+        "entry": [
+          -1.3,
+          0.327,
+          -8.181
+        ]
+      }
+    ],
+    "spawn": [
+      -6.601,
+      0.0,
+      -3.6
+    ]
+  },
+  "80": {
+    "id": 80,
+    "name": "自宅",
+    "place": 0,
+    "location": 2,
+    "scene": "res://scenes/areas/area_080.scn",
+    "source_json": "res://assets/original/areas/080/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.623,
+          0.232
+        ],
+        "max": [
+          1.746,
+          1.329
+        ],
+        "entry": [
+          -4.464,
+          0.0,
+          -4.032
+        ]
+      }
+    ],
+    "spawn": [
+      1.377,
+      0.0,
+      0.842
+    ]
+  },
+  "92": {
+    "id": 92,
+    "name": "马厩",
+    "place": 0,
+    "location": 3,
+    "scene": "res://scenes/areas/area_092.scn",
+    "source_json": "res://assets/original/areas/092/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.742,
+          1.227
+        ],
+        "max": [
+          0.355,
+          1.35
+        ],
+        "entry": [
+          4.704,
+          0.0,
+          -3.12
+        ]
+      }
+    ],
+    "spawn": [
+      -0.173,
+      0.0,
+      0.981
+    ]
+  },
+  "96": {
+    "id": 96,
+    "name": "牛羊棚",
+    "place": 0,
+    "location": 5,
+    "scene": "res://scenes/areas/area_096.scn",
+    "source_json": "res://assets/original/areas/096/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          1.047,
+          2.816
+        ],
+        "max": [
+          2.144,
+          2.939
+        ],
+        "entry": [
+          1.24,
+          0.0,
+          -2.688
+        ]
+      }
+    ],
+    "spawn": [
+      1.534,
+      0.0,
+      2.611
+    ]
+  },
+  "112": {
+    "id": 112,
+    "name": "鸡舍",
+    "place": 0,
+    "location": 4,
+    "scene": "res://scenes/areas/area_112.scn",
+    "source_json": "res://assets/original/areas/112/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.824,
+          0.645
+        ],
+        "max": [
+          1.947,
+          1.783
+        ],
+        "entry": [
+          -5.664,
+          0.0,
+          7.104
+        ]
+      }
+    ],
+    "spawn": [
+      1.619,
+      0.0,
+      1.255
+    ]
+  },
+  "128": {
+    "id": 128,
+    "name": "室内",
+    "place": 47,
+    "location": 49,
+    "scene": "res://scenes/areas/area_128.scn",
+    "source_json": "res://assets/original/areas/128/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 24,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.1,
+          1.632
+        ],
+        "max": [
+          1.064,
+          1.92
+        ],
+        "entry": [
+          1.78,
+          0.1,
+          -1.325
+        ]
+      },
+      {
+        "index": 1,
+        "target": 132,
+        "facing": 0,
+        "requires_action": true,
+        "min": [
+          -1.5,
+          -0.1
+        ],
+        "max": [
+          -1.125,
+          0.277
+        ],
+        "entry": [
+          -1.248,
+          0.0,
+          1.296
+        ]
+      }
+    ],
+    "spawn": [
+      -1.166,
+      0.0,
+      -0.784
+    ]
+  },
+  "132": {
+    "id": 132,
+    "name": "室内",
+    "place": 47,
+    "location": 50,
+    "scene": "res://scenes/areas/area_132.scn",
+    "source_json": "res://assets/original/areas/132/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 128,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -1.488,
+          0.624
+        ],
+        "max": [
+          -0.912,
+          0.816
+        ],
+        "entry": [
+          -1.166,
+          0.0,
+          -0.784
+        ]
+      }
+    ],
+    "spawn": [
+      -1.248,
+      0.0,
+      1.296
+    ]
+  },
+  "136": {
+    "id": 136,
+    "name": "室内",
+    "place": 7,
+    "location": 9,
+    "scene": "res://scenes/areas/area_136.scn",
+    "source_json": "res://assets/original/areas/136/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 28,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          2.016,
+          -0.15
+        ],
+        "max": [
+          2.304,
+          1.016
+        ],
+        "entry": [
+          -0.72,
+          0.0,
+          -1.536
+        ]
+      },
+      {
+        "index": 1,
+        "target": 28,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.968,
+          3.216
+        ],
+        "max": [
+          0.248,
+          3.504
+        ],
+        "entry": [
+          -3.2,
+          0.0,
+          0.456
+        ]
+      },
+      {
+        "index": 2,
+        "target": 140,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.613,
+          -1.08
+        ],
+        "max": [
+          -0.127,
+          -0.58
+        ],
+        "entry": [
+          -1.152,
+          0.0,
+          -0.816
+        ]
+      }
+    ],
+    "spawn": [
+      0.403,
+      0.0,
+      -0.907
+    ]
+  },
+  "140": {
+    "id": 140,
+    "name": "室内",
+    "place": 7,
+    "location": 10,
+    "scene": "res://scenes/areas/area_140.scn",
+    "source_json": "res://assets/original/areas/140/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 136,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          -1.008,
+          -1.152
+        ],
+        "max": [
+          -0.72,
+          -0.432
+        ],
+        "entry": [
+          0.403,
+          0.0,
+          -0.907
+        ]
+      }
+    ],
+    "spawn": [
+      -1.152,
+      0.0,
+      -0.816
+    ]
+  },
+  "144": {
+    "id": 144,
+    "name": "室内",
+    "place": 19,
+    "location": 36,
+    "scene": "res://scenes/areas/area_144.scn",
+    "source_json": "res://assets/original/areas/144/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 32,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          2.37,
+          -0.415
+        ],
+        "max": [
+          2.821,
+          0.651
+        ],
+        "entry": [
+          -0.48,
+          0.2,
+          -0.768
+        ]
+      },
+      {
+        "index": 1,
+        "target": 148,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          0.9,
+          -0.344
+        ],
+        "max": [
+          1.635,
+          -0.057
+        ],
+        "entry": [
+          1.248,
+          0.0,
+          -1.536
+        ]
+      }
+    ],
+    "spawn": [
+      1.125,
+      0.0,
+      0.476
+    ]
+  },
+  "148": {
+    "id": 148,
+    "name": "室内",
+    "place": 19,
+    "location": 37,
+    "scene": "res://scenes/areas/area_148.scn",
+    "source_json": "res://assets/original/areas/148/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 144,
+        "facing": 0,
+        "requires_action": true,
+        "min": [
+          0.816,
+          -1.392
+        ],
+        "max": [
+          1.6,
+          -1.248
+        ],
+        "entry": [
+          1.125,
+          0.0,
+          0.476
+        ]
+      }
+    ],
+    "spawn": [
+      1.248,
+      0.0,
+      -1.536
+    ]
+  },
+  "152": {
+    "id": 152,
+    "name": "室内",
+    "place": 19,
+    "location": 38,
+    "scene": "res://scenes/areas/area_152.scn",
+    "source_json": "res://assets/original/areas/152/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 32,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.198,
+          0.488
+        ],
+        "max": [
+          1.772,
+          1.162
+        ],
+        "entry": [
+          -1.039,
+          0.2,
+          -2.612
+        ]
+      }
+    ],
+    "spawn": [
+      0.542,
+      0.0,
+      0.875
+    ]
+  },
+  "156": {
+    "id": 156,
+    "name": "室内",
+    "place": 19,
+    "location": 35,
+    "scene": "res://scenes/areas/area_156.scn",
+    "source_json": "res://assets/original/areas/156/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 32,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.558,
+          -0.528
+        ],
+        "max": [
+          1.763,
+          0.528
+        ],
+        "entry": [
+          0.288,
+          0.2,
+          2.812
+        ]
+      }
+    ],
+    "spawn": [
+      1.261,
+      0.0,
+      -0.006
+    ]
+  },
+  "160": {
+    "id": 160,
+    "name": "室内",
+    "place": 19,
+    "location": 21,
+    "scene": "res://scenes/areas/area_160.scn",
+    "source_json": "res://assets/original/areas/160/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 36,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          2.413,
+          -0.365
+        ],
+        "max": [
+          2.577,
+          0.332
+        ],
+        "entry": [
+          -3.736,
+          0.0,
+          1.254
+        ]
+      },
+      {
+        "index": 1,
+        "target": 168,
+        "facing": 0,
+        "requires_action": true,
+        "min": [
+          -1.545,
+          2.107
+        ],
+        "max": [
+          -0.848,
+          2.476
+        ],
+        "entry": [
+          -0.647,
+          0.0,
+          -1.468
+        ]
+      }
+    ],
+    "spawn": [
+      -1.176,
+      1.44,
+      1.738
+    ]
+  },
+  "164": {
+    "id": 164,
+    "name": "室内",
+    "place": 19,
+    "location": 22,
+    "scene": "res://scenes/areas/area_164.scn",
+    "source_json": "res://assets/original/areas/164/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 168,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          0.35,
+          -1.6
+        ],
+        "max": [
+          0.8,
+          -0.95
+        ],
+        "entry": [
+          -0.196,
+          0.0,
+          -1.263
+        ]
+      },
+      {
+        "index": 1,
+        "target": 36,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.608,
+          -0.15
+        ],
+        "max": [
+          1.731,
+          0.946
+        ],
+        "entry": [
+          -3.818,
+          0.0,
+          3.386
+        ]
+      }
+    ],
+    "spawn": [
+      1.252,
+      0.0,
+      -1.137
+    ]
+  },
+  "168": {
+    "id": 168,
+    "name": "室内",
+    "place": 19,
+    "location": 23,
+    "scene": "res://scenes/areas/area_168.scn",
+    "source_json": "res://assets/original/areas/168/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 160,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -0.811,
+          -1.755
+        ],
+        "max": [
+          -0.36,
+          -1.45
+        ],
+        "entry": [
+          -1.176,
+          1.44,
+          1.738
+        ]
+      },
+      {
+        "index": 1,
+        "target": 164,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          0.05,
+          -1.55
+        ],
+        "max": [
+          0.214,
+          -0.92
+        ],
+        "entry": [
+          1.252,
+          0.0,
+          -1.137
+        ]
+      }
+    ],
+    "spawn": [
+      -0.196,
+      0.0,
+      -1.263
+    ]
+  },
+  "172": {
+    "id": 172,
+    "name": "室内",
+    "place": 19,
+    "location": 25,
+    "scene": "res://scenes/areas/area_172.scn",
+    "source_json": "res://assets/original/areas/172/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 36,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.546,
+          1.618
+        ],
+        "max": [
+          0.551,
+          1.741
+        ],
+        "entry": [
+          -2.055,
+          0.0,
+          -0.427
+        ]
+      }
+    ],
+    "spawn": [
+      -0.018,
+      0.0,
+      1.495
+    ]
+  },
+  "176": {
+    "id": 176,
+    "name": "室内",
+    "place": 19,
+    "location": 24,
+    "scene": "res://scenes/areas/area_176.scn",
+    "source_json": "res://assets/original/areas/176/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 36,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.546,
+          1.618
+        ],
+        "max": [
+          0.551,
+          1.741
+        ],
+        "entry": [
+          0.446,
+          0.0,
+          -0.427
+        ]
+      }
+    ],
+    "spawn": [
+      -0.018,
+      0.0,
+      1.495
+    ]
+  },
+  "180": {
+    "id": 180,
+    "name": "室内",
+    "place": 19,
+    "location": 30,
+    "scene": "res://scenes/areas/area_180.scn",
+    "source_json": "res://assets/original/areas/180/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 184,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -1.928,
+          -1.418
+        ],
+        "max": [
+          -1.5,
+          -0.967
+        ],
+        "entry": [
+          1.418,
+          0.0,
+          -1.231
+        ]
+      },
+      {
+        "index": 1,
+        "target": 40,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.529,
+          2.067
+        ],
+        "max": [
+          0.568,
+          2.149
+        ],
+        "entry": [
+          -2.324,
+          0.0,
+          -0.21
+        ]
+      }
+    ],
+    "spawn": [
+      -1.477,
+      0.0,
+      -1.254
+    ]
+  },
+  "184": {
+    "id": 184,
+    "name": "室内",
+    "place": 19,
+    "location": 31,
+    "scene": "res://scenes/areas/area_184.scn",
+    "source_json": "res://assets/original/areas/184/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 180,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          1.623,
+          -1.595
+        ],
+        "max": [
+          1.746,
+          -0.785
+        ],
+        "entry": [
+          -1.477,
+          0.0,
+          -1.254
+        ]
+      }
+    ],
+    "spawn": [
+      1.418,
+      0.0,
+      -1.231
+    ]
+  },
+  "188": {
+    "id": 188,
+    "name": "室内",
+    "place": 19,
+    "location": 32,
+    "scene": "res://scenes/areas/area_188.scn",
+    "source_json": "res://assets/original/areas/188/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 192,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.971,
+          -2.01
+        ],
+        "max": [
+          -0.397,
+          -1.37
+        ],
+        "entry": [
+          -1.481,
+          0.0,
+          -1.731
+        ]
+      },
+      {
+        "index": 1,
+        "target": 40,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.15,
+          2.032
+        ],
+        "max": [
+          0.947,
+          2.155
+        ],
+        "entry": [
+          2.41,
+          0.0,
+          -0.353
+        ]
+      }
+    ],
+    "spawn": [
+      0.136,
+      0.0,
+      -1.575
+    ]
+  },
+  "192": {
+    "id": 192,
+    "name": "室内",
+    "place": 19,
+    "location": 33,
+    "scene": "res://scenes/areas/area_192.scn",
+    "source_json": "res://assets/original/areas/192/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 188,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          -1.358,
+          -1.936
+        ],
+        "max": [
+          -1.112,
+          -1.321
+        ],
+        "entry": [
+          0.136,
+          0.0,
+          -1.575
+        ]
+      }
+    ],
+    "spawn": [
+      -1.481,
+      0.0,
+      -1.731
+    ]
+  },
+  "196": {
+    "id": 196,
+    "name": "室内",
+    "place": 19,
+    "location": 41,
+    "scene": "res://scenes/areas/area_196.scn",
+    "source_json": "res://assets/original/areas/196/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 44,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.564,
+          2.426
+        ],
+        "max": [
+          0.533,
+          2.549
+        ],
+        "entry": [
+          1.303,
+          0.0,
+          1.826
+        ]
+      }
+    ],
+    "spawn": [
+      0.005,
+      0.0,
+      2.262
+    ]
+  },
+  "200": {
+    "id": 200,
+    "name": "室内",
+    "place": 19,
+    "location": 40,
+    "scene": "res://scenes/areas/area_200.scn",
+    "source_json": "res://assets/original/areas/200/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 44,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.53,
+          1.417
+        ],
+        "max": [
+          0.526,
+          1.54
+        ],
+        "entry": [
+          4.033,
+          0.0,
+          -3.623
+        ]
+      }
+    ],
+    "spawn": [
+      -0.002,
+      0.0,
+      1.335
+    ]
+  },
+  "204": {
+    "id": 204,
+    "name": "室内",
+    "place": 19,
+    "location": 27,
+    "scene": "res://scenes/areas/area_204.scn",
+    "source_json": "res://assets/original/areas/204/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 208,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.285,
+          -3.187
+        ],
+        "max": [
+          0.084,
+          -2.695
+        ],
+        "entry": [
+          1.669,
+          0.0,
+          -3.093
+        ]
+      },
+      {
+        "index": 1,
+        "target": 48,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.4,
+          -0.1
+        ],
+        "max": [
+          4.6,
+          1.046
+        ],
+        "entry": [
+          -0.63,
+          0.0,
+          0.078
+        ]
+      }
+    ],
+    "spawn": [
+      0.13,
+      0.0,
+      -2.959
+    ]
+  },
+  "208": {
+    "id": 208,
+    "name": "室内",
+    "place": 19,
+    "location": 28,
+    "scene": "res://scenes/areas/area_208.scn",
+    "source_json": "res://assets/original/areas/208/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 204,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          2.035,
+          -3.559
+        ],
+        "max": [
+          2.158,
+          -2.767
+        ],
+        "entry": [
+          0.13,
+          0.0,
+          -2.959
+        ]
+      }
+    ],
+    "spawn": [
+      1.669,
+      0.0,
+      -3.093
+    ]
+  },
+  "212": {
+    "id": 212,
+    "name": "室内",
+    "place": 51,
+    "location": 53,
+    "scene": "res://scenes/areas/area_212.scn",
+    "source_json": "res://assets/original/areas/212/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 76,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.15,
+          1.635
+        ],
+        "max": [
+          0.952,
+          1.758
+        ],
+        "entry": [
+          -6.601,
+          0.0,
+          -3.6
+        ]
+      }
+    ],
+    "spawn": [
+      0.424,
+      0.0,
+      1.471
+    ]
+  },
+  "234": {
+    "id": 234,
+    "name": "矿洞",
+    "place": 55,
+    "location": 56,
+    "scene": "res://scenes/areas/area_234.scn",
+    "source_json": "res://assets/original/areas/234/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 68,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.466,
+          2.214
+        ],
+        "max": [
+          0.518,
+          2.788
+        ],
+        "entry": [
+          -10.911,
+          1.685,
+          -9.242
+        ]
+      }
+    ],
+    "spawn": [
+      -0.097,
+      0.0,
+      2.009
+    ]
+  },
+  "245": {
+    "id": 245,
+    "name": "矿洞",
+    "place": 67,
+    "location": 68,
+    "scene": "res://scenes/areas/area_245.scn",
+    "source_json": "res://assets/original/areas/245/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 72,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          2.177,
+          -0.315
+        ],
+        "max": [
+          2.505,
+          0.464
+        ],
+        "entry": [
+          -11.453,
+          1.892,
+          -9.706
+        ]
+      }
+    ],
+    "spawn": [
+      1.862,
+      0.0,
+      0.013
+    ]
+  }
+}

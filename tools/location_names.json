@@ -1,0 +1,174 @@
+{
+  "0": {
+    "slug": "farm",
+    "name": "农场"
+  },
+  "24": {
+    "slug": "yodel_ranch",
+    "name": "约德尔牧场"
+  },
+  "28": {
+    "slug": "poultry_farm",
+    "name": "养鸡场"
+  },
+  "32": {
+    "slug": "town_south",
+    "name": "镇南街区"
+  },
+  "36": {
+    "slug": "library_street",
+    "name": "图书馆街区"
+  },
+  "40": {
+    "slug": "market_street",
+    "name": "杂货店街区"
+  },
+  "44": {
+    "slug": "church_street",
+    "name": "教堂街区"
+  },
+  "48": {
+    "slug": "inn_street",
+    "name": "旅馆街区"
+  },
+  "52": {
+    "slug": "town_square",
+    "name": "小镇广场"
+  },
+  "56": {
+    "slug": "beach",
+    "name": "海滩"
+  },
+  "60": {
+    "slug": "mother_hill_summit",
+    "name": "圣母山山顶"
+  },
+  "64": {
+    "slug": "mother_hill_trail",
+    "name": "圣母山山道"
+  },
+  "68": {
+    "slug": "mother_hill_lake",
+    "name": "山间湖畔"
+  },
+  "72": {
+    "slug": "hot_spring",
+    "name": "温泉"
+  },
+  "76": {
+    "slug": "lumberjack_forest",
+    "name": "樵夫森林"
+  },
+  "80": {
+    "slug": "farmhouse",
+    "name": "自宅"
+  },
+  "92": {
+    "slug": "stable",
+    "name": "马厩"
+  },
+  "96": {
+    "slug": "barn",
+    "name": "牛羊棚"
+  },
+  "112": {
+    "slug": "chicken_coop",
+    "name": "鸡舍"
+  },
+  "128": {
+    "slug": "yodel_ranch_house",
+    "name": "约德尔牧场住宅"
+  },
+  "132": {
+    "slug": "yodel_ranch_bedroom",
+    "name": "牧场住宅卧室"
+  },
+  "136": {
+    "slug": "poultry_farm_house",
+    "name": "养鸡场住宅"
+  },
+  "140": {
+    "slug": "poultry_farm_bedroom",
+    "name": "养鸡场卧室"
+  },
+  "144": {
+    "slug": "blacksmith_forge",
+    "name": "锻冶屋"
+  },
+  "148": {
+    "slug": "blacksmith_bedroom",
+    "name": "锻冶屋卧室"
+  },
+  "152": {
+    "slug": "winery_cellar",
+    "name": "酒窖"
+  },
+  "156": {
+    "slug": "winery_house",
+    "name": "果园住宅"
+  },
+  "160": {
+    "slug": "library",
+    "name": "图书馆"
+  },
+  "164": {
+    "slug": "basil_house",
+    "name": "植物学家住宅"
+  },
+  "168": {
+    "slug": "basil_bedroom",
+    "name": "植物学家住宅卧室"
+  },
+  "172": {
+    "slug": "ellen_house",
+    "name": "艾莲住宅"
+  },
+  "176": {
+    "slug": "mayor_house",
+    "name": "镇长住宅"
+  },
+  "180": {
+    "slug": "supermarket",
+    "name": "杂货店"
+  },
+  "184": {
+    "slug": "supermarket_upstairs",
+    "name": "杂货店楼上"
+  },
+  "188": {
+    "slug": "clinic",
+    "name": "医院"
+  },
+  "192": {
+    "slug": "clinic_upstairs",
+    "name": "医院楼上"
+  },
+  "196": {
+    "slug": "church",
+    "name": "教堂"
+  },
+  "200": {
+    "slug": "harvest_sprite_home",
+    "name": "小矮人之家"
+  },
+  "204": {
+    "slug": "inn",
+    "name": "旅馆"
+  },
+  "208": {
+    "slug": "inn_upstairs",
+    "name": "旅馆楼上"
+  },
+  "212": {
+    "slug": "lumberjack_house",
+    "name": "樵夫住宅"
+  },
+  "234": {
+    "slug": "spring_mine",
+    "name": "泉边矿洞"
+  },
+  "245": {
+    "slug": "lake_mine",
+    "name": "湖边矿洞"
+  }
+}

@@ -1,0 +1,2519 @@
+{
+  "0": {
+    "id": 0,
+    "name": "农场",
+    "place": 0,
+    "location": 1,
+    "scene": "res://game/locations/farm/farm.scn",
+    "source_json": "res://tools/generated/locations/farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 80,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -4.944,
+          -4.228
+        ],
+        "max": [
+          -4.608,
+          -3.84
+        ],
+        "entry": [
+          1.377,
+          0.0,
+          0.842
+        ]
+      },
+      {
+        "index": 2,
+        "target": 112,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -6.096,
+          6.864
+        ],
+        "max": [
+          -5.808,
+          7.248
+        ],
+        "entry": [
+          1.619,
+          0.0,
+          1.255
+        ]
+      },
+      {
+        "index": 3,
+        "target": 96,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          0.96,
+          -3.264
+        ],
+        "max": [
+          1.584,
+          -2.832
+        ],
+        "entry": [
+          1.534,
+          0.0,
+          2.611
+        ]
+      },
+      {
+        "index": 4,
+        "target": 92,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          4.25,
+          -3.744
+        ],
+        "max": [
+          4.896,
+          -3.36
+        ],
+        "entry": [
+          -0.173,
+          0.0,
+          0.981
+        ]
+      },
+      {
+        "index": 5,
+        "target": 32,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -5.3,
+          -8.1
+        ],
+        "max": [
+          -2.8,
+          -6.3
+        ],
+        "entry": [
+          1.132,
+          0.8,
+          6.378
+        ]
+      },
+      {
+        "index": 6,
+        "target": 72,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -5.5,
+          11.5
+        ],
+        "max": [
+          -4.2,
+          12.8
+        ],
+        "entry": [
+          -3.299,
+          0.349,
+          -10.28
+        ]
+      }
+    ],
+    "spawn": [
+      0,
+      0.05,
+      0
+    ],
+    "slug": "farm",
+    "texture_base": "res://game/locations/farm/"
+  },
+  "24": {
+    "id": 24,
+    "name": "约德尔牧场",
+    "place": 47,
+    "location": 48,
+    "scene": "res://game/locations/yodel_ranch/yodel_ranch.scn",
+    "source_json": "res://tools/generated/locations/yodel_ranch.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 128,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          1.575,
+          -1.8
+        ],
+        "max": [
+          2.026,
+          -1.489
+        ],
+        "entry": [
+          0.406,
+          0.0,
+          1.462
+        ]
+      },
+      {
+        "index": 1,
+        "target": 28,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.92,
+          -4.45
+        ],
+        "max": [
+          5.42,
+          -3.45
+        ],
+        "entry": [
+          -2.61,
+          0.0,
+          -3.549
+        ]
+      },
+      {
+        "index": 2,
+        "target": 32,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -3.72,
+          -4.45
+        ],
+        "max": [
+          -3.22,
+          -3.45
+        ],
+        "entry": [
+          3.514,
+          0.8,
+          5.538
+        ]
+      },
+      {
+        "index": 3,
+        "target": 76,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          3.04,
+          5.81
+        ],
+        "max": [
+          3.77,
+          6.31
+        ],
+        "entry": [
+          -4.114,
+          -0.046,
+          -10.11
+        ]
+      }
+    ],
+    "spawn": [
+      1.78,
+      0.1,
+      -1.325
+    ],
+    "slug": "yodel_ranch",
+    "texture_base": "res://game/locations/yodel_ranch/"
+  },
+  "28": {
+    "id": 28,
+    "name": "养鸡场",
+    "place": 7,
+    "location": 8,
+    "scene": "res://game/locations/poultry_farm/poultry_farm.scn",
+    "source_json": "res://tools/generated/locations/poultry_farm.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 136,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -1.44,
+          -1.872
+        ],
+        "max": [
+          -1.104,
+          -1.296
+        ],
+        "entry": [
+          1.92,
+          0.0,
+          0.528
+        ]
+      },
+      {
+        "index": 1,
+        "target": 24,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -3.61,
+          -4.1
+        ],
+        "max": [
+          -3.11,
+          -2.85
+        ],
+        "entry": [
+          4.42,
+          0.0,
+          -3.958
+        ]
+      },
+      {
+        "index": 2,
+        "target": 52,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -0.95,
+          -8.526
+        ],
+        "max": [
+          0.2,
+          -8.026
+        ],
+        "entry": [
+          2.749,
+          0.0,
+          4.4
+        ]
+      },
+      {
+        "index": 3,
+        "target": 136,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -3.45,
+          0.05
+        ],
+        "max": [
+          -3.0,
+          0.25
+        ],
+        "entry": [
+          -0.416,
+          0.0,
+          2.937
+        ]
+      }
+    ],
+    "spawn": [
+      -3.2,
+      0.0,
+      0.456
+    ],
+    "slug": "poultry_farm",
+    "texture_base": "res://game/locations/poultry_farm/"
+  },
+  "32": {
+    "id": 32,
+    "name": "镇南街区",
+    "place": 19,
+    "location": 34,
+    "scene": "res://game/locations/town_south/town_south.scn",
+    "source_json": "res://tools/generated/locations/town_south.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 156,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.25,
+          2.566
+        ],
+        "max": [
+          0.0,
+          3.017
+        ],
+        "entry": [
+          1.261,
+          0.0,
+          -0.006
+        ]
+      },
+      {
+        "index": 1,
+        "target": 144,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.912,
+          -0.96
+        ],
+        "max": [
+          -0.528,
+          -0.624
+        ],
+        "entry": [
+          2.0,
+          0.0,
+          -0.005
+        ]
+      },
+      {
+        "index": 2,
+        "target": 152,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -1.44,
+          -2.688
+        ],
+        "max": [
+          -1.104,
+          -2.352
+        ],
+        "entry": [
+          0.542,
+          0.0,
+          0.875
+        ]
+      },
+      {
+        "index": 3,
+        "target": 36,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          0.63,
+          -8.4
+        ],
+        "max": [
+          1.73,
+          -7.9
+        ],
+        "entry": [
+          -2.688,
+          0.0,
+          7.43
+        ]
+      },
+      {
+        "index": 4,
+        "target": 0,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          0.53,
+          6.878
+        ],
+        "max": [
+          1.73,
+          7.378
+        ],
+        "entry": [
+          -3.888,
+          0.0,
+          -5.804
+        ]
+      },
+      {
+        "index": 5,
+        "target": 24,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.014,
+          5.1
+        ],
+        "max": [
+          4.514,
+          6.0
+        ],
+        "entry": [
+          -2.61,
+          0.0,
+          -4.04
+        ]
+      }
+    ],
+    "spawn": [
+      0.288,
+      0.2,
+      2.812
+    ],
+    "slug": "town_south",
+    "texture_base": "res://game/locations/town_south/"
+  },
+  "36": {
+    "id": 36,
+    "name": "图书馆街区",
+    "place": 19,
+    "location": 20,
+    "scene": "res://game/locations/library_street/library_street.scn",
+    "source_json": "res://tools/generated/locations/library_street.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 164,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -4.32,
+          3.216
+        ],
+        "max": [
+          -3.984,
+          3.696
+        ],
+        "entry": [
+          1.403,
+          0.0,
+          0.377
+        ]
+      },
+      {
+        "index": 1,
+        "target": 160,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -4.128,
+          1.056
+        ],
+        "max": [
+          -3.888,
+          1.44
+        ],
+        "entry": [
+          2.208,
+          0.0,
+          -0.037
+        ]
+      },
+      {
+        "index": 2,
+        "target": 172,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -2.16,
+          -0.768
+        ],
+        "max": [
+          -1.68,
+          -0.576
+        ],
+        "entry": [
+          -0.018,
+          0.0,
+          1.495
+        ]
+      },
+      {
+        "index": 3,
+        "target": 176,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          0.24,
+          -0.816
+        ],
+        "max": [
+          0.672,
+          -0.576
+        ],
+        "entry": [
+          -0.018,
+          0.0,
+          1.495
+        ]
+      },
+      {
+        "index": 4,
+        "target": 40,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.752,
+          -0.12
+        ],
+        "max": [
+          5.252,
+          1.35
+        ],
+        "entry": [
+          -6.068,
+          0.0,
+          0.672
+        ]
+      },
+      {
+        "index": 5,
+        "target": 32,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -3.42,
+          7.93
+        ],
+        "max": [
+          -2.15,
+          8.43
+        ],
+        "entry": [
+          1.148,
+          0.0,
+          -7.4
+        ]
+      }
+    ],
+    "spawn": [
+      0.446,
+      0.0,
+      -0.427
+    ],
+    "slug": "library_street",
+    "texture_base": "res://game/locations/library_street/"
+  },
+  "40": {
+    "id": 40,
+    "name": "杂货店街区",
+    "place": 19,
+    "location": 29,
+    "scene": "res://game/locations/market_street/market_street.scn",
+    "source_json": "res://tools/generated/locations/market_street.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 180,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -2.537,
+          -0.968
+        ],
+        "max": [
+          -2.168,
+          -0.681
+        ],
+        "entry": [
+          0.04,
+          0.0,
+          1.862
+        ]
+      },
+      {
+        "index": 1,
+        "target": 188,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          2.208,
+          -0.8
+        ],
+        "max": [
+          2.736,
+          -0.432
+        ],
+        "entry": [
+          0.378,
+          0.0,
+          1.868
+        ]
+      },
+      {
+        "index": 2,
+        "target": 36,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -7.068,
+          -0.15
+        ],
+        "max": [
+          -6.568,
+          1.36
+        ],
+        "entry": [
+          4.252,
+          0.0,
+          0.672
+        ]
+      },
+      {
+        "index": 3,
+        "target": 44,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          7.204,
+          -0.15
+        ],
+        "max": [
+          7.704,
+          1.36
+        ],
+        "entry": [
+          -5.654,
+          0.0,
+          2.996
+        ]
+      },
+      {
+        "index": 4,
+        "target": 48,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          0.26,
+          5.248
+        ],
+        "max": [
+          1.74,
+          5.748
+        ],
+        "entry": [
+          0.246,
+          0.0,
+          -3.78
+        ]
+      }
+    ],
+    "spawn": [
+      2.41,
+      0.0,
+      -0.353
+    ],
+    "slug": "market_street",
+    "texture_base": "res://game/locations/market_street/"
+  },
+  "44": {
+    "id": 44,
+    "name": "教堂街区",
+    "place": 19,
+    "location": 39,
+    "scene": "res://game/locations/church_street/church_street.scn",
+    "source_json": "res://tools/generated/locations/church_street.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 196,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          1.098,
+          1.3
+        ],
+        "max": [
+          1.672,
+          1.498
+        ],
+        "entry": [
+          0.005,
+          0.0,
+          2.262
+        ]
+      },
+      {
+        "index": 1,
+        "target": 200,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          3.869,
+          -3.951
+        ],
+        "max": [
+          4.156,
+          -3.869
+        ],
+        "entry": [
+          -0.002,
+          0.0,
+          1.335
+        ]
+      },
+      {
+        "index": 2,
+        "target": 40,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -6.654,
+          2.24
+        ],
+        "max": [
+          -6.154,
+          3.76
+        ],
+        "entry": [
+          6.068,
+          0.0,
+          0.533
+        ]
+      },
+      {
+        "index": 3,
+        "target": 52,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          1.02,
+          6.832
+        ],
+        "max": [
+          2.16,
+          7.332
+        ],
+        "entry": [
+          2.809,
+          0.0,
+          -4.282
+        ]
+      }
+    ],
+    "spawn": [
+      4.033,
+      0.0,
+      -3.623
+    ],
+    "slug": "church_street",
+    "texture_base": "res://game/locations/church_street/"
+  },
+  "48": {
+    "id": 48,
+    "name": "旅馆街区",
+    "place": 19,
+    "location": 26,
+    "scene": "res://game/locations/inn_street/inn_street.scn",
+    "source_json": "res://tools/generated/locations/inn_street.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 204,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -1.106,
+          -0.306
+        ],
+        "max": [
+          -0.86,
+          0.35
+        ],
+        "entry": [
+          4.017,
+          0.0,
+          0.326
+        ]
+      },
+      {
+        "index": 1,
+        "target": 40,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -0.6,
+          -4.68
+        ],
+        "max": [
+          0.99,
+          -4.18
+        ],
+        "entry": [
+          1.037,
+          0.0,
+          4.748
+        ]
+      },
+      {
+        "index": 2,
+        "target": 52,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          6.142,
+          1.8
+        ],
+        "max": [
+          6.642,
+          2.946
+        ],
+        "entry": [
+          -4.888,
+          0.0,
+          -0.016
+        ]
+      }
+    ],
+    "spawn": [
+      -0.63,
+      0.0,
+      0.078
+    ],
+    "slug": "inn_street",
+    "texture_base": "res://game/locations/inn_street/"
+  },
+  "52": {
+    "id": 52,
+    "name": "小镇广场",
+    "place": 19,
+    "location": 42,
+    "scene": "res://game/locations/town_square/town_square.scn",
+    "source_json": "res://tools/generated/locations/town_square.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 28,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          2.26,
+          4.9
+        ],
+        "max": [
+          3.36,
+          5.4
+        ],
+        "entry": [
+          -0.458,
+          -0.72,
+          -7.526
+        ]
+      },
+      {
+        "index": 1,
+        "target": 44,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          2.26,
+          -5.282
+        ],
+        "max": [
+          3.36,
+          -4.782
+        ],
+        "entry": [
+          1.625,
+          0.0,
+          6.332
+        ]
+      },
+      {
+        "index": 2,
+        "target": 48,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -5.888,
+          -0.56
+        ],
+        "max": [
+          -5.388,
+          0.54
+        ],
+        "entry": [
+          5.642,
+          0.0,
+          2.4
+        ]
+      },
+      {
+        "index": 3,
+        "target": 56,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.6,
+          -0.65
+        ],
+        "max": [
+          5.0,
+          0.6
+        ],
+        "entry": [
+          -7.486,
+          0.0,
+          -0.786
+        ]
+      }
+    ],
+    "spawn": [
+      4.4,
+      0.0,
+      0.0
+    ],
+    "slug": "town_square",
+    "texture_base": "res://game/locations/town_square/"
+  },
+  "56": {
+    "id": 56,
+    "name": "海滩",
+    "place": 43,
+    "location": 44,
+    "scene": "res://game/locations/beach/beach.scn",
+    "source_json": "res://tools/generated/locations/beach.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 52,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -7.95,
+          -1.2
+        ],
+        "max": [
+          -7.65,
+          -0.35
+        ],
+        "entry": [
+          4.4,
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "spawn": [
+      -7.486,
+      0.0,
+      -0.786
+    ],
+    "slug": "beach",
+    "texture_base": "res://game/locations/beach/"
+  },
+  "60": {
+    "id": 60,
+    "name": "圣母山山顶",
+    "place": 11,
+    "location": 15,
+    "scene": "res://game/locations/mother_hill_summit/mother_hill_summit.scn",
+    "source_json": "res://tools/generated/locations/mother_hill_summit.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 64,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -10.83,
+          0.608
+        ],
+        "max": [
+          -8.48,
+          1.108
+        ],
+        "entry": [
+          -11.103,
+          1.381,
+          -11.3
+        ]
+      }
+    ],
+    "spawn": [
+      -9.742,
+      -0.496,
+      0.108
+    ],
+    "slug": "mother_hill_summit",
+    "texture_base": "res://game/locations/mother_hill_summit/"
+  },
+  "64": {
+    "id": 64,
+    "name": "圣母山山道",
+    "place": 11,
+    "location": 14,
+    "scene": "res://game/locations/mother_hill_trail/mother_hill_trail.scn",
+    "source_json": "res://tools/generated/locations/mother_hill_trail.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 60,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -11.55,
+          -13.0
+        ],
+        "max": [
+          -10.658,
+          -11.892
+        ],
+        "entry": [
+          -9.742,
+          -0.496,
+          0.108
+        ]
+      },
+      {
+        "index": 1,
+        "target": 68,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -5.26,
+          -0.87
+        ],
+        "max": [
+          -3.8,
+          -0.37
+        ],
+        "entry": [
+          -4.303,
+          2.2,
+          -10.568
+        ]
+      }
+    ],
+    "spawn": [
+      -4.587,
+      0.121,
+      -1.27
+    ],
+    "slug": "mother_hill_trail",
+    "texture_base": "res://game/locations/mother_hill_trail/"
+  },
+  "68": {
+    "id": 68,
+    "name": "山间湖畔",
+    "place": 11,
+    "location": 13,
+    "scene": "res://game/locations/mother_hill_lake/mother_hill_lake.scn",
+    "source_json": "res://tools/generated/locations/mother_hill_lake.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 64,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -4.69,
+          -11.568
+        ],
+        "max": [
+          -3.83,
+          -11.068
+        ],
+        "entry": [
+          -4.587,
+          0.121,
+          -1.27
+        ]
+      },
+      {
+        "index": 1,
+        "target": 72,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          -0.806,
+          -2.156
+        ],
+        "max": [
+          -0.306,
+          -0.926
+        ],
+        "entry": [
+          -10.19,
+          1.183,
+          -0.688
+        ]
+      },
+      {
+        "index": 2,
+        "target": 234,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -11.214,
+          -9.924
+        ],
+        "max": [
+          -10.845,
+          -9.473
+        ],
+        "entry": [
+          -0.097,
+          0.0,
+          2.009
+        ]
+      }
+    ],
+    "spawn": [
+      -10.911,
+      1.685,
+      -9.242
+    ],
+    "slug": "mother_hill_lake",
+    "texture_base": "res://game/locations/mother_hill_lake/"
+  },
+  "72": {
+    "id": 72,
+    "name": "温泉",
+    "place": 11,
+    "location": 12,
+    "scene": "res://game/locations/hot_spring/hot_spring.scn",
+    "source_json": "res://tools/generated/locations/hot_spring.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -3.99,
+          -11.28
+        ],
+        "max": [
+          -2.48,
+          -10.78
+        ],
+        "entry": [
+          -4.638,
+          0.06,
+          11.01
+        ]
+      },
+      {
+        "index": 1,
+        "target": 68,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -11.19,
+          -1.6
+        ],
+        "max": [
+          -10.69,
+          -0.12
+        ],
+        "entry": [
+          -1.306,
+          0.061,
+          -1.558
+        ]
+      },
+      {
+        "index": 2,
+        "target": 76,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          -0.8,
+          -9.16
+        ],
+        "max": [
+          -0.3,
+          -7.53
+        ],
+        "entry": [
+          -13.72,
+          0.062,
+          -2.132
+        ]
+      },
+      {
+        "index": 8,
+        "target": 245,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -12.246,
+          -10.0
+        ],
+        "max": [
+          -11.877,
+          -9.4
+        ],
+        "entry": [
+          1.862,
+          0.0,
+          0.013
+        ]
+      }
+    ],
+    "spawn": [
+      -11.453,
+      1.892,
+      -9.706
+    ],
+    "slug": "hot_spring",
+    "texture_base": "res://game/locations/hot_spring/"
+  },
+  "76": {
+    "id": 76,
+    "name": "樵夫森林",
+    "place": 51,
+    "location": 52,
+    "scene": "res://game/locations/lumberjack_forest/lumberjack_forest.scn",
+    "source_json": "res://tools/generated/locations/lumberjack_forest.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 212,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -6.888,
+          -3.926
+        ],
+        "max": [
+          -6.396,
+          -3.639
+        ],
+        "entry": [
+          0.424,
+          0.0,
+          1.471
+        ]
+      },
+      {
+        "index": 1,
+        "target": 24,
+        "facing": 2,
+        "requires_action": false,
+        "min": [
+          -5.3,
+          -11.11
+        ],
+        "max": [
+          -3.24,
+          -10.61
+        ],
+        "entry": [
+          3.442,
+          0.0,
+          5.31
+        ]
+      },
+      {
+        "index": 2,
+        "target": 72,
+        "facing": 1,
+        "requires_action": false,
+        "min": [
+          -14.72,
+          -2.99
+        ],
+        "max": [
+          -14.22,
+          -1.1
+        ],
+        "entry": [
+          -1.3,
+          0.327,
+          -8.181
+        ]
+      }
+    ],
+    "spawn": [
+      -6.601,
+      0.0,
+      -3.6
+    ],
+    "slug": "lumberjack_forest",
+    "texture_base": "res://game/locations/lumberjack_forest/"
+  },
+  "80": {
+    "id": 80,
+    "name": "自宅",
+    "place": 0,
+    "location": 2,
+    "scene": "res://game/locations/farmhouse/farmhouse.scn",
+    "source_json": "res://tools/generated/locations/farmhouse.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.623,
+          0.232
+        ],
+        "max": [
+          1.746,
+          1.329
+        ],
+        "entry": [
+          -4.464,
+          0.0,
+          -4.032
+        ]
+      }
+    ],
+    "spawn": [
+      1.377,
+      0.0,
+      0.842
+    ],
+    "slug": "farmhouse",
+    "texture_base": "res://game/locations/farmhouse/"
+  },
+  "92": {
+    "id": 92,
+    "name": "马厩",
+    "place": 0,
+    "location": 3,
+    "scene": "res://game/locations/stable/stable.scn",
+    "source_json": "res://tools/generated/locations/stable.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.742,
+          1.227
+        ],
+        "max": [
+          0.355,
+          1.35
+        ],
+        "entry": [
+          4.704,
+          0.0,
+          -3.12
+        ]
+      }
+    ],
+    "spawn": [
+      -0.173,
+      0.0,
+      0.981
+    ],
+    "slug": "stable",
+    "texture_base": "res://game/locations/stable/"
+  },
+  "96": {
+    "id": 96,
+    "name": "牛羊棚",
+    "place": 0,
+    "location": 5,
+    "scene": "res://game/locations/barn/barn.scn",
+    "source_json": "res://tools/generated/locations/barn.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          1.047,
+          2.816
+        ],
+        "max": [
+          2.144,
+          2.939
+        ],
+        "entry": [
+          1.24,
+          0.0,
+          -2.688
+        ]
+      }
+    ],
+    "spawn": [
+      1.534,
+      0.0,
+      2.611
+    ],
+    "slug": "barn",
+    "texture_base": "res://game/locations/barn/"
+  },
+  "112": {
+    "id": 112,
+    "name": "鸡舍",
+    "place": 0,
+    "location": 4,
+    "scene": "res://game/locations/chicken_coop/chicken_coop.scn",
+    "source_json": "res://tools/generated/locations/chicken_coop.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 0,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.824,
+          0.645
+        ],
+        "max": [
+          1.947,
+          1.783
+        ],
+        "entry": [
+          -5.664,
+          0.0,
+          7.104
+        ]
+      }
+    ],
+    "spawn": [
+      1.619,
+      0.0,
+      1.255
+    ],
+    "slug": "chicken_coop",
+    "texture_base": "res://game/locations/chicken_coop/"
+  },
+  "128": {
+    "id": 128,
+    "name": "约德尔牧场住宅",
+    "place": 47,
+    "location": 49,
+    "scene": "res://game/locations/yodel_ranch_house/yodel_ranch_house.scn",
+    "source_json": "res://tools/generated/locations/yodel_ranch_house.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 24,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.1,
+          1.632
+        ],
+        "max": [
+          1.064,
+          1.92
+        ],
+        "entry": [
+          1.78,
+          0.1,
+          -1.325
+        ]
+      },
+      {
+        "index": 1,
+        "target": 132,
+        "facing": 0,
+        "requires_action": true,
+        "min": [
+          -1.5,
+          -0.1
+        ],
+        "max": [
+          -1.125,
+          0.277
+        ],
+        "entry": [
+          -1.248,
+          0.0,
+          1.296
+        ]
+      }
+    ],
+    "spawn": [
+      -1.166,
+      0.0,
+      -0.784
+    ],
+    "slug": "yodel_ranch_house",
+    "texture_base": "res://game/locations/yodel_ranch_house/"
+  },
+  "132": {
+    "id": 132,
+    "name": "牧场住宅卧室",
+    "place": 47,
+    "location": 50,
+    "scene": "res://game/locations/yodel_ranch_bedroom/yodel_ranch_bedroom.scn",
+    "source_json": "res://tools/generated/locations/yodel_ranch_bedroom.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 128,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -1.488,
+          0.624
+        ],
+        "max": [
+          -0.912,
+          0.816
+        ],
+        "entry": [
+          -1.166,
+          0.0,
+          -0.784
+        ]
+      }
+    ],
+    "spawn": [
+      -1.248,
+      0.0,
+      1.296
+    ],
+    "slug": "yodel_ranch_bedroom",
+    "texture_base": "res://game/locations/yodel_ranch_bedroom/"
+  },
+  "136": {
+    "id": 136,
+    "name": "养鸡场住宅",
+    "place": 7,
+    "location": 9,
+    "scene": "res://game/locations/poultry_farm_house/poultry_farm_house.scn",
+    "source_json": "res://tools/generated/locations/poultry_farm_house.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 28,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          2.016,
+          -0.15
+        ],
+        "max": [
+          2.304,
+          1.016
+        ],
+        "entry": [
+          -0.72,
+          0.0,
+          -1.536
+        ]
+      },
+      {
+        "index": 1,
+        "target": 28,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.968,
+          3.216
+        ],
+        "max": [
+          0.248,
+          3.504
+        ],
+        "entry": [
+          -3.2,
+          0.0,
+          0.456
+        ]
+      },
+      {
+        "index": 2,
+        "target": 140,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.613,
+          -1.08
+        ],
+        "max": [
+          -0.127,
+          -0.58
+        ],
+        "entry": [
+          -1.152,
+          0.0,
+          -0.816
+        ]
+      }
+    ],
+    "spawn": [
+      0.403,
+      0.0,
+      -0.907
+    ],
+    "slug": "poultry_farm_house",
+    "texture_base": "res://game/locations/poultry_farm_house/"
+  },
+  "140": {
+    "id": 140,
+    "name": "养鸡场卧室",
+    "place": 7,
+    "location": 10,
+    "scene": "res://game/locations/poultry_farm_bedroom/poultry_farm_bedroom.scn",
+    "source_json": "res://tools/generated/locations/poultry_farm_bedroom.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 136,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          -1.008,
+          -1.152
+        ],
+        "max": [
+          -0.72,
+          -0.432
+        ],
+        "entry": [
+          0.403,
+          0.0,
+          -0.907
+        ]
+      }
+    ],
+    "spawn": [
+      -1.152,
+      0.0,
+      -0.816
+    ],
+    "slug": "poultry_farm_bedroom",
+    "texture_base": "res://game/locations/poultry_farm_bedroom/"
+  },
+  "144": {
+    "id": 144,
+    "name": "锻冶屋",
+    "place": 19,
+    "location": 36,
+    "scene": "res://game/locations/blacksmith_forge/blacksmith_forge.scn",
+    "source_json": "res://tools/generated/locations/blacksmith_forge.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 32,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          2.37,
+          -0.415
+        ],
+        "max": [
+          2.821,
+          0.651
+        ],
+        "entry": [
+          -0.48,
+          0.2,
+          -0.768
+        ]
+      },
+      {
+        "index": 1,
+        "target": 148,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          0.9,
+          -0.344
+        ],
+        "max": [
+          1.635,
+          -0.057
+        ],
+        "entry": [
+          1.248,
+          0.0,
+          -1.536
+        ]
+      }
+    ],
+    "spawn": [
+      1.125,
+      0.0,
+      0.476
+    ],
+    "slug": "blacksmith_forge",
+    "texture_base": "res://game/locations/blacksmith_forge/"
+  },
+  "148": {
+    "id": 148,
+    "name": "锻冶屋卧室",
+    "place": 19,
+    "location": 37,
+    "scene": "res://game/locations/blacksmith_bedroom/blacksmith_bedroom.scn",
+    "source_json": "res://tools/generated/locations/blacksmith_bedroom.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 144,
+        "facing": 0,
+        "requires_action": true,
+        "min": [
+          0.816,
+          -1.392
+        ],
+        "max": [
+          1.6,
+          -1.248
+        ],
+        "entry": [
+          1.125,
+          0.0,
+          0.476
+        ]
+      }
+    ],
+    "spawn": [
+      1.248,
+      0.0,
+      -1.536
+    ],
+    "slug": "blacksmith_bedroom",
+    "texture_base": "res://game/locations/blacksmith_bedroom/"
+  },
+  "152": {
+    "id": 152,
+    "name": "酒窖",
+    "place": 19,
+    "location": 38,
+    "scene": "res://game/locations/winery_cellar/winery_cellar.scn",
+    "source_json": "res://tools/generated/locations/winery_cellar.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 32,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.198,
+          0.488
+        ],
+        "max": [
+          1.772,
+          1.162
+        ],
+        "entry": [
+          -1.039,
+          0.2,
+          -2.612
+        ]
+      }
+    ],
+    "spawn": [
+      0.542,
+      0.0,
+      0.875
+    ],
+    "slug": "winery_cellar",
+    "texture_base": "res://game/locations/winery_cellar/"
+  },
+  "156": {
+    "id": 156,
+    "name": "果园住宅",
+    "place": 19,
+    "location": 35,
+    "scene": "res://game/locations/winery_house/winery_house.scn",
+    "source_json": "res://tools/generated/locations/winery_house.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 32,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.558,
+          -0.528
+        ],
+        "max": [
+          1.763,
+          0.528
+        ],
+        "entry": [
+          0.288,
+          0.2,
+          2.812
+        ]
+      }
+    ],
+    "spawn": [
+      1.261,
+      0.0,
+      -0.006
+    ],
+    "slug": "winery_house",
+    "texture_base": "res://game/locations/winery_house/"
+  },
+  "160": {
+    "id": 160,
+    "name": "图书馆",
+    "place": 19,
+    "location": 21,
+    "scene": "res://game/locations/library/library.scn",
+    "source_json": "res://tools/generated/locations/library.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 36,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          2.413,
+          -0.365
+        ],
+        "max": [
+          2.577,
+          0.332
+        ],
+        "entry": [
+          -3.736,
+          0.0,
+          1.254
+        ]
+      },
+      {
+        "index": 1,
+        "target": 168,
+        "facing": 0,
+        "requires_action": true,
+        "min": [
+          -1.545,
+          2.107
+        ],
+        "max": [
+          -0.848,
+          2.476
+        ],
+        "entry": [
+          -0.647,
+          0.0,
+          -1.468
+        ]
+      }
+    ],
+    "spawn": [
+      -1.176,
+      1.44,
+      1.738
+    ],
+    "slug": "library",
+    "texture_base": "res://game/locations/library/"
+  },
+  "164": {
+    "id": 164,
+    "name": "植物学家住宅",
+    "place": 19,
+    "location": 22,
+    "scene": "res://game/locations/basil_house/basil_house.scn",
+    "source_json": "res://tools/generated/locations/basil_house.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 168,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          0.35,
+          -1.6
+        ],
+        "max": [
+          0.8,
+          -0.95
+        ],
+        "entry": [
+          -0.196,
+          0.0,
+          -1.263
+        ]
+      },
+      {
+        "index": 1,
+        "target": 36,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          1.608,
+          -0.15
+        ],
+        "max": [
+          1.731,
+          0.946
+        ],
+        "entry": [
+          -3.818,
+          0.0,
+          3.386
+        ]
+      }
+    ],
+    "spawn": [
+      1.252,
+      0.0,
+      -1.137
+    ],
+    "slug": "basil_house",
+    "texture_base": "res://game/locations/basil_house/"
+  },
+  "168": {
+    "id": 168,
+    "name": "植物学家住宅卧室",
+    "place": 19,
+    "location": 23,
+    "scene": "res://game/locations/basil_bedroom/basil_bedroom.scn",
+    "source_json": "res://tools/generated/locations/basil_bedroom.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 160,
+        "facing": 2,
+        "requires_action": true,
+        "min": [
+          -0.811,
+          -1.755
+        ],
+        "max": [
+          -0.36,
+          -1.45
+        ],
+        "entry": [
+          -1.176,
+          1.44,
+          1.738
+        ]
+      },
+      {
+        "index": 1,
+        "target": 164,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          0.05,
+          -1.55
+        ],
+        "max": [
+          0.214,
+          -0.92
+        ],
+        "entry": [
+          1.252,
+          0.0,
+          -1.137
+        ]
+      }
+    ],
+    "spawn": [
+      -0.196,
+      0.0,
+      -1.263
+    ],
+    "slug": "basil_bedroom",
+    "texture_base": "res://game/locations/basil_bedroom/"
+  },
+  "172": {
+    "id": 172,
+    "name": "艾莲住宅",
+    "place": 19,
+    "location": 25,
+    "scene": "res://game/locations/ellen_house/ellen_house.scn",
+    "source_json": "res://tools/generated/locations/ellen_house.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 36,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.546,
+          1.618
+        ],
+        "max": [
+          0.551,
+          1.741
+        ],
+        "entry": [
+          -2.055,
+          0.0,
+          -0.427
+        ]
+      }
+    ],
+    "spawn": [
+      -0.018,
+      0.0,
+      1.495
+    ],
+    "slug": "ellen_house",
+    "texture_base": "res://game/locations/ellen_house/"
+  },
+  "176": {
+    "id": 176,
+    "name": "镇长住宅",
+    "place": 19,
+    "location": 24,
+    "scene": "res://game/locations/mayor_house/mayor_house.scn",
+    "source_json": "res://tools/generated/locations/mayor_house.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 36,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.546,
+          1.618
+        ],
+        "max": [
+          0.551,
+          1.741
+        ],
+        "entry": [
+          0.446,
+          0.0,
+          -0.427
+        ]
+      }
+    ],
+    "spawn": [
+      -0.018,
+      0.0,
+      1.495
+    ],
+    "slug": "mayor_house",
+    "texture_base": "res://game/locations/mayor_house/"
+  },
+  "180": {
+    "id": 180,
+    "name": "杂货店",
+    "place": 19,
+    "location": 30,
+    "scene": "res://game/locations/supermarket/supermarket.scn",
+    "source_json": "res://tools/generated/locations/supermarket.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 184,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -1.928,
+          -1.418
+        ],
+        "max": [
+          -1.5,
+          -0.967
+        ],
+        "entry": [
+          1.418,
+          0.0,
+          -1.231
+        ]
+      },
+      {
+        "index": 1,
+        "target": 40,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.529,
+          2.067
+        ],
+        "max": [
+          0.568,
+          2.149
+        ],
+        "entry": [
+          -2.324,
+          0.0,
+          -0.21
+        ]
+      }
+    ],
+    "spawn": [
+      -1.477,
+      0.0,
+      -1.254
+    ],
+    "slug": "supermarket",
+    "texture_base": "res://game/locations/supermarket/"
+  },
+  "184": {
+    "id": 184,
+    "name": "杂货店楼上",
+    "place": 19,
+    "location": 31,
+    "scene": "res://game/locations/supermarket_upstairs/supermarket_upstairs.scn",
+    "source_json": "res://tools/generated/locations/supermarket_upstairs.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 180,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          1.623,
+          -1.595
+        ],
+        "max": [
+          1.746,
+          -0.785
+        ],
+        "entry": [
+          -1.477,
+          0.0,
+          -1.254
+        ]
+      }
+    ],
+    "spawn": [
+      1.418,
+      0.0,
+      -1.231
+    ],
+    "slug": "supermarket_upstairs",
+    "texture_base": "res://game/locations/supermarket_upstairs/"
+  },
+  "188": {
+    "id": 188,
+    "name": "医院",
+    "place": 19,
+    "location": 32,
+    "scene": "res://game/locations/clinic/clinic.scn",
+    "source_json": "res://tools/generated/locations/clinic.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 192,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.971,
+          -2.01
+        ],
+        "max": [
+          -0.397,
+          -1.37
+        ],
+        "entry": [
+          -1.481,
+          0.0,
+          -1.731
+        ]
+      },
+      {
+        "index": 1,
+        "target": 40,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.15,
+          2.032
+        ],
+        "max": [
+          0.947,
+          2.155
+        ],
+        "entry": [
+          2.41,
+          0.0,
+          -0.353
+        ]
+      }
+    ],
+    "spawn": [
+      0.136,
+      0.0,
+      -1.575
+    ],
+    "slug": "clinic",
+    "texture_base": "res://game/locations/clinic/"
+  },
+  "192": {
+    "id": 192,
+    "name": "医院楼上",
+    "place": 19,
+    "location": 33,
+    "scene": "res://game/locations/clinic_upstairs/clinic_upstairs.scn",
+    "source_json": "res://tools/generated/locations/clinic_upstairs.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 188,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          -1.358,
+          -1.936
+        ],
+        "max": [
+          -1.112,
+          -1.321
+        ],
+        "entry": [
+          0.136,
+          0.0,
+          -1.575
+        ]
+      }
+    ],
+    "spawn": [
+      -1.481,
+      0.0,
+      -1.731
+    ],
+    "slug": "clinic_upstairs",
+    "texture_base": "res://game/locations/clinic_upstairs/"
+  },
+  "196": {
+    "id": 196,
+    "name": "教堂",
+    "place": 19,
+    "location": 41,
+    "scene": "res://game/locations/church/church.scn",
+    "source_json": "res://tools/generated/locations/church.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 44,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.564,
+          2.426
+        ],
+        "max": [
+          0.533,
+          2.549
+        ],
+        "entry": [
+          1.303,
+          0.0,
+          1.826
+        ]
+      }
+    ],
+    "spawn": [
+      0.005,
+      0.0,
+      2.262
+    ],
+    "slug": "church",
+    "texture_base": "res://game/locations/church/"
+  },
+  "200": {
+    "id": 200,
+    "name": "小矮人之家",
+    "place": 19,
+    "location": 40,
+    "scene": "res://game/locations/harvest_sprite_home/harvest_sprite_home.scn",
+    "source_json": "res://tools/generated/locations/harvest_sprite_home.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 44,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.53,
+          1.417
+        ],
+        "max": [
+          0.526,
+          1.54
+        ],
+        "entry": [
+          4.033,
+          0.0,
+          -3.623
+        ]
+      }
+    ],
+    "spawn": [
+      -0.002,
+      0.0,
+      1.335
+    ],
+    "slug": "harvest_sprite_home",
+    "texture_base": "res://game/locations/harvest_sprite_home/"
+  },
+  "204": {
+    "id": 204,
+    "name": "旅馆",
+    "place": 19,
+    "location": 27,
+    "scene": "res://game/locations/inn/inn.scn",
+    "source_json": "res://tools/generated/locations/inn.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 208,
+        "facing": 1,
+        "requires_action": true,
+        "min": [
+          -0.285,
+          -3.187
+        ],
+        "max": [
+          0.084,
+          -2.695
+        ],
+        "entry": [
+          1.669,
+          0.0,
+          -3.093
+        ]
+      },
+      {
+        "index": 1,
+        "target": 48,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          4.4,
+          -0.1
+        ],
+        "max": [
+          4.6,
+          1.046
+        ],
+        "entry": [
+          -0.63,
+          0.0,
+          0.078
+        ]
+      }
+    ],
+    "spawn": [
+      0.13,
+      0.0,
+      -2.959
+    ],
+    "slug": "inn",
+    "texture_base": "res://game/locations/inn/"
+  },
+  "208": {
+    "id": 208,
+    "name": "旅馆楼上",
+    "place": 19,
+    "location": 28,
+    "scene": "res://game/locations/inn_upstairs/inn_upstairs.scn",
+    "source_json": "res://tools/generated/locations/inn_upstairs.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 204,
+        "facing": 3,
+        "requires_action": true,
+        "min": [
+          2.035,
+          -3.559
+        ],
+        "max": [
+          2.158,
+          -2.767
+        ],
+        "entry": [
+          0.13,
+          0.0,
+          -2.959
+        ]
+      }
+    ],
+    "spawn": [
+      1.669,
+      0.0,
+      -3.093
+    ],
+    "slug": "inn_upstairs",
+    "texture_base": "res://game/locations/inn_upstairs/"
+  },
+  "212": {
+    "id": 212,
+    "name": "樵夫住宅",
+    "place": 51,
+    "location": 53,
+    "scene": "res://game/locations/lumberjack_house/lumberjack_house.scn",
+    "source_json": "res://tools/generated/locations/lumberjack_house.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 76,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.15,
+          1.635
+        ],
+        "max": [
+          0.952,
+          1.758
+        ],
+        "entry": [
+          -6.601,
+          0.0,
+          -3.6
+        ]
+      }
+    ],
+    "spawn": [
+      0.424,
+      0.0,
+      1.471
+    ],
+    "slug": "lumberjack_house",
+    "texture_base": "res://game/locations/lumberjack_house/"
+  },
+  "234": {
+    "id": 234,
+    "name": "泉边矿洞",
+    "place": 55,
+    "location": 56,
+    "scene": "res://game/locations/spring_mine/spring_mine.scn",
+    "source_json": "res://tools/generated/locations/spring_mine.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 68,
+        "facing": 0,
+        "requires_action": false,
+        "min": [
+          -0.466,
+          2.214
+        ],
+        "max": [
+          0.518,
+          2.788
+        ],
+        "entry": [
+          -10.911,
+          1.685,
+          -9.242
+        ]
+      }
+    ],
+    "spawn": [
+      -0.097,
+      0.0,
+      2.009
+    ],
+    "slug": "spring_mine",
+    "texture_base": "res://game/locations/spring_mine/"
+  },
+  "245": {
+    "id": 245,
+    "name": "湖边矿洞",
+    "place": 67,
+    "location": 68,
+    "scene": "res://game/locations/lake_mine/lake_mine.scn",
+    "source_json": "res://tools/generated/locations/lake_mine.json",
+    "exits": [
+      {
+        "index": 0,
+        "target": 72,
+        "facing": 3,
+        "requires_action": false,
+        "min": [
+          2.177,
+          -0.315
+        ],
+        "max": [
+          2.505,
+          0.464
+        ],
+        "entry": [
+          -11.453,
+          1.892,
+          -9.706
+        ]
+      }
+    ],
+    "spawn": [
+      1.862,
+      0.0,
+      0.013
+    ],
+    "slug": "lake_mine",
+    "texture_base": "res://game/locations/lake_mine/"
+  }
+}

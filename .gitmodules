@@ -1,0 +1,3 @@
+[submodule "reference/hmbtn-decomp"]
+	path = reference/hmbtn-decomp
+	url = https://github.com/coalslav/hmbtn-decomp.git

@@ -1,26 +1,657 @@
 {
-  "objects": 294,
-  "primitives": 4246,
-  "modes": {
-    "2101": 7,
-    "3501": 352,
-    "3d01": 2214,
-    "2501": 239,
-    "2901": 10,
-    "2d01": 1420,
-    "3901": 1,
-    "3101": 3
-  },
-  "materials": 51,
-  "scene_entries": 8,
-  "coordinate_conversion": "(x, -y, -z) / 1000",
+  "areas": [
+    {
+      "objects": 294,
+      "primitives": 4246,
+      "modes": {
+        "2101": 7,
+        "3501": 352,
+        "3d01": 2214,
+        "2501": 239,
+        "2901": 10,
+        "2d01": 1420,
+        "3901": 1,
+        "3101": 3
+      },
+      "materials": 51,
+      "scene_entries": 8,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 0,
+      "texture_blocks": 166
+    },
+    {
+      "objects": 134,
+      "primitives": 2682,
+      "modes": {
+        "2501": 52,
+        "3501": 622,
+        "2d01": 560,
+        "3d01": 1446,
+        "2901": 2
+      },
+      "materials": 55,
+      "scene_entries": 3,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 24,
+      "texture_blocks": 127
+    },
+    {
+      "objects": 176,
+      "primitives": 2983,
+      "modes": {
+        "2101": 11,
+        "3101": 6,
+        "2501": 97,
+        "3501": 545,
+        "2d01": 716,
+        "3d01": 1602,
+        "2901": 2,
+        "3901": 4
+      },
+      "materials": 56,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 28,
+      "texture_blocks": 115
+    },
+    {
+      "objects": 90,
+      "primitives": 2514,
+      "modes": {
+        "2501": 189,
+        "3501": 650,
+        "2d01": 667,
+        "3d01": 999,
+        "2901": 6,
+        "3901": 3
+      },
+      "materials": 59,
+      "scene_entries": 3,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 32,
+      "texture_blocks": 119
+    },
+    {
+      "objects": 95,
+      "primitives": 3169,
+      "modes": {
+        "2101": 9,
+        "2501": 179,
+        "3501": 757,
+        "2901": 27,
+        "2d01": 731,
+        "3d01": 1440,
+        "3101": 13,
+        "3901": 13
+      },
+      "materials": 65,
+      "scene_entries": 4,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 36,
+      "texture_blocks": 133
+    },
+    {
+      "objects": 120,
+      "primitives": 3307,
+      "modes": {
+        "2101": 2,
+        "3101": 2,
+        "2501": 187,
+        "3501": 716,
+        "2901": 13,
+        "3901": 2,
+        "2d01": 897,
+        "3d01": 1488
+      },
+      "materials": 69,
+      "scene_entries": 2,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 40,
+      "texture_blocks": 144
+    },
+    {
+      "objects": 133,
+      "primitives": 3533,
+      "modes": {
+        "2101": 1,
+        "2501": 249,
+        "3501": 978,
+        "2d01": 889,
+        "3d01": 1402,
+        "2901": 14
+      },
+      "materials": 60,
+      "scene_entries": 4,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 44,
+      "texture_blocks": 124
+    },
+    {
+      "objects": 115,
+      "primitives": 2384,
+      "modes": {
+        "2101": 3,
+        "2501": 111,
+        "3501": 396,
+        "2901": 10,
+        "2d01": 647,
+        "3d01": 1217
+      },
+      "materials": 59,
+      "scene_entries": 2,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 48,
+      "texture_blocks": 126
+    },
+    {
+      "objects": 120,
+      "primitives": 2819,
+      "modes": {
+        "2101": 1,
+        "2501": 198,
+        "3501": 552,
+        "3901": 37,
+        "2d01": 785,
+        "3d01": 1216,
+        "2901": 30
+      },
+      "materials": 39,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 52,
+      "texture_blocks": 92
+    },
+    {
+      "objects": 207,
+      "primitives": 4374,
+      "modes": {
+        "2101": 1,
+        "2501": 118,
+        "3501": 326,
+        "2901": 28,
+        "3901": 37,
+        "2d01": 1476,
+        "3d01": 2388
+      },
+      "materials": 74,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 56,
+      "texture_blocks": 164
+    },
+    {
+      "objects": 102,
+      "primitives": 1552,
+      "modes": {
+        "3101": 1,
+        "3501": 953,
+        "2d01": 308,
+        "2501": 66,
+        "3d01": 224
+      },
+      "materials": 10,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 60,
+      "texture_blocks": 28
+    },
+    {
+      "objects": 115,
+      "primitives": 2883,
+      "modes": {
+        "3101": 19,
+        "2501": 1593,
+        "3501": 679,
+        "2d01": 461,
+        "3d01": 131
+      },
+      "materials": 23,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 64,
+      "texture_blocks": 60
+    },
+    {
+      "objects": 160,
+      "primitives": 3054,
+      "modes": {
+        "2501": 1131,
+        "3501": 1357,
+        "3d01": 314,
+        "2d01": 252
+      },
+      "materials": 28,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 68,
+      "texture_blocks": 62
+    },
+    {
+      "objects": 121,
+      "primitives": 2414,
+      "modes": {
+        "2501": 344,
+        "3501": 488,
+        "2d01": 1114,
+        "3d01": 468
+      },
+      "materials": 38,
+      "scene_entries": 2,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 72,
+      "texture_blocks": 82
+    },
+    {
+      "objects": 223,
+      "primitives": 4195,
+      "modes": {
+        "2501": 891,
+        "3501": 298,
+        "2d01": 1396,
+        "3d01": 1609,
+        "3901": 1
+      },
+      "materials": 29,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 76,
+      "texture_blocks": 76
+    },
+    {
+      "objects": 23,
+      "primitives": 610,
+      "modes": {
+        "2501": 5,
+        "2d01": 267,
+        "3d01": 338
+      },
+      "materials": 32,
+      "scene_entries": 2,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 80,
+      "texture_blocks": 78
+    },
+    {
+      "objects": 8,
+      "primitives": 312,
+      "modes": {
+        "2d01": 66,
+        "3d01": 246
+      },
+      "materials": 11,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 92,
+      "texture_blocks": 22
+    },
+    {
+      "objects": 26,
+      "primitives": 565,
+      "modes": {
+        "2d01": 202,
+        "3d01": 363
+      },
+      "materials": 10,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 96,
+      "texture_blocks": 22
+    },
+    {
+      "objects": 18,
+      "primitives": 206,
+      "modes": {
+        "2d01": 35,
+        "3d01": 171
+      },
+      "materials": 11,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 112,
+      "texture_blocks": 24
+    },
+    {
+      "objects": 21,
+      "primitives": 716,
+      "modes": {
+        "2501": 13,
+        "2d01": 347,
+        "3d01": 355,
+        "3501": 1
+      },
+      "materials": 25,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 128,
+      "texture_blocks": 60
+    },
+    {
+      "objects": 21,
+      "primitives": 409,
+      "modes": {
+        "2d01": 205,
+        "3d01": 204
+      },
+      "materials": 16,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 132,
+      "texture_blocks": 34
+    },
+    {
+      "objects": 27,
+      "primitives": 1232,
+      "modes": {
+        "2501": 5,
+        "2d01": 592,
+        "3d01": 627,
+        "2901": 6,
+        "3901": 2
+      },
+      "materials": 39,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 136,
+      "texture_blocks": 88
+    },
+    {
+      "objects": 22,
+      "primitives": 883,
+      "modes": {
+        "2501": 14,
+        "3501": 1,
+        "2d01": 527,
+        "3d01": 341
+      },
+      "materials": 30,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 140,
+      "texture_blocks": 64
+    },
+    {
+      "objects": 26,
+      "primitives": 1084,
+      "modes": {
+        "2d01": 475,
+        "3d01": 609
+      },
+      "materials": 29,
+      "scene_entries": 2,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 144,
+      "texture_blocks": 58
+    },
+    {
+      "objects": 30,
+      "primitives": 836,
+      "modes": {
+        "2d01": 465,
+        "3d01": 371
+      },
+      "materials": 25,
+      "scene_entries": 2,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 148,
+      "texture_blocks": 50
+    },
+    {
+      "objects": 12,
+      "primitives": 432,
+      "modes": {
+        "2501": 1,
+        "3501": 2,
+        "2d01": 191,
+        "3d01": 238
+      },
+      "materials": 14,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 152,
+      "texture_blocks": 26
+    },
+    {
+      "objects": 18,
+      "primitives": 554,
+      "modes": {
+        "2d01": 187,
+        "3d01": 367
+      },
+      "materials": 23,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 156,
+      "texture_blocks": 48
+    },
+    {
+      "objects": 38,
+      "primitives": 1188,
+      "modes": {
+        "2d01": 699,
+        "3d01": 489
+      },
+      "materials": 13,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 160,
+      "texture_blocks": 24
+    },
+    {
+      "objects": 17,
+      "primitives": 679,
+      "modes": {
+        "2d01": 430,
+        "3d01": 249
+      },
+      "materials": 22,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 164,
+      "texture_blocks": 42
+    },
+    {
+      "objects": 22,
+      "primitives": 558,
+      "modes": {
+        "2d01": 294,
+        "3d01": 264
+      },
+      "materials": 29,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 168,
+      "texture_blocks": 66
+    },
+    {
+      "objects": 18,
+      "primitives": 746,
+      "modes": {
+        "2901": 29,
+        "3901": 10,
+        "2d01": 473,
+        "3d01": 234
+      },
+      "materials": 40,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 172,
+      "texture_blocks": 78
+    },
+    {
+      "objects": 20,
+      "primitives": 725,
+      "modes": {
+        "2d01": 483,
+        "3d01": 242
+      },
+      "materials": 33,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 176,
+      "texture_blocks": 66
+    },
+    {
+      "objects": 29,
+      "primitives": 337,
+      "modes": {
+        "2d01": 191,
+        "3d01": 146
+      },
+      "materials": 24,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 180,
+      "texture_blocks": 50
+    },
+    {
+      "objects": 27,
+      "primitives": 1220,
+      "modes": {
+        "2901": 17,
+        "3901": 26,
+        "2d01": 800,
+        "3d01": 377
+      },
+      "materials": 47,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 184,
+      "texture_blocks": 92
+    },
+    {
+      "objects": 29,
+      "primitives": 794,
+      "modes": {
+        "2501": 6,
+        "3501": 7,
+        "2d01": 415,
+        "3d01": 366
+      },
+      "materials": 28,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 188,
+      "texture_blocks": 60
+    },
+    {
+      "objects": 32,
+      "primitives": 684,
+      "modes": {
+        "2d01": 418,
+        "3d01": 266
+      },
+      "materials": 26,
+      "scene_entries": 2,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 192,
+      "texture_blocks": 50
+    },
+    {
+      "objects": 30,
+      "primitives": 983,
+      "modes": {
+        "2d01": 505,
+        "3d01": 478
+      },
+      "materials": 19,
+      "scene_entries": 1,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 196,
+      "texture_blocks": 44
+    },
+    {
+      "objects": 9,
+      "primitives": 1129,
+      "modes": {
+        "2d01": 602,
+        "3d01": 527
+      },
+      "materials": 20,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 200,
+      "texture_blocks": 40
+    },
+    {
+      "objects": 80,
+      "primitives": 3101,
+      "modes": {
+        "2501": 5,
+        "2d01": 1341,
+        "3d01": 1755
+      },
+      "materials": 38,
+      "scene_entries": 3,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 204,
+      "texture_blocks": 74
+    },
+    {
+      "objects": 43,
+      "primitives": 1088,
+      "modes": {
+        "2501": 1,
+        "3501": 1,
+        "2d01": 565,
+        "3d01": 521
+      },
+      "materials": 41,
+      "scene_entries": 3,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 208,
+      "texture_blocks": 82
+    },
+    {
+      "objects": 24,
+      "primitives": 840,
+      "modes": {
+        "2501": 4,
+        "3501": 4,
+        "2901": 23,
+        "2d01": 246,
+        "3d01": 527,
+        "3901": 36
+      },
+      "materials": 34,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 212,
+      "texture_blocks": 66
+    },
+    {
+      "objects": 23,
+      "primitives": 302,
+      "modes": {
+        "2d01": 33,
+        "3d01": 269
+      },
+      "materials": 3,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 234,
+      "texture_blocks": 12
+    },
+    {
+      "objects": 23,
+      "primitives": 302,
+      "modes": {
+        "2d01": 34,
+        "3d01": 268
+      },
+      "materials": 3,
+      "scene_entries": 0,
+      "coordinate_conversion": "(x, -y, -z) / 1000",
+      "area": 245,
+      "texture_blocks": 12
+    }
+  ],
+  "area_count": 43,
   "player": {
     "ranges": 15,
     "frames": 90,
     "texture_blocks": 277
   },
-  "texture_blocks": 166,
   "source": "https://github.com/coalslav/hmbtn-decomp",
   "disc_sha256": "41f81532a5fd70d6f79e7b5750513c35eee732d5e31ba144a1db7e90d84d97de",
-  "note": "Farm section 0. Original assets extracted locally. Native Godot runtime does not read the disc."
+  "note": "Default spring areas connected by source exits. Original assets extracted locally. Native Godot runtime does not read the disc."
 }
