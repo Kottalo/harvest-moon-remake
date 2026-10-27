@@ -1,0 +1,4 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FARM_READY: native meshes loaded, no disc reader or PS1 runtime
+NATIVE_CHECK_OK: landed, walk/diagonal/run distances=[2.60002541542053, 2.59997844696045, 4.79992723464966]; imported wall blocks player
