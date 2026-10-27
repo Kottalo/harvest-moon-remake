@@ -1,0 +1,68 @@
+[
+  {
+    "tool": "project_run",
+    "is_error": false,
+    "data": {
+      "autosave": false,
+      "current_run_errors": [],
+      "game_status": {
+        "active": true,
+        "editor_log_cursor": 0,
+        "elapsed_msec": 1081,
+        "helper_expected": true,
+        "helper_live": true,
+        "ready": true,
+        "ready_wait_msec": 3000,
+        "run_started_msec": 2097731,
+        "run_token": 9,
+        "session_active": true,
+        "status": "live"
+      },
+      "helper_live": true,
+      "mode": "main",
+      "reason": "Game launched and the Godot AI game helper is live.",
+      "recent_errors": [],
+      "recent_errors_may_predate_run": false,
+      "recent_errors_scope": "none",
+      "recent_errors_truncated": false,
+      "retained_errors": [],
+      "scene": "",
+      "session_active": true,
+      "undoable": false,
+      "was_already_running": false
+    }
+  },
+  {
+    "tool": "editor_manage",
+    "is_error": false,
+    "data": {
+      "result": {
+        "eye_target_distance": 10.0623064041138,
+        "fov": 13.685546875,
+        "height": 4.5,
+        "horizontal_distance": 9.0,
+        "perspective": true
+      },
+      "source": "game"
+    }
+  },
+  {
+    "tool": "logs_read",
+    "is_error": false,
+    "data": {
+      "source": "editor",
+      "lines": [],
+      "total_count": 0,
+      "returned_count": 0,
+      "offset": 0,
+      "limit": 10,
+      "has_more": false,
+      "run_id": "",
+      "is_running": false,
+      "dropped_count": 0,
+      "stale_run_id": false,
+      "next_cursor": 0,
+      "appended_total": 0
+    }
+  }
+]

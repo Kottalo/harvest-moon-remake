@@ -23,6 +23,9 @@ func _run() -> void:
 	if not _require(farm.player.is_on_floor(), "Player did not land on the imported farm"):
 		return
 	var start: Vector3 = farm.player.position
+	var camera_delta: Vector3 = farm.camera.position - start
+	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 9.0) < 0.00001 and absf(camera_delta.y - 4.5) < 0.00001 and absf(camera_delta.length() - sqrt(101.25)) < 0.00001, "Original camera distance was not applied"):
+		return
 	# User-visible regression: the four keys project NE, SW, NW, SE, with four facings.
 	var directions := ["move_up", "move_down", "move_left", "move_right"]
 	var screen_signs := [Vector2(1, -1), Vector2(-1, 1), Vector2(-1, -1), Vector2(1, 1)]

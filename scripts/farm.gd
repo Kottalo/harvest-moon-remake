@@ -11,8 +11,13 @@ var facing := 0
 var animation := 0
 var animation_frame := 0
 var animation_time := 0.0
-# scene_view.c: PS1 eye=(6363,-4500,-6363), H=1000 on a 320x240 frame.
-const CAMERA_OFFSET := Vector3(6.363, 4.5, 6.363)
+# scene_view.c::farm_scroll_reset: z=-9000, x=-4500, yaw=-512.
+# Derive the offset from the original distances; do not round the rotated X/Z.
+const CAMERA_HORIZONTAL_DISTANCE := 9000.0 / 1000.0
+const CAMERA_HEIGHT := 4500.0 / 1000.0
+const CAMERA_YAW := -512.0 * TAU / 4096.0
+var camera_offset := Vector3(-sin(CAMERA_YAW) * CAMERA_HORIZONTAL_DISTANCE,
+	CAMERA_HEIGHT, cos(CAMERA_YAW) * CAMERA_HORIZONTAL_DISTANCE)
 const PROJECTION_DISTANCE := 1000.0
 const WALK_SPEED := 41.0 * 30.0 / 1000.0
 const RUN_SPEED := 73.0 * 30.0 / 1000.0
@@ -24,7 +29,7 @@ func _ready() -> void:
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	camera.set_perspective(rad_to_deg(2.0 * atan(120.0 / PROJECTION_DISTANCE)), 0.05, 200.0)
 	add_child(camera)
-	camera.position = CAMERA_OFFSET
+	camera.position = camera_offset
 	camera.look_at(Vector3.ZERO)
 	_build_player()
 	var canvas := CanvasLayer.new()
@@ -111,12 +116,12 @@ func _movement_direction() -> Vector2:
 func _update_camera() -> void:
 	if not overview:
 		var focus := player.position
-		camera.position = focus + CAMERA_OFFSET
+		camera.position = focus + camera_offset
 		camera.look_at(focus)
 		# The original character is a screen-space sprite, so its pixel size stays constant.
 		sprite.pixel_size = -camera.to_local(sprite.global_position).z / PROJECTION_DISTANCE
 	else:
-		sprite.pixel_size = CAMERA_OFFSET.length() / PROJECTION_DISTANCE
+		sprite.pixel_size = camera_offset.length() / PROJECTION_DISTANCE
 
 func _update_animation(direction: Vector2, running: bool, delta: float) -> void:
 	var moving := direction.length_squared() > 0.01
@@ -156,7 +161,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		overview = not overview
 		if overview:
 			camera.set_orthogonal(32, 0.05, 200)
-			camera.position = Vector3(2, 0, 2) + CAMERA_OFFSET * 2.6
+			camera.position = Vector3(2, 0, 2) + camera_offset * 2.6
 			camera.look_at(Vector3(2, 0, 2))
 		else:
 			camera.set_perspective(rad_to_deg(2.0 * atan(120.0 / PROJECTION_DISTANCE)), 0.05, 200)
