@@ -1,0 +1,272 @@
+{
+  "areas": {
+    "0": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "24": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "28": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "32": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "36": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "40": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "44": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "48": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "52": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "56": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "60": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "64": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "68": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "72": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "76": {
+      "clock_paused": false,
+      "tint_enabled": true,
+      "source_flags": 0
+    },
+    "80": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "92": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "96": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "112": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "128": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "132": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "136": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "140": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "144": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "148": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "152": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "156": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "160": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "164": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "168": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "172": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "176": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "180": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "184": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "188": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "192": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "196": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "200": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "204": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 4096
+    },
+    "208": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "212": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 36864
+    },
+    "234": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 34816
+    },
+    "245": {
+      "clock_paused": true,
+      "tint_enabled": false,
+      "source_flags": 34816
+    }
+  },
+  "beds": [
+    {
+      "area": 80,
+      "index": 1,
+      "facing": 1,
+      "min": [
+        -1.6,
+        0.3
+      ],
+      "max": [
+        -1.2,
+        0.7
+      ]
+    }
+  ],
+  "wake_area": 80,
+  "wake_position": [
+    -0.09,
+    0,
+    -0.541
+  ],
+  "bed_position": [
+    -1.35,
+    0,
+    0.96
+  ],
+  "minute_seconds": 0.5,
+  "day_start": 360,
+  "days_per_season": 30,
+  "tint_rgb": [
+    [
+      20,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      5,
+      30,
+      40
+    ],
+    [
+      80,
+      70,
+      45
+    ]
+  ],
+  "tint_ticks": 256,
+  "source": "clock.c, clock_events.c, weather.c, farm_data.c, player.c; source zone headers"
+}

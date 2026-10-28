@@ -13,6 +13,9 @@ var doors
 var transition_effect
 var loose_items
 var transition_token := 0
+var day_cycle
+var hud_elapsed := 0.0
+var location_loader
 
 func area_to_world(area: int, point: Vector3) -> Vector3:
 	if area == 56:
@@ -24,9 +27,17 @@ func world_to_area(area: int, point: Vector3) -> Vector3:
 
 func _ready() -> void:
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
+	location_loader = load("res://game/world/location_loader.gd").new()
+	location_loader.catalogue = world
+	location_loader.warm(0)
 	var canvas := CanvasLayer.new()
+	canvas.layer = 10
 	add_child(canvas)
 	hud = Label.new()
+	# One CJK-capable font avoids a font/texture switch between Chinese and ASCII.
+	var ui_font := SystemFont.new()
+	ui_font.font_names = PackedStringArray(["Microsoft YaHei UI","Microsoft YaHei"])
+	hud.add_theme_font_override("font",ui_font)
 	hud.position = Vector2(18, 620)
 	hud.add_theme_font_size_override("font_size", 16)
 	hud.add_theme_color_override("font_shadow_color", Color.BLACK)
@@ -41,6 +52,12 @@ func _ready() -> void:
 	loose_items.name = "LooseItems"
 	add_child(loose_items)
 	loose_items.setup(self)
+	day_cycle = load("res://game/time/day_cycle.gd").new()
+	day_cycle.name = "DayCycle"
+	add_child(day_cycle)
+	day_cycle.setup(self)
+	day_cycle.sleep_requested.connect(_sleep_until_morning)
+	player.actions.interact_requested.connect(day_cycle.interact)
 	_refresh_hud()
 	_update_camera()
 	print("WORLD_READY: ", world.size(), " native locations")
@@ -48,20 +65,28 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if transitioning:
 		return
+	day_cycle.advance(delta,overview)
+	if transitioning or day_cycle.menu_open:
+		return
 	if player.position.y < -10:
 		var spawn: Array = world[str(current_area)].spawn
 		player.position = area_to_world(current_area, Vector3(spawn[0], spawn[1] + 0.05, spawn[2]))
 		player.velocity = Vector3.ZERO
+		player.reset_physics_interpolation()
 	if player.actions.busy():
-		_refresh_hud()
 		return
 	_check_exits(delta)
 
-func _process(_delta: float) -> void:
-	_update_camera()
+func _process(delta: float) -> void:
+	location_loader.poll()
+	_update_camera(true)
+	hud_elapsed += delta
+	if hud_elapsed >= 0.1:
+		hud_elapsed = 0
+		_refresh_hud()
 
-func _update_camera() -> void:
-	camera.follow(player, overview)
+func _update_camera(interpolate := false) -> void:
+	camera.follow(player, overview, interpolate)
 
 func _set_overview() -> void:
 	camera.show_overview(get_node("Location"))
@@ -75,6 +100,8 @@ func _refresh_hud() -> void:
 		hud.text += " · E / Space 放下或丢弃 · Shift+Space 投掷"
 	if not nearby_exit.is_empty():
 		hud.text += "\nE 进入 " + str(world[str(int(nearby_exit.target))].name)
+	elif day_cycle != null and day_cycle.nearby_bed():
+		hud.text += "\nE 床边休息"
 
 func _check_exits(_delta: float) -> void:
 	nearby_exit = {}
@@ -101,7 +128,6 @@ func _check_exits(_delta: float) -> void:
 		transitioning = true
 		_begin_transition.call_deferred(exit.duplicate(true))
 		break
-	_refresh_hud()
 
 func _begin_transition(exit: Dictionary) -> void:
 	var token := transition_token
@@ -144,7 +170,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 		transitioning = false
 		push_error("Destination has not been imported: " + str(area))
 		return
-	var packed: PackedScene = load("res://game/world/coast.tscn" if area in [52, 56] else world[str(area)].scene)
+	var packed: PackedScene = location_loader.get_scene(area)
 	if packed == null:
 		transitioning = false
 		return
@@ -155,14 +181,18 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	scene.name = "Location"
 	add_child(scene)
 	current_area = area
+	location_loader.warm(area)
 	player.position = area_to_world(area, entry) + Vector3(0, 0.015, 0)
 	player.velocity = Vector3.ZERO
+	player.actions.cinematic = false
+	player.reset_physics_interpolation()
 	# Source arrival coordinates already sit outside automatic return zones.
 	# Consume a held action button without disabling any destination exits.
 	awaiting_interact_release = Input.is_action_pressed("interact")
 	transitioning = during_transition
 	nearby_exit = {}
 	loose_items.set_area(area)
+	day_cycle.refresh()
 	if overview:
 		_set_overview()
 	_update_camera()
@@ -170,6 +200,8 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	print("AREA_READY: ", area, " ", world[str(area)].name)
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if day_cycle.menu_open or day_cycle.sleeping:
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB:
 		overview = not overview
 		if overview:
@@ -177,3 +209,40 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		else:
 			camera.reset_perspective()
 		_update_camera()
+
+func _sleep_until_morning(automatic: bool) -> void:
+	if transitioning:
+		return
+	transitioning = true
+	player.input_locked = true
+	player.scripted_walk_time = 0
+	var token := transition_token
+	if not automatic:
+		var bed: Array = day_cycle.catalogue.bed_position
+		await player.actions.go_to_bed(Vector3(bed[0],bed[1],bed[2]))
+		if token != transition_token:
+			day_cycle.sleeping = false
+			return
+	transition_effect.start_out()
+	while transition_effect.phase != "black":
+		await get_tree().process_frame
+		if token != transition_token:
+			day_cycle.sleeping = false
+			return
+	day_cycle.wake_next_morning(automatic)
+	player.actions.state = ""
+	player.actions.range_id = -1
+	player.animation = -1
+	var wake: Array = day_cycle.catalogue.wake_position
+	_change_area(int(day_cycle.catalogue.wake_area),Vector3(wake[0],wake[1],wake[2]),true)
+	player.facing = 0
+	player._update_animation(Vector2.ZERO,false,0)
+	transition_effect.start_in()
+	while transition_effect.phase != "idle":
+		await get_tree().process_frame
+		if token != transition_token:
+			day_cycle.sleeping = false
+			return
+	day_cycle.sleeping = false
+	player.input_locked = false
+	transitioning = false

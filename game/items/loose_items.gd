@@ -9,6 +9,8 @@ var flights := []
 var ticks := 0.0
 var field_cells: Array
 var placement := {}
+var batches := {}
+var meshes := {}
 
 func setup(owner_world) -> void:
 	world = owner_world
@@ -27,31 +29,82 @@ func set_area(area: int) -> void:
 		remove_child(child)
 		child.queue_free()
 	flights.clear()
+	batches.clear()
 	current_area = area
 	if not records.has(area):
 		records[area] = []
+	# Static debris shares three tightly cropped meshes, rather than 423 Sprite3Ds.
+	for item in [58,62,64]:
+		var count := 0
+		for record in records[area]:
+			if record.active and record.id == item:
+				count += 1
+		if count == 0:
+			continue
+		var batch := MultiMeshInstance3D.new()
+		batch.name = catalogue.pictures[str(item)].name.to_pascal_case()+"Batch"
+		batch.multimesh = MultiMesh.new()
+		batch.multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		batch.multimesh.mesh = _item_mesh(item)
+		batch.multimesh.instance_count = count
+		add_child(batch)
+		batches[item] = {"mesh":batch.multimesh,"next":0}
 	for record in records[area]:
 		if record.active:
-			record["node"] = _spawn(record.id,record.position,true)
+			_add_record(record)
+
+func _item_mesh(item: int) -> ArrayMesh:
+	if meshes.has(item):
+		return meshes[item]
+	var texture: Texture2D = load(catalogue.pictures[str(item)].texture)
+	var bounds := texture.get_image().get_used_rect().grow(1).intersection(Rect2i(0,0,128,128))
+	var scale: float = world.player.sprite.pixel_size
+	var left := (bounds.position.x-64)*scale
+	var right := (bounds.end.x-64)*scale
+	var top := (64-bounds.position.y+48)*scale
+	var bottom := (64-bounds.end.y+48)*scale
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(left,bottom,0),Vector3(right,bottom,0),Vector3(right,top,0),Vector3(left,top,0)])
+	var uv := Rect2(bounds)
+	arrays[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(uv.position.x,uv.end.y)/128,uv.end/128,Vector2(uv.end.x,uv.position.y)/128,uv.position/128])
+	arrays[Mesh.ARRAY_INDEX] = PackedInt32Array([0,1,2,0,2,3])
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+	var material := ShaderMaterial.new()
+	material.shader = load("res://game/rendering/player_sprite.gdshader")
+	material.set_shader_parameter("albedo_texture",texture)
+	mesh.surface_set_material(0,material)
+	meshes[item] = mesh
+	return mesh
+
+func _add_record(record: Dictionary) -> void:
+	var batch: Dictionary = batches[record.id]
+	var slot: int = batch.next
+	batch.mesh.set_instance_transform(slot,Transform3D(Basis.IDENTITY,record.position))
+	batch.next += 1
+	record["batch_slot"] = slot
+	record["node"] = _spawn(record.id,record.position,true)
 
 func _spawn(item: int, point: Vector3, solid: bool) -> Node3D:
 	var node := Node3D.new()
 	node.name = catalogue.pictures[str(item)].name.to_pascal_case()
 	node.position = point
 	add_child(node)
-	var sprite := Sprite3D.new()
-	sprite.texture = load(catalogue.pictures[str(item)].texture)
-	sprite.offset = Vector2(0,48)
-	sprite.pixel_size = world.player.sprite.pixel_size
-	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
-	if not materials.has(item):
-		var material := ShaderMaterial.new()
-		material.shader = load("res://game/rendering/player_sprite.gdshader")
-		material.set_shader_parameter("albedo_texture",sprite.texture)
-		materials[item] = material
-	sprite.material_override = materials[item]
-	node.add_child(sprite)
+	if not solid:
+		var sprite := Sprite3D.new()
+		sprite.texture = load(catalogue.pictures[str(item)].texture)
+		sprite.offset = Vector2(0,48)
+		sprite.pixel_size = world.player.sprite.pixel_size
+		sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+		if not materials.has(item):
+			var material := ShaderMaterial.new()
+			material.shader = load("res://game/rendering/player_sprite.gdshader")
+			material.set_shader_parameter("albedo_texture",sprite.texture)
+			materials[item] = material
+		sprite.material_override = materials[item]
+		node.add_child(sprite)
 	if solid and item in [58,62]:
 		var body := StaticBody3D.new()
 		body.collision_layer = 1
@@ -94,6 +147,8 @@ func interact() -> void:
 
 func _remove(record: Dictionary) -> void:
 	record.active = false
+	var batch: Dictionary = batches[record.id]
+	batch.mesh.set_instance_transform(record.batch_slot,Transform3D(Basis.IDENTITY,Vector3(0,-10000,0)))
 	record.node.queue_free()
 	if current_area == 0 and record.has("cell"):
 		field_cells[record.cell] = 0x167 # ITEM_SOIL
@@ -124,9 +179,9 @@ func release_item(item: int, thrown: bool) -> void:
 			return
 		var point: Vector3 = placement.position
 		var record := {"id":item,"position":point,"active":true,"cell":placement.cell}
-		record.node = _spawn(item,point,true)
 		records[current_area].append(record)
 		field_cells[placement.cell] = item
+		set_area(current_area)
 	placement = {}
 
 func use_tool(tool: int, _charge: int) -> void:

@@ -1,0 +1,17 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+AREA_READY: 56 海滩
+COAST_ROUTE_OK: side=-1.1 running=false position=(6.127025, -0.559193, -0.299919)
+AREA_READY: 56 海滩
+COAST_ROUTE_OK: side=-1.1 running=true position=(6.154911, -0.559189, -0.299924)
+AREA_READY: 56 海滩
+COAST_ROUTE_OK: side=-0.8 running=false position=(6.126398, -0.559071, 0.000038)
+AREA_READY: 56 海滩
+COAST_ROUTE_OK: side=-0.8 running=true position=(6.15553, -0.559071, -0.000012)
+AREA_READY: 56 海滩
+COAST_ROUTE_OK: side=-0.5 running=false position=(6.126746, -0.559207, 0.299935)
+AREA_READY: 56 海滩
+COAST_ROUTE_OK: side=-0.5 running=true position=(6.155546, -0.559203, 0.300019)
+COAST_CHECK_OK: 60 Hz; three lanes walk/run; immediate return; same scene/meshes, continuous player/camera/floor

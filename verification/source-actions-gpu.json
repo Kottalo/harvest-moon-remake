@@ -1,17 +1,87 @@
 {
-	"accepted_water_animation": true,
-	"carried_item_texture_bound": true,
 	"common_canvas_aligned": true,
-	"existing_render_order": true,
 	"gallery_samples": 12,
-	"held_layer_behind_body": true,
+	"item_layer_cases": [
+		{
+			"facing": 0,
+			"item_front": true,
+			"ok": true,
+			"stage": "pickup"
+		},
+		{
+			"facing": 1,
+			"item_front": false,
+			"ok": true,
+			"stage": "pickup"
+		},
+		{
+			"facing": 2,
+			"item_front": false,
+			"ok": true,
+			"stage": "pickup"
+		},
+		{
+			"facing": 3,
+			"item_front": true,
+			"ok": true,
+			"stage": "pickup"
+		},
+		{
+			"facing": 0,
+			"item_front": true,
+			"ok": true,
+			"stage": "carry"
+		},
+		{
+			"facing": 1,
+			"item_front": true,
+			"ok": true,
+			"stage": "carry"
+		},
+		{
+			"facing": 2,
+			"item_front": true,
+			"ok": true,
+			"stage": "carry"
+		},
+		{
+			"facing": 3,
+			"item_front": true,
+			"ok": true,
+			"stage": "carry"
+		},
+		{
+			"facing": 0,
+			"item_front": true,
+			"ok": true,
+			"stage": "drop"
+		},
+		{
+			"facing": 1,
+			"item_front": false,
+			"ok": true,
+			"stage": "drop"
+		},
+		{
+			"facing": 2,
+			"item_front": false,
+			"ok": true,
+			"stage": "drop"
+		},
+		{
+			"facing": 3,
+			"item_front": true,
+			"ok": true,
+			"stage": "drop"
+		}
+	],
 	"legacy_bounds": "[P: (101, 89), S: (115, 151)]",
 	"offscreen": true,
 	"ok": true,
-	"overlap_pixel": "(0.0863, 0.1961, 0.898, 1.0)",
 	"packed_bounds": "[P: (101, 89), S: (115, 151)]",
 	"physics_processing": false,
 	"player_position": "(0.0, 0.0, 0.0)",
+	"source_lifo_item_layers": true,
 	"source_subtractive_blend": true,
 	"subtractive_pixel": "(0.6, 0.298, 0.0471, 1.0)"
 }

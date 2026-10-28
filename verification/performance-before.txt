@@ -1,0 +1,17 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+AREA_READY: 0 农场
+PROFILE: {"area":0,"cpu_p95_ms":18.954,"draw_calls":269.0,"frames":179,"load_ms":83.716,"name":"farm","nodes":1112.0,"objects":360.0,"p50_ms":14.836,"p95_ms":19.205,"p99_ms":21.777,"physics_p95_ms":15.574}
+AREA_READY: 48 旅馆街区
+PROFILE: {"area":48,"cpu_p95_ms":9.374,"draw_calls":145.0,"frames":273,"load_ms":426.517,"name":"inn_street","nodes":32.0,"objects":235.0,"p50_ms":10.611,"p95_ms":17.299,"p99_ms":20.194,"physics_p95_ms":13.007}
+AREA_READY: 52 小镇广场
+PROFILE: {"area":52,"cpu_p95_ms":9.435,"draw_calls":174.0,"frames":289,"load_ms":677.668,"name":"town_square","nodes":38.0,"objects":261.0,"p50_ms":10.578,"p95_ms":16.097,"p99_ms":18.534,"physics_p95_ms":13.351}
+AREA_READY: 60 圣母山山顶
+PROFILE: {"area":60,"cpu_p95_ms":107.111,"draw_calls":94.0,"frames":237,"load_ms":83.584,"name":"mother_hill_summit","nodes":24.0,"objects":190.0,"p50_ms":11.815,"p95_ms":20.204,"p99_ms":22.452,"physics_p95_ms":17.906}
+AREA_READY: 64 圣母山山道
+PROFILE: {"area":64,"cpu_p95_ms":8.06,"draw_calls":103.0,"frames":320,"load_ms":218.618,"name":"mother_hill_trail","nodes":24.0,"objects":202.0,"p50_ms":3.241,"p95_ms":17.257,"p99_ms":18.264,"physics_p95_ms":14.692}
+AREA_READY: 80 自宅
+PROFILE: {"area":80,"cpu_p95_ms":7.982,"draw_calls":118.0,"frames":377,"load_ms":310.044,"name":"farmhouse","nodes":32.0,"objects":208.0,"p50_ms":3.558,"p95_ms":14.494,"p99_ms":15.549,"physics_p95_ms":10.493}

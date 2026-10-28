@@ -30,6 +30,9 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	actions.poll_input()
+	if actions.cinematic:
+		if actions.busy(): actions.advance(delta)
+		return # Source bedtime arc owns motion until the morning scene is ready.
 	var direction := Vector2.ZERO if input_locked or actions.busy() else _movement_direction()
 	if scripted_walk_time > 0:
 		direction = scripted_direction

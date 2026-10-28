@@ -22,7 +22,7 @@ class ProcessInfo(c.Structure):
     _fields_ = [('process',w.HANDLE),('thread',w.HANDLE),('pid',w.DWORD),('tid',w.DWORD)]
 
 
-def run(log):
+def run(log, script='tools/render_actions_check.gd', timeout=60, project=None):
     user = c.WinDLL('user32',use_last_error=True)
     kernel = c.WinDLL('kernel32',use_last_error=True)
     user.CreateDesktopW.argtypes = [w.LPCWSTR,w.LPCWSTR,c.c_void_p,w.DWORD,w.DWORD,c.c_void_p]
@@ -49,8 +49,9 @@ def run(log):
         finally:
             user.CloseDesktop(handle)
 
-    root = Path(__file__).resolve().parents[1]
-    godot = root.parent/'Tools/Godot/Godot_v4.7.2-stable_win64_console.exe'
+    source_root = Path(__file__).resolve().parents[1]
+    root = project.resolve() if project else source_root
+    godot = source_root.parent/'Tools/Godot/Godot_v4.7.2-stable_win64_console.exe'
     before = input_desktop()
     name = 'CodexRenderCheck'
     desktop = user.CreateDesktopW(name,None,None,0,0x000F01FF,None)
@@ -63,12 +64,12 @@ def run(log):
         startup.desktop = 'WinSta0\\'+name
         startup.flags = 1 # STARTF_USESHOWWINDOW
         startup.show = 0 # SW_HIDE
-        command = c.create_unicode_buffer(subprocess.list2cmdline([str(godot),'--path',str(root),'--resolution','64x64','--script','tools/render_actions_check.gd','--log-file',str(log)]))
+        command = c.create_unicode_buffer(subprocess.list2cmdline([str(godot),'--path',str(root),'--resolution','64x64','--script',script,'--log-file',str(log)]))
         if not kernel.CreateProcessW(str(godot),command,None,None,False,0x08000000,None,str(root),c.byref(startup),c.byref(info)):
             raise c.WinError(c.get_last_error())
-        if kernel.WaitForSingleObject(info.process,60000) != 0:
+        if kernel.WaitForSingleObject(info.process,timeout*1000) != 0:
             kernel.TerminateProcess(info.process,1)
-            raise TimeoutError('Isolated GPU check exceeded 60 seconds')
+            raise TimeoutError(f'Isolated GPU check exceeded {timeout} seconds')
         status = w.DWORD()
         if not kernel.GetExitCodeProcess(info.process,c.byref(status)):
             raise c.WinError(c.get_last_error())
@@ -86,5 +87,8 @@ def run(log):
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--log',type=Path,required=True)
+    parser.add_argument('--script',default='tools/render_actions_check.gd')
+    parser.add_argument('--timeout',type=int,default=60)
+    parser.add_argument('--project',type=Path)
     args = parser.parse_args()
-    raise SystemExit(run(args.log.resolve()))
+    raise SystemExit(run(args.log.resolve(),args.script,args.timeout,args.project))

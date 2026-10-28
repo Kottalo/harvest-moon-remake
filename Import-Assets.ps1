@@ -8,6 +8,8 @@ $godotExe = Join-Path $PSScriptRoot '..\Tools\Godot\Godot_v4.7.2-stable_win64_co
 if ($LASTEXITCODE -ne 0) { throw 'Disc conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\import_player_actions.py') $Disc
 if ($LASTEXITCODE -ne 0) { throw 'Player action conversion failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\import_day_cycle.py') $Disc
+if ($LASTEXITCODE -ne 0) { throw 'Day cycle conversion failed' }
 $openEditor = Get-Process Godot* -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -match 'Harvest Moon BTN - Godot Remake.*Godot Engine' }
 if ($openEditor) {
     $mcpPython = Join-Path $env:APPDATA 'uv\tools\godot-ai\Scripts\python.exe'
@@ -22,6 +24,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Native scene baking failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Native runtime check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_actions.gd
 if ($LASTEXITCODE -ne 0) { throw 'Source action check failed' }
+& $godotExe --headless --path $PSScriptRoot --script tools/verify_day_cycle.gd
+if ($LASTEXITCODE -ne 0) { throw 'Day cycle and sleep check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_world.gd
 if ($LASTEXITCODE -ne 0) { throw 'World navigation check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_collision.gd

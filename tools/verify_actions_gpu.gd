@@ -45,26 +45,41 @@ func run(parent: Node) -> Dictionary:
 		var picture := viewport.get_texture().get_image()
 		gallery.blit_rect(picture,Rect2i(0,0,320,320),Vector2i(i%4*320,i/4 as int*320))
 	gallery.save_png("res://verification/source_actions_gallery.png")
-	player.hide()
 	label.hide()
-	for i in 2:
-		var layer := Sprite3D.new()
-		var color_image := Image.create(8,8,false,Image.FORMAT_RGBA8)
-		color_image.fill(Color(0.1,0.2,0.9) if i==0 else Color(0.9,0.1,0.1))
-		layer.texture = ImageTexture.create_from_image(color_image)
-		layer.pixel_size = 0.05
-		layer.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		layer.position = focus
-		var material := ShaderMaterial.new()
-		material.shader = load("res://game/rendering/player_sprite.gdshader")
-		material.set_shader_parameter("albedo_texture",layer.texture)
-		material.set_shader_parameter("sort_bias",0.0 if i==0 else 0.005)
-		layer.material_override = material
-		viewport.add_child(layer)
-	await RenderingServer.frame_post_draw
-	await RenderingServer.frame_post_draw
-	var overlap := viewport.get_texture().get_image().get_pixel(160,160)
-	var held_behind: bool = overlap.b>0.85 and overlap.r<0.15
+	var blue := Image.create(8,8,false,Image.FORMAT_RGBA8)
+	blue.fill(Color(0.1,0.2,0.9))
+	var red := Image.create(8,8,false,Image.FORMAT_RGBA8)
+	red.fill(Color(0.9,0.1,0.1))
+	var blue_texture := ImageTexture.create_from_image(blue)
+	var red_texture := ImageTexture.create_from_image(red)
+	player.sprite.texture = blue_texture
+	player.sprite.material_override.set_shader_parameter("albedo_texture",blue_texture)
+	player.sprite.hframes = 1
+	player.sprite.vframes = 1
+	player.sprite.offset = Vector2.ZERO
+	player.sprite.position = focus
+	player.sprite.pixel_size = 0.05
+	var layer_cases := []
+	var layer_ok := true
+	for stage in ["pickup","carry","drop"]:
+		for facing in 4:
+			player.facing = facing
+			player.actions.pending_item = 58 if stage=="pickup" else 0
+			player.actions.carried_id = 0 if stage=="pickup" else 58
+			player.actions.state = "" if stage=="carry" else stage
+			player.actions.update_held(false)
+			var held: Sprite3D = player.actions.held_sprite
+			held.texture = red_texture
+			held.material_override.set_shader_parameter("albedo_texture",red_texture)
+			held.offset = Vector2.ZERO
+			held.pixel_size = 0.05
+			await RenderingServer.frame_post_draw
+			await RenderingServer.frame_post_draw
+			var overlap := viewport.get_texture().get_image().get_pixel(160,160)
+			var front: bool = stage=="carry" or facing in [0,3]
+			var correct: bool = (overlap.r>0.85 and overlap.b<0.15) if front else (overlap.b>0.85 and overlap.r<0.15)
+			layer_ok = layer_ok and correct
+			layer_cases.append({"stage":stage,"facing":facing,"item_front":front,"ok":correct})
 	# Check actual subtractive pixels, independently of gameplay timing.
 	var transition = load("res://game/world/location_transition.gd").new()
 	viewport.add_child(transition)
@@ -79,8 +94,10 @@ func run(parent: Node) -> Dictionary:
 	await RenderingServer.frame_post_draw
 	var pixel := viewport.get_texture().get_image().get_pixel(160,160)
 	var subtractive: bool = absf(pixel.r-0.6)<0.02 and absf(pixel.g-0.3)<0.02 and absf(pixel.b-0.05)<0.02
-	var report := {"ok":aligned and subtractive and held_behind,"held_layer_behind_body":held_behind,"overlap_pixel":overlap,"player_position":player.position,"physics_processing":player.is_physics_processing(),"legacy_bounds":original,"packed_bounds":packed,"common_canvas_aligned":aligned,"subtractive_pixel":pixel,"source_subtractive_blend":subtractive,"offscreen":true,"gallery_samples":samples.size()}
+	var report := {"ok":aligned and subtractive and layer_ok,"source_lifo_item_layers":layer_ok,"item_layer_cases":layer_cases,"player_position":player.position,"physics_processing":player.is_physics_processing(),"legacy_bounds":original,"packed_bounds":packed,"common_canvas_aligned":aligned,"subtractive_pixel":pixel,"source_subtractive_blend":subtractive,"offscreen":true,"gallery_samples":samples.size()}
 	var file := FileAccess.open("res://verification/source-actions-gpu.json",FileAccess.WRITE)
 	file.store_string(JSON.stringify(report,"\t"))
+	file.close()
+	print("CARRY_GPU_OK: ",layer_ok," cases=",layer_cases.size())
 	viewport.queue_free()
 	return report

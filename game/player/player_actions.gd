@@ -19,6 +19,8 @@ var upgrade := 0
 var carried_id := 0
 var pending_item := 0
 var held_sprite: Sprite3D
+var cinematic := false
+var bed_ground_y := 0.0
 const TOOL_IDS := [1,6,11,16,21,26,27,28,29,56,57,30,31,32,34]
 const TOOL_NAMES := ["镰刀","锄头","斧头","锤子","水壶","挤奶器","剪毛器","刷子","铃铛","钓竿","高级钓竿","动物药","牛孕药","羊孕药","种子"]
 const LEVEL_NAMES := ["普通","铜","银","金","秘银"]
@@ -115,7 +117,47 @@ func start_drop(thrown := false) -> bool:
 	play("base",23+player.facing,"throw" if thrown else "drop")
 	return true
 
+func go_to_bed(target: Vector3) -> void:
+	# player_start_result_scene / player_result_camera_step (house level 0).
+	cinematic = true
+	bed_ground_y = player.position.y
+	player.facing = 0
+	player.velocity = Vector3.ZERO
+	player.sprite.position.y = 0
+	play("sleep",0,"bedtime")
+	while busy():
+		await get_tree().physics_frame
+		if not cinematic: return
+	play("sleep",1,"bed_pose")
+	var begin: Vector3 = player.position
+	target.y = begin.y+0.04
+	var height := begin.y
+	# Eighteen source ticks at 30 Hz, independent of the native physics rate.
+	for tick in 18:
+		var remaining := 1.0/30.0
+		while remaining>0.000001:
+			await get_tree().physics_frame
+			if not cinematic: return
+			remaining -= get_physics_process_delta_time()
+		var offset := (absi(tick-8)*111/8 as int)/1000.0
+		height = maxf(height+(offset if tick<9 else -offset),begin.y+0.04)
+		player.position = begin.lerp(target,tick/17.0)
+		player.position.y = height
+	play("sleep",2,"bed_pose")
+	var wait := 0.0
+	while wait<0.5:
+		await get_tree().physics_frame
+		if not cinematic: return
+		wait += get_physics_process_delta_time()
+	play("sleep",3,"bedtime")
+	while busy():
+		await get_tree().physics_frame
+		if not cinematic: return
+
 func advance(delta: float) -> void:
+	if state == "bed_hold":
+		_draw()
+		return
 	if state == "charge":
 		charge_ticks += delta*30.0
 		frame = mini(int(charge_ticks/20),upgrade)
@@ -145,6 +187,9 @@ func advance(delta: float) -> void:
 
 func _finish() -> void:
 	var finished := state
+	if finished == "bed_pose":
+		state = "bed_hold"
+		return
 	if finished == "cast":
 		play("fishing",8,"fishing_wait",player.facing)
 		return
@@ -182,7 +227,10 @@ func update_held(running: bool) -> void:
 	var offset: Array = data.item_offsets[group*4+player.facing]
 	held_sprite.offset = Vector2(offset[0],53-offset[1])
 	held_sprite.position = player.sprite.position
-	var behind: bool = carried_id != 0 or player.facing in [0,3]
+	# PS1 addPrim prepends: item submitted before body is drawn AFTER it.
+	# Carry poses put the object in front; pickup/release use the facing order.
+	var carrying: bool = carried_id != 0 and state not in ["drop","throw"]
+	var behind: bool = not (carrying or player.facing in [0,3])
 	held_sprite.material_override.set_shader_parameter("sort_bias",0.005 if behind else -0.005)
 
 func _texture(path: String) -> Texture2D:
@@ -202,8 +250,9 @@ func _draw() -> void:
 		texture.margin = Rect2(pose.margin[0],pose.margin[1],pose.margin[2],pose.margin[3])
 		frame_textures[key] = texture
 	var texture: AtlasTexture = frame_textures[key]
-	player.sprite.texture = texture
-	player.sprite.material_override.set_shader_parameter("albedo_texture",texture)
-	player.sprite.hframes = 1
-	player.sprite.vframes = 1
-	player.sprite.frame = 0
+	if player.sprite.texture != texture:
+		player.sprite.texture = texture
+		player.sprite.material_override.set_shader_parameter("albedo_texture",texture)
+		player.sprite.hframes = 1
+		player.sprite.vframes = 1
+		player.sprite.frame = 0
