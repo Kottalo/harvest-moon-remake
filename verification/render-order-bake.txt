@@ -1,0 +1,46 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+BAKE_OK: area 0.0, 8 positioned zone models
+BAKE_OK: area 24.0, 3 positioned zone models
+BAKE_OK: area 28.0, 1 positioned zone models
+BAKE_OK: area 32.0, 3 positioned zone models
+BAKE_OK: area 36.0, 4 positioned zone models
+BAKE_OK: area 40.0, 2 positioned zone models
+BAKE_OK: area 44.0, 4 positioned zone models
+BAKE_OK: area 48.0, 2 positioned zone models
+BAKE_OK: area 52.0, 0 positioned zone models
+BAKE_OK: area 56.0, 0 positioned zone models
+BAKE_OK: area 60.0, 0 positioned zone models
+BAKE_OK: area 64.0, 0 positioned zone models
+BAKE_OK: area 68.0, 0 positioned zone models
+BAKE_OK: area 72.0, 2 positioned zone models
+BAKE_OK: area 76.0, 1 positioned zone models
+BAKE_OK: area 80.0, 2 positioned zone models
+BAKE_OK: area 92.0, 0 positioned zone models
+BAKE_OK: area 96.0, 1 positioned zone models
+BAKE_OK: area 112.0, 1 positioned zone models
+BAKE_OK: area 128.0, 0 positioned zone models
+BAKE_OK: area 132.0, 0 positioned zone models
+BAKE_OK: area 136.0, 0 positioned zone models
+BAKE_OK: area 140.0, 0 positioned zone models
+BAKE_OK: area 144.0, 2 positioned zone models
+BAKE_OK: area 148.0, 2 positioned zone models
+BAKE_OK: area 152.0, 0 positioned zone models
+BAKE_OK: area 156.0, 1 positioned zone models
+BAKE_OK: area 160.0, 0 positioned zone models
+BAKE_OK: area 164.0, 0 positioned zone models
+BAKE_OK: area 168.0, 1 positioned zone models
+BAKE_OK: area 172.0, 0 positioned zone models
+BAKE_OK: area 176.0, 0 positioned zone models
+BAKE_OK: area 180.0, 1 positioned zone models
+BAKE_OK: area 184.0, 0 positioned zone models
+BAKE_OK: area 188.0, 1 positioned zone models
+BAKE_OK: area 192.0, 2 positioned zone models
+BAKE_OK: area 196.0, 1 positioned zone models
+BAKE_OK: area 200.0, 0 positioned zone models
+BAKE_OK: area 204.0, 3 positioned zone models
+BAKE_OK: area 208.0, 3 positioned zone models
+BAKE_OK: area 212.0, 0 positioned zone models
+BAKE_OK: area 234.0, 0 positioned zone models
+BAKE_OK: area 245.0, 0 positioned zone models
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)

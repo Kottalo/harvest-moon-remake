@@ -10,6 +10,7 @@ import hashlib
 import json
 import re
 import struct
+from tempfile import TemporaryDirectory
 
 from PIL import Image
 
@@ -165,15 +166,21 @@ def model_mesh(data, vram, out, offset=0x2000, texture_names=None):
             page = struct.unpack_from('<H', packet, 10)[0] if textured else 0
             clut = struct.unpack_from('<H', packet, 6)[0] if textured else 0
             name = f'p{page:04x}_c{clut:04x}' if textured else 'solid'
-            if name not in groups:
+            # Additive black changes no framebuffer pixels, but these planes still supply ground.
+            colors = [packet[ci + i * 4:ci + i * 4 + 3] for i in range(count if gouraud else 1)]
+            visible = not (textured and header & 0x02000000 and (page >> 5) & 3 == 1 and not any(map(any, colors)))
+            group_key = (name, visible)
+            if group_key not in groups:
                 if textured and name not in texture_names:
                     texture_names[name] = f'textures/{out.name}_atlas_{len(texture_names) + 1:02d}.png'
                 filename = texture_names[name] if textured else ''
                 if textured and out / filename not in WRITTEN_TEXTURES:
                     texture_page(vram, page, clut).save(out / filename)
                     WRITTEN_TEXTURES.add(out / filename)
-                groups[name] = dict(texture=filename, vertices=[], colors=[], uv=[], primitive_flags=[])
-            group = groups[name]
+                groups[group_key] = dict(texture=filename, visible=visible, vertices=[], colors=[], uv=[], primitive_flags=[], sort_centers=[])
+            group = groups[group_key]
+            center = [sum(points[index][axis] for index in indices) / count / 1000 for axis in range(3)]
+            center[1], center[2] = -center[1], -center[2]
             # ground.c / farm_settle_on_ground: low header bits govern walkability.
             group['primitive_flags'].extend([header & 0xffff] * (1 if count == 3 else 2))
             for corner in ((0, 1, 2) if count == 3 else (0, 1, 2, 1, 3, 2)):
@@ -181,6 +188,7 @@ def model_mesh(data, vram, out, offset=0x2000, texture_names=None):
                 # PS1 camera looks along +Z with Y down. Godot uses -Z, Y up.
                 # Flipping only Y mirrored the entire farm in the previous build.
                 group['vertices'].extend((x / 1000, -y / 1000, -z / 1000))
+                group['sort_centers'].extend(center)
                 color = packet[ci + (corner * 4 if gouraud else 0):][:3]
                 # PS1 textured color 128 is neutral; solid colors use the full 255 range.
                 divisor = 128 if textured else 255
@@ -358,6 +366,23 @@ def self_check():
     surfaces, _ = model_mesh(model, bytearray(), ROOT, offset=0)
     assert surfaces[0]['primitive_flags'] == [0, 0x80]
     assert len(surfaces[0]['vertices']) == len(surfaces[0]['primitive_flags']) * 9
+    # Only neutral additive black is invisible; preserve its geometry for collision.
+    textured = bytearray(model[:64]) + bytearray(28)
+    struct.pack_into('<7I', textured, 12, 28, 3, 0, 0, 52, 1, 0)
+    struct.pack_into('<3H', textured, 84, 0, 1, 2)
+    with TemporaryDirectory() as temporary:
+        for index, (command, page, color, visible) in enumerate([
+                (0x27010000, 0x20, 0, False), (0x27010000, 0, 0, True),
+                (0x25010000, 0x20, 0, True), (0x27010000, 0x20, 128, True)]):
+            directory = Path(temporary) / str(index)
+            (directory / 'textures').mkdir(parents=True)
+            struct.pack_into('<I', textured, 64, command)
+            struct.pack_into('<H', textured, 74, page)
+            textured[80:83] = bytes([color] * 3)
+            result, _ = model_mesh(textured, bytearray(1024 * 512 * 2), directory, offset=0)
+            assert result[0]['visible'] == visible
+            assert result[0]['primitive_flags'] == [0] and len(result[0]['vertices']) == 9
+            assert all(abs(actual - expected) < 1e-9 for actual, expected in zip(result[0]['sort_centers'], [1 / 30, 0, -1 / 30] * 3))
     assert expand_rle(b'\xfdABC\x03Z', 6) == b'ABCZZZ'
     assert expand_rle(b'\x00Q', 1) == b'Q'
     try:
@@ -375,7 +400,7 @@ def self_check():
         assert actual == (pixels if flags != 8 else bytes([1, 3, 5, 7, 2, 4, 6, 8]))
         assert count == 1
     assert rgba(0) == (0, 0, 0, 0) and rgba(0x7fff) == (255, 255, 255, 255)
-    print('RLE, raw/column image banks, palettes and source ground flags checked')
+    print('RLE, raw/column image banks, palettes, source ground flags, primitive sort centers and neutral additive-black drawing checked')
 
 
 def main():

@@ -116,14 +116,21 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 	var mesh := ArrayMesh.new()
 	var walkable_faces := PackedVector3Array()
 	var ground_faces := PackedVector3Array()
+	var solid_faces := PackedVector3Array()
 	for surface in surfaces:
 		var vertices := PackedVector3Array()
 		var colors := PackedColorArray()
+		var sorting := PackedFloat32Array()
 		var uv := PackedVector2Array()
 		for i in range(0, surface.vertices.size(), 3):
 			vertices.append(Vector3(surface.vertices[i], surface.vertices[i + 1], surface.vertices[i + 2]))
 			colors.append(Color(surface.colors[i], surface.colors[i + 1], surface.colors[i + 2]))
+			var flags := int(surface.primitive_flags[i / 9])
+			var bias := (0.14 if flags & 0x8000 == 0 else 0.0) + (0.004 if flags & 0x4000 else 0.0)
+			sorting.append_array(PackedFloat32Array([surface.sort_centers[i], surface.sort_centers[i + 1], surface.sort_centers[i + 2], bias]))
 		assert(surface.has("primitive_flags") and surface.primitive_flags.size() * 3 == vertices.size(), "Re-extract source ground flags before baking")
+		if parent != farm:
+			solid_faces.append_array(vertices)
 		if parent == farm:
 			for triangle in surface.primitive_flags.size():
 				var polygons := [vertices.slice(triangle * 3, triangle * 3 + 3)]
@@ -141,6 +148,8 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 							ground_faces.append_array(face)
 						if (int(surface.primitive_flags[triangle]) & 0xE080) == 0:
 							walkable_faces.append_array(face)
+		if not surface.visible:
+			continue # Keep collision above; omit neutral additive-black drawing below.
 		for i in range(0, surface.uv.size(), 2):
 			uv.append(Vector2(surface.uv[i], surface.uv[i + 1]))
 		var arrays := []
@@ -148,17 +157,14 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 		arrays[Mesh.ARRAY_VERTEX] = vertices
 		arrays[Mesh.ARRAY_COLOR] = colors
 		arrays[Mesh.ARRAY_TEX_UV] = uv
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-		var material := StandardMaterial3D.new()
+		arrays[Mesh.ARRAY_CUSTOM0] = sorting
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
+		var material := ShaderMaterial.new()
 		material.resource_name = texture_base.trim_suffix("/").get_file() + "_material_%02d" % mesh.get_surface_count()
-		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		material.cull_mode = BaseMaterial3D.CULL_DISABLED
-		material.vertex_color_use_as_albedo = true
-		material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+		material.shader = load("res://game/rendering/source_surface.gdshader")
+		material.set_shader_parameter("textured", not surface.texture.is_empty())
 		if not surface.texture.is_empty():
-			material.albedo_texture = load(texture_base + surface.texture)
-			material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-			material.alpha_scissor_threshold = 0.5
+			material.set_shader_parameter("albedo_texture", load(texture_base + surface.texture))
 		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
 	var instance := MeshInstance3D.new()
 	instance.name = "Geometry"
@@ -175,6 +181,9 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 	var shape := CollisionShape3D.new()
 	shape.name = "CollisionShape"
 	var collision := mesh.create_trimesh_shape()
+	if parent != farm:
+		collision = ConcavePolygonShape3D.new()
+		collision.set_faces(solid_faces)
 	collision.backface_collision = true
 	shape.shape = collision
 	parent.add_child(body)

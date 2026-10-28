@@ -126,6 +126,21 @@ func _run() -> void:
 	var room_wall: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, 0), "move_right", Engine.physics_ticks_per_second * 2, true)
 	if not _require(room_wall.x < 2.01 and world.player.is_on_floor(), "Player crossed the original room ground boundary"):
 		return
+	# Reported hospital door: walking stops outside; the action key still opens the exit.
+	for running in [false, true]:
+		world._change_area(40, Vector3(2.4, 0.05, -0.28))
+		var doorstep: Vector3 = await _walk(world.player, Vector3(2.4, 0.05, -0.28), "move_up", Engine.physics_ticks_per_second, running)
+		if not _require(doorstep.z > -0.74 and doorstep.z < -0.6, "Player crossed the closed hospital door: " + str(doorstep)):
+			return
+		world.set_physics_process(true)
+		Input.action_press("interact")
+		await _frames(3)
+		Input.action_release("interact")
+		await _frames(3)
+		world.set_physics_process(false)
+		if not _require(world.current_area == 188, "Hospital collision blocked its action exit"):
+			return
+		print("HOSPITAL_DOOR_OK running=", running, " stop=", doorstep, "; E entered clinic")
 	var location: Node3D = world.get_node("Location")
 	world.remove_child(location)
 	location.free()

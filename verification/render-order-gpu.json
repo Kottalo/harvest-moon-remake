@@ -1,0 +1,6 @@
+{
+  "behind_wall": "(0.8, 0.0863, 0.0863, 1.0)",
+  "check": "one ground-anchored body depth; real GPU front/behind pixels",
+  "front_cap": "(0.1569, 0.6431, 0.9333, 1.0)",
+  "ok": true
+}
