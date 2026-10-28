@@ -12,6 +12,8 @@
 
 地面与楼梯按原版面片标志区分可行走表面和显示模型，使用原版高度容差并检查身体净空。换层遵循原版区域事件规则：自动入口直接走入，需要确认的入口按 E。楼梯及障碍回归：`godot --headless --path . --script tools/verify_collision.gd`（追加 `-- --120hz` 验证 120 Hz）；完整上下楼流程检查为 `tools/verify_stair_transitions.gd`。
 
+换层后可立即折返；确认键按住跨场景时，需要松开再按才触发下一次确认。
+
 ## 运行
 
 使用 Godot 4.7.2 打开 `project.godot`，主场景为 `game/world/world.tscn`。兼容性渲染器适用于当前电脑。桌面环境也可以运行 `Play-Godot.cmd` / `Open-Editor.cmd`，它们使用相邻的 `../Tools/Godot` 便携版。

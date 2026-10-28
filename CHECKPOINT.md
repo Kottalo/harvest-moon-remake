@@ -41,3 +41,10 @@ The user authorized a private GitHub checkpoint including project assets. Keep t
 - `verification/source-stair-transitions.txt` 记录使用物理方向键实际走过 16 条室内连接：13 自动、3 按确认。`source-collision-60.txt` / `source-collision-120.txt` 扩大到楼梯边线、接缝、旋转方向、医院/牧场隐藏斜坡、160 单位台阶、低净空、高障碍、薄墙、禁行表面与原版房间边界。
 - 当前回归：`verification/source-ground-runtime.txt`、`verification/source-ground-world.txt`。运行时仍只读取 Godot 原生资源，不读取 ROM。
 
+## 2026-10-28 立即下楼回归修复
+
+- 已实际复现旧版失败：医院 188→192 后立即反向，0.6 秒全局冷却忽略了下楼触发区，人物进入楼梯洞却停在 192。旧实机测试等待了 45 个物理帧，漏掉此用法。
+- 删除全局换图冷却；只对跨场景按住的确认键要求先释放，自动出口始终接受判定。审计全部 94 个原版到达坐标：没有坐标落在自动返回区内，仅一处落在需确认的返回区内。
+- `verify_stair_transitions.gd` 现在每次换层后，从真实到达位置立刻按反方向返回，不等待、不传送、不修改过渡状态。16 条连接均通过立即返回测试；新测试在修复前首先复现牧场卧室下楼失败。
+- 运行中物理方向键实测路线：188→192→188→192→188，折返等待 0 帧。证据：`verification/immediate-stair-live.json`、`verification/immediate-stair-returns.txt`。
+

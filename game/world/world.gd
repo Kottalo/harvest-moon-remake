@@ -6,7 +6,7 @@ var hud: Label
 var world: Dictionary
 var current_area := 0
 var overview := false
-var transition_cooldown := 0.0
+var awaiting_interact_release := false
 var transitioning := false
 var nearby_exit: Dictionary = {}
 
@@ -48,12 +48,10 @@ func _refresh_hud() -> void:
 	if not nearby_exit.is_empty():
 		hud.text += "\nE 进入 " + str(world[str(int(nearby_exit.target))].name)
 
-func _check_exits(delta: float) -> void:
-	transition_cooldown = maxf(0, transition_cooldown - delta)
+func _check_exits(_delta: float) -> void:
 	nearby_exit = {}
-	if transition_cooldown > 0:
-		_refresh_hud()
-		return
+	if not Input.is_action_pressed("interact"):
+		awaiting_interact_release = false
 	var point := Vector2(player.position.x, player.position.z)
 	var ahead: Vector2 = point + [Vector2(0, 1), Vector2(-1, 0), Vector2(0, -1), Vector2(1, 0)][player.facing] * 0.224
 	for exit in world[str(current_area)].exits:
@@ -64,7 +62,7 @@ func _check_exits(delta: float) -> void:
 		if exit.requires_facing and int(exit.facing) in [0, 1, 2, 3] and int(exit.facing) != player.facing:
 			continue
 		nearby_exit = exit
-		if action and not Input.is_action_just_pressed("interact"):
+		if action and (awaiting_interact_release or not Input.is_action_just_pressed("interact")):
 			break
 		transitioning = true
 		_change_area.call_deferred(int(exit.target), Vector3(exit.entry[0], exit.entry[1], exit.entry[2]))
@@ -89,7 +87,9 @@ func _change_area(area: int, entry: Vector3) -> void:
 	current_area = area
 	player.position = entry + Vector3(0, 0.015, 0)
 	player.velocity = Vector3.ZERO
-	transition_cooldown = 0.6
+	# Source arrival coordinates already sit outside automatic return zones.
+	# Consume a held action button without disabling any destination exits.
+	awaiting_interact_release = Input.is_action_pressed("interact")
 	transitioning = false
 	nearby_exit = {}
 	if overview:

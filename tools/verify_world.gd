@@ -22,7 +22,6 @@ func _run() -> void:
 		var spawn := Vector3(info.spawn[0], info.spawn[1], info.spawn[2])
 		farm._change_area(int(area), spawn)
 		# Exercise the actual player on each destination floor without triggering another exit.
-		farm.transition_cooldown = 5.0
 		farm.player.set_physics_process(true)
 		await _frames(30)
 		if farm.player.is_on_floor():
@@ -36,7 +35,6 @@ func _run() -> void:
 		farm.player.set_physics_process(false)
 		for exit in info.exits:
 			farm._change_area(int(area), spawn)
-			farm.transition_cooldown = 0.0
 			farm.player.position = Vector3((exit.min[0] + exit.max[0]) * 0.5, spawn.y, (exit.min[1] + exit.max[1]) * 0.5)
 			farm.player.facing = int(exit.facing) if int(exit.facing) in [0, 1, 2, 3] else 0
 			Input.action_press("interact")

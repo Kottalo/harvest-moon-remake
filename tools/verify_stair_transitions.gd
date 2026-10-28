@@ -48,7 +48,6 @@ func _run() -> void:
 				return
 			world.player.position = floor_hit.position + Vector3.UP * 0.01
 			world.player.velocity = Vector3.ZERO
-			world.transition_cooldown = 0
 			await _frames(10)
 			_key(KEYS[facing], true)
 			var used_action := false
@@ -72,8 +71,34 @@ func _run() -> void:
 			else:
 				automatic += 1
 			print("STAIR_ROUTE_OK: ", area, " -> ", exit.target, " action=", used_action)
+			# Reverse immediately from the real arrival position: no teleport, wait or state reset.
+			var reverse := {}
+			for candidate in world.world[str(int(exit.target))].exits:
+				if int(candidate.target) == int(area):
+					reverse = candidate
+					break
+			assert(not reverse.is_empty())
+			var reverse_key: int = KEYS[int(reverse.facing)]
+			_key(reverse_key, true)
+			var confirmed := false
+			for frame in 180:
+				await _frames(1)
+				if world.current_area == int(area):
+					break
+				if reverse.requires_action and not confirmed and not world.nearby_exit.is_empty() and int(world.nearby_exit.index) == int(reverse.index):
+					_key(KEY_E, true)
+					await _frames(1)
+					_key(KEY_E, false)
+					confirmed = true
+			_key(reverse_key, false)
+			_key(KEY_E, false)
+			if world.current_area != int(area):
+				push_error("Immediate stair return failed: " + str([exit.target, area, world.current_area, world.player.position]))
+				quit(1)
+				return
+			print("STAIR_RETURN_OK: ", exit.target, " -> ", area, " immediate=true")
 	assert(automatic > 0 and manual > 0)
-	print("STAIR_TRANSITIONS_OK: ", automatic, " automatic and ", manual, " action-gated room transitions via physical keys")
+	print("STAIR_TRANSITIONS_OK: ", automatic, " automatic and ", manual, " action-gated room transitions via physical keys; all immediate returns passed without waits or resets")
 	world.queue_free()
 	await process_frame
 	quit()
