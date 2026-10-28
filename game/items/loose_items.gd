@@ -34,21 +34,23 @@ func set_area(area: int) -> void:
 	if not records.has(area):
 		records[area] = []
 	# Static debris shares three tightly cropped meshes, rather than 423 Sprite3Ds.
+	if records[area].is_empty() and area != 0:
+		return
 	for item in [58,62,64]:
-		var count := 0
-		for record in records[area]:
-			if record.active and record.id == item:
-				count += 1
-		if count == 0:
-			continue
 		var batch := MultiMeshInstance3D.new()
 		batch.name = catalogue.pictures[str(item)].name.to_pascal_case()+"Batch"
+		# These are stationary items. Slot reuse is a discrete change, not motion
+		# from the former occupant's position to the newly placed item's position.
+		batch.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 		batch.multimesh = MultiMesh.new()
 		batch.multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		batch.multimesh.mesh = _item_mesh(item)
-		batch.multimesh.instance_count = count
+		# At most one item per field cell. Allocate once when entering the map;
+		# visible_instance_count draws only the dense active prefix, not spare slots.
+		batch.multimesh.instance_count = field_cells.size()
+		batch.multimesh.visible_instance_count = 0
 		add_child(batch)
-		batches[item] = {"mesh":batch.multimesh,"next":0}
+		batches[item] = {"mesh":batch.multimesh,"records":[]}
 	for record in records[area]:
 		if record.active:
 			_add_record(record)
@@ -80,9 +82,10 @@ func _item_mesh(item: int) -> ArrayMesh:
 
 func _add_record(record: Dictionary) -> void:
 	var batch: Dictionary = batches[record.id]
-	var slot: int = batch.next
+	var slot: int = batch.records.size()
 	batch.mesh.set_instance_transform(slot,Transform3D(Basis.IDENTITY,record.position))
-	batch.next += 1
+	batch.records.append(record)
+	batch.mesh.visible_instance_count = batch.records.size()
 	record["batch_slot"] = slot
 	record["node"] = _spawn(record.id,record.position,true)
 
@@ -146,9 +149,19 @@ func interact() -> void:
 		_remove(record)
 
 func _remove(record: Dictionary) -> void:
+	if not record.active:
+		return
 	record.active = false
 	var batch: Dictionary = batches[record.id]
-	batch.mesh.set_instance_transform(record.batch_slot,Transform3D(Basis.IDENTITY,Vector3(0,-10000,0)))
+	var slot: int = record.batch_slot
+	var last: Dictionary = batch.records.pop_back()
+	if slot < batch.records.size():
+		# Fill just this hole with the last live instance; its collider stays put.
+		batch.records[slot] = last
+		last.batch_slot = slot
+		batch.mesh.set_instance_transform(slot,Transform3D(Basis.IDENTITY,last.position))
+	batch.mesh.visible_instance_count = batch.records.size()
+	record.batch_slot = -1
 	record.node.queue_free()
 	if current_area == 0 and record.has("cell"):
 		field_cells[record.cell] = 0x167 # ITEM_SOIL
@@ -181,7 +194,7 @@ func release_item(item: int, thrown: bool) -> void:
 		var record := {"id":item,"position":point,"active":true,"cell":placement.cell}
 		records[current_area].append(record)
 		field_cells[placement.cell] = item
-		set_area(current_area)
+		_add_record(record)
 	placement = {}
 
 func use_tool(tool: int, _charge: int) -> void:

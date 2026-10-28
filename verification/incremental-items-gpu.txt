@@ -1,0 +1,16 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+CARRY_GPU_OK: true cases=12
+GPU_CARRY_DONE: true
+WORLD_READY: 43 native locations
+GPU_BATCH_DONE: true pixels=1
+GPU_TINT: 0 true
+GPU_TINT: 1 true
+GPU_TINT: 2 true
+GPU_TINT: 3 true
+GPU_TINT: 4 true
+WORLD_READY: 43 native locations
+AREA_READY: 80 自宅
+DAY_CYCLE_GPU: {"batch_changed_pixels":1,"batch_pixel_match":true,"batched_item_bounds":"[P: (86, 164), S: (161, 89)]","ok":true,"original_item_bounds":"[P: (86, 164), S: (161, 89)]","source_item_layer_cases":[{"facing":0,"item_front":true,"ok":true,"stage":"pickup"},{"facing":1,"item_front":false,"ok":true,"stage":"pickup"},{"facing":2,"item_front":false,"ok":true,"stage":"pickup"},{"facing":3,"item_front":true,"ok":true,"stage":"pickup"},{"facing":0,"item_front":true,"ok":true,"stage":"carry"},{"facing":1,"item_front":true,"ok":true,"stage":"carry"},{"facing":2,"item_front":true,"ok":true,"stage":"carry"},{"facing":3,"item_front":true,"ok":true,"stage":"carry"},{"facing":0,"item_front":true,"ok":true,"stage":"drop"},{"facing":1,"item_front":false,"ok":true,"stage":"drop"},{"facing":2,"item_front":false,"ok":true,"stage":"drop"},{"facing":3,"item_front":true,"ok":true,"stage":"drop"}],"source_item_layers":true,"tint_cases":[{"expected":"(0.721569, 0.5, 0.25)","indoor":false,"minute":360,"ok":true,"pixel":"(0.7216, 0.502, 0.251, 0.0)"},{"expected":"(0.8, 0.5, 0.25)","indoor":false,"minute":720,"ok":true,"pixel":"(0.8, 0.502, 0.251, 1.0)"},{"expected":"(0.780392, 0.382353, 0.093137)","indoor":false,"minute":960,"ok":true,"pixel":"(0.7804, 0.3843, 0.0941, 0.0)"},{"expected":"(0.486275, 0.22549, 0.073529)","indoor":false,"minute":1200,"ok":true,"pixel":"(0.4863, 0.2275, 0.0745, 0.0)"},{"expected":"(0.8, 0.5, 0.25)","indoor":true,"minute":1200,"ok":true,"pixel":"(0.8, 0.502, 0.251, 1.0)"}],"tint_ok":true}

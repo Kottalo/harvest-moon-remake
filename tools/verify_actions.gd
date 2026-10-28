@@ -119,6 +119,14 @@ func _run() -> void:
 	world._change_area(0,stone.position-Vector3(0,0,0.224)+Vector3.UP*0.05)
 	world.player.facing = 0
 	await _frames(20)
+	var untouched := []
+	for record in world.loose_items.records[0]:
+		if record.active and record != stone:
+			untouched.append({"record":record,"node_id":record.node.get_instance_id()})
+	var batch_ids := {}
+	for item in world.loose_items.batches:
+		var mesh: MultiMesh = world.loose_items.batches[item].mesh
+		batch_ids[item] = [mesh.get_instance_id(),mesh.instance_count]
 	_key(KEY_E,true)
 	await _frames(2)
 	_key(KEY_E,false)
@@ -142,6 +150,45 @@ func _run() -> void:
 	if not _require(world.player.position.z<=stone.position.z-0.13 and world.player.position.z>approach.z+0.02,"Placed stone did not restore its physical obstruction"):
 		return
 	print("PLACEMENT_OK: physical E puts the stone back on its source cell, restores obstruction and leaves exactly one item")
+	# Exercise hole removal, tail removal, an empty batch and repeated slot reuse.
+	world.set_physics_process(false)
+	world.player.set_physics_process(false)
+	var items = world.loose_items
+	var placed: Dictionary = items.batches[58].records.back()
+	for i in 24:
+		items._remove(placed)
+		items.placement = {"cell":placed.cell,"position":placed.position}
+		items.release_item(58,false)
+		placed = items.batches[58].records.back()
+		await _frames(1)
+	for saved in untouched:
+		if not _require(saved.record.active and saved.record.node.get_instance_id()==saved.node_id,"Placing one stone rebuilt an unrelated item/collider"):
+			return
+	# Emptying a type must not destroy/reallocate its GPU batch.
+	for record in items.batches[58].records.duplicate():
+		items._remove(record)
+	if not _require(items.batches[58].mesh.visible_instance_count==0,"Empty stone batch still draws instances"):
+		return
+	var flight: Node3D = items._spawn(64,Vector3(0,2,0),false)
+	items.flights.append({"node":flight,"direction":Vector3.ZERO,"velocity":0.0,"ground":0.0})
+	items.placement = {"cell":placed.cell,"position":placed.position}
+	items.release_item(58,false)
+	if not _require(is_instance_valid(flight) and not flight.is_queued_for_deletion() and items.flights.size()==1,"Placement reset an unrelated item in flight"):
+		return
+	for item in items.batches:
+		var batch: Dictionary = items.batches[item]
+		if not _require(batch.mesh.get_instance_id()==batch_ids[item][0] and batch.mesh.instance_count==batch_ids[item][1],"Placement rebuilt/reallocated the GPU batch"):
+			return
+		if not _require(batch.mesh.visible_instance_count==batch.records.size(),"Visible batch count differs from live items"):
+			return
+		for slot in batch.records.size():
+			var record: Dictionary = batch.records[slot]
+			# The headless dummy renderer returns identity for instance transforms.
+			# The isolated GPU run also checks the actual render-server coordinates.
+			var position_ok: bool = DisplayServer.get_name()=="headless" or batch.mesh.get_instance_transform(slot).origin.is_equal_approx(record.position)
+			if not _require(record.active and record.batch_slot==slot and record.node.position.is_equal_approx(record.position) and position_ok,"Dense batch swap changed an item's displayed position: "+str([item,slot,record.active,record.batch_slot,record.position,batch.mesh.get_instance_transform(slot).origin])):
+				return
+	print("INCREMENTAL_ITEMS_OK: physical pickup/place and 24 repeats preserve unrelated nodes/colliders, GPU batches/capacity and flights; empty batch restores correctly")
 	var location := Node3D.new()
 	var panel := Node3D.new()
 	panel.name = "ZoneModel_00"
