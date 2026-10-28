@@ -59,6 +59,7 @@ func _run() -> void:
 	items.field_cells.fill(0x167)
 	items.records[0] = []
 	items.set_area(0)
+	if not await _placement_probe(arena): return
 	var cell := 4*45+11
 	var centre := Vector3(0.1885,0,0.1955) # Source cell's 399-unit bounds, not its 400-unit art position.
 	for id in [58,62,64]:
@@ -90,28 +91,88 @@ func _run() -> void:
 			player.position = centre-Vector3(0,-0.001,0.23)
 			player.facing = 0
 			var assisted: Dictionary = items._placement(id)
-			if not _require(not assisted.get("blocked",false) and int(assisted.cell)!=cell,"Cell-edge placement did not find the nearest clear forward cell"): return
+			if not _require(not assisted.get("blocked",false) and assisted.position.distance_to(player.position+Vector3(0,-0.001,0.4))<0.002,"Cell-edge placement snapped away from the exact forward target"): return
 			player.position = centre-Vector3(0,-0.001,0.31)
 			var clear: Dictionary = items._placement(id)
 			if not _require(not clear.is_empty() and not clear.get("blocked",false),"A safely reachable empty cell rejects placement"): return
 			items.placement = {"cell":cell,"position":record.position}
 			items.release_item(id,false)
 			await _frames(2)
+			var dropped: Vector3 = items.batches[id].records.back().position
 			var restored := await _walk(centre-Vector3(0,0,0.5),0,true)
-			if not _require(restored.z<centre.z-0.258,"Putting the item down did not restore its blocking cell"): return
+			if not _require(absf(restored.z-(dropped.z-0.2595))<0.006,"Placed item obstruction does not follow its continuous position"): return
 			items._remove(items.batches[id].records.back())
 			await _frames(2)
 		print("FIELD_ITEM_OK: ",id," four sides, centre/edges, walk/run, empty neighbour, tool clears obstruction", "; placement restores" if id in [58,62] else "")
 	if not await _assisted_placement(arena,floor_body): return
+	if not await _placement_retreat(arena,floor_body): return
 	print("ITEM_COLLISION_CHECK_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical approaches; stone/branch/weeds match blocked source cells")
 	arena.queue_free()
 	await process_frame
 	quit()
 
+func _probe_blocker(arena: Node3D, point: Vector3, size: Vector3) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.collision_layer = 1
+	body.collision_mask = 0
+	body.position = point
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	shape.shape.size = size
+	body.add_child(shape)
+	arena.add_child(body)
+	return body
+
+func _placement_probe(arena: Node3D) -> bool:
+	var centre := Vector3(0.1885,0,0.1955)
+	player.set_physics_process(false)
+	for facing in 4:
+		var direction: Vector3 = DIRECTIONS[facing]
+		var side := Vector3(-direction.z,0,direction.x)
+		player.position = centre-direction*0.4+Vector3.UP*0.001
+		player.facing = facing
+		await _frames(2)
+		var clear: Dictionary = items._placement(58)
+		if not _require(not clear.get("blocked",false) and clear.free_ratio==1.0,"Empty forward detector counts the player as an obstacle"): return false
+		for width in [0.4,0.5]:
+			var size := Vector3(width,0.4,0.8) if facing%2==0 else Vector3(0.8,0.4,width)
+			# Leave the capsule clear of the near edge; every probe row still overlaps.
+			var obstacle := _probe_blocker(arena,centre+direction*0.08+side*(-0.4+width*0.5)+Vector3.UP*0.2,size)
+			await _frames(2)
+			for item in [58,62]:
+				var target: Dictionary = items._placement(item)
+				var expected := 0.5 if width==0.4 else 0.375
+				if not _require(is_equal_approx(target.free_ratio,expected) and target.get("blocked",false)==(expected<0.5),"Forward free-area threshold failed: "+str([facing,item,width,target])): return false
+			obstacle.collision_layer = 0
+			obstacle.queue_free()
+			await _frames(2)
+	# Crossing a source grid boundary by 1 mm must move the drop by 1 mm, not a cell.
+	for facing in 4:
+		for offset in [-0.0005,0.0005]:
+			var exact := Vector3(12*0.399-4.4+offset,0,0.1955)
+			player.position = exact-DIRECTIONS[facing]*0.4+Vector3.UP*0.001
+			player.facing = facing
+			var target: Dictionary = items._placement(58)
+			if not _require(not target.get("blocked",false) and target.position.distance_to(exact)<0.0001,"Grid-boundary motion rounded the continuous drop point"): return false
+	player.position = centre-Vector3(0,0,0.4)+Vector3.UP*0.001
+	player.facing = 0
+	var strips := []
+	for offset in [-0.25,0.0,0.25]:
+		strips.append(_probe_blocker(arena,centre+Vector3(offset,0.2,0.08),Vector3(0.02,0.4,0.8)))
+	await _frames(2)
+	var fragmented: Dictionary = items._placement(58)
+	if not _require(fragmented.free_ratio>=0.5 and fragmented.get("blocked",false),"Disconnected free slivers did not require a complete landing footprint: "+str(fragmented)): return false
+	for obstacle in strips:
+		obstacle.collision_layer = 0
+		obstacle.queue_free()
+	await _frames(2)
+	player.set_physics_process(true)
+	print("PLACEMENT_PROBE_OK: four facings, stone/branch, clear player exclusion, 50% allowed, 37.5% blocked, fragmented gaps rejected")
+	return true
+
 func _assisted_placement(arena: Node3D, floor_body: StaticBody3D) -> bool:
 	var centre := Vector3(0.1885,0,0.1955)
 	var cell := 4*45+11
-	var expected := [cell+45,cell-1,cell-45,cell+1]
 	for id in [58,62]:
 		for facing in 4:
 			player.position = centre-DIRECTIONS[facing]*0.23+Vector3.UP*0.001
@@ -120,12 +181,15 @@ func _assisted_placement(arena: Node3D, floor_body: StaticBody3D) -> bool:
 			await _frames(2)
 			var before: Vector3 = player.position
 			var target: Dictionary = items._placement(id)
-			if not _require(not target.get("blocked",false) and target.cell==expected[facing],"Near-edge placement failed to choose the nearest clear forward cell: "+str([id,facing,target])): return false
+			var expected: Vector3 = before+DIRECTIONS[facing]*0.4
+			expected.y = 0
+			if not _require(not target.get("blocked",false) and target.position.distance_to(expected)<0.001,"Near-edge placement snapped away from the exact nearest target: "+str([id,facing,target,expected])): return false
 			items.placement = target
 			items.release_item(id,false)
 			await _frames(2)
 			var placed: Dictionary = items.batches[id].records.back()
-			if not _require(placed.cell==target.cell and player.position.distance_to(before)<0.002,"Assisted placement moved the player or used the wrong cell"): return false
+			var shape: CollisionShape3D = placed.node.get_node("Obstruction").get_child(0)
+			if not _require(placed.position.distance_to(expected)<0.001 and shape.global_position.distance_to(placed.position+Vector3.UP*0.2)<0.001 and player.position.distance_to(before)<0.002,"Assisted placement moved the player, snapped the item or left its collider on the field grid"): return false
 			items._remove(placed)
 			await _frames(2)
 	# An actual collider must be detected even when the field metadata says soil.
@@ -134,7 +198,7 @@ func _assisted_placement(arena: Node3D, floor_body: StaticBody3D) -> bool:
 	var obstacle: Node3D = items._spawn(58,Vector3(0.2,0,0.2),true)
 	await _frames(2)
 	var beside: Dictionary = items._placement(58)
-	if not _require(not beside.get("blocked",false) and beside.cell!=cell,"Placement ignored a real obstacle or failed to find the clear space beside it"): return false
+	if not _require(not beside.get("blocked",false) and beside.position.distance_to(Vector3(0.2,0,0.2))>0.39,"Placement ignored a real obstacle or failed to find the clear space beside it"): return false
 	obstacle.get_node("Obstruction").collision_layer = 0
 	obstacle.queue_free()
 	await _frames(2)
@@ -145,7 +209,7 @@ func _assisted_placement(arena: Node3D, floor_body: StaticBody3D) -> bool:
 	var box := BoxShape3D.new()
 	box.size = Vector3(4,0.6,0.04)
 	shape.shape = box
-	wall.position = centre+Vector3(0,0.3,-0.19)
+	wall.position = player.position+Vector3(0,0.3,0.15)
 	wall.add_child(shape)
 	arena.add_child(wall)
 	await _frames(2)
@@ -177,5 +241,50 @@ func _assisted_placement(arena: Node3D, floor_body: StaticBody3D) -> bool:
 	for record in items.batches[58].records.duplicate(): items._remove(record)
 	items.field_cells.fill(0x167)
 	player.actions.carried_id = 0
-	print("ASSISTED_PLACEMENT_OK: four facings, stone/branch nearest-cell fallback, player stays put, real obstacles, wall, support floor, no invisible-placeholder blocks, release revalidation and no item loss")
+	print("ASSISTED_PLACEMENT_OK: four facings, exact unsnapped stone/branch targets and colliders, player stays put on clear ground, real obstacles, wall, support floor, no invisible-placeholder blocks, release revalidation and no item loss")
+	return true
+
+func _placement_retreat(arena: Node3D, floor_body: StaticBody3D) -> bool:
+	var centre := Vector3(0.1885,0,0.1955)
+	player.actions.item_released.connect(items.release_item)
+	for facing in 4:
+		var direction: Vector3 = DIRECTIONS[facing]
+		player.position = centre-direction*0.4+Vector3.UP*0.001
+		player.velocity = Vector3.ZERO
+		player.facing = facing
+		await _frames(2)
+		var wall_size := Vector3(4,0.4,0.4) if facing%2==0 else Vector3(0.4,0.4,4)
+		var wall := _probe_blocker(arena,centre+direction*0.25+Vector3.UP*0.2,wall_size)
+		await _frames(2)
+		var before: Vector3 = player.position
+		var target: Dictionary = items._placement(58)
+		if not _require(not target.get("blocked",false) and target.backstep>0 and target.backstep<0.04 and target.position.distance_to(centre)<0.151,"Nearest continuous landing did not allow a small safe retreat: "+str([facing,target])): return false
+		player.actions.carried_id = 58
+		items.interact()
+		if not _require(player.actions.busy(),"Assisted retreat did not start the actual drop animation"): return false
+		await _frames(ceili(1.2*Engine.physics_ticks_per_second))
+		var record: Dictionary = items.batches[58].records.back()
+		var retreat: Vector3 = player.position-before
+		if not _require(player.actions.carried_id==0 and not player.actions.busy() and absf(retreat.dot(direction)+target.backstep)<0.002 and record.position.distance_to(target.position)<0.001,"Actual drop animation did not keep the closest point and move the player safely backward"): return false
+		items._remove(record)
+		await _frames(2)
+		player.position = before
+		player.velocity = Vector3.ZERO
+		var rear_size := Vector3(4,0.4,0.04) if facing%2==0 else Vector3(0.04,0.4,4)
+		var rear := _probe_blocker(arena,before-direction*0.085+Vector3.UP*0.2,rear_size)
+		await _frames(2)
+		var beside: Dictionary = items._placement(58)
+		if not _require(not beside.get("blocked",false) and beside.backstep==0 and beside.position.distance_to(centre)>target.position.distance_to(centre),"Blocked retreat did not choose a safe alternative instead of pushing through the rear wall"): return false
+		rear.collision_layer = 0
+		rear.queue_free()
+		floor_body.collision_layer = 3 # Placement floor remains; backstep walkability is absent.
+		await _frames(2)
+		var unsupported: Dictionary = items._placement(58)
+		if not _require(not unsupported.get("blocked",false) and unsupported.backstep==0,"Retreat accepted unsupported ground"): return false
+		floor_body.collision_layer = 11
+		wall.collision_layer = 0
+		wall.queue_free()
+		await _frames(2)
+	player.actions.item_released.disconnect(items.release_item)
+	print("PLACEMENT_RETREAT_OK: actual drop animation in all four facings keeps nearest point with small swept retreat; rear obstacles and missing support use safe alternatives")
 	return true

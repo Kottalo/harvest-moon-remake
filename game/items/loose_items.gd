@@ -12,7 +12,12 @@ var placement := {}
 var batches := {}
 var meshes := {}
 var obstruction_shape: BoxShape3D
+var placement_offsets: Array[Vector2] = []
 const FIELD_CELL_SIZE := 0.399 # field_world_to_cell: the source 399-unit grid.
+const PLACEMENT_PROBE_SIZE := 0.8
+const PLACEMENT_MIN_FREE_RATIO := 0.5
+const PLACEMENT_PROBE_STEPS := 8
+const PLACEMENT_SEARCH_STEP := 0.025
 
 func setup(owner_world) -> void:
 	world = owner_world
@@ -89,9 +94,9 @@ func _add_record(record: Dictionary) -> void:
 	batch.records.append(record)
 	batch.mesh.visible_instance_count = batch.records.size()
 	record["batch_slot"] = slot
-	record["node"] = _spawn(record.id,record.position,true)
+	record["node"] = _spawn(record.id,record.position,true,not record.get("free_position",false))
 
-func _spawn(item: int, point: Vector3, solid: bool) -> Node3D:
+func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Node3D:
 	var node := Node3D.new()
 	node.name = catalogue.pictures[str(item)].name.to_pascal_case()
 	node.position = point
@@ -122,7 +127,8 @@ func _spawn(item: int, point: Vector3, solid: bool) -> Node3D:
 		var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
 		var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
 		var centre := _cell_bounds(column,row).get_center()
-		shape.position = Vector3(centre.x-point.x,0.2,centre.y-point.z)
+		# Imported debris keeps source cell bounds; freely placed items follow their art.
+		shape.position = Vector3(centre.x-point.x,0.2,centre.y-point.z) if cell_aligned else Vector3.UP*0.2
 		node.add_child(body)
 		body.add_child(shape)
 	return node
@@ -190,20 +196,24 @@ func _remove(record: Dictionary) -> void:
 func _placement(item: int) -> Dictionary:
 	if current_area != 0 or not catalogue.pictures[str(item)].place_on_farm:
 		return {}
-	# Keep the source forward target, but assist placement around a cell edge.
+	# Keep the source forward reach, without snapping the actual drop to field cells.
 	var facing: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
 	var point: Vector3 = world.player.position + facing*0.4
-	var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
-	var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
+	var free_ratio := _placement_free_ratio(point)
+	var best := {"blocked":true,"free_ratio":free_ratio}
+	if free_ratio < PLACEMENT_MIN_FREE_RATIO:
+		return best
 	var feet := Vector2(world.player.position.x,world.player.position.z)
-	var ideal := Vector2(point.x,point.z)
 	var direction := Vector2(facing.x,facing.z)
-	var best := {"blocked":true}
-	var best_distance := INF
-	var occupied := {}
-	for record in records[current_area]:
-		if record.active and record.has("cell"):
-			occupied[int(record.cell)] = true
+	var side := Vector2(-direction.y,direction.x)
+	if placement_offsets.is_empty():
+		# ponytail: nearest fallback is sampled every 2.5 cm; the unobstructed
+		# target is exact and never snapped to either this sampling or field cells.
+		var steps := floori(PLACEMENT_PROBE_SIZE*0.5/PLACEMENT_SEARCH_STEP)
+		for y in range(-steps,steps+1):
+			for x in range(-steps,steps+1):
+				placement_offsets.append(Vector2(x,y)*PLACEMENT_SEARCH_STEP)
+		placement_offsets.sort_custom(func(a: Vector2,b: Vector2): return a.length_squared()<b.length_squared())
 	var query := PhysicsShapeQueryParameters3D.new()
 	var box := BoxShape3D.new()
 	# One source unit of clearance permits touching neighbouring occupied cells.
@@ -212,34 +222,79 @@ func _placement(item: int) -> Dictionary:
 	query.collision_mask = 1
 	query.exclude = [world.player.get_rid()]
 	var space := get_world_3d().direct_space_state
-	for y in range(row-1,row+2):
-		for x in range(column-1,column+2):
-			# Unimported source-layout placeholders are not physical obstacles.
-			if x<0 or x>=45 or y<0 or y>=25 or occupied.has(y*45+x):
-				continue
-			var bounds := _cell_bounds(x,y)
-			var centre := bounds.get_center()
-			if (centre-feet).dot(direction)<=0 or feet.distance_to(feet.clamp(bounds.position,bounds.end))<world.player.footprint.radius:
-				continue
-			var visual := Vector2(x*0.4-4.2,y*0.4-1.4)
-			var distance := visual.distance_squared_to(ideal)
-			if distance>=best_distance:
-				continue
-			var ray := PhysicsRayQueryParameters3D.create(Vector3(centre.x,world.player.position.y+0.5,centre.y),Vector3(centre.x,world.player.position.y-0.5,centre.y),2)
-			var floor_hit := space.intersect_ray(ray)
-			if floor_hit.is_empty() or floor_hit.normal.y<cos(world.player.floor_max_angle):
-				continue
-			var height: float = floor_hit.position.y
-			query.transform = Transform3D(Basis.IDENTITY,Vector3(centre.x,height+0.2,centre.y))
-			if not space.intersect_shape(query,1).is_empty():
-				continue
-			ray = PhysicsRayQueryParameters3D.create(world.player.position+Vector3.UP*0.2,Vector3(centre.x,height+0.2,centre.y),1)
-			ray.exclude = query.exclude
-			if not space.intersect_ray(ray).is_empty():
-				continue
-			best = {"cell":y*45+x,"position":Vector3(visual.x,height,visual.y)}
-			best_distance = distance
+	var field := Rect2(Vector2(-4.4,-1.6),Vector2(45,25)*FIELD_CELL_SIZE)
+	for offset in placement_offsets:
+		var centre := Vector2(point.x,point.z)+side*offset.x+direction*offset.y
+		if (centre-feet).dot(direction)<=0:
+			continue
+		var bounds := Rect2(centre-Vector2.ONE*FIELD_CELL_SIZE*0.5,Vector2.ONE*FIELD_CELL_SIZE)
+		if not field.encloses(bounds):
+			continue
+		var ray := PhysicsRayQueryParameters3D.create(Vector3(centre.x,world.player.position.y+0.5,centre.y),Vector3(centre.x,world.player.position.y-0.5,centre.y),2)
+		var floor_hit := space.intersect_ray(ray)
+		if floor_hit.is_empty() or floor_hit.normal.y<cos(world.player.floor_max_angle):
+			continue
+		var height: float = floor_hit.position.y
+		query.transform = Transform3D(Basis.IDENTITY,Vector3(centre.x,height+0.2,centre.y))
+		if not space.intersect_shape(query,1).is_empty():
+			continue
+		ray = PhysicsRayQueryParameters3D.create(world.player.position+Vector3.UP*0.2,Vector3(centre.x,height+0.2,centre.y),1)
+		ray.exclude = query.exclude
+		if not space.intersect_ray(ray).is_empty():
+			continue
+		var target := Vector3(centre.x,height,centre.y)
+		var backstep := _placement_backstep(target,facing)
+		if backstep<0:
+			continue
+		var column := floori((centre.x+4.4)/FIELD_CELL_SIZE)
+		var row := floori((centre.y+1.6)/FIELD_CELL_SIZE)
+		return {"cell":row*45+column,"position":target,"free_ratio":free_ratio,"backstep":backstep}
 	return best
+
+func _placement_backstep(point: Vector3, facing: Vector3) -> float:
+	var delta: Vector3 = point-world.player.position
+	var lateral := maxf(absf(delta.dot(Vector3(-facing.z,0,facing.x)))-FIELD_CELL_SIZE*0.5,0)
+	var radius: float = world.player.footprint.radius+0.002
+	if lateral>=radius:
+		return 0
+	var distance := maxf(FIELD_CELL_SIZE*0.5+sqrt(radius*radius-lateral*lateral)-delta.dot(facing),0)
+	if distance==0:
+		return 0
+	var motion := -facing*distance
+	if distance>0.2 or world.player.test_move(world.player.global_transform,motion):
+		return -1
+	# Never step through an obstacle or back off the supported farm floor.
+	for fraction in [0.5,1.0]:
+		var feet: Vector3 = world.player.position+motion*fraction
+		var ray := PhysicsRayQueryParameters3D.create(feet+Vector3.UP*0.2,feet-Vector3.UP*0.2,8)
+		var hit := get_world_3d().direct_space_state.intersect_ray(ray)
+		if hit.is_empty() or hit.normal.y<cos(world.player.floor_max_angle) or absf(hit.position.y-world.player.position.y)>0.02:
+			return -1
+	return distance
+
+func _placement_free_ratio(point: Vector3) -> float:
+	# ponytail: 8x8 area estimate on interaction only; the final full-size query
+	# remains authoritative even for obstacles narrower than a sample.
+	var step := PLACEMENT_PROBE_SIZE/PLACEMENT_PROBE_STEPS
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(step-0.001,0.39,step-0.001)
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.collision_mask = 1
+	query.exclude = [world.player.get_rid()]
+	var space := get_world_3d().direct_space_state
+	var free := 0
+	for y in PLACEMENT_PROBE_STEPS:
+		for x in PLACEMENT_PROBE_STEPS:
+			var sample := point+Vector3((x+0.5)*step-PLACEMENT_PROBE_SIZE*0.5,0.2,(y+0.5)*step-PLACEMENT_PROBE_SIZE*0.5)
+			var column := floori((sample.x+4.4)/FIELD_CELL_SIZE)
+			var row := floori((sample.z+1.6)/FIELD_CELL_SIZE)
+			if column<0 or column>=45 or row<0 or row>=25:
+				continue
+			query.transform = Transform3D(Basis.IDENTITY,sample)
+			if space.intersect_shape(query,1).is_empty():
+				free += 1
+	return float(free)/(PLACEMENT_PROBE_STEPS*PLACEMENT_PROBE_STEPS)
 
 func release_item(item: int, thrown: bool) -> void:
 	var direction: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
@@ -253,8 +308,14 @@ func release_item(item: int, thrown: bool) -> void:
 			world.player.actions.carried_id = item
 			placement = {}
 			return
+		if placement.backstep>0:
+			# Native swept body motion clears the overlap before creating the item.
+			if world.player.move_and_collide(-direction*placement.backstep)!=null:
+				world.player.actions.carried_id = item
+				placement = {}
+				return
 		var point: Vector3 = placement.position
-		var record := {"id":item,"position":point,"active":true,"cell":placement.cell}
+		var record := {"id":item,"position":point,"active":true,"cell":placement.cell,"free_position":true}
 		records[current_area].append(record)
 		field_cells[placement.cell] = item
 		_add_record(record)
