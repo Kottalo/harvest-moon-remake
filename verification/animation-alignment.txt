@@ -1,0 +1,28 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+AREA_READY: 32 镇南街区
+VISIBLE_FOOT_SAMPLE (1.205002, 0.152077, 4.05) ground=0.17428576946259 foot=0.17428578436375 error=0.00000001490116
+AREA_READY: 32 镇南街区
+VISIBLE_FOOT_SAMPLE (1.205002, 0.266237, 4.25) ground=0.29428577423096 foot=0.29428577423096 error=0.0
+AREA_READY: 32 镇南街区
+VISIBLE_FOOT_SAMPLE (1.205002, 0.380625, 4.45) ground=0.41428562998772 foot=0.41428560018539 error=0.00000002980232
+AREA_READY: 32 镇南街区
+VISIBLE_FOOT_SAMPLE (1.205002, 0.49474, 4.65) ground=0.54857152700424 foot=0.54857152700424 error=0.0
+AREA_READY: 32 镇南街区
+VISIBLE_FOOT_SAMPLE (1.205002, 0.58069, 4.8) ground=0.6800000667572 foot=0.6800000667572 error=0.0
+AREA_READY: 32 镇南街区
+VISIBLE_FOOT_SAMPLE (1.205002, 0.694881, 5.0) ground=0.7035294175148 foot=0.7035294175148 error=0.0
+AREA_READY: 32 镇南街区
+VISIBLE_FOOT_SAMPLE (1.205002, 0.796432, 5.18) ground=0.77333331108093 foot=0.77333331108093 error=0.0
+AREA_READY: 32 镇南街区
+VISIBLE_FOOT_SAMPLE (1.205002, 0.800093, 5.3) ground=0.79999995231628 foot=0.79999995231628 error=0.0
+ANI_ALIGNMENT_OK: all 68 idle/walk/run frames and four facings preserve one canvas pivot (0.0, 53.0); source pose offsets retained
+AREA_READY: 32 镇南街区
+VISIBLE_ROAD_RETURN 0.9 end=(0.900036, 0.800838, 5.287948)
+AREA_READY: 32 镇南街区
+VISIBLE_ROAD_RETURN 1.205002 end=(1.205643, 0.800879, 5.270924)
+AREA_READY: 32 镇南街区
+VISIBLE_ROAD_RETURN 1.5 end=(1.50004, 0.80083, 5.271337)
+PLAYER_GROUNDING_OK: stationary and moving rendered ground/pivot max error=0.00000002980232; fixed animation pivot follows the support point; three road lanes down/up

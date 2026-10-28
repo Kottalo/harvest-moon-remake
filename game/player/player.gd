@@ -112,6 +112,6 @@ func _update_animation(direction: Vector2, running: bool, delta: float) -> void:
 			duration = maxf(ceilf(float(frames[animation_frame].duration) / 2.0), 1.0) / 30.0
 	else:
 		animation_frame = facing
-	var current_frame: Dictionary = frames[animation_frame]
-	sprite.frame = int(current_frame.tile)
-	sprite.offset = Vector2(0, float(current_frame.foot_y) - float(animation_data.cell) * 0.5)
+	# ANI frame/part offsets are already baked into the common atlas canvas.
+	# Keep its pivot fixed: alpha bounds move naturally as the legs and body animate.
+	sprite.frame = int(frames[animation_frame].tile)

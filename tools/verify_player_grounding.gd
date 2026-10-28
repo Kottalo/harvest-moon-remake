@@ -1,5 +1,5 @@
 extends SceneTree
-## Compare visible foot anchors against the actual rendered road, not only collision heights.
+## Check the shared ANI canvas pivot and its support against actual rendered road heights.
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -13,6 +13,8 @@ func _run() -> void:
 	var world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
 	world.set_physics_process(false)
+	var fixed_pivot: Vector2 = world.player.sprite.offset
+	var checked_frames := {}
 	var maximum_error := 0.0
 	for z in [4.05, 4.25, 4.45, 4.65, 4.8, 5.0, 5.18, 5.3]:
 		world._change_area(32, Vector3(1.205002, 1.0, z))
@@ -28,7 +30,7 @@ func _run() -> void:
 			return
 		var error: float = absf(sprite.global_position.y - visible.position.y)
 		maximum_error = maxf(maximum_error, error)
-		print("VISIBLE_FOOT_SAMPLE ", point, " ground=", visible.position.y, " foot=", sprite.global_position.y, " error=", error)
+		print("VISIBLE_PIVOT_SAMPLE ", point, " ground=", visible.position.y, " pivot=", sprite.global_position.y, " error=", error)
 		if not player.is_on_floor() or error > 0.025 or absf(sprite.position.x) > 0.00001 or absf(sprite.position.z) > 0.00001:
 			push_error("Visible feet do not match the rendered road")
 			quit(1)
@@ -37,10 +39,19 @@ func _run() -> void:
 			player.facing = facing
 			for motion in [Vector2.ZERO, [Vector2(0, 1), Vector2(-1, 0), Vector2(0, -1), Vector2(1, 0)][facing]]:
 				for running in [false, true]:
-					for frame in 20:
+					for frame in 60:
 						player._update_animation(motion, running, 1.0 / 30.0)
 						var current: Dictionary = player.animation_data.animations[player.animation][player.animation_frame]
-						assert(absf(sprite.offset.y + 64 - current.foot_y) < 0.00001, "Frame foot anchor shifted")
+						if sprite.offset != fixed_pivot or sprite.frame != int(current.tile):
+							push_error("ANI frame shifted the shared canvas pivot: " + str([player.animation, player.animation_frame, sprite.offset, fixed_pivot]))
+							quit(1)
+							return
+						checked_frames[int(current.tile)] = true
+	if checked_frames.size() != 68:
+		push_error("Idle/walk/run frame coverage incomplete: " + str(checked_frames.size()))
+		quit(1)
+		return
+	print("ANI_ALIGNMENT_OK: all 68 idle/walk/run frames and four facings preserve one canvas pivot ", fixed_pivot, "; source pose offsets retained")
 	for x in [0.9, 1.205002, 1.5]:
 		world._change_area(32, Vector3(x, 0.81, 5.27))
 		await _frames(20)
@@ -67,7 +78,7 @@ func _run() -> void:
 			push_error("Grounding fix blocked the road return")
 			quit(1)
 			return
-	print("PLAYER_GROUNDING_OK: stationary and moving rendered ground/foot max error=", maximum_error, "; idle/walk/run foot anchors remain at the support point; three road lanes down/up")
+	print("PLAYER_GROUNDING_OK: stationary and moving rendered ground/pivot max error=", maximum_error, "; fixed animation pivot follows the support point; three road lanes down/up")
 	world.queue_free()
 	await process_frame
 	quit()
