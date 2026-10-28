@@ -6,6 +6,8 @@
 
 这是场景与移动阶段的移植，NPC、对话、剧情、营业时间、种植、物品、动物、音频和完整存档尚未实现。
 
+主角另有根据精灵重新建模的 3D 低模初版：运行时按 **F3** 在原版精灵与 3D 角色之间切换，默认仍用原版精灵。初版包含 12 根骨骼及站立、行走、跑步动画；隐藏结构是根据四向精灵推测的，尚非最终美术。可编辑源文件为 `game/player/model_3d/source/farmer.blend`，游戏使用 `farmer.glb`。Blender 5.2.3 LTS 便携版已安装在相邻 `../Tools/Blender/`，桌面有 Blender 快捷方式。使用此便携版重建：`& ../Tools/Blender/blender-5.2.3-windows-x64/blender.exe --background --factory-startup --python tools/build_farmer_model.py`；离屏检查入口为 `tools/verify_farmer_model.gd`。
+
 2026-10-28：按用户要求，游戏镜头连续两次拉远 20%，现为原版距离的 1.44 倍，保留原版观察角度与透视参数。
 
 人物使用固定世界尺寸的 3D billboard，按原版镜头基准校准。镜头距离、FOV 或正交缩放变化时，人物与场景一起缩放，不再固定人物的屏幕像素大小。

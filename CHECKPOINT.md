@@ -1,5 +1,13 @@
 # Checkpoint — 2026-10-28
 
+## 2026-10-28 主角 3D 低模初版
+
+- 安装 Blender 5.2.3 LTS 官方便携版到相邻 `Tools/Blender/`，建立桌面快捷方式；下载 ZIP 的 SHA256 与官方校验表一致。安装程序和便携软件不进入本仓库。
+- 根据主角四向精灵构建蓝帽、棕发、红领巾、工作服、白手套、圆背包及短腿轮廓。导出的 GLB 为单网格、5722 三角形、12 根骨骼，带 idle/walk/run 三段动画。编辑源文件放在 `game/player/model_3d/source/farmer.blend`，目录 `.gdignore` 避免 Godot 重复导入 Blender 文件；GLB 与 Blender 源文件都使用 LFS。
+- 默认保留原版精灵；F3 切换 3D 角色，复用现有玩家身体、碰撞、四向输入和显示路面高度，隐藏时停用骨骼动画。固定世界缩放为 0.28，保持与镜头缩放无关。专用顶点调色板 shader 修正 glTF 线性顶点色在兼容渲染器下偏暗的问题。
+- 在独立 SubViewport 中检查四向模型、骨骼及行走/跑步关节变化；参考镜头下模型宽 204–205、高 270–281 像素，原精灵宽 208、高 270 像素。证据：`verification/farmer-godot.json`、`farmer_3d_views.png`、`farmer-model.json`。这仍是美术初版，未见部位属于推断，动作与细节有待继续对照。
+- 后续测试遵循用户新要求：后台/headless 或离屏进行，不抢焦点、不向正在使用的游戏注入按键，不为测试重启用户游戏。原生检查中的按键事件只发生在独立 headless 进程。
+
 Entry scene: `game/world/world.tscn`. Open `project.godot` in Godot 4.7.2 (compatibility renderer); local desktop launchers use the adjacent `../Tools/Godot` installation.
 
 Implemented: 43 original spring locations, 94 source exits, ground collision, original four-direction input (up NE / down SW / left NW / right SE), original camera distances/projection, original player ANI idle/walk/run. Walk over road exits; press E or Enter at doors. Tab toggles a map overview.

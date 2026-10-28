@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+FARMER_TOGGLE_OK: physical F3 switches model/sprite, suspends hidden animation and preserves the body
+PLAYER_SCALE_OK: fixed world dimensions; distance, FOV and orthographic zoom preserve player/world ratio
+NATIVE_CHECK_OK: 1.44x camera distance with original perspective/angle, four diagonal screen directions/facings, scene object positions, walk/run speeds=[1.23014664649963, 1.23014664649963, 2.19016265869141]; imported wall blocks player

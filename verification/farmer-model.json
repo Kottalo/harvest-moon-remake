@@ -1,0 +1,14 @@
+{
+  "blender": "5.2.3 LTS",
+  "source_meshes": 53,
+  "exported_meshes": 1,
+  "triangles": 5722,
+  "bones": 12,
+  "animations": [
+    "idle",
+    "walk",
+    "run"
+  ],
+  "world_scale": 0.28,
+  "notes": "Hand-built prototype from four source sprite facings; hidden geometry inferred."
+}

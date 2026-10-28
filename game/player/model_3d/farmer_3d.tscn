@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://game/player/model_3d/farmer.glb" id="1"]
+[ext_resource type="Script" path="res://game/player/model_3d/farmer_visual.gd" id="2"]
+
+[node name="Farmer3D" type="Node3D"]
+script = ExtResource("2")
+
+[node name="Model" parent="." instance=ExtResource("1")]
+scale = Vector3(0.28, 0.28, 0.28)

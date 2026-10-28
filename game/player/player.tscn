@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://game/player/player.gd" id="1"]
 [ext_resource type="Texture2D" path="res://game/player/player_atlas.png" id="2"]
 [ext_resource type="Shader" path="res://game/rendering/player_sprite.gdshader" id="3"]
+[ext_resource type="PackedScene" path="res://game/player/model_3d/farmer_3d.tscn" id="4"]
 
 [sub_resource type="CapsuleShape3D" id="PlayerFootprint"]
 radius = 0.06
@@ -32,3 +33,6 @@ texture_filter = 1
 texture = ExtResource("2")
 hframes = 8
 vframes = 12
+
+[node name="Farmer3D" parent="." instance=ExtResource("4")]
+visible = false
