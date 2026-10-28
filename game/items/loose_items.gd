@@ -11,8 +11,8 @@ var field_cells: Array
 var placement := {}
 var batches := {}
 var meshes := {}
-var obstruction_shape: BoxShape3D
-var loose_obstruction_shapes := {}
+var prefab_scenes := {58:preload("res://game/items/prefabs/stone.tscn"),62:preload("res://game/items/prefabs/branch.tscn"),64:preload("res://game/items/prefabs/weeds.tscn")}
+var prefab_definitions := {}
 var placement_offsets: Array[Vector2] = []
 const FIELD_CELL_SIZE := 0.399 # field_world_to_cell: the source 399-unit grid.
 const PLACEMENT_PROBE_SIZE := 0.8
@@ -66,13 +66,15 @@ func set_area(area: int) -> void:
 func _item_mesh(item: int) -> ArrayMesh:
 	if meshes.has(item):
 		return meshes[item]
-	var texture: Texture2D = load(catalogue.pictures[str(item)].ground_texture)
+	var definition := _prefab_definition(item)
+	var texture: Texture2D = definition.texture
 	var bounds := texture.get_image().get_used_rect().grow(1).intersection(Rect2i(0,0,128,128))
-	var scale: float = world.player.sprite.pixel_size
-	var left := (bounds.position.x-64)*scale
-	var right := (bounds.end.x-64)*scale
-	var top := (64-bounds.position.y+48)*scale
-	var bottom := (64-bounds.end.y+48)*scale
+	var scale: float = definition.pixel_size
+	var offset: Vector2 = definition.offset
+	var left: float = (bounds.position.x-64+offset.x)*scale*definition.scale.x
+	var right: float = (bounds.end.x-64+offset.x)*scale*definition.scale.x
+	var top: float = (64-bounds.position.y+offset.y)*scale*definition.scale.y
+	var bottom: float = (64-bounds.end.y+offset.y)*scale*definition.scale.y
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(left,bottom,0),Vector3(right,bottom,0),Vector3(right,top,0),Vector3(left,top,0)])
@@ -84,8 +86,7 @@ func _item_mesh(item: int) -> ArrayMesh:
 	var material := ShaderMaterial.new()
 	material.shader = load("res://game/rendering/player_sprite.gdshader")
 	material.set_shader_parameter("albedo_texture",texture)
-	var draw: Array = catalogue.ground_draw_offset
-	material.set_shader_parameter("draw_offset",Vector3(draw[0],draw[1],draw[2]))
+	material.set_shader_parameter("draw_offset",definition.position)
 	mesh.surface_set_material(0,material)
 	meshes[item] = mesh
 	return mesh
@@ -127,30 +128,35 @@ func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Nod
 		body.collision_mask = 0
 		var shape := CollisionShape3D.new()
 		shape.shape = _obstruction_box(item,not cell_aligned)
+		shape.transform = _prefab_definition(item).loose.transform if not cell_aligned else _prefab_definition(item).field.transform
 		var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
 		var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
 		var centre := _cell_bounds(column,row).get_center()
-		# Imported debris keeps source cell bounds; freely placed items follow their art.
-		shape.position = Vector3(centre.x-point.x,0.2,centre.y-point.z) if cell_aligned else Vector3.UP*0.2
+		# Preserve the source grid/art difference, then apply the user's prefab offset.
+		if cell_aligned:
+			shape.position += Vector3(centre.x-point.x,0,centre.y-point.z)
 		node.add_child(body)
 		body.add_child(shape)
 	return node
 
-func _obstruction_box(item := 0, free_position := false) -> BoxShape3D:
-	if free_position:
-		if not loose_obstruction_shapes.has(item):
-			var half: Array = catalogue.pictures[str(item)].half_extents
-			var shape := BoxShape3D.new()
-			# farm_record_hit_test uses ItemInfo halfWidth/halfDepth around position.
-			shape.size = Vector3(half[0]*2,0.4,half[1]*2)
-			loose_obstruction_shapes[item] = shape
-		return loose_obstruction_shapes[item]
-	if obstruction_shape == null:
-		obstruction_shape = BoxShape3D.new()
-		# A vertical barrier adapts the source's 2D occupancy test: the native
-		# rounded capsule must not climb onto a low box representing a sprite.
-		obstruction_shape.size = Vector3(FIELD_CELL_SIZE,0.4,FIELD_CELL_SIZE)
-	return obstruction_shape
+func _prefab_definition(item: int) -> Dictionary:
+	if prefab_definitions.has(item):
+		return prefab_definitions[item]
+	var prefab: Node3D = prefab_scenes[item].instantiate()
+	var sprite: Sprite3D = prefab.get_node("GroundSprite")
+	var definition := {"texture":sprite.texture,"pixel_size":sprite.pixel_size,"offset":sprite.offset,"scale":sprite.scale,"position":sprite.position}
+	for kind in ["field","loose"]:
+		var node: CollisionShape3D = prefab.get_node("Obstruction/"+("FieldFootprint" if kind=="field" else "LooseFootprint"))
+		var transform: Transform3D = prefab.get_node("Obstruction").transform*node.transform
+		var shape := BoxShape3D.new()
+		shape.size = node.shape.size*transform.basis.get_scale().abs()
+		definition[kind] = {"shape":shape,"transform":Transform3D(transform.basis.orthonormalized(),transform.origin)}
+	prefab.free()
+	prefab_definitions[item] = definition
+	return definition
+
+func _obstruction_box(item: int, free_position := false) -> BoxShape3D:
+	return _prefab_definition(item)["loose" if free_position else "field"].shape
 
 func _cell_bounds(column: int, row: int) -> Rect2:
 	return Rect2(Vector2(column*FIELD_CELL_SIZE-4.4,row*FIELD_CELL_SIZE-1.6),Vector2.ONE*FIELD_CELL_SIZE)
@@ -229,7 +235,9 @@ func _placement(item: int) -> Dictionary:
 	var box := BoxShape3D.new()
 	# One source unit of clearance permits touching neighbouring occupied cells.
 	var footprint := _obstruction_box(item,true).size
-	var half_size := Vector2(footprint.x,footprint.z)*0.5
+	var local: Transform3D = _prefab_definition(item).loose.transform
+	var extent: AABB = Transform3D(local.basis,Vector3.ZERO)*AABB(-footprint*0.5,footprint)
+	var half_size := Vector2(extent.size.x,extent.size.z)*0.5
 	box.size = footprint-Vector3(0.002,0.01,0.002)
 	query.shape = box
 	query.collision_mask = 1
@@ -241,7 +249,8 @@ func _placement(item: int) -> Dictionary:
 		var centre := Vector2(point.x,point.z)+side*offset.x+direction*offset.y
 		if (centre-feet).dot(direction)<=0:
 			continue
-		var bounds := Rect2(centre-half_size,half_size*2)
+		var collision_centre := centre+Vector2(local.origin.x,local.origin.z)
+		var bounds := Rect2(collision_centre-half_size,half_size*2)
 		if not field.encloses(bounds) or not detector.encloses(bounds):
 			continue
 		var ray := PhysicsRayQueryParameters3D.create(Vector3(centre.x,world.player.position.y+0.5,centre.y),Vector3(centre.x,world.player.position.y-0.5,centre.y),2)
@@ -249,15 +258,15 @@ func _placement(item: int) -> Dictionary:
 		if floor_hit.is_empty() or floor_hit.normal.y<cos(world.player.floor_max_angle):
 			continue
 		var height: float = floor_hit.position.y
-		query.transform = Transform3D(Basis.IDENTITY,Vector3(centre.x,height+0.2,centre.y))
+		query.transform = Transform3D(local.basis,Vector3(centre.x,height,centre.y)+local.origin)
 		if not space.intersect_shape(query,1).is_empty():
 			continue
-		ray = PhysicsRayQueryParameters3D.create(world.player.position+Vector3.UP*0.2,Vector3(centre.x,height+0.2,centre.y),1)
+		ray = PhysicsRayQueryParameters3D.create(world.player.position+Vector3.UP*0.2,Vector3(collision_centre.x,height+local.origin.y,collision_centre.y),1)
 		ray.exclude = query.exclude
 		if not space.intersect_ray(ray).is_empty():
 			continue
 		var target := Vector3(centre.x,height,centre.y)
-		var backstep := _placement_backstep(target,facing,half_size)
+		var backstep := _placement_backstep(target+local.origin,facing,half_size)
 		if backstep<0:
 			continue
 		var column := floori((centre.x+4.4)/FIELD_CELL_SIZE)

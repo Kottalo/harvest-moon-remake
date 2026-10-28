@@ -60,6 +60,7 @@ func _run() -> void:
 	items.records[0] = []
 	items.set_area(0)
 	if not _source_offsets(): return
+	if not await _authored_prefab(arena): return
 	if not await _placement_probe(arena): return
 	var cell := 4*45+11
 	var centre := Vector3(0.1885,0,0.1955) # Source cell's 399-unit bounds, not its 400-unit art position.
@@ -148,6 +149,49 @@ func _probe_blocker(arena: Node3D, point: Vector3, size: Vector3) -> StaticBody3
 	body.add_child(shape)
 	arena.add_child(body)
 	return body
+
+func _authored_prefab(arena: Node3D) -> bool:
+	var original: PackedScene = items.prefab_scenes[58]
+	var prefab: Node3D = original.instantiate()
+	var field: CollisionShape3D = prefab.get_node("Obstruction/FieldFootprint")
+	var loose: CollisionShape3D = prefab.get_node("Obstruction/LooseFootprint")
+	field.shape = field.shape.duplicate()
+	field.shape.size = Vector3(0.31,0.36,0.34)
+	field.position = Vector3(0.03,0.18,-0.04)
+	field.rotation.y = 0.3
+	loose.shape = loose.shape.duplicate()
+	loose.shape.size = Vector3(0.18,0.3,0.24)
+	loose.position = Vector3(0.045,0.15,-0.025)
+	loose.rotation.y = 0.25
+	var edited := PackedScene.new()
+	if not _require(edited.pack(prefab)==OK,"Cannot pack authored item prefab"): return false
+	items.prefab_scenes[58] = edited
+	items.prefab_definitions.erase(58)
+	var point := Vector3(0.2,0,0.2)
+	for free_position in [false,true]:
+		var expected := loose if free_position else field
+		var node: Node3D = items._spawn(58,point,true,not free_position)
+		var collision: CollisionShape3D = node.get_node("Obstruction").get_child(0)
+		var shift := Vector3.ZERO if free_position else Vector3(-0.0115,0,-0.0045)
+		if not _require(collision.global_position.distance_to(point+expected.position+shift)<0.00001 and collision.basis.is_equal_approx(expected.basis) and collision.shape.size.is_equal_approx(expected.shape.size),"Manual prefab box position/rotation/size did not reach the actual runtime collider"): return false
+		node.get_node("Obstruction").collision_layer = 0
+		node.queue_free()
+	player.set_physics_process(false)
+	player.position = point-Vector3(0,-0.001,0.4)
+	player.facing = 0
+	var obstacle := _probe_blocker(arena,point+Vector3(0.11,0.15,0),Vector3(0.01,0.3,0.01))
+	await _frames(2)
+	var target: Dictionary = items._placement(58)
+	if not _require(not target.get("blocked",false) and target.position.distance_to(point)>0.001,"Placement queries ignored the authored collider offset/rotation"): return false
+	obstacle.collision_layer = 0
+	obstacle.queue_free()
+	player.set_physics_process(true)
+	items.prefab_scenes[58] = original
+	items.prefab_definitions.erase(58)
+	prefab.free()
+	await _frames(2)
+	print("AUTHORED_ITEM_PREFAB_OK: saved prefab edits control field/loose box position, rotation and size; placement uses the same authored footprint")
+	return true
 
 func _placement_probe(arena: Node3D) -> bool:
 	var centre := Vector3(0.1885,0,0.1955)

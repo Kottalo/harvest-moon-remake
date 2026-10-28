@@ -14,6 +14,8 @@
 
 农场加载原版新游戏布局中的石头、树枝和杂草，按 `E` 拿起，抱持时使用对应行走／跑步姿态。石头、树枝对着农场空格再按 `E / Space` 可以放回，杂草按原版丢弃；`Shift+Space` 投掷。门板按原版加速开合，普通换地点逐步减暗旧画面，再在新地点淡入；海滩—广场仍保持无缝。
 
+物件手动对位：打开 `game/items/prefabs/stone.tscn`、`branch.tscn` 或 `weeds.tscn`。`GroundSprite` 调图片；根节点的 `Preview Mode` 切换初始／自由放下模式，再选择 `Obstruction/FieldFootprint` 或 `LooseFootprint` 调整实际阻挡方块。橙色方块沿世界轴，不随镜头转，自动跟随碰撞节点的位置／旋转／尺寸。保存 prefab 后重新运行即应用给同类物件，导入器不覆盖手调数据；详细步骤见 `game/items/prefabs/README.md`。运行时仍保留三批 MultiMesh 绘制。
+
 2026-10-28：按用户要求，游戏镜头连续两次拉远 20%，现为原版距离的 1.44 倍，保留原版观察角度与透视参数。
 
 人物使用固定世界尺寸的 3D billboard，按原版镜头基准校准。镜头距离、FOV 或正交缩放变化时，人物与场景一起缩放，不再固定人物的屏幕像素大小。
