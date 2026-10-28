@@ -143,11 +143,15 @@ func _run() -> void:
 			copies += 1
 	if not _require(action.carried_id==0 and copies==1 and world.loose_items.flights.is_empty() and int(world.loose_items.field_cells[stone.cell])==58,"Stone placement failed or duplicated the item"):
 		return
+	world.player.position.z -= 0.2
+	world.player.velocity = Vector3.ZERO
+	world.player.reset_physics_interpolation()
+	await _frames(2)
 	var approach: Vector3 = world.player.position
 	_key(KEY_DOWN,true)
 	await _frames(20)
 	_key(KEY_DOWN,false)
-	if not _require(world.player.position.z<=stone.position.z-0.13 and world.player.position.z>approach.z+0.02,"Placed stone did not restore its physical obstruction"):
+	if not _require(world.player.position.z<=stone.position.z-0.25 and world.player.position.z>approach.z+0.02,"Placed stone did not restore its physical obstruction"):
 		return
 	print("PLACEMENT_OK: physical E puts the stone back on its source cell, restores obstruction and leaves exactly one item")
 	# Exercise hole removal, tail removal, an empty batch and repeated slot reuse.

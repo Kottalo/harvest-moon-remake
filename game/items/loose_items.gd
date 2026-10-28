@@ -11,6 +11,8 @@ var field_cells: Array
 var placement := {}
 var batches := {}
 var meshes := {}
+var obstruction_shape: BoxShape3D
+const FIELD_CELL_SIZE := 0.399 # field_world_to_cell: the source 399-unit grid.
 
 func setup(owner_world) -> void:
 	world = owner_world
@@ -108,18 +110,30 @@ func _spawn(item: int, point: Vector3, solid: bool) -> Node3D:
 			materials[item] = material
 		sprite.material_override = materials[item]
 		node.add_child(sprite)
-	if solid and item in [58,62]:
+	# farm_tables.c: stone/branch/weeds use blocked tile rules 3/6/2.
+	# The field probe blocks their occupied CELL, not just the sprite's centre.
+	if solid and item in [58,62,64]:
 		var body := StaticBody3D.new()
+		body.name = "Obstruction"
 		body.collision_layer = 1
 		body.collision_mask = 0
 		var shape := CollisionShape3D.new()
-		var box := BoxShape3D.new()
-		box.size = Vector3(0.16,0.12,0.16)
-		shape.shape = box
-		shape.position.y = 0.06
+		if obstruction_shape == null:
+			obstruction_shape = BoxShape3D.new()
+			# A vertical barrier adapts the source's 2D occupancy test: the native
+			# rounded capsule must not climb onto a low box representing a sprite.
+			obstruction_shape.size = Vector3(FIELD_CELL_SIZE,0.4,FIELD_CELL_SIZE)
+		shape.shape = obstruction_shape
+		var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
+		var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
+		var centre := _cell_bounds(column,row).get_center()
+		shape.position = Vector3(centre.x-point.x,0.2,centre.y-point.z)
 		node.add_child(body)
 		body.add_child(shape)
 	return node
+
+func _cell_bounds(column: int, row: int) -> Rect2:
+	return Rect2(Vector2(column*FIELD_CELL_SIZE-4.4,row*FIELD_CELL_SIZE-1.6),Vector2.ONE*FIELD_CELL_SIZE)
 
 func _target() -> Dictionary:
 	var ahead: Vector3 = world.player.position + world.player.actions.DIRECTIONS[world.player.facing]*0.224
@@ -172,12 +186,18 @@ func _placement(item: int) -> Dictionary:
 	# player_selection_to_result uses facing_steps[0..3] (400 units), then
 	# field_world_to_cell's original 399-unit integer cell conversion.
 	var point: Vector3 = world.player.position + world.player.actions.DIRECTIONS[world.player.facing]*0.4
-	var column := floori((point.x+4.4)/0.399)
-	var row := floori((point.z+1.6)/0.399)
+	var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
+	var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
 	if column < 0 or column >= 45 or row < 0 or row >= 25:
 		return {}
 	var cell := row*45+column
 	if int(field_cells[cell]) != 0x167:
+		return {"blocked":true}
+	# A native capsule can straddle a cell edge. Do not create a blocker inside it.
+	var bounds := _cell_bounds(column,row)
+	var feet := Vector2(world.player.position.x,world.player.position.z)
+	var nearest := feet.clamp(bounds.position,bounds.end)
+	if feet.distance_to(nearest) < world.player.footprint.radius:
 		return {"blocked":true}
 	return {"cell":cell,"position":Vector3(column*0.4-4.2,0,row*0.4-1.4)}
 

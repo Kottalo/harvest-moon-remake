@@ -1,0 +1,116 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+AREA_READY: 32 镇南街区
+AREA_READY: 52 小镇广场
+AREA_READY: 56 海滩
+AREA_READY: 72 温泉
+AREA_READY: 128 约德尔牧场住宅
+AREA_READY: 132 牧场住宅卧室
+AREA_READY: 136 养鸡场住宅
+AREA_READY: 140 养鸡场卧室
+AREA_READY: 144 锻冶屋
+AREA_READY: 148 锻冶屋卧室
+AREA_READY: 152 酒窖
+AREA_READY: 160 图书馆
+AREA_READY: 164 植物学家住宅
+AREA_READY: 168 植物学家住宅卧室
+AREA_READY: 188 医院
+AREA_READY: 192 医院楼上
+AREA_READY: 204 旅馆
+RAMP_SURFACES_OK: 21 named ramp/landing surfaces sampled across their width and length
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(1.206526, 0.800869, 5.695262)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(1.206305, 0.800866, 5.951647)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(0.900057, 0.800838, 5.69434)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(0.899945, 0.800813, 5.987632)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(1.500041, 0.800831, 5.695508)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(1.500109, 0.800827, 5.988171)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(-1.381656, 0.199304, -2.59993)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-1.381754, 0.199464, -2.600007)
+AREA_READY: 52 小镇广场
+STAIR_SAMPLE 52 running=false end=(4.734416, 0.000935, 0.000061)
+AREA_READY: 52 小镇广场
+STAIR_SAMPLE 52 running=true end=(4.520977, 0.000936, 0.000047)
+AREA_READY: 56 海滩
+STAIR_SAMPLE 56 running=false end=(4.829857, 0.000935, 0.000042)
+AREA_READY: 56 海滩
+STAIR_SAMPLE 56 running=true end=(4.570815, 0.000936, 0.0)
+AREA_READY: 56 海滩
+STAIR_SAMPLE 56 running=false end=(4.45718, 0.000936, 0.000028)
+AREA_READY: 56 海滩
+STAIR_SAMPLE 56 running=true end=(4.217562, 0.000935, -0.000025)
+AREA_READY: 56 海滩
+STAIR_SAMPLE 56 running=false end=(4.457388, 0.00083, -0.29997)
+AREA_READY: 56 海滩
+STAIR_SAMPLE 56 running=true end=(4.217286, 0.00083, -0.299915)
+AREA_READY: 56 海滩
+STAIR_SAMPLE 56 running=false end=(4.457304, 0.00083, 0.3)
+AREA_READY: 56 海滩
+STAIR_SAMPLE 56 running=true end=(4.217566, 0.00083, 0.300014)
+AREA_READY: 72 温泉
+STAIR_SAMPLE 72 running=false end=(-6.05114, 1.892838, -8.199921)
+AREA_READY: 72 温泉
+STAIR_SAMPLE 72 running=true end=(-6.288787, 1.89284, -8.199968)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(-0.152645, 0.200818, 2.614564)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.135315, 0.200829, 2.614501)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(-0.118319, 0.200833, 2.550029)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.145304, 0.20083, 2.550035)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(-0.118241, 0.200822, 3.050014)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.108999, 0.200827, 3.050001)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(-0.118274, 0.200936, 2.800047)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.145382, 0.200934, 2.800053)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(-0.118394, 0.200936, -0.799958)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.327878, 0.200934, -0.799946)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=false end=(-1.129374, 0.764892, -1.599891)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=true end=(-1.1184, 0.757589, -1.599957)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=false end=(-1.130258, 0.765512, -1.799928)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=true end=(-1.11838, 0.757576, -1.799943)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=false end=(-1.130362, 0.765469, -1.519886)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=true end=(-1.118374, 0.757477, -1.519975)
+AREA_READY: 204 旅馆
+STAIR_SAMPLE 204 running=false end=(-0.930509, 0.800935, 3.600036)
+AREA_READY: 204 旅馆
+STAIR_SAMPLE 204 running=true end=(-0.916714, 0.800935, 3.600034)
+AREA_READY: 128 约德尔牧场住宅
+STAIR_SAMPLE 128 running=false end=(-1.279888, 0.793126, 0.73816)
+AREA_READY: 128 约德尔牧场住宅
+STAIR_SAMPLE 128 running=true end=(-1.279941, 0.780312, 0.720747)
+AREA_READY: 152 酒窖
+STAIR_SAMPLE 152 running=false end=(1.925969, 0.763758, 0.800055)
+AREA_READY: 152 酒窖
+STAIR_SAMPLE 152 running=true end=(1.915606, 0.756854, 0.800001)
+AREA_READY: 188 医院
+AREA_READY: 40 杂货店街区
+AREA_READY: 188 医院
+HOSPITAL_DOOR_OK running=false stop=(2.4, 0.020934, -0.709515); E entered clinic
+AREA_READY: 40 杂货店街区
+AREA_READY: 188 医院
+HOSPITAL_DOOR_OK running=true stop=(2.4, 0.020935, -0.692823); E entered clinic
+STEEP_GRADE_SAMPLE running=false end=(0.186952, 0.160834, -1.0)
+STEEP_GRADE_SAMPLE running=true end=(0.186744, 0.160833, -1.0)
+COLLISION_CHECK_OK: 60 Hz; walk/run up/down imported stairs; tall/thin obstacles and low ceilings block player

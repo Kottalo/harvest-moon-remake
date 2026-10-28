@@ -22,6 +22,11 @@ func _run() -> void:
 	await _frames(90)
 	if not _require(farm.player.is_on_floor(), "Player did not land on the imported farm"):
 		return
+	# Calibrate on the clear farmyard; field weeds/stones intentionally block paths.
+	farm.player.position = Vector3(0,0.05,-2.0)
+	farm.player.velocity = Vector3.ZERO
+	farm.player.reset_physics_interpolation()
+	await _frames(12)
 	var start: Vector3 = farm.player.position
 	var camera_delta: Vector3 = farm.camera.position - start
 	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 12.96) < 0.00001 and absf(camera_delta.y - 6.48) < 0.00001 and absf(camera_delta.length() - sqrt(209.952)) < 0.00001, "User's 1.44x camera distance was not applied"):

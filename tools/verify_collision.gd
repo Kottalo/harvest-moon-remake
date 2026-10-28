@@ -7,7 +7,9 @@ func _initialize() -> void:
 func _frames(count: int) -> void:
 	for i in count:
 		await physics_frame
-		await process_frame
+	# One rendered frame can contain two 120 Hz physics ticks. Waiting for a
+	# render after EVERY tick doubled travel time and overshot the test landing.
+	await process_frame
 
 func _require(condition: bool, message: String) -> bool:
 	if not condition:
@@ -184,7 +186,7 @@ func _run() -> void:
 		var speed: float = world.player.RUN_SPEED if running else world.player.WALK_SPEED
 		var frames := roundi(0.8 / speed * Engine.physics_ticks_per_second)
 		var high_tread: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, -3), "move_left", frames, running)
-		if not _require(absf(high_tread.x) < 0.25 and high_tread.y > 0.15, "Player did not follow the ramp onto the raised landing"):
+		if not _require(absf(high_tread.x) < 0.25 and high_tread.y > 0.15, "Player did not follow the ramp onto the raised landing: "+str([running,high_tread,frames])):
 			return
 		var steep_grade: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, -1), "move_left", frames, running)
 		# Finish on the landing rather than requiring one exact uphill travel time.

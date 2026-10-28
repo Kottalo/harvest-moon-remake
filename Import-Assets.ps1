@@ -24,6 +24,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Native scene baking failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Native runtime check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_actions.gd
 if ($LASTEXITCODE -ne 0) { throw 'Source action check failed' }
+& $godotExe --headless --path $PSScriptRoot --script tools/verify_item_collision.gd
+if ($LASTEXITCODE -ne 0) { throw 'Field item obstruction check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_day_cycle.gd
 if ($LASTEXITCODE -ne 0) { throw 'Day cycle and sleep check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_world.gd
