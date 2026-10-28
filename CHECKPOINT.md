@@ -24,3 +24,10 @@ The user authorized a private GitHub checkpoint including project assets. Keep t
 - 后续每次更新验证后提交并 push，仓库保持私有，二进制素材继续使用 LFS。
 - 人物缩放已改为固定世界尺寸，移除镜头的屏幕尺寸补偿；基准 pixel_size=0.009827848，来自原版相机到人物锚点的深度/1000。距离、FOV、正交视图下人物与场景保持相对比例，检查见 `verification/player-world-scale.txt`。
 
+## 2026-10-28 楼梯与障碍碰撞
+
+- 在 `game/player/player.gd` 增加受限跨阶：最大单级 0.12，抬升/前进全身扫掠、可落脚表面与头顶空间检查；从台阶真实表面取高度，避免胶囊圆角误判。人物和地图尺寸未改。
+- `floor_snap_length=0.12`，下楼继续贴地。保留原生 `move_and_slide`，高障碍和薄墙继续阻挡。
+- 验证镇南街区两处原始楼梯、医院和旅馆楼梯的步行/跑步上下行；60/120 Hz 下检测高障碍、薄墙和低天花板。日志：`verification/collision-60.txt`、`verification/collision-120.txt`。
+- 移动、镜头、人物比例和全地图出入口回归记录：`verification/stairs-runtime.txt`、`verification/stairs-world.txt`。
+

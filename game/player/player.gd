@@ -6,8 +6,11 @@ var animation_frame := 0
 var animation_time := 0.0
 var animation_data: Dictionary
 @onready var sprite: Sprite3D = $Sprite3D
+@onready var footprint: CapsuleShape3D = $CollisionShape3D.shape
 const WALK_SPEED := 41.0 * 30.0 / 1000.0
 const RUN_SPEED := 73.0 * 30.0 / 1000.0
+# Original treads rise 0.04 outdoors / 0.08 indoors; higher ledges remain obstacles.
+const MAX_STEP_HEIGHT := 0.12
 
 func _ready() -> void:
 	_setup_input()
@@ -20,8 +23,35 @@ func _physics_process(delta: float) -> void:
 	velocity.x = direction.x * speed
 	velocity.z = direction.y * speed
 	velocity.y -= 14 * delta
+	_step_up(Vector3(velocity.x, 0, velocity.z) * delta)
 	move_and_slide()
 	_update_animation(direction, running, delta)
+
+func _step_up(motion: Vector3) -> void:
+	if not is_on_floor() or velocity.y > 0 or motion.is_zero_approx():
+		return
+	var hit := KinematicCollision3D.new()
+	if not test_move(global_transform, motion, hit, safe_margin):
+		return
+	var raised := global_transform
+	var lift := up_direction * MAX_STEP_HEIGHT
+	if test_move(raised, lift, null, safe_margin):
+		return
+	raised.origin += lift
+	if test_move(raised, motion, null, safe_margin):
+		return
+	# Read the tread surface, not the capsule's rounded contact with its edge.
+	var ahead := motion + motion.normalized() * footprint.radius
+	var query := PhysicsRayQueryParameters3D.create(global_position + lift + ahead, global_position + ahead)
+	query.exclude = [get_rid()]
+	query.collision_mask = collision_mask
+	var floor_hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if floor_hit.is_empty() or floor_hit.normal.dot(up_direction) < cos(floor_max_angle):
+		return
+	var rise: float = (floor_hit.position - global_position).dot(up_direction)
+	if rise > safe_margin and rise <= MAX_STEP_HEIGHT:
+		global_position += up_direction * rise
+		velocity.y = 0
 
 func _setup_input() -> void:
 	var keys := {

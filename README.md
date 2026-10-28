@@ -10,6 +10,8 @@
 
 人物使用固定世界尺寸的 3D billboard，按原版镜头基准校准。镜头距离、FOV 或正交缩放变化时，人物与场景一起缩放，不再固定人物的屏幕像素大小。
 
+台阶支持自动上下，使用有高度限制的全身碰撞检测与地面吸附。楼梯及障碍回归检查：`godot --headless --path . --script tools/verify_collision.gd`，追加 `-- --120hz` 验证 120 Hz 物理帧率。
+
 ## 运行
 
 使用 Godot 4.7.2 打开 `project.godot`，主场景为 `game/world/world.tscn`。兼容性渲染器适用于当前电脑。桌面环境也可以运行 `Play-Godot.cmd` / `Open-Editor.cmd`，它们使用相邻的 `../Tools/Godot` 便携版。

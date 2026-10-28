@@ -1,0 +1,21 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(0.067401, 0.200936, 2.80002)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.128707, 0.200936, 2.799998)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(0.067348, 0.200936, -0.799997)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.128711, 0.200936, -0.800003)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=false end=(-1.592493, 0.800833, -1.600007)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=true end=(-1.784563, 0.800836, -1.599983)
+AREA_READY: 204 旅馆
+STAIR_SAMPLE 204 running=false end=(-0.770475, 0.800934, 3.599975)
+AREA_READY: 204 旅馆
+STAIR_SAMPLE 204 running=true end=(-0.926378, 0.800935, 3.599991)
+COLLISION_CHECK_OK: 60 Hz; walk/run up/down imported stairs; tall/thin obstacles and low ceilings block player
