@@ -55,8 +55,8 @@
           "name": "pier_entrance",
           "axis": "x",
           "from": [
-            -6.6,
-            -0.4
+            -6.4,
+            -0.56
           ],
           "to": [
             -7.4,
@@ -352,7 +352,7 @@
           "axis": "x",
           "from": [
             6.0,
-            -0.5
+            -0.56
           ],
           "to": [
             5.0,
@@ -429,5 +429,6 @@
       ]
     }
   ],
-  "road_connections": 1
+  "road_connections": 1,
+  "coast_note": "Town square and beach use clipped native segments and share the beach staircase in one continuous world."
 }

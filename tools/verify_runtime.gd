@@ -89,6 +89,7 @@ func _run() -> void:
 		farm.player.position = start
 		farm.player.velocity = Vector3.ZERO
 		await _frames(3)
+		var first_tick := Engine.get_physics_frames()
 		Input.action_press("move_right")
 		if mode == 1:
 			Input.action_press("move_down")
@@ -99,9 +100,12 @@ func _run() -> void:
 		Input.action_release("move_down")
 		Input.action_release("run")
 		var distance: float = farm.player.position.distance_to(start)
-		distances.append(distance)
+		# A loaded editor can advance several physics ticks per rendered frame.
+		var seconds := float(Engine.get_physics_frames() - first_tick) / Engine.physics_ticks_per_second
+		var measured_speed := distance / seconds
+		distances.append(measured_speed)
 		var expected := 2.19 if mode == 2 else 1.23
-		if not _require(absf(distance - expected) < 0.2, "Incorrect input movement: " + str(distances)):
+		if not _require(absf(measured_speed - expected) < 0.03, "Incorrect input speed: " + str(distances)):
 			return
 		if not _require(farm.player.is_on_floor(), "Player left the floor while walking"):
 			return
@@ -125,7 +129,7 @@ func _run() -> void:
 	var collision = farm.player.move_and_collide(-normal * 1.4)
 	if not _require(collision != null, "Player passed through imported wall"):
 		return
-	print("NATIVE_CHECK_OK: 1.44x camera distance with original perspective/angle, four diagonal screen directions/facings, scene object positions, walk/run=", distances, "; imported wall blocks player")
+	print("NATIVE_CHECK_OK: 1.44x camera distance with original perspective/angle, four diagonal screen directions/facings, scene object positions, walk/run speeds=", distances, "; imported wall blocks player")
 	farm.queue_free()
 	await process_frame
 	quit()

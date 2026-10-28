@@ -1,5 +1,6 @@
 extends SceneTree
 ## Run after importing PNGs: godot --headless --path . --script tools/bake_assets.gd
+var motion_textures := {}
 
 func _initialize() -> void:
 	if OS.get_cmdline_user_args().has("--check"):
@@ -20,6 +21,9 @@ func _initialize() -> void:
 		if area == "0" and OS.get_cmdline_user_args().has("--skip-farm"):
 			continue
 		_bake_scene(world[area])
+	if selected_area in ["", "52", "56"]:
+		load("res://tools/bake_coast.gd").new().bake()
+	motion_textures.clear()
 	quit()
 
 func _bake_scene(info: Dictionary) -> void:
@@ -63,7 +67,12 @@ func _outside_ramp(polygon: PackedVector3Array, planes: Array) -> Array:
 	var remainder := polygon
 	for plane: Plane in planes:
 		var outside := Geometry3D.clip_polygon(remainder, Plane(-plane.normal, -plane.d))
-		if outside.size() >= 3:
+		# Both closed clipping half-spaces include coplanar faces. A riser exactly
+		# on a ramp endpoint belongs inside the cut, not in the retained outside.
+		var extends_outside := false
+		for point in outside:
+			extends_outside = extends_outside or plane.distance_to(point) > 0.000001
+		if outside.size() >= 3 and extends_outside:
 			pieces.append(outside)
 		remainder = Geometry3D.clip_polygon(remainder, plane)
 		if remainder.size() < 3:
@@ -78,6 +87,8 @@ func _check_ramp_cut() -> void:
 		for i in range(1, polygon.size() - 1):
 			area += (polygon[i] - polygon[0]).cross(polygon[i + 1] - polygon[0]).length() * 0.5
 	assert(absf(area - 7.0) < 0.0001, "Ramp must cut its own footprint while preserving the surrounding platform")
+	var endpoint := PackedVector3Array([Vector3(0, 0, 0), Vector3(0, 0.2, 0), Vector3(0, 0, 1)])
+	assert(_outside_ramp(endpoint, _ramp_planes(ramp)).is_empty(), "A coplanar endpoint riser must not block the continuous ramp")
 	print("RAMP_CUT_OK: unit ramp footprint removed; surrounding platform area preserved")
 
 func _ramp_point(ramp: Dictionary, end: Array, side: float) -> Vector3:
@@ -152,20 +163,52 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 			continue # Keep collision above; omit neutral additive-black drawing below.
 		for i in range(0, surface.uv.size(), 2):
 			uv.append(Vector2(surface.uv[i], surface.uv[i + 1]))
+		if texture_base.ends_with("/mother_hill_summit/") and surface.texture.get_file() in ["mother_hill_summit_atlas_09.png", "mother_hill_summit_atlas_03_blend.png"]:
+			# Enlarge the original sky and distant-mountain backdrops in the camera
+			# plane. Keep their horizon edges and view depth; gameplay stays put.
+			var stars: bool = surface.texture.get_file() == "mother_hill_summit_atlas_09.png"
+			var right := Vector3(1, 0, -1).normalized()
+			var up := Vector3(-1, sqrt(8.0), -1).normalized() # Original 9:4.5 camera slope.
+			var left := INF
+			var bottom := INF
+			var top := -INF
+			var edge := -INF
+			for point in vertices:
+				left = minf(left, point.dot(right))
+				edge = maxf(edge, point.dot(right))
+				bottom = minf(bottom, point.dot(up))
+				top = maxf(top, point.dot(up))
+			for i in vertices.size():
+				var point := vertices[i]
+				vertices[i] += right * (point.dot(right) - (left + edge) * 0.5) * 2.0 + up * (point.dot(up) - (bottom if stars else top)) * (2.0 if stars else 1.0)
 		var arrays := []
 		arrays.resize(Mesh.ARRAY_MAX)
 		arrays[Mesh.ARRAY_VERTEX] = vertices
 		arrays[Mesh.ARRAY_COLOR] = colors
 		arrays[Mesh.ARRAY_TEX_UV] = uv
 		arrays[Mesh.ARRAY_CUSTOM0] = sorting
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
 		var material := ShaderMaterial.new()
 		material.resource_name = texture_base.trim_suffix("/").get_file() + "_material_%02d" % mesh.get_surface_count()
 		material.shader = load("res://game/rendering/source_surface.gdshader")
 		material.set_shader_parameter("textured", not surface.texture.is_empty())
+		var blend_mode := int(surface.get("blend_mode", -1))
+		if blend_mode >= 0:
+			material.set_shader_parameter("alpha_scissor_threshold", 0.75)
 		if not surface.texture.is_empty():
 			material.set_shader_parameter("albedo_texture", load(texture_base + surface.texture))
+		_set_motion(material, surface, texture_base)
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
 		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
+		if blend_mode >= 0:
+			var blended := ShaderMaterial.new()
+			blended.resource_name = material.resource_name + "_blend"
+			var effect: String = ["average", "add", "subtract", "add"][blend_mode]
+			blended.shader = load("res://game/rendering/source_blend_" + effect + ".gdshader")
+			blended.set_shader_parameter("albedo_texture", load(texture_base + surface.texture))
+			blended.set_shader_parameter("opacity", [0.5, 1.0, 1.0, 0.25][blend_mode])
+			_set_motion(blended, surface, texture_base)
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
+			mesh.surface_set_material(mesh.get_surface_count() - 1, blended)
 	var instance := MeshInstance3D.new()
 	instance.name = "Geometry"
 	instance.mesh = mesh
@@ -190,6 +233,7 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 	body.owner = farm
 	body.add_child(shape)
 	shape.owner = farm
+
 	for definition in [["Ground", 2, ground_faces], ["WalkableGround", 8, walkable_faces]]:
 		if definition[2].is_empty():
 			continue
@@ -206,3 +250,26 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 		ground.owner = farm
 		ground.add_child(ground_shape)
 		ground_shape.owner = farm
+
+func _set_motion(material: ShaderMaterial, surface: Dictionary, texture_base: String) -> void:
+	var motion: Dictionary = surface.get("motion", {})
+	if motion.is_empty():
+		return
+	var path: String = texture_base + motion.texture
+	if not motion_textures.has(path):
+		var image := Image.load_from_file(path)
+		assert(image != null, "Missing motion atlas: " + path)
+		var texture := ImageTexture.create_from_image(image)
+		texture.resource_name = motion.texture.get_file().get_basename()
+		motion_textures[path] = texture
+	material.set_shader_parameter("motion_texture", motion_textures[path])
+	material.set_shader_parameter("motion_size", Vector2(motion.size[0], motion.size[1]))
+	material.set_shader_parameter("motion_count", motion.records.size())
+	material.set_shader_parameter("motion_ripples", texture_base.trim_suffix("/").get_file() in ["farm", "yodel_ranch", "beach", "mother_hill_lake", "hot_spring", "lumberjack_forest"])
+	for field in ["destination", "source", "timing"]:
+		var values := PackedVector4Array()
+		for record in motion.records:
+			var value: Array = record["dest" if field == "destination" else field]
+			values.append(Vector4(value[0], value[1], value[2], value[3]))
+		values.resize(16)
+		material.set_shader_parameter("motion_" + field, values)

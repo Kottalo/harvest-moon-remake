@@ -16,6 +16,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 WRITTEN_TEXTURES = set()
+MOTION_TEXTURES = {}
 
 
 class Disc:
@@ -105,16 +106,17 @@ def texture_bank(data):
     return vram, count
 
 
-def rgba(word):
-    return tuple(((word >> shift) & 31) * 255 // 31 for shift in (0, 5, 10)) + (0 if word == 0 else 255,)
+def rgba(word, semi_transparent=False):
+    alpha = 0 if word == 0 else 128 if semi_transparent and word & 0x8000 else 255
+    return tuple(((word >> shift) & 31) * 255 // 31 for shift in (0, 5, 10)) + (alpha,)
 
 
-def texture_page(vram, page, clut):
+def texture_page(vram, page, clut, semi_transparent=False):
     x, y, depth = (page & 15) * 64, ((page >> 4) & 1) * 256, (page >> 7) & 3
     assert depth < 3, 'Reserved PS1 texture depth'
     words = memoryview(vram).cast('H')
     cx, cy = (clut & 63) * 16, (clut >> 6) & 511
-    palette = [rgba(words[(cy * 1024 + cx + i) % len(words)]) for i in range(16 if depth == 0 else 256)] if depth < 2 else []
+    palette = [rgba(words[(cy * 1024 + cx + i) % len(words)], semi_transparent) for i in range(16 if depth == 0 else 256)] if depth < 2 else []
     colors = []
     for v in range(256):
         for u in range(256):
@@ -124,7 +126,7 @@ def texture_page(vram, page, clut):
             elif depth == 1:
                 colors.append(palette[(word >> ((u & 1) * 8)) & 255])
             else:
-                colors.append(rgba(word))
+                colors.append(rgba(word, semi_transparent))
     image = Image.new('RGBA', (256, 256))
     image.putdata(colors)
     return image
@@ -143,7 +145,79 @@ LAYOUTS = {
 }
 
 
-def model_mesh(data, vram, out, offset=0x2000, texture_names=None):
+def scene_motion(data):
+    """FarmModeScript.frames: scene_view.c slot_rect_step and slot_image_step."""
+    frames = [struct.unpack_from('<HhH6h', data, 16 + 50 * 44 + i * 18) for i in range(8)]
+    result, seen = [], set()
+    for index, frame in enumerate(frames):
+        identity, duration, following, x, y, sx, sy, w, h = frame
+        if identity == 0xffff or identity in seen:
+            continue
+        seen.add(identity)
+        if not identity & 0x8000:
+            result.append(dict(dest=[x, y, w, h], source=[sx, sy, w, h], timing=[0, 0, 0, following + 1]))
+            continue
+        chain, tick, current = [], 0, index
+        while True:
+            key, duration, following, x, y, sx, sy, w, h = frames[current]
+            assert key == identity and duration > 0
+            chain.append(dict(dest=[x, y, w, h], source=[sx, sy, w, h], timing=[tick, tick + duration, 0, 0]))
+            tick += duration
+            current = following
+            if current == index:
+                break
+            assert len(chain) < 8, 'Unsupported non-cyclic image slot'
+        copies = [0, 8, 16] if struct.unpack_from('<H', data, 2)[0] == 0x2c and identity & 1 else [0]
+        for item in chain:
+            item['timing'][2] = tick
+            for shift in copies:
+                x, y, w, h = item['dest']
+                result.append(dict(dest=[x + shift, y, w, h], source=item['source'], timing=item['timing']))
+    return result
+
+
+def texture_motion(vram, page, clut, filename, out, frames, semi):
+    if not frames:
+        return {}
+    destination = out / filename
+    if destination in MOTION_TEXTURES:
+        return MOTION_TEXTURES[destination]
+    px, py, depth = (page & 15) * 64, ((page >> 4) & 1) * 256, (page >> 7) & 3
+    factor = 4 >> depth
+    selected = [f for f in frames if px <= f['dest'][0] and f['dest'][0] + f['dest'][2] <= px + 256 // factor
+                and py <= f['dest'][1] and f['dest'][1] + f['dest'][3] <= py + 256]
+    if not selected:
+        MOTION_TEXTURES[destination] = {}
+        return {}
+    words = memoryview(vram).cast('H')
+    cx, cy = (clut & 63) * 16, (clut >> 6) & 511
+    palette = [rgba(words[cy * 1024 + cx + i], semi) for i in range(16 if depth == 0 else 256)] if depth < 2 else []
+    width = max(f['source'][2] * factor for f in selected)
+    height = sum(f['source'][3] for f in selected)
+    atlas = Image.new('RGBA', (width, height))
+    records, row = [], 0
+    for frame in selected:
+        sx, sy, w, h = frame['source']
+        pixels = []
+        for v in range(h):
+            for u in range(w * factor):
+                word = words[((sy + v) & 511) * 1024 + ((sx + u // factor) & 1023)]
+                value = palette[(word >> ((u % factor) * (16 // factor))) & ((1 << (16 // factor)) - 1)] if depth < 2 else rgba(word, semi)
+                pixels.append(value)
+        image = Image.new('RGBA', (w * factor, h))
+        image.putdata(pixels)
+        atlas.paste(image, (0, row))
+        x, y, dw, dh = frame['dest']
+        records.append(dict(dest=[(x - px) * factor, y - py, dw * factor, dh], source=[0, row, w * factor, h], timing=frame['timing']))
+        row += h
+    motion_name = str(Path(filename).with_stem(Path(filename).stem + '_motion')).replace('\\', '/')
+    atlas.save(out / motion_name)
+    result = dict(texture=motion_name, size=[width, height], records=records)
+    MOTION_TEXTURES[destination] = result
+    return result
+
+
+def model_mesh(data, vram, out, offset=0x2000, texture_names=None, animations=()):
     assert struct.unpack_from('<I', data, offset)[0] in (0x41, 0x42)
     base = offset + 12
     objects = struct.unpack_from('<I', data, offset + 8)[0]
@@ -169,7 +243,8 @@ def model_mesh(data, vram, out, offset=0x2000, texture_names=None):
             # Additive black changes no framebuffer pixels, but these planes still supply ground.
             colors = [packet[ci + i * 4:ci + i * 4 + 3] for i in range(count if gouraud else 1)]
             visible = not (textured and header & 0x02000000 and (page >> 5) & 3 == 1 and not any(map(any, colors)))
-            group_key = (name, visible)
+            blend_mode = (page >> 5) & 3 if textured and header & 0x02000000 else -1
+            group_key = (name, visible, blend_mode)
             if group_key not in groups:
                 if textured and name not in texture_names:
                     texture_names[name] = f'textures/{out.name}_atlas_{len(texture_names) + 1:02d}.png'
@@ -177,7 +252,14 @@ def model_mesh(data, vram, out, offset=0x2000, texture_names=None):
                 if textured and out / filename not in WRITTEN_TEXTURES:
                     texture_page(vram, page, clut).save(out / filename)
                     WRITTEN_TEXTURES.add(out / filename)
-                groups[group_key] = dict(texture=filename, visible=visible, vertices=[], colors=[], uv=[], primitive_flags=[], sort_centers=[])
+                if blend_mode >= 0:
+                    filename = str(Path(filename).with_stem(Path(filename).stem + '_blend')).replace('\\', '/')
+                    if out / filename not in WRITTEN_TEXTURES:
+                        texture_page(vram, page, clut, True).save(out / filename)
+                        WRITTEN_TEXTURES.add(out / filename)
+                groups[group_key] = dict(texture=filename, blend_mode=blend_mode, visible=visible, vertices=[], colors=[], uv=[], primitive_flags=[], sort_centers=[])
+                if textured:
+                    groups[group_key]['motion'] = texture_motion(vram, page, clut, filename, out, animations, blend_mode >= 0)
             group = groups[group_key]
             center = [sum(points[index][axis] for index in indices) / count / 1000 for axis in range(3)]
             center[1], center[2] = -center[1], -center[2]
@@ -205,7 +287,8 @@ def model_mesh(data, vram, out, offset=0x2000, texture_names=None):
 
 def farm_mesh(data, vram, out, json_output=None):
     texture_names = {}
-    surfaces, report = model_mesh(data, vram, out, texture_names=texture_names)
+    animations = scene_motion(data)
+    surfaces, report = model_mesh(data, vram, out, texture_names=texture_names, animations=animations)
     entries = []
     # FarmModeScript is 0xBDC bytes, ending with 15 FarmZoneModel records of 44 bytes.
     for index in range(15):
@@ -216,7 +299,7 @@ def farm_mesh(data, vram, out, json_output=None):
             continue
         position = struct.unpack_from('<3h', data, record + 20)
         angle = struct.unpack_from('<3h', data, record + 28)
-        parts, info = model_mesh(data, vram, out, 0x2000 + name, texture_names)
+        parts, info = model_mesh(data, vram, out, 0x2000 + name, texture_names, animations)
         x, y, z = position
         entries.append(dict(index=index, flags=flags, source_position=position,
                             position=[x / 1000, -y / 1000, -z / 1000],
@@ -349,6 +432,27 @@ def player_sprites(data, out):
 
 
 def self_check():
+    script = bytearray(0xbdc)
+    for index in range(8):
+        struct.pack_into('<H', script, 2216 + index * 18, 0xffff)
+    struct.pack_into('<HhH6h', script, 2216, 0, 1, 8, 320, 44, 328, 44, 8, 31)
+    assert scene_motion(script) == [dict(dest=[320, 44, 8, 31], source=[328, 44, 8, 31], timing=[0, 0, 0, 9])]
+    struct.pack_into('<HhH6h', script, 2216, 0x8000, 2, 1, 0, 0, 300, 0, 1, 4)
+    struct.pack_into('<HhH6h', script, 2234, 0x8000, 3, 0, 0, 0, 300, 4, 1, 4)
+    frames = scene_motion(script)
+    assert [entry['timing'] for entry in frames] == [[0, 2, 5, 0], [2, 5, 5, 0]]
+    with TemporaryDirectory() as temporary:
+        directory = Path(temporary)
+        (directory / 'textures').mkdir()
+        vram = bytearray(1024 * 512 * 2)
+        struct.pack_into('<H', vram, 300 * 2, 0x1f)
+        motion = texture_motion(vram, 0x100, 0, 'textures/check.png', directory, frames, False)
+        assert motion['size'] == [1, 8] and Image.open(directory / motion['texture']).getpixel((0, 0)) == (255, 0, 0, 255)
+    struct.pack_into('<H', script, 2, 0x2c)
+    struct.pack_into('<H', script, 2216, 0x8001)
+    struct.pack_into('<H', script, 2234, 0x8001)
+    repeated = scene_motion(script)
+    assert [entry['dest'][0] for entry in repeated] == [0, 8, 16, 0, 8, 16]
     zone_data = bytearray(0xbdc)
     for flags, event, facing, expected in [(0x9200, 28, 1, False), (0x9000, 37, 1, True), (0x9000, 47, 1, False), (0x9000, 37, 999, False)]:
         struct.pack_into('<2H', zone_data, 16, flags, 1)
@@ -400,6 +504,7 @@ def self_check():
         assert actual == (pixels if flags != 8 else bytes([1, 3, 5, 7, 2, 4, 6, 8]))
         assert count == 1
     assert rgba(0) == (0, 0, 0, 0) and rgba(0x7fff) == (255, 255, 255, 255)
+    assert rgba(0, True)[3] == 0 and rgba(0x8000, True)[3] == 128 and rgba(0x7fff, True)[3] == 255
     print('RLE, raw/column image banks, palettes, source ground flags, primitive sort centers and neutral additive-black drawing checked')
 
 

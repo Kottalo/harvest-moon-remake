@@ -20,7 +20,12 @@ func follow(player: CharacterBody3D, overview: bool) -> void:
 		look_at(player.position)
 
 func show_overview(location: Node3D) -> void:
-	var bounds: AABB = location.get_node("Geometry").mesh.get_aabb()
+	var bounds: AABB
+	var first := true
+	for geometry: MeshInstance3D in location.find_children("*", "MeshInstance3D", true, false):
+		var part: AABB = location.global_transform.affine_inverse() * geometry.global_transform * geometry.mesh.get_aabb()
+		bounds = part if first else bounds.merge(part)
+		first = false
 	var focus := bounds.get_center()
 	set_orthogonal(maxf(bounds.size.x, bounds.size.z) * 1.25, 0.05, 200)
 	position = focus + eye_offset * 3

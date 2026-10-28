@@ -2,7 +2,7 @@
 
 《牧场物语：回归自然》的 Godot 原生移植工程，当前 checkpoint 见 [CHECKPOINT.md](CHECKPOINT.md)。
 
-现有 43 个原版春季地点、94 个出入口，支持移动、跑步、碰撞、原版镜头和主角动画。沿道路进入边缘自动换区，门口按 E 或 Enter 进出，Tab 查看当前地点全景。方向键：上东北、下西南、左西北、右东南。
+现有 43 个原版春季地点、94 条原始连接，支持移动、跑步、碰撞、原版镜头和主角动画。海滩与广场的双向连接已无缝化，两侧模型常驻；其余 92 个分区出口沿用原版坐标，门口按 E 或 Enter 进出，Tab 查看当前地点全景。方向键：上东北、下西南、左西北、右东南。
 
 这是场景与移动阶段的移植，NPC、对话、剧情、营业时间、种植、物品、动物、音频和完整存档尚未实现。
 
@@ -14,7 +14,11 @@
 
 人物所有动画帧共用固定画布锚点，保留原版 ANI 的动作偏移；锚点跟随附近的可见路面高度，连续斜坡负责身体通行，避免坡面与原始台阶外观存在高度差时穿地。动画对位、路面高度与道路往返回归：`tools/verify_player_grounding.gd`。
 
-遮挡采用原版绘制基准：角色整张精灵按脚底对应的位置排序，场景按原始面片平均深度及偏移排序，避免墙和门将平面角色切开。材质保留背面剔除；原版加法混合的纯黑通行面只保留碰撞。GPU 前后遮挡检查：在 Godot AI `game_eval` 中执行 `return await load("res://tools/verify_render_order.gd").new().run(get_tree().current_scene)`。
+角色整张精灵按脚底对应的位置判断遮挡，场景模型保留正常的 3D 深度和背面剔除，避免墙切开角色、台阶之间错误穿插。原始 STP 位区分透明、混合及不透明像素，瀑布和蒸汽使用对应的半透明混合；纯黑加法通行面只保留碰撞。场景和人物使用 Linear，抗锯齿为 4× MSAA。GPU 检查：在 Godot AI `game_eval` 中执行 `return await load("res://tools/verify_render_order.gd").new().run(get_tree().current_scene)`。
+
+游戏渲染目标为 60 FPS，物理更新为 60 Hz；角色速度和动作时长仍按原版。水面/瀑布/蒸汽使用原始场景表和离线 motion atlas，通过 shader 平滑滚动、换帧交融及轻微 UV 波纹呈现动态，未变形模型。GPU 动画检查：`return await load("res://tools/verify_water.gd").new().run(get_tree().current_scene)`。室外地图延伸方案已按用户要求取消，保留原始边界。山顶仅扩大原有星空与远山背景，覆盖背景边缘，不改变可行走地形。
+
+海滩与广场通行回归：`godot --headless --path . --script tools/verify_coast.gd`（追加 `-- --120hz`）。重新烘焙任一连接地点或全部场景时，烘焙器会同时更新两侧裁切资源。
 
 换层后可立即折返；确认键按住跨场景时，需要松开再按才触发下一次确认。
 

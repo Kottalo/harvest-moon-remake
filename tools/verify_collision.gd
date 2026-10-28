@@ -57,6 +57,7 @@ func _ramp(parent: Node3D, z: float, height: float, run: float = 0.5) -> void:
 	parent.add_child(body)
 
 func _run() -> void:
+	Engine.max_fps = 0 # Let isolated 120 Hz physics checks advance independently of the game's render cap.
 	if OS.get_cmdline_user_args().has("--120hz"):
 		Engine.physics_ticks_per_second = 120
 	var world = load("res://game/world/world.tscn").instantiate()
@@ -78,6 +79,7 @@ func _run() -> void:
 					var side := lerpf(ramp.cross[0], ramp.cross[1], across)
 					var height := lerpf(ramp["from"][1], ramp.to[1], along)
 					var point := Vector3(coordinate, height, side) if ramp.axis == "x" else Vector3(side, height, coordinate)
+					point = world.area_to_world(int(area), point)
 					var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.3, point - Vector3.UP * 0.3, 2)
 					var hit: Dictionary = world.get_world_3d().direct_space_state.intersect_ray(query)
 					if hit.is_empty():
@@ -95,6 +97,9 @@ func _run() -> void:
 		[32, Vector3(-2.23, -0.15, -2.6), Vector3(-1.45, 0.21, -2.6), 0.18],
 		[52, Vector3(5.94, -0.45, 0), Vector3(5.08, -0.02, 0), -0.08],
 		[56, Vector3(-6.66, -0.35, -0.8), Vector3(-7.3, -0.02, -0.8), -0.08],
+		[56, Vector3(-6.28, -0.54, -0.8), Vector3(-7.5, 0.02, -0.8), -0.03],
+		[56, Vector3(-6.28, -0.54, -1.1), Vector3(-7.5, 0.02, -1.1), -0.03],
+		[56, Vector3(-6.28, -0.54, -0.5), Vector3(-7.5, 0.02, -0.5), -0.03],
 		[72, Vector3(-5.24, 1.46, -8.2), Vector3(-5.82, 1.88, -8.2), 1.8],
 		[32, Vector3(1.233451, 0.02, 2.614479), Vector3(0.3, 0.22, 2.614479), 0.18],
 		[32, Vector3(1.0, 0.02, 2.55), Vector3(0.3, 0.22, 2.55), 0.18],
@@ -110,16 +115,18 @@ func _run() -> void:
 	]:
 		for running in [false, true]:
 			world._change_area(sample[0], sample[1])
+			var start: Vector3 = world.area_to_world(sample[0], sample[1])
+			var finish: Vector3 = world.area_to_world(sample[0], sample[2])
 			var speed: float = world.player.RUN_SPEED if running else world.player.WALK_SPEED
 			var path: Vector3 = sample[2] - sample[1]
 			var actions: Array = (["move_left", "move_right"] if path.x < 0 else ["move_right", "move_left"]) if absf(path.x) > absf(path.z) else (["move_up", "move_down"] if path.z < 0 else ["move_down", "move_up"])
 			var frames := roundi((path.length() / speed * 1.4 + 0.2) * Engine.physics_ticks_per_second)
-			var top: Vector3 = await _walk(world.player, sample[1], actions[0], frames, running)
+			var top: Vector3 = await _walk(world.player, start, actions[0], frames, running)
 			print("STAIR_SAMPLE ", sample[0], " running=", running, " end=", top)
-			var progress: float = Vector2(top.x - sample[1].x, top.z - sample[1].z).dot(Vector2(path.x, path.z).normalized())
+			var progress: float = Vector2(top.x - start.x, top.z - start.z).dot(Vector2(path.x, path.z).normalized())
 			if not _require(top.y > sample[3] and progress > Vector2(path.x, path.z).length() - 0.12, "Imported staircase ascent failed: " + str(sample[0])):
 				return
-			var bottom: Vector3 = await _walk(world.player, sample[2], actions[1], frames, running)
+			var bottom: Vector3 = await _walk(world.player, finish, actions[1], frames, running)
 			if not _require(bottom.y < sample[1].y + 0.12 and world.player.is_on_floor(), "Imported staircase descent failed: " + str([sample[0], bottom])):
 				return
 	world._change_area(188, Vector3(0.8, 0.02, 0))

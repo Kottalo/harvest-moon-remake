@@ -1,0 +1,12 @@
+{
+  "behind_wall": "(0.8, 0.0863, 0.0863, 1.0)",
+  "check": "fixed sprite anchor; continuous solid geometry depth; real GPU pixels",
+  "front_cap": "(0.1569, 0.6431, 0.9333, 1.0)",
+  "geometry_left": "(0.8, 0.0863, 0.0863, 1.0)",
+  "geometry_right": "(0.0863, 0.0863, 0.8, 1.0)",
+  "msaa_3d": 2,
+  "ok": true,
+  "solid_geometry_ok": true,
+  "sprite_filter": 1,
+  "sprite_order_ok": true
+}

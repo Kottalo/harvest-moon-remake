@@ -1,7 +1,7 @@
 shader_type spatial;
 render_mode unshaded, cull_disabled;
 
-uniform sampler2D albedo_texture : source_color, filter_nearest, repeat_disable;
+uniform sampler2D albedo_texture : source_color, filter_linear, repeat_disable;
 varying flat float source_depth;
 
 void vertex() {

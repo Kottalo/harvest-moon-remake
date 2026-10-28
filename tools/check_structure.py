@@ -31,7 +31,7 @@ for path in (ROOT / 'game').rglob('*'):
     relative = path.relative_to(ROOT / 'game')
     assert relative.parts[0] in {'player', 'camera', 'world', 'locations', 'rendering'}, relative
     assert path.suffix.lower() not in {'.bin', '.cue', '.iso', '.py'}, relative
-    if path.suffix not in {'.gd', '.tscn', '.gdshader'}:
+    if path.suffix not in {'.gd', '.tscn', '.gdshader', '.gdshaderinc'}:
         continue
     text = path.read_text(encoding='utf-8')
     assert 'res://tools/' not in text and 'res://reference/' not in text, relative

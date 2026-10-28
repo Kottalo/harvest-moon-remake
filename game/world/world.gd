@@ -10,6 +10,14 @@ var awaiting_interact_release := false
 var transitioning := false
 var nearby_exit: Dictionary = {}
 
+func area_to_world(area: int, point: Vector3) -> Vector3:
+	if area == 56:
+		return point + Vector3(12.4, 0, 0.8)
+	return point
+
+func world_to_area(area: int, point: Vector3) -> Vector3:
+	return point - area_to_world(area, Vector3.ZERO)
+
 func _ready() -> void:
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
 	var canvas := CanvasLayer.new()
@@ -30,7 +38,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if player.position.y < -10:
 		var spawn: Array = world[str(current_area)].spawn
-		player.position = Vector3(spawn[0], spawn[1] + 0.05, spawn[2])
+		player.position = area_to_world(current_area, Vector3(spawn[0], spawn[1] + 0.05, spawn[2]))
 		player.velocity = Vector3.ZERO
 	_check_exits(delta)
 
@@ -50,11 +58,17 @@ func _refresh_hud() -> void:
 
 func _check_exits(_delta: float) -> void:
 	nearby_exit = {}
+	if current_area in [52, 56]:
+		# The two coast segments stay loaded. Crossing only changes the region label.
+		current_area = 52 if player.position.x < 5.0 else 56
 	if not Input.is_action_pressed("interact"):
 		awaiting_interact_release = false
-	var point := Vector2(player.position.x, player.position.z)
+	var local := world_to_area(current_area, player.position)
+	var point := Vector2(local.x, local.z)
 	var ahead: Vector2 = point + [Vector2(0, 1), Vector2(-1, 0), Vector2(0, -1), Vector2(1, 0)][player.facing] * 0.224
 	for exit in world[str(current_area)].exits:
+		if current_area in [52, 56] and int(exit.target) in [52, 56]:
+			continue
 		var bounds := Rect2(Vector2(exit.min[0], exit.min[1]), Vector2(exit.max[0] - exit.min[0], exit.max[1] - exit.min[1]))
 		var action: bool = exit.requires_action
 		if not bounds.has_point(point) and not (action and bounds.has_point(ahead)):
@@ -74,7 +88,7 @@ func _change_area(area: int, entry: Vector3) -> void:
 		transitioning = false
 		push_error("Destination has not been imported: " + str(area))
 		return
-	var packed: PackedScene = load(world[str(area)].scene)
+	var packed: PackedScene = load("res://game/world/coast.tscn" if area in [52, 56] else world[str(area)].scene)
 	if packed == null:
 		transitioning = false
 		return
@@ -85,7 +99,7 @@ func _change_area(area: int, entry: Vector3) -> void:
 	scene.name = "Location"
 	add_child(scene)
 	current_area = area
-	player.position = entry + Vector3(0, 0.015, 0)
+	player.position = area_to_world(area, entry) + Vector3(0, 0.015, 0)
 	player.velocity = Vector3.ZERO
 	# Source arrival coordinates already sit outside automatic return zones.
 	# Consume a held action button without disabling any destination exits.

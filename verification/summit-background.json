@@ -1,0 +1,28 @@
+{
+	"mountain_height_scale": 2,
+	"mountain_width_scale": 3,
+	"samples": [
+		{
+			"clear_edge_samples": 0,
+			"position": "(-10.14408, -0.495254, 0.505261)"
+		},
+		{
+			"clear_edge_samples": 0,
+			"position": "(-9.8, -0.43, -2.5)"
+		},
+		{
+			"clear_edge_samples": 0,
+			"position": "(-8.6, -0.46, -2.5)"
+		},
+		{
+			"clear_edge_samples": 0,
+			"position": "(-11.2, -0.43, -2.5)"
+		},
+		{
+			"clear_edge_samples": 0,
+			"position": "(-9.5, -0.4, -4.0)"
+		}
+	],
+	"sky_scale": 3,
+	"terrain_extension": false
+}

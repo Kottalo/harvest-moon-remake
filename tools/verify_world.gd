@@ -34,6 +34,8 @@ func _run() -> void:
 			missing_floors.append(area)
 		farm.player.set_physics_process(false)
 		for exit in info.exits:
+			if int(area) in [52, 56] and int(exit.target) in [52, 56]:
+				continue # This connection now uses continuous world coordinates, checked separately.
 			farm._change_area(int(area), spawn)
 			farm.player.position = Vector3((exit.min[0] + exit.max[0]) * 0.5, spawn.y, (exit.min[1] + exit.max[1]) * 0.5)
 			farm.player.facing = int(exit.facing) if int(exit.facing) in [0, 1, 2, 3] else 0
@@ -56,7 +58,7 @@ func _run() -> void:
 		push_error("Entry floors not reached: " + str(missing_floors))
 		quit(1)
 		return
-	print("WORLD_CHECK_OK: ", landed, " scenes with walkable entry floors; ", checked, " source exits reached their destinations at original coordinates")
+	print("WORLD_CHECK_OK: ", landed, " scenes with walkable entry floors; ", checked, " non-coast source exits reached their destinations at original coordinates; coast crossing checked separately")
 	farm.queue_free()
 	await process_frame
 	quit()

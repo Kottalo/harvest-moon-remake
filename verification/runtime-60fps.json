@@ -1,0 +1,10 @@
+{
+	"area": 52,
+	"camera_distance_scale": 1.44,
+	"exterior_terrain_count": 0,
+	"fps": 46.0,
+	"fps_limit": 60,
+	"msaa_3d": 2,
+	"physics_hz": 60,
+	"player_texture_filter": 1
+}
