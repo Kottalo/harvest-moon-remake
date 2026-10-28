@@ -26,6 +26,30 @@ func _run() -> void:
 	var camera_delta: Vector3 = farm.camera.position - start
 	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 12.96) < 0.00001 and absf(camera_delta.y - 6.48) < 0.00001 and absf(camera_delta.length() - sqrt(209.952)) < 0.00001, "User's 1.44x camera distance was not applied"):
 		return
+	# Character/world scale stays fixed for distance, FOV and orthographic zoom.
+	var sprite: Sprite3D = farm.player.get_node("Sprite3D")
+	var sprite_size := sprite.get_aabb().size
+	var original_offset: Vector3 = farm.camera.eye_offset
+	for mode in 4:
+		farm.camera.reset_perspective()
+		farm.camera.eye_offset = original_offset * (2.0 if mode == 1 else 1.0)
+		farm.overview = mode == 3
+		if mode == 2:
+			farm.camera.fov = 30.0
+		if farm.overview:
+			farm._set_overview()
+		farm._update_camera()
+		var center := sprite.global_position
+		var up: Vector3 = farm.camera.global_basis.y
+		var unit_pixels: float = farm.camera.unproject_position(center + up * 0.5).distance_to(farm.camera.unproject_position(center - up * 0.5))
+		var sprite_pixels: float = farm.camera.unproject_position(center + up * sprite.get_aabb().size.y * 0.5).distance_to(farm.camera.unproject_position(center - up * sprite.get_aabb().size.y * 0.5))
+		if not _require(sprite.get_aabb().size.is_equal_approx(sprite_size) and absf(sprite_pixels / unit_pixels - sprite_size.y) < 0.0001, "Player/world proportion changed with camera mode " + str(mode)):
+			return
+	farm.overview = false
+	farm.camera.eye_offset = original_offset
+	farm.camera.reset_perspective()
+	farm._update_camera()
+	print("PLAYER_SCALE_OK: fixed world dimensions; distance, FOV and orthographic zoom preserve player/world ratio")
 	# User-visible regression: the four keys project NE, SW, NW, SE, with four facings.
 	var directions := ["move_up", "move_down", "move_left", "move_right"]
 	var screen_signs := [Vector2(1, -1), Vector2(-1, 1), Vector2(-1, -1), Vector2(1, 1)]

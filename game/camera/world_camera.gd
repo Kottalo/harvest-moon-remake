@@ -15,13 +15,9 @@ func reset_perspective() -> void:
 	set_perspective(rad_to_deg(2.0 * atan(120.0 / PROJECTION_DISTANCE)), 0.05, 200.0)
 
 func follow(player: CharacterBody3D, overview: bool) -> void:
-	var sprite: Sprite3D = player.get_node("Sprite3D")
 	if not overview:
 		position = player.position + eye_offset
 		look_at(player.position)
-		sprite.pixel_size = -to_local(sprite.global_position).z / PROJECTION_DISTANCE
-	else:
-		sprite.pixel_size = eye_offset.length() / PROJECTION_DISTANCE
 
 func show_overview(location: Node3D) -> void:
 	var bounds: AABB = location.get_node("Geometry").mesh.get_aabb()
