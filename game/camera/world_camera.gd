@@ -2,7 +2,7 @@ extends Camera3D
 ## Original farm projection/angle, with the user's wider framing.
 const HORIZONTAL_DISTANCE := 9000.0 / 1000.0
 const HEIGHT := 4500.0 / 1000.0
-const DISTANCE_SCALE := 1.2
+const DISTANCE_SCALE := 1.44
 const YAW := -512.0 * TAU / 4096.0
 const PROJECTION_DISTANCE := 1000.0
 var eye_offset := Vector3(-sin(YAW) * HORIZONTAL_DISTANCE, HEIGHT, cos(YAW) * HORIZONTAL_DISTANCE) * DISTANCE_SCALE

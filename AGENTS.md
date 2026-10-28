@@ -3,7 +3,7 @@
 ## Directory contract
 
 - `game/player/`: player scene, input, movement, ANI playback and shared player assets only. No world/map loading dependencies.
-- `game/camera/`: camera projection and follow/overview behavior only. Preserve the original yaw/FOV; the user requested 20% farther framing on 2026-10-28 (distance scale 1.2).
+- `game/camera/`: camera projection and follow/overview behavior only. Preserve the original yaw/FOV; the user requested two successive 20% distance increases on 2026-10-28 (distance scale 1.44).
 - `game/world/`: world entry scene, location catalog, navigation/exits and simple navigation prompts. Do not put player animation, camera math, shops, crops or NPC behavior here.
 - `game/locations/<semantic_name>/`: one original place per folder, its native scene and texture atlases. Use names such as `farmhouse`, `library`, `clinic`; raw source area numbers belong in metadata, never the primary directory name.
 - `tools/`: offline conversion and runnable checks. `tools/generated/` contains ignored, regenerable conversion intermediates, not runtime code.

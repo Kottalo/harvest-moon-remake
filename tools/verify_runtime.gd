@@ -24,7 +24,7 @@ func _run() -> void:
 		return
 	var start: Vector3 = farm.player.position
 	var camera_delta: Vector3 = farm.camera.position - start
-	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 10.8) < 0.00001 and absf(camera_delta.y - 5.4) < 0.00001 and absf(camera_delta.length() - sqrt(145.8)) < 0.00001, "User's 20% farther camera distance was not applied"):
+	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 12.96) < 0.00001 and absf(camera_delta.y - 6.48) < 0.00001 and absf(camera_delta.length() - sqrt(209.952)) < 0.00001, "User's 1.44x camera distance was not applied"):
 		return
 	# User-visible regression: the four keys project NE, SW, NW, SE, with four facings.
 	var directions := ["move_up", "move_down", "move_left", "move_right"]
@@ -40,10 +40,10 @@ func _run() -> void:
 		var projected := Vector2(farm.camera.basis.x.dot(delta), -farm.camera.basis.y.dot(delta))
 		if not _require(projected.x * screen_signs[i].x > 0 and projected.y * screen_signs[i].y > 0 and farm.player.facing == facings[i], "Wrong screen direction or pose: " + directions[i] + str(projected)):
 			return
-	# Original camera_build_view + GTE H=1000 equations, at the user's 1.2x distance.
+	# Original camera_build_view + GTE H=1000 equations, at the user's 1.44x distance.
 	farm.player.position = start
 	farm._update_camera()
-	var eye := Vector3(6363, -4500, -6363) * 1.2
+	var eye := Vector3(6363, -4500, -6363) * 1.44
 	var forward := (-eye).normalized()
 	var side := Vector3(forward.z, 0, -forward.x).normalized()
 	var down := forward.cross(side).normalized()
@@ -100,7 +100,7 @@ func _run() -> void:
 	var collision = farm.player.move_and_collide(-normal * 1.4)
 	if not _require(collision != null, "Player passed through imported wall"):
 		return
-	print("NATIVE_CHECK_OK: 20% farther camera with original perspective/angle, four diagonal screen directions/facings, scene object positions, walk/run=", distances, "; imported wall blocks player")
+	print("NATIVE_CHECK_OK: 1.44x camera distance with original perspective/angle, four diagonal screen directions/facings, scene object positions, walk/run=", distances, "; imported wall blocks player")
 	farm.queue_free()
 	await process_frame
 	quit()
