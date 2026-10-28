@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-28",
+  "location": "town_south",
+  "reported_position": [1.205002, 0.800812, 5.26998],
+  "before": {
+    "solid_sweep_blocked": false,
+    "ground_normal": [0, 0.6, -0.8],
+    "ground_angle_degrees": 53.130102,
+    "player_floor_limit_degrees": 45,
+    "move_up_100_frames": "position unchanged; movement rejected by ground-angle check"
+  },
+  "after": {
+    "ramp_node": "World/Location/WalkableRamps/UpperRoadConnection",
+    "ground_normal": [0, 0.868243, -0.496139],
+    "ground_angle_degrees": 29.744881,
+    "player_floor_limit_degrees": 60,
+    "live_physical_key": "UP",
+    "descended_position": [1.207459, 0.000936, 2.797307],
+    "on_floor_after_descent": true,
+    "returned_to_upper_road": [1.209699, 0.800844, 5.283293],
+    "on_floor_after_return": true
+  }
+}

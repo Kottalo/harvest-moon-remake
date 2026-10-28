@@ -2,7 +2,7 @@
   "date": "2026-10-28",
   "audited_locations": 43,
   "ramp_locations": 17,
-  "continuous_slopes": 19,
+  "continuous_slopes": 20,
   "flat_landings": 1,
   "movement": "Native CharacterBody3D move_and_slide and floor_snap; no manual step lifting",
   "locations": [
@@ -324,6 +324,23 @@
             -2.8,
             -2.4
           ]
+        },
+        {
+          "name": "upper_road_connection",
+          "purpose": "road_connection",
+          "axis": "z",
+          "from": [
+            3.94,
+            0.08
+          ],
+          "to": [
+            5.2,
+            0.8
+          ],
+          "cross": [
+            0.8,
+            1.6
+          ]
         }
       ]
     },
@@ -411,5 +428,6 @@
         }
       ]
     }
-  ]
+  ],
+  "road_connections": 1
 }

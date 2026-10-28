@@ -39,7 +39,7 @@ func _walk(player: CharacterBody3D, position: Vector3, action: String, frames: i
 	await _frames(4)
 	return player.position
 
-func _ramp(parent: Node3D, z: float, height: float) -> void:
+func _ramp(parent: Node3D, z: float, height: float, run: float = 0.5) -> void:
 	var body := StaticBody3D.new()
 	body.collision_layer = 11
 	body.position.z = z
@@ -48,9 +48,9 @@ func _ramp(parent: Node3D, z: float, height: float) -> void:
 	var points := PackedVector3Array()
 	for side in [-0.3, 0.3]:
 		points.append(Vector3(0.25, height, side))
-		points.append(Vector3(0.75, 0, side))
+		points.append(Vector3(0.25 + run, 0, side))
 		points.append(Vector3(0.25, -0.05, side))
-		points.append(Vector3(0.75, -0.05, side))
+		points.append(Vector3(0.25 + run, -0.05, side))
 	wedge.points = points
 	shape.shape = wedge
 	body.add_child(shape)
@@ -89,6 +89,9 @@ func _run() -> void:
 			ramp_count += 1
 	print("RAMP_SURFACES_OK: ", ramp_count, " named ramp/landing surfaces sampled across their width and length")
 	for sample in [
+		[32, Vector3(1.205002, 0.09, 3.98), Vector3(1.205002, 0.800812, 5.26998), 0.75],
+		[32, Vector3(0.9, 0.09, 3.98), Vector3(0.9, 0.81, 5.27), 0.75],
+		[32, Vector3(1.5, 0.09, 3.98), Vector3(1.5, 0.81, 5.27), 0.75],
 		[32, Vector3(-2.23, -0.15, -2.6), Vector3(-1.45, 0.21, -2.6), 0.18],
 		[52, Vector3(5.94, -0.45, 0), Vector3(5.08, -0.02, 0), -0.08],
 		[56, Vector3(-6.66, -0.35, -0.8), Vector3(-7.3, -0.02, -0.8), -0.08],
@@ -140,6 +143,8 @@ func _run() -> void:
 	_ramp(fixtures, 2, 0.08)
 	_ramp(fixtures, -3, 0.16)
 	_ramp(fixtures, 3, 0.04)
+	_box(fixtures, Vector3(0, 0.08, -1), Vector3(0.5, 0.16, 0.6), true)
+	_ramp(fixtures, -1, 0.16, 0.12) # Same 53.13-degree grade as the reported road joint.
 	await _frames(3)
 	for running in [false, true]:
 		var wall: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, 0), "move_left", 90, running)
@@ -155,6 +160,23 @@ func _run() -> void:
 		var frames := roundi(0.8 / speed * Engine.physics_ticks_per_second)
 		var high_tread: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, -3), "move_left", frames, running)
 		if not _require(absf(high_tread.x) < 0.25 and high_tread.y > 0.15, "Player did not follow the ramp onto the raised landing"):
+			return
+		var steep_grade: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, -1), "move_left", frames, running)
+		# Finish on the landing rather than requiring one exact uphill travel time.
+		if steep_grade.x >= 0.25:
+			Input.action_press("move_left")
+			if running:
+				Input.action_press("run")
+			for tick in 60:
+				await _frames(1)
+				if world.player.position.x < 0.2:
+					break
+			Input.action_release("move_left")
+			Input.action_release("run")
+			await _frames(4)
+			steep_grade = world.player.position
+		print("STEEP_GRADE_SAMPLE running=", running, " end=", steep_grade)
+		if not _require(steep_grade.x < 0.25 and steep_grade.y > 0.15, "Source walkable 53-degree ramp was classified as a wall"):
 			return
 		var blocked_face: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, 1), "move_left", frames, running)
 		if not _require(blocked_face.x > 0.3 and blocked_face.y < 0.02, "Controller climbed a face excluded from original walkable ground"):

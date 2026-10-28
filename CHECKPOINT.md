@@ -55,3 +55,9 @@ The user authorized a private GitHub checkpoint including project assets. Keep t
 - 烘焙器使用 Godot 几何裁切移除坡道范围内的旧台阶/坡面碰撞，保留周围平台；`tools/bake_assets.gd -- --check` 检查裁切面积，`-- --ramps-only` 只更新有坡道定义的地点。
 - 覆盖与验证记录：`verification/ramp-coverage.json`、`all-ramps-60.txt`、`all-ramps-120.txt`、`all-ramps-transitions.txt`、`all-ramps-world.txt`。每段坡面均采样宽度和长度，保留立即折返、身体净空、高障碍及薄墙检查。
 
+## 2026-10-28 镇南街区道路接坡
+
+- 用户截图位置实际坐标为 (1.205002, 0.800812, 5.26998)，属于上层道路的接坡，上一轮重复台阶清单漏掉了它。四向全身扫掠没有命中阻挡物；向 -Z 的地面法线是 (0, 0.6, -0.8)，53.13° 超过旧 45° 上限，导致地面通行查询主动清零速度。
+- 增加命名坡面 `UpperRoadConnection`，连接 z=3.94/y=0.08 与 z=5.2/y=0.8，宽 x=0.8…1.6。整坡约 29.745°，替换该范围的碎接坡。角色可行走坡度调整为 60°，覆盖同类原版合法接坡，垂直障碍仍不可通行。
+- 回归增加截图的准确站位和坡道两侧，以及复现 53.13° 原版坡度的独立实体斜坡。修复前原地按上 100 帧完全不动；修复后实际下降到低处地面并保持着地。证据见 `verification/road-connection-diagnostic.json` 与 `road-connection-60.txt` / `road-connection-120.txt`。
+

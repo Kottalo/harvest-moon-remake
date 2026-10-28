@@ -8,7 +8,13 @@ func _initialize() -> void:
 		return
 	var world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
 	assert(world is Dictionary, "Run tools/import_disc.py first")
+	var selected_area := ""
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--area="):
+			selected_area = argument.get_slice("=", 1)
 	for area in world:
+		if not selected_area.is_empty() and str(area) != selected_area:
+			continue
 		if OS.get_cmdline_user_args().has("--ramps-only") and not FileAccess.file_exists(world[area].texture_base + "walkable_ramps.json"):
 			continue
 		if area == "0" and OS.get_cmdline_user_args().has("--skip-farm"):
