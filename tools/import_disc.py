@@ -327,7 +327,9 @@ def player_sprites(data, out):
                             image = image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
                         cache[key] = image
                     canvas.alpha_composite(cache[key], (64 + dx + fx, 112 + dy + fy))
-            result.append(dict(tile=len(rendered), duration=duration, control=control))
+            bounds = canvas.getchannel('A').getbbox()
+            result.append(dict(tile=len(rendered), duration=duration, control=control,
+                               foot_y=bounds[3] if bounds else 112))
             rendered.append(canvas)
         animations.append(result)
     atlas = Image.new('RGBA', (1024, ((len(rendered) + 7) // 8) * 128))

@@ -19,8 +19,7 @@ position = Vector3(0, 0.12, 0)
 shape = SubResource("PlayerFootprint")
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
-position = Vector3(0.15, 0.1, 0.15)
-offset = Vector2(0, 48)
+offset = Vector2(0, 53)
 pixel_size = 0.009827848
 billboard = 1
 texture_filter = 0

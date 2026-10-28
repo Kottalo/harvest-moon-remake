@@ -1,0 +1,2 @@
+RLE, raw/column image banks, palettes and source ground flags checked
+PLAYER_REIMPORT_OK: {'ranges': 15, 'frames': 90, 'texture_blocks': 277} ; canonical atlas and foot metadata reproduced byte for byte

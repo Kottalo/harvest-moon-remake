@@ -16,6 +16,7 @@ const GROUND_PROBE_REACH := 48.0 / 1000.0
 func _ready() -> void:
 	_setup_input()
 	animation_data = JSON.parse_string(FileAccess.get_file_as_string("res://game/player/player_animations.json"))
+	_update_animation(Vector2.ZERO, false, 0.0)
 
 func _physics_process(delta: float) -> void:
 	var direction := _movement_direction()
@@ -26,6 +27,14 @@ func _physics_process(delta: float) -> void:
 	velocity.y -= 14 * delta
 	_constrain_to_ground(Vector3(velocity.x, 0, velocity.z) * delta)
 	move_and_slide()
+	# Align the visible feet to the support plane, not the capsule's rounded bottom.
+	sprite.position.y = -footprint.radius * (1.0 / get_floor_normal().y - 1.0) if is_on_floor() else 0.0
+	if is_on_floor():
+		# Smooth collision ramps can sit below the visible road joints or stair treads.
+		var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * GROUND_PROBE_HEIGHT, global_position - Vector3.UP * GROUND_PROBE_HEIGHT, 4)
+		var surface := get_world_3d().direct_space_state.intersect_ray(query)
+		if not surface.is_empty() and surface.normal.y >= cos(floor_max_angle):
+			sprite.position.y = surface.position.y - global_position.y
 	_update_animation(direction, running, delta)
 
 func _constrain_to_ground(motion: Vector3) -> void:
@@ -103,4 +112,6 @@ func _update_animation(direction: Vector2, running: bool, delta: float) -> void:
 			duration = maxf(ceilf(float(frames[animation_frame].duration) / 2.0), 1.0) / 30.0
 	else:
 		animation_frame = facing
-	sprite.frame = int(frames[animation_frame].tile)
+	var current_frame: Dictionary = frames[animation_frame]
+	sprite.frame = int(current_frame.tile)
+	sprite.offset = Vector2(0, float(current_frame.foot_y) - float(animation_data.cell) * 0.5)
