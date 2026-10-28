@@ -2,9 +2,15 @@ extends SceneTree
 ## Run after importing PNGs: godot --headless --path . --script tools/bake_assets.gd
 
 func _initialize() -> void:
+	if OS.get_cmdline_user_args().has("--check"):
+		_check_ramp_cut()
+		quit()
+		return
 	var world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
 	assert(world is Dictionary, "Run tools/import_disc.py first")
 	for area in world:
+		if OS.get_cmdline_user_args().has("--ramps-only") and not FileAccess.file_exists(world[area].texture_base + "walkable_ramps.json"):
+			continue
 		if area == "0" and OS.get_cmdline_user_args().has("--skip-farm"):
 			continue
 		_bake_scene(world[area])
@@ -14,10 +20,16 @@ func _bake_scene(info: Dictionary) -> void:
 	var source = JSON.parse_string(FileAccess.get_file_as_string(info.source_json))
 	assert(source is Dictionary, "Run tools/import_disc.py first")
 	var texture_base: String = info.texture_base
+	var ramps: Array = []
+	if FileAccess.file_exists(texture_base + "walkable_ramps.json"):
+		ramps = JSON.parse_string(FileAccess.get_file_as_string(texture_base + "walkable_ramps.json"))
+	for ramp in ramps:
+		ramp["clip_planes"] = _ramp_planes(ramp)
 	var farm := Node3D.new()
 	farm.name = str(info.slug).to_pascal_case()
 	farm.set_meta("area_id", info.id)
-	_add_mesh(farm, farm, source.surfaces, texture_base)
+	_add_mesh(farm, farm, source.surfaces, texture_base, ramps)
+	_add_ramps(farm, ramps)
 	for entry in source.entries:
 		var node := Node3D.new()
 		node.name = "ZoneModel_%02d" % int(entry.index)
@@ -35,7 +47,66 @@ func _bake_scene(info: Dictionary) -> void:
 	print("BAKE_OK: area ", info.id, ", ", source.entries.size(), " positioned zone models")
 	farm.free()
 
-func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: String) -> void:
+func _ramp_planes(ramp: Dictionary) -> Array:
+	var low := _ramp_point(ramp, [minf(ramp["from"][0], ramp.to[0]), minf(ramp["from"][1], ramp.to[1]) - 0.001], ramp.cross[0])
+	var high := _ramp_point(ramp, [maxf(ramp["from"][0], ramp.to[0]), maxf(ramp["from"][1], ramp.to[1]) + 0.001], ramp.cross[1])
+	return [Plane(Vector3.LEFT, -low.x), Plane(Vector3.RIGHT, high.x), Plane(Vector3.FORWARD, -low.z), Plane(Vector3.BACK, high.z), Plane(Vector3.DOWN, -low.y), Plane(Vector3.UP, high.y)]
+
+func _outside_ramp(polygon: PackedVector3Array, planes: Array) -> Array:
+	var pieces := []
+	var remainder := polygon
+	for plane: Plane in planes:
+		var outside := Geometry3D.clip_polygon(remainder, Plane(-plane.normal, -plane.d))
+		if outside.size() >= 3:
+			pieces.append(outside)
+		remainder = Geometry3D.clip_polygon(remainder, plane)
+		if remainder.size() < 3:
+			break
+	return pieces
+
+func _check_ramp_cut() -> void:
+	var ramp := {"axis": "x", "from": [0, 0], "to": [1, 0.2], "cross": [0, 1]}
+	var face := PackedVector3Array([Vector3(-1, 0, -1), Vector3(3, 0, -1), Vector3(-1, 0, 3)])
+	var area := 0.0
+	for polygon: PackedVector3Array in _outside_ramp(face, _ramp_planes(ramp)):
+		for i in range(1, polygon.size() - 1):
+			area += (polygon[i] - polygon[0]).cross(polygon[i + 1] - polygon[0]).length() * 0.5
+	assert(absf(area - 7.0) < 0.0001, "Ramp must cut its own footprint while preserving the surrounding platform")
+	print("RAMP_CUT_OK: unit ramp footprint removed; surrounding platform area preserved")
+
+func _ramp_point(ramp: Dictionary, end: Array, side: float) -> Vector3:
+	return Vector3(end[0], end[1], side) if ramp.axis == "x" else Vector3(side, end[1], end[0])
+
+func _add_ramps(farm: Node3D, ramps: Array) -> void:
+	if ramps.is_empty():
+		return
+	var group := Node3D.new()
+	group.name = "WalkableRamps"
+	farm.add_child(group)
+	group.owner = farm
+	for ramp in ramps:
+		var a := _ramp_point(ramp, ramp["from"], ramp.cross[0])
+		var b := _ramp_point(ramp, ramp["from"], ramp.cross[1])
+		var c := _ramp_point(ramp, ramp.to, ramp.cross[0])
+		var d := _ramp_point(ramp, ramp.to, ramp.cross[1])
+		var faces := PackedVector3Array([a, c, b, b, c, d])
+		if (faces[1] - faces[0]).cross(faces[2] - faces[0]).y < 0:
+			faces = PackedVector3Array([a, b, c, b, d, c])
+		var body := StaticBody3D.new()
+		body.name = str(ramp.name).to_pascal_case()
+		body.collision_layer = 10 # Physical floor and walkability query.
+		body.collision_mask = 0
+		var shape := CollisionShape3D.new()
+		var plane := ConcavePolygonShape3D.new()
+		plane.set_faces(faces)
+		plane.backface_collision = true
+		shape.shape = plane
+		group.add_child(body)
+		body.owner = farm
+		body.add_child(shape)
+		shape.owner = farm
+
+func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: String, ramps: Array = []) -> void:
 	var mesh := ArrayMesh.new()
 	var walkable_faces := PackedVector3Array()
 	var ground_faces := PackedVector3Array()
@@ -49,14 +120,21 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 		assert(surface.has("primitive_flags") and surface.primitive_flags.size() * 3 == vertices.size(), "Re-extract source ground flags before baking")
 		if parent == farm:
 			for triangle in surface.primitive_flags.size():
-				if (int(surface.primitive_flags[triangle]) & 0xC080) == 0:
-					for corner in 3:
-						ground_faces.append(vertices[triangle * 3 + corner])
-				# player_slide_on_bump probes with 0xE080; decoration/blocked faces stay excluded.
-				if int(surface.primitive_flags[triangle]) & 0xE080:
-					continue
-				for corner in 3:
-					walkable_faces.append(vertices[triangle * 3 + corner])
+				var polygons := [vertices.slice(triangle * 3, triangle * 3 + 3)]
+				for ramp in ramps:
+					var remaining := []
+					for polygon: PackedVector3Array in polygons:
+						remaining.append_array(_outside_ramp(polygon, ramp.clip_planes))
+					polygons = remaining
+				for polygon: PackedVector3Array in polygons:
+					for i in range(1, polygon.size() - 1):
+						var face := PackedVector3Array([polygon[0], polygon[i], polygon[i + 1]])
+						if (face[1] - face[0]).cross(face[2] - face[0]).length_squared() < 0.000000000001:
+							continue
+						if (int(surface.primitive_flags[triangle]) & 0xC080) == 0:
+							ground_faces.append_array(face)
+						if (int(surface.primitive_flags[triangle]) & 0xE080) == 0:
+							walkable_faces.append_array(face)
 		for i in range(0, surface.uv.size(), 2):
 			uv.append(Vector2(surface.uv[i], surface.uv[i + 1]))
 		var arrays := []

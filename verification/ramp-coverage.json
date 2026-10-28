@@ -1,0 +1,415 @@
+{
+  "date": "2026-10-28",
+  "audited_locations": 43,
+  "ramp_locations": 17,
+  "continuous_slopes": 19,
+  "flat_landings": 1,
+  "movement": "Native CharacterBody3D move_and_slide and floor_snap; no manual step lifting",
+  "locations": [
+    {
+      "location": "basil_bedroom",
+      "surfaces": [
+        {
+          "name": "north_staircase",
+          "axis": "x",
+          "from": [
+            0.508,
+            -0.34
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "cross": [
+            -1.48,
+            -0.92
+          ]
+        }
+      ]
+    },
+    {
+      "location": "basil_house",
+      "surfaces": [
+        {
+          "name": "north_staircase",
+          "axis": "x",
+          "from": [
+            1.2,
+            0
+          ],
+          "to": [
+            0,
+            0.8
+          ],
+          "cross": [
+            -1.48,
+            -0.92
+          ]
+        }
+      ]
+    },
+    {
+      "location": "beach",
+      "surfaces": [
+        {
+          "name": "pier_entrance",
+          "axis": "x",
+          "from": [
+            -6.6,
+            -0.4
+          ],
+          "to": [
+            -7.4,
+            0.0
+          ],
+          "cross": [
+            -1.2,
+            -0.4
+          ]
+        }
+      ]
+    },
+    {
+      "location": "blacksmith_bedroom",
+      "surfaces": [
+        {
+          "name": "east_staircase",
+          "axis": "z",
+          "from": [
+            -0.332,
+            -0.58
+          ],
+          "to": [
+            -1.2,
+            0
+          ],
+          "cross": [
+            0.92,
+            1.6
+          ]
+        }
+      ]
+    },
+    {
+      "location": "blacksmith_forge",
+      "surfaces": [
+        {
+          "name": "east_staircase",
+          "axis": "z",
+          "from": [
+            0.32,
+            0
+          ],
+          "to": [
+            -0.68,
+            0.664
+          ],
+          "cross": [
+            0.92,
+            1.6
+          ]
+        }
+      ]
+    },
+    {
+      "location": "clinic",
+      "surfaces": [
+        {
+          "name": "north_staircase",
+          "axis": "x",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1.2,
+            0.8
+          ],
+          "cross": [
+            -1.88,
+            -1.448
+          ]
+        }
+      ]
+    },
+    {
+      "location": "clinic_upstairs",
+      "surfaces": [
+        {
+          "name": "north_staircase",
+          "axis": "x",
+          "from": [
+            -0.664,
+            -0.356
+          ],
+          "to": [
+            -1.2,
+            0
+          ],
+          "cross": [
+            -1.88,
+            -1.32
+          ]
+        }
+      ]
+    },
+    {
+      "location": "hot_spring",
+      "surfaces": [
+        {
+          "name": "bath_staircase",
+          "axis": "x",
+          "from": [
+            -5.2,
+            1.412
+          ],
+          "to": [
+            -5.868,
+            1.892
+          ],
+          "cross": [
+            -8.4,
+            -8.0
+          ]
+        }
+      ]
+    },
+    {
+      "location": "inn",
+      "surfaces": [
+        {
+          "name": "south_staircase",
+          "axis": "x",
+          "from": [
+            1.12,
+            0
+          ],
+          "to": [
+            -0.08,
+            0.8
+          ],
+          "cross": [
+            3.32,
+            3.88
+          ]
+        }
+      ]
+    },
+    {
+      "location": "library",
+      "surfaces": [
+        {
+          "name": "east_staircase",
+          "axis": "z",
+          "from": [
+            1.32,
+            0
+          ],
+          "to": [
+            -0.84,
+            1.44
+          ],
+          "cross": [
+            0.12,
+            0.68
+          ]
+        }
+      ]
+    },
+    {
+      "location": "poultry_farm_bedroom",
+      "surfaces": [
+        {
+          "name": "north_staircase",
+          "axis": "x",
+          "from": [
+            -0.4,
+            -0.32
+          ],
+          "to": [
+            -0.88,
+            0
+          ],
+          "cross": [
+            -1.08,
+            -0.68
+          ]
+        }
+      ]
+    },
+    {
+      "location": "poultry_farm_house",
+      "surfaces": [
+        {
+          "name": "north_staircase",
+          "axis": "x",
+          "from": [
+            0.32,
+            0
+          ],
+          "to": [
+            -0.816,
+            0.836
+          ],
+          "cross": [
+            -1.08,
+            -0.68
+          ]
+        }
+      ]
+    },
+    {
+      "location": "town_south",
+      "surfaces": [
+        {
+          "name": "blacksmith_entrance",
+          "axis": "x",
+          "from": [
+            0.8,
+            0.0
+          ],
+          "to": [
+            0.4,
+            0.2
+          ],
+          "cross": [
+            2.48,
+            3.12
+          ]
+        },
+        {
+          "name": "winery_entrance",
+          "axis": "x",
+          "from": [
+            0.8,
+            0.0
+          ],
+          "to": [
+            0.4,
+            0.2
+          ],
+          "cross": [
+            -1.12,
+            -0.48
+          ]
+        },
+        {
+          "name": "cellar_entrance",
+          "axis": "x",
+          "from": [
+            -2.28,
+            -0.2
+          ],
+          "to": [
+            -1.6,
+            0.2
+          ],
+          "cross": [
+            -2.8,
+            -2.4
+          ]
+        },
+        {
+          "name": "cellar_landing",
+          "axis": "x",
+          "from": [
+            -1.6,
+            0.2
+          ],
+          "to": [
+            -1.0,
+            0.2
+          ],
+          "cross": [
+            -2.8,
+            -2.4
+          ]
+        }
+      ]
+    },
+    {
+      "location": "town_square",
+      "surfaces": [
+        {
+          "name": "beach_staircase",
+          "axis": "x",
+          "from": [
+            6.0,
+            -0.5
+          ],
+          "to": [
+            5.0,
+            0.0
+          ],
+          "cross": [
+            -0.4,
+            0.4
+          ]
+        }
+      ]
+    },
+    {
+      "location": "winery_cellar",
+      "surfaces": [
+        {
+          "name": "south_staircase",
+          "axis": "x",
+          "from": [
+            0.8,
+            0
+          ],
+          "to": [
+            2,
+            0.8
+          ],
+          "cross": [
+            0.52,
+            1.2
+          ]
+        }
+      ]
+    },
+    {
+      "location": "yodel_ranch_bedroom",
+      "surfaces": [
+        {
+          "name": "west_staircase",
+          "axis": "z",
+          "from": [
+            -0.652,
+            -0.808
+          ],
+          "to": [
+            0.68,
+            0
+          ],
+          "cross": [
+            -1.48,
+            -1.08
+          ]
+        }
+      ]
+    },
+    {
+      "location": "yodel_ranch_house",
+      "surfaces": [
+        {
+          "name": "west_staircase",
+          "axis": "z",
+          "from": [
+            -0.32,
+            0
+          ],
+          "to": [
+            0.816,
+            0.836
+          ],
+          "cross": [
+            -1.48,
+            -1.08
+          ]
+        }
+      ]
+    }
+  ]
+}

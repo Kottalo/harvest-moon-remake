@@ -48,3 +48,10 @@ The user authorized a private GitHub checkpoint including project assets. Keep t
 - `verify_stair_transitions.gd` 现在每次换层后，从真实到达位置立刻按反方向返回，不等待、不传送、不修改过渡状态。16 条连接均通过立即返回测试；新测试在修复前首先复现牧场卧室下楼失败。
 - 运行中物理方向键实测路线：188→192→188→192→188，折返等待 0 帧。证据：`verification/immediate-stair-live.json`、`verification/immediate-stair-returns.txt`。
 
+## 2026-10-28 全部楼梯改为连续斜坡
+
+- 按用户要求删除角色主动抬升、向上/前方跨阶扫掠等专门逻辑。角色 Y 只由 Godot 原生碰撞移动、重力和 floor snap 决定；地面查询只限制无效通行区域。
+- 审计当前 43 个地点，为 17 个地点设置 19 段连续楼梯坡道和 1 处平整落脚平台，保留楼梯原始外观。原版分段隐藏坡面也合并为整片，包含室外镇南街区、广场、海滩、温泉及室内楼梯。各地点的 `walkable_ramps.json` 是定义，场景中的 `WalkableRamps/<语义名称>` 是原生碰撞资源。
+- 烘焙器使用 Godot 几何裁切移除坡道范围内的旧台阶/坡面碰撞，保留周围平台；`tools/bake_assets.gd -- --check` 检查裁切面积，`-- --ramps-only` 只更新有坡道定义的地点。
+- 覆盖与验证记录：`verification/ramp-coverage.json`、`all-ramps-60.txt`、`all-ramps-120.txt`、`all-ramps-transitions.txt`、`all-ramps-world.txt`。每段坡面均采样宽度和长度，保留立即折返、身体净空、高障碍及薄墙检查。
+

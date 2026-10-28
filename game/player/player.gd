@@ -10,7 +10,7 @@ var animation_data: Dictionary
 const WALK_SPEED := 41.0 * 30.0 / 1000.0
 const RUN_SPEED := 73.0 * 30.0 / 1000.0
 # player.c: GROUND_TOLERANCE_DEFAULT=200; player_slide_on_bump probes 48 units ahead.
-const MAX_STEP_HEIGHT := 200.0 / 1000.0
+const GROUND_PROBE_HEIGHT := 200.0 / 1000.0
 const GROUND_PROBE_REACH := 48.0 / 1000.0
 
 func _ready() -> void:
@@ -24,43 +24,26 @@ func _physics_process(delta: float) -> void:
 	velocity.x = direction.x * speed
 	velocity.z = direction.y * speed
 	velocity.y -= 14 * delta
-	_follow_ground(Vector3(velocity.x, 0, velocity.z) * delta)
+	_constrain_to_ground(Vector3(velocity.x, 0, velocity.z) * delta)
 	move_and_slide()
 	_update_animation(direction, running, delta)
 
-func _follow_ground(motion: Vector3) -> void:
+func _constrain_to_ground(motion: Vector3) -> void:
 	if velocity.y > 0 or motion.is_zero_approx():
 		return
 	# farm_probe.c: settle against walkable ground, not every visible model face.
 	# The native capsule must reach the next tread even when one 120 Hz step is tiny.
 	var ahead := motion + motion.normalized() * maxf(GROUND_PROBE_REACH, footprint.radius)
-	var floor_hit := {}
 	# Original integer edge tests include triangle seams. Native rays can miss exactly on them.
 	for edge in [Vector3.ZERO, Vector3(0.001, 0, 0), Vector3(-0.001, 0, 0), Vector3(0, 0, 0.001), Vector3(0, 0, -0.001)]:
-		var query := PhysicsRayQueryParameters3D.create(global_position + up_direction * MAX_STEP_HEIGHT + ahead + edge, global_position - up_direction * MAX_STEP_HEIGHT + ahead + edge)
+		var query := PhysicsRayQueryParameters3D.create(global_position + up_direction * GROUND_PROBE_HEIGHT + ahead + edge, global_position - up_direction * GROUND_PROBE_HEIGHT + ahead + edge)
 		query.exclude = [get_rid()]
 		query.collision_mask = 8 # Original forward probe: skip mask 0xE080.
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty() and hit.normal.dot(up_direction) >= cos(floor_max_angle):
-			floor_hit = hit
-			break
-	if floor_hit.is_empty():
-		velocity.x = 0
-		velocity.z = 0
-		return
-	var rise: float = (floor_hit.position - global_position).dot(up_direction)
-	if rise <= safe_margin or rise > MAX_STEP_HEIGHT:
-		return
-	# Sweep only the actual rise: raising by the maximum falsely hits low overhead geometry.
-	var lift := up_direction * rise
-	if test_move(global_transform, lift, null, safe_margin):
-		return
-	var raised := global_transform
-	raised.origin += lift
-	if test_move(raised, motion, null, safe_margin):
-		return
-	global_position += lift
-	velocity.y = 0
+			return
+	velocity.x = 0
+	velocity.z = 0
 
 func _setup_input() -> void:
 	var keys := {

@@ -10,7 +10,7 @@
 
 人物使用固定世界尺寸的 3D billboard，按原版镜头基准校准。镜头距离、FOV 或正交缩放变化时，人物与场景一起缩放，不再固定人物的屏幕像素大小。
 
-地面与楼梯按原版面片标志区分可行走表面和显示模型，使用原版高度容差并检查身体净空。换层遵循原版区域事件规则：自动入口直接走入，需要确认的入口按 E。楼梯及障碍回归：`godot --headless --path . --script tools/verify_collision.gd`（追加 `-- --120hz` 验证 120 Hz）；完整上下楼流程检查为 `tools/verify_stair_transitions.gd`。
+所有可通行楼梯使用连续斜坡碰撞，外观仍是原版楼梯；角色通过 Godot 原生移动与贴地跟随坡面，不再主动跨级抬升。各地点的 `walkable_ramps.json` 定义坡道与平台，烘焙后位于场景的 `WalkableRamps` 节点下。换层遵循原版区域事件规则：自动入口直接走入，需要确认的入口按 E。坡道及障碍回归：`godot --headless --path . --script tools/verify_collision.gd`（追加 `-- --120hz` 验证 120 Hz）；完整上下楼流程检查为 `tools/verify_stair_transitions.gd`。
 
 换层后可立即折返；确认键按住跨场景时，需要松开再按才触发下一次确认。
 
