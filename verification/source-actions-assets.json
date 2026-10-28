@@ -1,0 +1,23 @@
+{
+  "banks": {
+    "base": 177,
+    "tool_0": 100,
+    "tool_1": 100,
+    "tool_2": 100,
+    "tool_3": 100,
+    "tool_4": 100,
+    "overcharge": 1,
+    "milker": 4,
+    "clippers": 4,
+    "brush": 4,
+    "bell": 4,
+    "medicine": 4,
+    "refill": 20,
+    "seeds": 8,
+    "fishing": 13,
+    "potion": 4
+  },
+  "doors": 22,
+  "field_items": 423,
+  "source": "original USA disc and decomp tables"
+}

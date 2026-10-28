@@ -143,7 +143,10 @@ func _run() -> void:
 		Input.action_press("interact")
 		await _frames(3)
 		Input.action_release("interact")
-		await _frames(3)
+		for frame in Engine.physics_ticks_per_second*3:
+			await _frames(1)
+			if not world.transitioning:
+				break
 		world.set_physics_process(false)
 		if not _require(world.current_area == 188, "Hospital collision blocked its action exit"):
 			return

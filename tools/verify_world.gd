@@ -42,8 +42,10 @@ func _run() -> void:
 			Input.action_press("interact")
 			farm._check_exits(0.0)
 			Input.action_release("interact")
-			await process_frame
-			await process_frame
+			for frame in 180:
+				await _frames(1)
+				if not farm.transitioning:
+					break
 			if farm.current_area != int(exit.target):
 				push_error("Exit did not reach destination: " + str([area, exit.index, exit.target, farm.current_area]))
 				quit(1)

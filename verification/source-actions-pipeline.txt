@@ -1,0 +1,9 @@
+ACTION_ASSETS_CHECK_OK: 6205 frames; common canvas margins, bounded pages and original 90 frames unchanged
+NATIVE_CHECK_OK: 1.44x camera distance with original perspective/angle, four diagonal screen directions/facings, scene object positions, walk/run speeds=[1.23014664649963, 1.23014664649963, 2.19016265869141]; imported wall blocks player
+ACTIONS_CHECK_OK
+WORLD_CHECK_OK: 43 scenes with walkable entry floors; 92 non-coast source exits reached their destinations at original coordinates; coast crossing checked separately
+HOSPITAL_DOOR_OK running=false stop=(2.4, 0.020934, -0.709515); E entered clinic
+HOSPITAL_DOOR_OK running=true stop=(2.4, 0.020935, -0.692823); E entered clinic
+COLLISION_CHECK_OK: 60 Hz; walk/run up/down imported stairs; tall/thin obstacles and low ceilings block player
+STAIR_TRANSITIONS_OK: 13 automatic and 3 action-gated room transitions via physical keys; all immediate returns passed without waits or resets
+STRUCTURE_CHECK_OK: 43 named location folders; player/camera/world boundaries and resource references valid

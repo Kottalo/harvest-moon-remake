@@ -1,0 +1,20 @@
+{
+	"behind_wall": "(0.8, 0.0863, 0.0863, 1.0)",
+	"blending": {
+		"additive_black": "(0.0863, 0.1961, 0.4, 1.0)",
+		"additive_ok": true,
+		"averaged_black": "(0.0431, 0.098, 0.2, 1.0)",
+		"background": "(0.0863, 0.1961, 0.4, 1.0)",
+		"mixed_stp_ok": true,
+		"ok": true,
+		"opaque_texel": "(0.4, 0.4, 0.4, 1.0)",
+		"water": "(0.4863, 0.6, 0.8, 1.0)"
+	},
+	"check": "fixed sprite anchor; continuous solid geometry depth; PS1 blend/STP; real GPU pixels",
+	"front_cap": "(0.1569, 0.6431, 0.9333, 1.0)",
+	"geometry_left": "(0.8, 0.0863, 0.0863, 1.0)",
+	"geometry_right": "(0.0863, 0.0863, 0.8, 1.0)",
+	"ok": true,
+	"solid_geometry_ok": true,
+	"sprite_order_ok": true
+}

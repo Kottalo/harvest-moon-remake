@@ -378,25 +378,26 @@ def import_world(disc, offsets, out):
     return reports
 
 
-def player_sprites(data, out):
+def compose_animations(data, bank_offset, range_ids, palette_rule=None, canvas_size=128):
     """Compose the original ANI parts with their original palette and frame timing."""
     assert struct.unpack_from('<I', data)[0] == 14
     images, lists, parts, ranges, frames = struct.unpack_from('<5I', data, 16)
-    vram, blocks = texture_bank(data[0xbe08:])
+    vram, blocks = texture_bank(data[bank_offset:])
     words = memoryview(vram).cast('H')
     rendered, animations, cache = [], [], {}
-    # First 15 source ranges cover idle, walking, running and common movement poses.
-    for animation in range(15):
+    for animation in range_ids:
         count, offset = struct.unpack_from('<hH', data, ranges + animation * 4)
         result = []
         for frame in range(count):
             list_id, fx, fy, duration, control = struct.unpack_from('<HhhBB', data, frames + offset + frame * 10)
-            canvas = Image.new('RGBA', (128, 128))
+            canvas = Image.new('RGBA', (canvas_size, canvas_size))
             if list_id <= 0xfffd:
                 part_count, part_offset = struct.unpack_from('<hH', data, lists + list_id * 4)
                 assert 0 <= part_count < 64
                 for part in reversed(range(part_count)):
                     image_id, palette_id, dx, dy, attr, place = struct.unpack_from('<HHhhBB', data, parts + part_offset + part * 12)
+                    if palette_rule is not None:
+                        palette_id = palette_rule(animation, palette_id, place)
                     key = (image_id, palette_id, attr)
                     if key not in cache:
                         x, y, w, h = struct.unpack_from('<4h', data, images + image_id * 8)
@@ -417,12 +418,17 @@ def player_sprites(data, out):
                         if attr & 2:
                             image = image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
                         cache[key] = image
-                    canvas.alpha_composite(cache[key], (64 + dx + fx, 112 + dy + fy))
+                    canvas.alpha_composite(cache[key], (canvas_size//2 + dx + fx, canvas_size//2+48 + dy + fy))
             bounds = canvas.getchannel('A').getbbox()
             result.append(dict(tile=len(rendered), duration=duration, control=control,
                                foot_y=bounds[3] if bounds else 112))
             rendered.append(canvas)
         animations.append(result)
+    return rendered, animations, blocks
+
+
+def player_sprites(data, out):
+    rendered, animations, blocks = compose_animations(data, 0xbe08, range(15))
     atlas = Image.new('RGBA', (1024, ((len(rendered) + 7) // 8) * 128))
     for tile, image in enumerate(rendered):
         atlas.paste(image, (tile % 8 * 128, tile // 8 * 128))

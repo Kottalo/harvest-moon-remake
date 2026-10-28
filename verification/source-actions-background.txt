@@ -1,0 +1,1 @@
+OFFSCREEN_CHECK: exit=0; input desktop remained Default; no desktop switch performed

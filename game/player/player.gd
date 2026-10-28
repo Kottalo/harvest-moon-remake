@@ -5,6 +5,11 @@ var animation := 0
 var animation_frame := 0
 var animation_time := 0.0
 var animation_data: Dictionary
+var actions
+var input_locked := false
+var scripted_direction := Vector2.ZERO
+var scripted_walk_time := 0.0
+var normal_texture: Texture2D
 @onready var sprite: Sprite3D = $Sprite3D
 @onready var footprint: CapsuleShape3D = $CollisionShape3D.shape
 const WALK_SPEED := 41.0 * 30.0 / 1000.0
@@ -15,12 +20,21 @@ const GROUND_PROBE_REACH := 48.0 / 1000.0
 
 func _ready() -> void:
 	_setup_input()
+	sprite.material_override = sprite.material_override.duplicate()
 	animation_data = JSON.parse_string(FileAccess.get_file_as_string("res://game/player/player_animations.json"))
+	normal_texture = sprite.texture
+	actions = load("res://game/player/player_actions.gd").new()
+	add_child(actions)
+	actions.setup(self)
 	_update_animation(Vector2.ZERO, false, 0.0)
 
 func _physics_process(delta: float) -> void:
-	var direction := _movement_direction()
-	var running := Input.is_action_pressed("run")
+	actions.poll_input()
+	var direction := Vector2.ZERO if input_locked or actions.busy() else _movement_direction()
+	if scripted_walk_time > 0:
+		direction = scripted_direction
+		scripted_walk_time = maxf(0,scripted_walk_time-delta)
+	var running := Input.is_action_pressed("run") and not input_locked
 	var speed := RUN_SPEED if running else WALK_SPEED
 	velocity.x = direction.x * speed
 	velocity.z = direction.y * speed
@@ -35,7 +49,11 @@ func _physics_process(delta: float) -> void:
 		var surface := get_world_3d().direct_space_state.intersect_ray(query)
 		if not surface.is_empty() and surface.normal.y >= cos(floor_max_angle):
 			sprite.position.y = surface.position.y - global_position.y
-	_update_animation(direction, running, delta)
+	if actions.busy():
+		actions.advance(delta)
+	else:
+		_update_animation(direction, running, delta)
+	actions.update_held(running and not direction.is_zero_approx())
 
 func _constrain_to_ground(motion: Vector3) -> void:
 	if velocity.y > 0 or motion.is_zero_approx():
@@ -58,7 +76,8 @@ func _setup_input() -> void:
 	var keys := {
 		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
 		"move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
-		"run": [KEY_SHIFT], "interact": [KEY_E, KEY_ENTER]
+		"run": [KEY_SHIFT], "interact": [KEY_E, KEY_ENTER],
+		"use_tool": [KEY_SPACE, KEY_X], "next_tool": [KEY_Q], "tool_level": [KEY_R], "refill_can": [KEY_G]
 	}
 	for action in keys:
 		if not InputMap.has_action(action):
@@ -88,6 +107,14 @@ func _update_animation(direction: Vector2, running: bool, delta: float) -> void:
 			facing = 3 if direction.x > 0 else 1
 		else:
 			facing = 0 if direction.y > 0 else 2
+	if actions != null and actions.carried_id != 0:
+		actions.draw_carry(direction,running,delta)
+		return
+	if sprite.texture != normal_texture:
+		sprite.texture = normal_texture
+		sprite.hframes = 8
+		sprite.vframes = 12
+		sprite.material_override.set_shader_parameter("albedo_texture",normal_texture)
 	# Original player.c: idle range 0 indexed by facing; walk 1+facing; run 6+facing.
 	var selected := (6 if running else 1) + facing if moving else 0
 	if selected != animation:

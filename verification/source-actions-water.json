@@ -1,0 +1,17 @@
+{
+	"ok": true,
+	"scroll": {
+		"cycle_ticks": 144.0,
+		"height": 31.0,
+		"ok": true,
+		"smooth": true,
+		"step_ticks": 9.0
+	},
+	"waves": {
+		"cycle_ticks": 48.0,
+		"height": 63.0,
+		"ok": true,
+		"smooth": true,
+		"step_ticks": 16.0
+	}
+}

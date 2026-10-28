@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+ACTIONS_GPU_RESULT: {"accepted_water_animation":true,"carried_item_texture_bound":true,"common_canvas_aligned":true,"existing_render_order":true,"gallery_samples":12,"held_layer_behind_body":true,"legacy_bounds":"[P: (101, 89), S: (115, 151)]","offscreen":true,"ok":true,"overlap_pixel":"(0.0863, 0.1961, 0.898, 1.0)","packed_bounds":"[P: (101, 89), S: (115, 151)]","physics_processing":false,"player_position":"(0.0, 0.0, 0.0)","source_subtractive_blend":true,"subtractive_pixel":"(0.6, 0.298, 0.0471, 1.0)"}

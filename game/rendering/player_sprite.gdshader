@@ -2,6 +2,7 @@ shader_type spatial;
 render_mode unshaded, cull_disabled;
 
 uniform sampler2D albedo_texture : source_color, filter_linear, repeat_disable;
+uniform float sort_bias = 0.0;
 varying flat float source_depth;
 
 void vertex() {
@@ -9,7 +10,10 @@ void vertex() {
 	// player_draw sorts the entire body at the hand point relative to its ground position.
 	// Pose pixels keep one depth, so a wall cannot slice through the billboard.
 	vec3 anchor = MODEL_MATRIX[3].xyz + vec3(0.15, 0.1, 0.15);
-	vec4 projected = PROJECTION_MATRIX * VIEW_MATRIX * vec4(anchor, 1.0);
+	vec4 view_anchor = VIEW_MATRIX * vec4(anchor, 1.0);
+	// Positive bias is farther in view space, including reverse-Z renderers.
+	view_anchor.z -= sort_bias;
+	vec4 projected = PROJECTION_MATRIX * view_anchor;
 	source_depth = projected.z / projected.w;
 }
 

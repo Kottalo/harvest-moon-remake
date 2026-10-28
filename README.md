@@ -4,7 +4,11 @@
 
 现有 43 个原版春季地点、94 条原始连接，支持移动、跑步、碰撞、原版镜头和主角动画。海滩与广场的双向连接已无缝化，两侧模型常驻；其余 92 个分区出口沿用原版坐标，门口按 E 或 Enter 进出，Tab 查看当前地点全景。方向键：上东北、下西南、左西北、右东南。
 
-这是场景与移动阶段的移植，NPC、对话、剧情、营业时间、种植、物品、动物、音频和完整存档尚未实现。
+当前已接入原版角色动作与基础散落物交互；NPC、对话、剧情、营业时间、完整种植／背包／动物系统、音频和完整存档尚未实现。
+
+动作使用原始 ANI 帧、控制字节、部件偏移和调色板：五种农具的五个等级／四朝向、蓄力与松手挥动、挤奶器、剪毛器、刷子、铃铛、钓竿，以及补水等辅助动作。`Space / X` 使用工具（蓄力后松开），`Q` 轮换工具，`R` 切换农具等级；水壶的补水动作暂用 `G`。当前轮换表用于验证全部动作，尚未接入商店购买、工具升级进度、作物和动物的完整效果判定。
+
+农场加载原版新游戏布局中的石头、树枝和杂草，按 `E` 拿起，抱持时使用对应行走／跑步姿态。石头、树枝对着农场空格再按 `E / Space` 可以放回，杂草按原版丢弃；`Shift+Space` 投掷。门板按原版加速开合，普通换地点逐步减暗旧画面，再在新地点淡入；海滩—广场仍保持无缝。
 
 2026-10-28：按用户要求，游戏镜头连续两次拉远 20%，现为原版距离的 1.44 倍，保留原版观察角度与透视参数。
 
@@ -41,6 +45,7 @@ git -C harvest-moon-remake lfs pull
 - `game/player/`：角色场景、输入、移动、动画、共享角色素材。
 - `game/camera/`：原版镜头投影、跟随和检查全景。
 - `game/world/`：主场景、地点目录、出入口切换。
+- `game/items/`：散落物原生图像、农场初始布局和会话内交互记录。
 - `game/locations/<名称>/`：每个地点的原生场景、贴图图集和材质；例如 `farmhouse`、`library`、`clinic`。
 - `tools/`：离线提取、转换及检查；`tools/generated/` 是可重新生成的中间文件，不提交。
 - `reference/hmbtn-decomp/`：原版反编译源码，固定版本的只读 Git submodule。
@@ -50,5 +55,7 @@ git -C harvest-moon-remake lfs pull
 `AGENTS.md` 定义目录职责和模块边界，`python tools/check_structure.py` 检查归属、命名和资源引用。旧 `scenes/`、`scripts/farm.gd` 与农场素材别名保留给现有编辑器标签页，运行入口已迁移到 `game/`，旧脚本只做跳转。
 
 运行时只使用 Godot 场景、PNG 和 JSON，不读取 ROM 或执行 PS1 指令。重新转换素材才需要本机 USA 镜像、Python/Pillow 和参考源码；入口是 `Import-Assets.ps1`。当前使用 Godot AI MCP 4.3.1，编辑器保持打开时通过 MCP 刷新素材。
+
+动作与过渡检查：`godot --headless --path . --script tools/verify_actions.gd`。后台 GPU 检查：`python tools/run_render_check.py --log <绝对日志路径>`，在独立 Windows 桌面离屏执行，不切换用户桌面或注入按键。动作预览见 `verification/source_actions_gallery.png`。
 
 这个私有 checkpoint 包含用户授权保存的项目素材，不包含 ROM；不要改为公开仓库。历史实现记录见 `PORTING.md`，当前目录及进度以本文件和 `CHECKPOINT.md` 为准。
