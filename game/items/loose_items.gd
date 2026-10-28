@@ -118,12 +118,7 @@ func _spawn(item: int, point: Vector3, solid: bool) -> Node3D:
 		body.collision_layer = 1
 		body.collision_mask = 0
 		var shape := CollisionShape3D.new()
-		if obstruction_shape == null:
-			obstruction_shape = BoxShape3D.new()
-			# A vertical barrier adapts the source's 2D occupancy test: the native
-			# rounded capsule must not climb onto a low box representing a sprite.
-			obstruction_shape.size = Vector3(FIELD_CELL_SIZE,0.4,FIELD_CELL_SIZE)
-		shape.shape = obstruction_shape
+		shape.shape = _obstruction_box()
 		var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
 		var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
 		var centre := _cell_bounds(column,row).get_center()
@@ -131,6 +126,14 @@ func _spawn(item: int, point: Vector3, solid: bool) -> Node3D:
 		node.add_child(body)
 		body.add_child(shape)
 	return node
+
+func _obstruction_box() -> BoxShape3D:
+	if obstruction_shape == null:
+		obstruction_shape = BoxShape3D.new()
+		# A vertical barrier adapts the source's 2D occupancy test: the native
+		# rounded capsule must not climb onto a low box representing a sprite.
+		obstruction_shape.size = Vector3(FIELD_CELL_SIZE,0.4,FIELD_CELL_SIZE)
+	return obstruction_shape
 
 func _cell_bounds(column: int, row: int) -> Rect2:
 	return Rect2(Vector2(column*FIELD_CELL_SIZE-4.4,row*FIELD_CELL_SIZE-1.6),Vector2.ONE*FIELD_CELL_SIZE)
@@ -176,6 +179,10 @@ func _remove(record: Dictionary) -> void:
 		batch.mesh.set_instance_transform(slot,Transform3D(Basis.IDENTITY,last.position))
 	batch.mesh.visible_instance_count = batch.records.size()
 	record.batch_slot = -1
+	# Same-tick placement queries must not see a collider awaiting queue_free().
+	var body: Node = record.node.get_node_or_null("Obstruction")
+	if body != null:
+		body.collision_layer = 0
 	record.node.queue_free()
 	if current_area == 0 and record.has("cell"):
 		field_cells[record.cell] = 0x167 # ITEM_SOIL
@@ -183,23 +190,56 @@ func _remove(record: Dictionary) -> void:
 func _placement(item: int) -> Dictionary:
 	if current_area != 0 or not catalogue.pictures[str(item)].place_on_farm:
 		return {}
-	# player_selection_to_result uses facing_steps[0..3] (400 units), then
-	# field_world_to_cell's original 399-unit integer cell conversion.
-	var point: Vector3 = world.player.position + world.player.actions.DIRECTIONS[world.player.facing]*0.4
+	# Keep the source forward target, but assist placement around a cell edge.
+	var facing: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
+	var point: Vector3 = world.player.position + facing*0.4
 	var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
 	var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
-	if column < 0 or column >= 45 or row < 0 or row >= 25:
-		return {}
-	var cell := row*45+column
-	if int(field_cells[cell]) != 0x167:
-		return {"blocked":true}
-	# A native capsule can straddle a cell edge. Do not create a blocker inside it.
-	var bounds := _cell_bounds(column,row)
 	var feet := Vector2(world.player.position.x,world.player.position.z)
-	var nearest := feet.clamp(bounds.position,bounds.end)
-	if feet.distance_to(nearest) < world.player.footprint.radius:
-		return {"blocked":true}
-	return {"cell":cell,"position":Vector3(column*0.4-4.2,0,row*0.4-1.4)}
+	var ideal := Vector2(point.x,point.z)
+	var direction := Vector2(facing.x,facing.z)
+	var best := {"blocked":true}
+	var best_distance := INF
+	var occupied := {}
+	for record in records[current_area]:
+		if record.active and record.has("cell"):
+			occupied[int(record.cell)] = true
+	var query := PhysicsShapeQueryParameters3D.new()
+	var box := BoxShape3D.new()
+	# One source unit of clearance permits touching neighbouring occupied cells.
+	box.size = _obstruction_box().size-Vector3(0.002,0.01,0.002)
+	query.shape = box
+	query.collision_mask = 1
+	query.exclude = [world.player.get_rid()]
+	var space := get_world_3d().direct_space_state
+	for y in range(row-1,row+2):
+		for x in range(column-1,column+2):
+			# Unimported source-layout placeholders are not physical obstacles.
+			if x<0 or x>=45 or y<0 or y>=25 or occupied.has(y*45+x):
+				continue
+			var bounds := _cell_bounds(x,y)
+			var centre := bounds.get_center()
+			if (centre-feet).dot(direction)<=0 or feet.distance_to(feet.clamp(bounds.position,bounds.end))<world.player.footprint.radius:
+				continue
+			var visual := Vector2(x*0.4-4.2,y*0.4-1.4)
+			var distance := visual.distance_squared_to(ideal)
+			if distance>=best_distance:
+				continue
+			var ray := PhysicsRayQueryParameters3D.create(Vector3(centre.x,world.player.position.y+0.5,centre.y),Vector3(centre.x,world.player.position.y-0.5,centre.y),2)
+			var floor_hit := space.intersect_ray(ray)
+			if floor_hit.is_empty() or floor_hit.normal.y<cos(world.player.floor_max_angle):
+				continue
+			var height: float = floor_hit.position.y
+			query.transform = Transform3D(Basis.IDENTITY,Vector3(centre.x,height+0.2,centre.y))
+			if not space.intersect_shape(query,1).is_empty():
+				continue
+			ray = PhysicsRayQueryParameters3D.create(world.player.position+Vector3.UP*0.2,Vector3(centre.x,height+0.2,centre.y),1)
+			ray.exclude = query.exclude
+			if not space.intersect_ray(ray).is_empty():
+				continue
+			best = {"cell":y*45+x,"position":Vector3(visual.x,height,visual.y)}
+			best_distance = distance
+	return best
 
 func release_item(item: int, thrown: bool) -> void:
 	var direction: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
@@ -207,8 +247,11 @@ func release_item(item: int, thrown: bool) -> void:
 		var node := _spawn(item,world.player.position+Vector3.UP*0.3,false)
 		flights.append({"node":node,"direction":direction,"velocity":0.0,"ground":world.player.position.y})
 	else:
-		if placement.is_empty():
+		# Re-evaluate after the release animation in case an obstacle moved in.
+		placement = _placement(item)
+		if placement.is_empty() or placement.get("blocked",false):
 			world.player.actions.carried_id = item
+			placement = {}
 			return
 		var point: Vector3 = placement.position
 		var record := {"id":item,"position":point,"active":true,"cell":placement.cell}
