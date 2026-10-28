@@ -15,3 +15,11 @@ The user's editor remains open; they are adjusting its orthographic viewing angl
 The old `scenes/original_farm.scn` and farm texture aliases remain for existing editor tabs. `scripts/farm.gd` is only a compatibility redirect; new systems belong under `game/`. Binary assets use Git LFS. ROMs, tool caches, credentials, Godot binaries and generated conversion JSON are excluded. The source reference is pinned as a Git submodule.
 
 The user authorized a private GitHub checkpoint including project assets. Keep the repository private and never upload ROM images. CodeGraph has not been configured; Ponytail and godot-ai MCP have been used.
+# 2026-10-28 素材恢复与镜头更新
+
+- LFS 历史迁移后本地残留了指针文本，导致编辑器贴图加载失败；已通过 `git lfs checkout` 恢复全部 1,525 个文件，并在运行中的编辑器重新导入 56 张旧贴图。
+- `tools/check_structure.py` 现在拒绝未展开的 LFS 指针；已验证真实素材通过、指针样本失败。
+- 按用户要求，游戏镜头距离为原版的 1.2 倍：水平 10.8、高差 5.4，保留原版 yaw/FOV 和四向移动。旧记录中的 9.0/4.5 是原版基准。
+- 原生运行检查、旧农场场景和全部 55 张旧农场贴图加载检查均通过；验证日志见 `verification/lfs-camera-fix.txt`。
+- 后续每次更新验证后提交并 push，仓库保持私有，二进制素材继续使用 LFS。
+

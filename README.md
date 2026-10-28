@@ -6,6 +6,8 @@
 
 这是场景与移动阶段的移植，NPC、对话、剧情、营业时间、种植、物品、动物、音频和完整存档尚未实现。
 
+2026-10-28：按用户要求，游戏镜头距离在原版基础上拉远 20%，保留原版观察角度与透视参数。
+
 ## 运行
 
 使用 Godot 4.7.2 打开 `project.godot`，主场景为 `game/world/world.tscn`。兼容性渲染器适用于当前电脑。桌面环境也可以运行 `Play-Godot.cmd` / `Open-Editor.cmd`，它们使用相邻的 `../Tools/Godot` 便携版。
@@ -17,6 +19,8 @@ git lfs install
 git clone --recurse-submodules https://github.com/Kottalo/harvest-moon-remake.git
 git -C harvest-moon-remake lfs pull
 ```
+
+如果 Godot 大量提示 PNG/场景加载失败，先运行 `python tools/check_structure.py`。它会检查是否残留 LFS 指针；在工程目录执行 `git lfs pull` 和 `git lfs checkout` 恢复真实素材，再让编辑器重新扫描、导入。迁移 LFS 历史后也应执行此检查，不能只以 `git status` 干净判断素材可用。
 
 ## 目录
 

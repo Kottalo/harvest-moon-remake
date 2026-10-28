@@ -4,6 +4,15 @@ import json
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
+for directory in ('game', 'assets', 'scenes'):
+    for path in (ROOT / directory).rglob('*'):
+        if path.suffix.lower() not in {'.png', '.scn'} or not path.is_file():
+            continue
+        with path.open('rb') as asset:
+            assert not asset.read(48).startswith(b'version https://git-lfs.github.com/spec/v1'), (
+                f'{path.relative_to(ROOT)} is an unresolved Git LFS pointer; '
+                'run git lfs pull, then git lfs checkout before opening Godot'
+            )
 world = json.loads((ROOT / 'game/world/location_catalog.json').read_text(encoding='utf-8'))
 slugs = {info['slug'] for info in world.values()}
 assert len(slugs) == len(world), 'Location folders must have unique semantic names'

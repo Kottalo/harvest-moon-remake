@@ -1,0 +1,13 @@
+2026-10-28: LFS working-tree recovery and 20% farther camera
+Recovered 1525 LFS-tracked working files; no unresolved asset pointers remain.
+Reimported 56 invalid legacy PNG imports through the running Godot AI MCP editor.
+LFS_GUARD_OK: valid assets pass; an unresolved pointer fixture is rejected.
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+RESTORED_ASSETS_OK: legacy scene geometry, player atlas and 55 legacy textures load
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+NATIVE_CHECK_OK: 20% farther camera with original perspective/angle, four diagonal screen directions/facings, scene object positions, walk/run=[1.23011493682861, 1.23011493682861, 2.19011998176575]; imported wall blocks player

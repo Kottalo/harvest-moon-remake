@@ -3,7 +3,7 @@
 ## Directory contract
 
 - `game/player/`: player scene, input, movement, ANI playback and shared player assets only. No world/map loading dependencies.
-- `game/camera/`: camera projection and follow/overview behavior only. Preserve the user-approved original parameters.
+- `game/camera/`: camera projection and follow/overview behavior only. Preserve the original yaw/FOV; the user requested 20% farther framing on 2026-10-28 (distance scale 1.2).
 - `game/world/`: world entry scene, location catalog, navigation/exits and simple navigation prompts. Do not put player animation, camera math, shops, crops or NPC behavior here.
 - `game/locations/<semantic_name>/`: one original place per folder, its native scene and texture atlases. Use names such as `farmhouse`, `library`, `clinic`; raw source area numbers belong in metadata, never the primary directory name.
 - `tools/`: offline conversion and runnable checks. `tools/generated/` contains ignored, regenerable conversion intermediates, not runtime code.
@@ -21,3 +21,4 @@
 - Godot 4.7.2 portable executables are at `../Tools/Godot`; use the compatibility renderer on this machine.
 - For runtime/physics changes, run `--headless --path . --script tools/verify_runtime.gd`. For importer changes, run its `--check`, re-extract, bake and run the native check using Import-Assets.ps1. Do not repeat conversion when only runtime code changed.
 - The user authorized a private GitHub checkpoint with project assets stored in Git LFS. Keep it private; never upload the disc/ROM or make game assets public.
+- The user requests every completed update be committed and pushed after verification. Check that local LFS assets are hydrated; a clean Git status alone is insufficient.
