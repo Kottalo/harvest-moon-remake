@@ -112,6 +112,7 @@ func _run() -> void:
 	for i in 16:
 		var angle := float(i) * TAU / 16.0
 		var query := PhysicsRayQueryParameters3D.create(Vector3(0, 0.4, 0), Vector3(cos(angle) * 30, 0.4, sin(angle) * 30))
+		query.collision_mask = 1 # Solid positioned objects, not the render-only terrain reference.
 		query.exclude = [farm.player.get_rid()]
 		var hit := space.intersect_ray(query)
 		if not hit.is_empty() and absf(hit.normal.y) < 0.1:

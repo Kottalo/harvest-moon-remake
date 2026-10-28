@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-28",
+  "method": "Godot AI MCP game_eval with InputEventKey and live physics frames",
+  "areas": [188, 192, 188, 192],
+  "physical_keys": ["LEFT", "RIGHT", "LEFT"],
+  "confirmation_pressed": false,
+  "final_location": "clinic_upstairs",
+  "editor_left_open": true
+}

@@ -61,7 +61,7 @@ func _check_exits(delta: float) -> void:
 		var action: bool = exit.requires_action
 		if not bounds.has_point(point) and not (action and bounds.has_point(ahead)):
 			continue
-		if action and int(exit.facing) in [0, 1, 2, 3] and int(exit.facing) != player.facing:
+		if exit.requires_facing and int(exit.facing) in [0, 1, 2, 3] and int(exit.facing) != player.facing:
 			continue
 		nearby_exit = exit
 		if action and not Input.is_action_just_pressed("interact"):

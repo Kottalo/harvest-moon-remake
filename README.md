@@ -10,7 +10,7 @@
 
 人物使用固定世界尺寸的 3D billboard，按原版镜头基准校准。镜头距离、FOV 或正交缩放变化时，人物与场景一起缩放，不再固定人物的屏幕像素大小。
 
-台阶支持自动上下，使用有高度限制的全身碰撞检测与地面吸附。楼梯及障碍回归检查：`godot --headless --path . --script tools/verify_collision.gd`，追加 `-- --120hz` 验证 120 Hz 物理帧率。
+地面与楼梯按原版面片标志区分可行走表面和显示模型，使用原版高度容差并检查身体净空。换层遵循原版区域事件规则：自动入口直接走入，需要确认的入口按 E。楼梯及障碍回归：`godot --headless --path . --script tools/verify_collision.gd`（追加 `-- --120hz` 验证 120 Hz）；完整上下楼流程检查为 `tools/verify_stair_transitions.gd`。
 
 ## 运行
 

@@ -37,6 +37,8 @@ func _bake_scene(info: Dictionary) -> void:
 
 func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: String) -> void:
 	var mesh := ArrayMesh.new()
+	var walkable_faces := PackedVector3Array()
+	var ground_faces := PackedVector3Array()
 	for surface in surfaces:
 		var vertices := PackedVector3Array()
 		var colors := PackedColorArray()
@@ -44,6 +46,17 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 		for i in range(0, surface.vertices.size(), 3):
 			vertices.append(Vector3(surface.vertices[i], surface.vertices[i + 1], surface.vertices[i + 2]))
 			colors.append(Color(surface.colors[i], surface.colors[i + 1], surface.colors[i + 2]))
+		assert(surface.has("primitive_flags") and surface.primitive_flags.size() * 3 == vertices.size(), "Re-extract source ground flags before baking")
+		if parent == farm:
+			for triangle in surface.primitive_flags.size():
+				if (int(surface.primitive_flags[triangle]) & 0xC080) == 0:
+					for corner in 3:
+						ground_faces.append(vertices[triangle * 3 + corner])
+				# player_slide_on_bump probes with 0xE080; decoration/blocked faces stay excluded.
+				if int(surface.primitive_flags[triangle]) & 0xE080:
+					continue
+				for corner in 3:
+					walkable_faces.append(vertices[triangle * 3 + corner])
 		for i in range(0, surface.uv.size(), 2):
 			uv.append(Vector2(surface.uv[i], surface.uv[i + 1]))
 		var arrays := []
@@ -70,6 +83,11 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 	instance.owner = farm
 	var body := StaticBody3D.new()
 	body.name = "Collision"
+	if parent == farm:
+		# Render-only stair risers/roofs are not original collision geometry.
+		body.name = "VisualGeometryReference"
+		body.collision_layer = 4
+		body.collision_mask = 0
 	var shape := CollisionShape3D.new()
 	shape.name = "CollisionShape"
 	var collision := mesh.create_trimesh_shape()
@@ -79,3 +97,19 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 	body.owner = farm
 	body.add_child(shape)
 	shape.owner = farm
+	for definition in [["Ground", 2, ground_faces], ["WalkableGround", 8, walkable_faces]]:
+		if definition[2].is_empty():
+			continue
+		var ground := StaticBody3D.new()
+		ground.name = definition[0]
+		ground.collision_layer = definition[1]
+		ground.collision_mask = 0
+		var ground_shape := CollisionShape3D.new()
+		var ground_mesh := ConcavePolygonShape3D.new()
+		ground_mesh.set_faces(definition[2])
+		ground_mesh.backface_collision = true
+		ground_shape.shape = ground_mesh
+		parent.add_child(ground)
+		ground.owner = farm
+		ground.add_child(ground_shape)
+		ground_shape.owner = farm

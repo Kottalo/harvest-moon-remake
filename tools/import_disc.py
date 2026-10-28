@@ -172,8 +172,10 @@ def model_mesh(data, vram, out, offset=0x2000, texture_names=None):
                 if textured and out / filename not in WRITTEN_TEXTURES:
                     texture_page(vram, page, clut).save(out / filename)
                     WRITTEN_TEXTURES.add(out / filename)
-                groups[name] = dict(texture=filename, vertices=[], colors=[], uv=[])
+                groups[name] = dict(texture=filename, vertices=[], colors=[], uv=[], primitive_flags=[])
             group = groups[name]
+            # ground.c / farm_settle_on_ground: low header bits govern walkability.
+            group['primitive_flags'].extend([header & 0xffff] * (1 if count == 3 else 2))
             for corner in ((0, 1, 2) if count == 3 else (0, 1, 2, 1, 3, 2)):
                 x, y, z = points[indices[corner]]
                 # PS1 camera looks along +Z with Y down. Godot uses -Z, Y up.
@@ -228,8 +230,13 @@ def scene_exits(data, count):
             continue
         # Farm zones intentionally test X/Z only, including boxes with zero Y thickness.
         entry = struct.unpack_from('<3h', data, offset + 38)
-        result.append(dict(index=index, target=target, facing=struct.unpack_from('<h', data, offset + 8)[0],
-                           requires_action=bool(flags & 0x1000),
+        facing, event = struct.unpack_from('<2h', data, offset + 8)
+        # player.c zone handling: HAS_EVENT bypasses FACING/action gating;
+        # event 0x2f also bypasses the action button, but still checks facing.
+        facing_gated = facing != 999 and flags & 0x1200 == 0x1000
+        result.append(dict(index=index, target=target, facing=facing, event=event, source_flags=flags,
+                           requires_facing=facing_gated,
+                           requires_action=facing_gated and event != 0x2f,
                            min=[low[0] / 1000, -high[2] / 1000],
                            max=[high[0] / 1000, -low[2] / 1000],
                            entry=[entry[0] / 1000, -entry[1] / 1000, -entry[2] / 1000]))
@@ -332,6 +339,23 @@ def player_sprites(data, out):
 
 
 def self_check():
+    zone_data = bytearray(0xbdc)
+    for flags, event, facing, expected in [(0x9200, 28, 1, False), (0x9000, 37, 1, True), (0x9000, 47, 1, False), (0x9000, 37, 999, False)]:
+        struct.pack_into('<2H', zone_data, 16, flags, 1)
+        struct.pack_into('<2h', zone_data, 24, facing, event)
+        struct.pack_into('<3h', zone_data, 30, -100, 0, -100)
+        struct.pack_into('<3h', zone_data, 36, 100, 0, 100)
+        assert scene_exits(zone_data, 2)[0]['requires_action'] == expected
+    model = bytearray(12 + 28 + 24 + 32)
+    struct.pack_into('<3I', model, 0, 0x41, 0, 1)
+    struct.pack_into('<7I', model, 12, 28, 3, 0, 0, 52, 2, 0)
+    for index, point in enumerate([(0, 0, 0), (100, 0, 0), (0, 0, 100)]):
+        struct.pack_into('<3h', model, 40 + index * 8, *point)
+    for index, flags in enumerate([0, 0x80]):
+        struct.pack_into('<I3B x 3H 2x', model, 64 + index * 16, 0x21010000 | flags, 128, 128, 128, 0, 1, 2)
+    surfaces, _ = model_mesh(model, bytearray(), ROOT, offset=0)
+    assert surfaces[0]['primitive_flags'] == [0, 0x80]
+    assert len(surfaces[0]['vertices']) == len(surfaces[0]['primitive_flags']) * 9
     assert expand_rle(b'\xfdABC\x03Z', 6) == b'ABCZZZ'
     assert expand_rle(b'\x00Q', 1) == b'Q'
     try:
@@ -349,7 +373,7 @@ def self_check():
         assert actual == (pixels if flags != 8 else bytes([1, 3, 5, 7, 2, 4, 6, 8]))
         assert count == 1
     assert rgba(0) == (0, 0, 0, 0) and rgba(0x7fff) == (255, 255, 255, 255)
-    print('RLE, raw/column image banks and palette checks passed')
+    print('RLE, raw/column image banks, palettes and source ground flags checked')
 
 
 def main():

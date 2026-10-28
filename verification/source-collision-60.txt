@@ -1,0 +1,50 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WORLD_READY: 43 native locations
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(0.045131, 0.200835, 2.614492)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.151716, 0.200823, 2.614531)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(0.058397, 0.20084, 2.549989)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.129195, 0.200833, 2.550002)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(0.061698, 0.200832, 3.049981)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.121157, 0.200824, 3.049992)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(0.062144, 0.200936, 2.8)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.107091, 0.200936, 2.799999)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=false end=(0.061034, 0.200936, -0.8)
+AREA_READY: 32 镇南街区
+STAIR_SAMPLE 32 running=true end=(-0.105831, 0.200934, -0.799988)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=false end=(-1.121, 0.759345, -1.6)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=true end=(-1.1275, 0.763765, -1.6)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=false end=(-1.120972, 0.759327, -1.80004)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=true end=(-1.127509, 0.763772, -1.799987)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=false end=(-1.121, 0.759345, -1.52)
+AREA_READY: 188 医院
+STAIR_SAMPLE 188 running=true end=(-1.1275, 0.763765, -1.52)
+AREA_READY: 204 旅馆
+STAIR_SAMPLE 204 running=false end=(-0.749952, 0.800934, 3.59997)
+AREA_READY: 204 旅馆
+STAIR_SAMPLE 204 running=true end=(-0.916951, 0.800935, 3.599996)
+AREA_READY: 128 约德尔牧场住宅
+STAIR_SAMPLE 128 running=false end=(-1.28, 0.80461, 0.7505)
+AREA_READY: 128 约德尔牧场住宅
+STAIR_SAMPLE 128 running=true end=(-1.28, 0.798296, 0.741)
+AREA_READY: 152 酒窖
+STAIR_SAMPLE 152 running=false end=(1.934997, 0.768864, 0.8)
+AREA_READY: 152 酒窖
+STAIR_SAMPLE 152 running=true end=(1.923499, 0.761045, 0.8)
+AREA_READY: 188 医院
+COLLISION_CHECK_OK: 60 Hz; walk/run up/down imported stairs; tall/thin obstacles and low ceilings block player

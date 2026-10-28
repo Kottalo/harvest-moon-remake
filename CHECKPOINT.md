@@ -26,8 +26,18 @@ The user authorized a private GitHub checkpoint including project assets. Keep t
 
 ## 2026-10-28 楼梯与障碍碰撞
 
+下方记录是第一版通用跨阶方案，已由本文件最后的原版地面/换层修正取代，不能作为完整上下楼成功的依据。
+
 - 在 `game/player/player.gd` 增加受限跨阶：最大单级 0.12，抬升/前进全身扫掠、可落脚表面与头顶空间检查；从台阶真实表面取高度，避免胶囊圆角误判。人物和地图尺寸未改。
 - `floor_snap_length=0.12`，下楼继续贴地。保留原生 `move_and_slide`，高障碍和薄墙继续阻挡。
 - 验证镇南街区两处原始楼梯、医院和旅馆楼梯的步行/跑步上下行；60/120 Hz 下检测高障碍、薄墙和低天花板。日志：`verification/collision-60.txt`、`verification/collision-120.txt`。
 - 移动、镜头、人物比例和全地图出入口回归记录：`verification/stairs-runtime.txt`、`verification/stairs-world.txt`。
+
+## 2026-10-28 按原版修正楼梯与换层
+
+- 直接核对 `ground.c:ground_primitive_under/ground_height_at`、`farm_probe.c:farm_settle_on_ground` 和 `player.c:player_update_position/player_slide_on_bump` 及区域切换分支。保留原面片 flags，原生场景分别烘焙 0xC080 地面和 0xE080 通行表面；显示模型中带 0x8000 的台阶装饰不再干扰原版隐藏斜坡。独立场景物件保留实体碰撞，地面边界阻止进入无效区域。
+- 使用原版 200 单位高度容差；前探基准 48 单位并覆盖 Godot 胶囊半径；只检查实际抬升所需净空。地面射线在精确三角形接缝失效时，尝试 1 个原版单位的偏移以匹配原版整数边界判定。
+- 修正旧提取器把 0x1000 一律译为按 E 的错误；加入 source_flags/event/requires_facing，按 0x1200 组合及 event 0x2f 判定自动/确认换层。剧情、营业时间等完整事件系统仍未移植。
+- `verification/source-stair-transitions.txt` 记录使用物理方向键实际走过 16 条室内连接：13 自动、3 按确认。`source-collision-60.txt` / `source-collision-120.txt` 扩大到楼梯边线、接缝、旋转方向、医院/牧场隐藏斜坡、160 单位台阶、低净空、高障碍、薄墙、禁行表面与原版房间边界。
+- 当前回归：`verification/source-ground-runtime.txt`、`verification/source-ground-world.txt`。运行时仍只读取 Godot 原生资源，不读取 ROM。
 

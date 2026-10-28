@@ -20,5 +20,9 @@ if ($LASTEXITCODE -ne 0) { throw 'Native scene baking failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Native runtime check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_world.gd
 if ($LASTEXITCODE -ne 0) { throw 'World navigation check failed' }
+& $godotExe --headless --path $PSScriptRoot --script tools/verify_collision.gd
+if ($LASTEXITCODE -ne 0) { throw 'Original ground collision check failed' }
+& $godotExe --headless --path $PSScriptRoot --script tools/verify_stair_transitions.gd
+if ($LASTEXITCODE -ne 0) { throw 'Room stair transitions check failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\check_structure.py')
 if ($LASTEXITCODE -ne 0) { throw 'Directory structure check failed' }
