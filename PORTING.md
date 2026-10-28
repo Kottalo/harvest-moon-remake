@@ -2,6 +2,8 @@
 
 ## 固定来源
 
+2026-10-29 锄地接入：`tools/import_farm_field.py` 校验并导出 `field.c` 的 cell_looks／column_mirror_table、`farm_tables.c` 锄头 picture_grids 与 `player.c` 的 tool_charge_steps_a。真实挥锄结束触发原版逐格结果：1／2／3／4／6 格，失败即终止后续格子，已有湿土不被锄干。耕地使用 page 8 / CLUT 0x3E95，湿土保留使用 CLUT 0x3E5F；shader 用原版 31 texel 角点跨度重算目标格 UV，替换原地面颜色，几何和碰撞不变。离线检查涵盖全部 1125 个田地四边形及镜像；GPU 中真实 Space 操作产生的耕地与独立原版四边形参考的 9 个采样像素一致。土壤在本次运行内跨区保留，不代表完整作物／挖矿／存档系统已接入。
+
 - 游戏反编译：`https://github.com/coalslav/hmbtn-decomp`，提交 `a2dd23e4554154bb34a4c8a09d1a74b4039028dc`。
 - Godot AI：`https://github.com/hi-godot/godot-ai`，4.3.1，插件副本提交 `a799acfa49cd9510738b7976355aae85cf7577b9`，Python 端由 uv 安装 `godot-ai==4.3.1`。
 - Godot：4.7.2 stable，官方 Windows x64 便携版。

@@ -41,6 +41,8 @@ func _run() -> void:
 	world.player.set_physics_process(false)
 	world.set_physics_process(false)
 	var action = world.player.actions
+	# This loop checks animation ranges; field results have their own real-input check.
+	action.tool_used.disconnect(world.farm_field.use_tool)
 	for kind in 5:
 		for grade in 5:
 			for facing in 4:
@@ -83,6 +85,7 @@ func _run() -> void:
 	if not _require(action.state=="overcharge","Source overcharge timeout was lost") or not _finish_action(action):
 		return
 	print("TOOLS_OK: ",checks," source combinations; uncharged/charged, all metal tiers/facings, auxiliary tools and refills")
+	action.tool_used.connect(world.farm_field.use_tool)
 	world.player.set_physics_process(true)
 	world.set_physics_process(true)
 	var weed: Dictionary

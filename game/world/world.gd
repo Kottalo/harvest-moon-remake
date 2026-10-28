@@ -16,6 +16,7 @@ var transition_token := 0
 var day_cycle
 var hud_elapsed := 0.0
 var location_loader
+var farm_field
 
 func area_to_world(area: int, point: Vector3) -> Vector3:
 	if area == 56:
@@ -58,6 +59,10 @@ func _ready() -> void:
 	day_cycle.setup(self)
 	day_cycle.sleep_requested.connect(_sleep_until_morning)
 	player.actions.interact_requested.connect(day_cycle.interact)
+	farm_field = load("res://game/field/farm_field.gd").new()
+	farm_field.name = "FarmField"
+	add_child(farm_field)
+	farm_field.setup(self)
 	_refresh_hud()
 	_update_camera()
 	print("WORLD_READY: ", world.size(), " native locations")
@@ -192,6 +197,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	transitioning = during_transition
 	nearby_exit = {}
 	loose_items.set_area(area)
+	farm_field.bind_location()
 	day_cycle.refresh()
 	if overview:
 		_set_overview()

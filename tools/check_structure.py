@@ -29,7 +29,7 @@ for path in (ROOT / 'game').rglob('*'):
     if not path.is_file():
         continue
     relative = path.relative_to(ROOT / 'game')
-    assert relative.parts[0] in {'player', 'camera', 'world', 'locations', 'rendering', 'items', 'time'}, relative
+    assert relative.parts[0] in {'player', 'camera', 'world', 'locations', 'rendering', 'items', 'time', 'field'}, relative
     assert path.suffix.lower() not in {'.bin', '.cue', '.iso', '.py'}, relative
     if path.suffix not in {'.gd', '.tscn', '.gdshader', '.gdshaderinc'}:
         continue
