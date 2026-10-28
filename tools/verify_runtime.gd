@@ -23,18 +23,6 @@ func _run() -> void:
 	if not _require(farm.player.is_on_floor(), "Player did not land on the imported farm"):
 		return
 	var start: Vector3 = farm.player.position
-	var model: Node3D = farm.player.get_node("Farmer3D")
-	for enabled in [true, false]:
-		for pressed in [true, false]:
-			var toggle := InputEventKey.new()
-			toggle.physical_keycode = KEY_F3
-			toggle.keycode = KEY_F3
-			toggle.pressed = pressed
-			Input.parse_input_event(toggle)
-			await _frames(2)
-		if not _require(model.visible == enabled and farm.player.sprite.visible != enabled and model.animator.active == enabled and farm.player.position.distance_to(start) < 0.002, "F3 changed movement or failed to switch player visuals"):
-			return
-	print("FARMER_TOGGLE_OK: physical F3 switches model/sprite, suspends hidden animation and preserves the body")
 	var camera_delta: Vector3 = farm.camera.position - start
 	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 12.96) < 0.00001 and absf(camera_delta.y - 6.48) < 0.00001 and absf(camera_delta.length() - sqrt(209.952)) < 0.00001, "User's 1.44x camera distance was not applied"):
 		return

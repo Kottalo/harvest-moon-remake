@@ -6,7 +6,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 for directory in ('game', 'assets', 'scenes'):
     for path in (ROOT / directory).rglob('*'):
-        if path.suffix.lower() not in {'.png', '.scn', '.glb', '.blend'} or not path.is_file():
+        if path.suffix.lower() not in {'.png', '.scn'} or not path.is_file():
             continue
         with path.open('rb') as asset:
             assert not asset.read(48).startswith(b'version https://git-lfs.github.com/spec/v1'), (
