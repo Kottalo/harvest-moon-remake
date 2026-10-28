@@ -3,10 +3,13 @@ render_mode unshaded, cull_disabled;
 
 uniform sampler2D albedo_texture : source_color, filter_linear, repeat_disable;
 uniform float sort_bias = 0.0;
+uniform vec3 draw_offset = vec3(0.0);
 varying flat float source_depth;
 
 void vertex() {
 	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0], INV_VIEW_MATRIX[1], INV_VIEW_MATRIX[2], MODEL_MATRIX[3]);
+	// Ground item ANI projects the source hand point; its collision stays at the base.
+	MODELVIEW_MATRIX[3] = VIEW_MATRIX * vec4(MODEL_MATRIX[3].xyz + draw_offset, 1.0);
 	// player_draw sorts the entire body at the hand point relative to its ground position.
 	// Pose pixels keep one depth, so a wall cannot slice through the billboard.
 	vec3 anchor = MODEL_MATRIX[3].xyz + vec3(0.15, 0.1, 0.15);

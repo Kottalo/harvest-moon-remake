@@ -12,6 +12,7 @@ var placement := {}
 var batches := {}
 var meshes := {}
 var obstruction_shape: BoxShape3D
+var loose_obstruction_shapes := {}
 var placement_offsets: Array[Vector2] = []
 const FIELD_CELL_SIZE := 0.399 # field_world_to_cell: the source 399-unit grid.
 const PLACEMENT_PROBE_SIZE := 0.8
@@ -65,7 +66,7 @@ func set_area(area: int) -> void:
 func _item_mesh(item: int) -> ArrayMesh:
 	if meshes.has(item):
 		return meshes[item]
-	var texture: Texture2D = load(catalogue.pictures[str(item)].texture)
+	var texture: Texture2D = load(catalogue.pictures[str(item)].ground_texture)
 	var bounds := texture.get_image().get_used_rect().grow(1).intersection(Rect2i(0,0,128,128))
 	var scale: float = world.player.sprite.pixel_size
 	var left := (bounds.position.x-64)*scale
@@ -83,6 +84,8 @@ func _item_mesh(item: int) -> ArrayMesh:
 	var material := ShaderMaterial.new()
 	material.shader = load("res://game/rendering/player_sprite.gdshader")
 	material.set_shader_parameter("albedo_texture",texture)
+	var draw: Array = catalogue.ground_draw_offset
+	material.set_shader_parameter("draw_offset",Vector3(draw[0],draw[1],draw[2]))
 	mesh.surface_set_material(0,material)
 	meshes[item] = mesh
 	return mesh
@@ -123,7 +126,7 @@ func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Nod
 		body.collision_layer = 1
 		body.collision_mask = 0
 		var shape := CollisionShape3D.new()
-		shape.shape = _obstruction_box()
+		shape.shape = _obstruction_box(item,not cell_aligned)
 		var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
 		var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
 		var centre := _cell_bounds(column,row).get_center()
@@ -133,7 +136,15 @@ func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Nod
 		body.add_child(shape)
 	return node
 
-func _obstruction_box() -> BoxShape3D:
+func _obstruction_box(item := 0, free_position := false) -> BoxShape3D:
+	if free_position:
+		if not loose_obstruction_shapes.has(item):
+			var half: Array = catalogue.pictures[str(item)].half_extents
+			var shape := BoxShape3D.new()
+			# farm_record_hit_test uses ItemInfo halfWidth/halfDepth around position.
+			shape.size = Vector3(half[0]*2,0.4,half[1]*2)
+			loose_obstruction_shapes[item] = shape
+		return loose_obstruction_shapes[item]
 	if obstruction_shape == null:
 		obstruction_shape = BoxShape3D.new()
 		# A vertical barrier adapts the source's 2D occupancy test: the native
@@ -217,18 +228,21 @@ func _placement(item: int) -> Dictionary:
 	var query := PhysicsShapeQueryParameters3D.new()
 	var box := BoxShape3D.new()
 	# One source unit of clearance permits touching neighbouring occupied cells.
-	box.size = _obstruction_box().size-Vector3(0.002,0.01,0.002)
+	var footprint := _obstruction_box(item,true).size
+	var half_size := Vector2(footprint.x,footprint.z)*0.5
+	box.size = footprint-Vector3(0.002,0.01,0.002)
 	query.shape = box
 	query.collision_mask = 1
 	query.exclude = [world.player.get_rid()]
 	var space := get_world_3d().direct_space_state
 	var field := Rect2(Vector2(-4.4,-1.6),Vector2(45,25)*FIELD_CELL_SIZE)
+	var detector := Rect2(Vector2(point.x,point.z)-Vector2.ONE*PLACEMENT_PROBE_SIZE*0.5,Vector2.ONE*PLACEMENT_PROBE_SIZE)
 	for offset in placement_offsets:
 		var centre := Vector2(point.x,point.z)+side*offset.x+direction*offset.y
 		if (centre-feet).dot(direction)<=0:
 			continue
-		var bounds := Rect2(centre-Vector2.ONE*FIELD_CELL_SIZE*0.5,Vector2.ONE*FIELD_CELL_SIZE)
-		if not field.encloses(bounds):
+		var bounds := Rect2(centre-half_size,half_size*2)
+		if not field.encloses(bounds) or not detector.encloses(bounds):
 			continue
 		var ray := PhysicsRayQueryParameters3D.create(Vector3(centre.x,world.player.position.y+0.5,centre.y),Vector3(centre.x,world.player.position.y-0.5,centre.y),2)
 		var floor_hit := space.intersect_ray(ray)
@@ -243,7 +257,7 @@ func _placement(item: int) -> Dictionary:
 		if not space.intersect_ray(ray).is_empty():
 			continue
 		var target := Vector3(centre.x,height,centre.y)
-		var backstep := _placement_backstep(target,facing)
+		var backstep := _placement_backstep(target,facing,half_size)
 		if backstep<0:
 			continue
 		var column := floori((centre.x+4.4)/FIELD_CELL_SIZE)
@@ -251,13 +265,15 @@ func _placement(item: int) -> Dictionary:
 		return {"cell":row*45+column,"position":target,"free_ratio":free_ratio,"backstep":backstep}
 	return best
 
-func _placement_backstep(point: Vector3, facing: Vector3) -> float:
+func _placement_backstep(point: Vector3, facing: Vector3, half_size: Vector2) -> float:
 	var delta: Vector3 = point-world.player.position
-	var lateral := maxf(absf(delta.dot(Vector3(-facing.z,0,facing.x)))-FIELD_CELL_SIZE*0.5,0)
+	var forward_half := half_size.dot(Vector2(absf(facing.x),absf(facing.z)))
+	var side_half := half_size.dot(Vector2(absf(facing.z),absf(facing.x)))
+	var lateral := maxf(absf(delta.dot(Vector3(-facing.z,0,facing.x)))-side_half,0)
 	var radius: float = world.player.footprint.radius+0.002
 	if lateral>=radius:
 		return 0
-	var distance := maxf(FIELD_CELL_SIZE*0.5+sqrt(radius*radius-lateral*lateral)-delta.dot(facing),0)
+	var distance := maxf(forward_half+sqrt(radius*radius-lateral*lateral)-delta.dot(facing),0)
 	if distance==0:
 		return 0
 	var motion := -facing*distance

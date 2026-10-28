@@ -9,6 +9,72 @@ from PIL import Image
 from import_disc import ROOT, Disc, compose_animations
 
 
+def item_half_extents():
+    source = (ROOT/'reference/hmbtn-decomp/src/main/game/farm_tables.c').read_text()
+    result = {}
+    for item,name in [(58,'STONE'),(62,'BRANCH'),(64,'WEEDS')]:
+        row = re.search(r'\[ITEM_'+name+r'\] = \{(.*?)(?=\n    \[)',source,re.S)[1]
+        width,depth = re.search(r',\s*(\d+),\s*(\d+)\},\s*$',row).groups()
+        result[item] = [int(width)/1000,int(depth)/1000]
+    return result
+
+
+def ground_item_frames(disc):
+    source = (ROOT/'reference/hmbtn-decomp/src/overlay/11_GF_FARM/farm_data.c').read_text()
+    toc = re.search(r'farm_item_toc_0 = \{35, \{(.*?)\}\};',source,re.S)[1]
+    offsets = [int(value) for value in re.findall(r'\d+',toc)]
+    load = (ROOT/'reference/hmbtn-decomp/src/overlay/11_GF_FARM/farm_load.c').read_text()
+    table = re.search(r'farm_item_file_offsets\[11\] = \{(.*?)\};',load,re.S)[1]
+    first,last = [int(value,16) for value in re.findall(r'0x[0-9A-Fa-f]+',table)][:2]
+    pack = disc.asset(first,last-first)
+    return {item:compose_animations(pack[offsets[slot]:],offsets[-1]-offsets[slot],[0])[0][0]
+            for item,slot in [(58,0),(62,4),(64,6)]}
+
+
+def extract_items(disc):
+    items = ROOT/'game/items'
+    (items/'textures').mkdir(parents=True,exist_ok=True)
+    pictures = {}
+    half_extents = item_half_extents()
+    ground_frames = ground_item_frames(disc)
+    for item,name in [(58,'stone'),(62,'branch'),(64,'weeds')]:
+        data = disc.asset(0x3c19000+item*2048,2048)
+        frames,_,_ = compose_animations(data,0x100,[0,1])
+        frames[0].save(items/'textures'/f'{name}.png')
+        ground_frames[item].save(items/'textures'/f'{name}_ground.png')
+        pictures[str(item)] = dict(name=name,texture=f'res://game/items/textures/{name}.png',
+            ground_texture=f'res://game/items/textures/{name}_ground.png',half_extents=half_extents[item],
+            source_flags=0x8000,place_on_farm=item in [58,62],pickup=True,
+            tool={58:'hammer',62:'axe',64:'sickle'}[item])
+    title = (ROOT/'reference/hmbtn-decomp/src/overlay/27_GF_TITLE/title.c').read_text()
+    layout = re.search(r'title_layout0_cells\[1126\] = \{(.*?)\};',title,re.S)[1]
+    cells = [int(x,16) for x in re.findall(r'0x[0-9a-fA-F]+',layout)][:1125]
+    assert len(cells)==1125
+    field = [dict(id=item,cell=i,position=[(i%45*400-4200)/1000,0,(i//45*400-1400)/1000]) for i,item in enumerate(cells) if str(item) in pictures]
+    estate = (ROOT/'reference/hmbtn-decomp/src/overlay/11_GF_FARM/estate.c').read_text()
+    draw = [int(re.search(r'#define ESTATE_SPRITE_OFFSET_'+axis+r'\s+\(?(-?\d+)',estate)[1]) for axis in 'XYZ']
+    (items/'item_catalog.json').write_text(json.dumps(dict(pictures=pictures,initial_farm=field,
+        field_cells=cells,ground_draw_offset=[draw[0]/1000,-draw[1]/1000,-draw[2]/1000]),separators=(',',':')),encoding='utf-8')
+    return len(field)
+
+
+def check_items(disc=None):
+    catalogue = json.loads((ROOT/'game/items/item_catalog.json').read_text())
+    extents = item_half_extents()
+    original = ground_item_frames(disc) if disc else {}
+    report = {}
+    for key,picture in catalogue['pictures'].items():
+        item = int(key)
+        assert picture['half_extents']==extents[item], 'Item footprint differs from farm_tables.c'
+        ground = Image.open(ROOT/picture['ground_texture'][6:]).convert('RGBA')
+        held = Image.open(ROOT/picture['texture'][6:]).convert('RGBA')
+        if disc:
+            assert ground.tobytes()==original[item].tobytes(), 'Ground ANI offsets differ from field sprite pack'
+        report[picture['name']] = dict(half_extents=extents[item],ground_bounds=ground.getchannel('A').getbbox(),held_bounds=held.getchannel('A').getbbox())
+    assert catalogue['ground_draw_offset']==[0.15,0.1,0.15]
+    print('SOURCE_ITEM_OFFSETS_OK:',json.dumps(report), 'ground draw offset=',catalogue['ground_draw_offset'])
+
+
 def export_bank(data, offset, ids, name, directory, palette_rule=None):
     ids = list(ids)
     images, ranges, _ = compose_animations(data, offset, ids, palette_rule,256)
@@ -84,21 +150,7 @@ def extract(disc):
                      source='player.c, anim.c, fishing.c; original ANI durations/control/part offsets')
     (destination/'action_catalog.json').write_text(json.dumps(catalogue,separators=(',',':')),encoding='utf-8')
 
-    items = ROOT/'game/items'
-    (items/'textures').mkdir(parents=True,exist_ok=True)
-    pictures = {}
-    for item,name in [(58,'stone'),(62,'branch'),(64,'weeds')]:
-        data = disc.asset(0x3c19000+item*2048,2048)
-        frames,_,_ = compose_animations(data,0x100,[0,1])
-        frames[0].save(items/'textures'/f'{name}.png')
-        pictures[str(item)] = dict(name=name,texture=f'res://game/items/textures/{name}.png',source_flags=0x8000,place_on_farm=item in [58,62],
-                                   pickup=item in [58,62,64],tool={58:'hammer',59:'hammer',60:'hammer',61:'axe',62:'axe',64:'sickle'}[item])
-    title = (ROOT/'reference/hmbtn-decomp/src/overlay/27_GF_TITLE/title.c').read_text()
-    layout = re.search(r'title_layout0_cells\[1126\] = \{(.*?)\};',title,re.S)[1]
-    cells = [int(x,16) for x in re.findall(r'0x[0-9a-fA-F]+',layout)][:1125]
-    assert len(cells)==1125
-    field = [dict(id=item,cell=i,position=[(i%45*400-4200)/1000,0,(i//45*400-1400)/1000]) for i,item in enumerate(cells) if str(item) in pictures]
-    (items/'item_catalog.json').write_text(json.dumps(dict(pictures=pictures,initial_farm=field,field_cells=cells),separators=(',',':')),encoding='utf-8')
+    field_count = extract_items(disc)
     for obsolete in destination.glob('tool_level_[0-4]_??.png'):
         obsolete.unlink()
         obsolete.with_name(obsolete.name+'.import').unlink(missing_ok=True)
@@ -120,7 +172,7 @@ def extract(disc):
                 exit['door'] = dict(model=index,twin=twin if twin in entries else -1)
                 doors += 1
     path.write_text(json.dumps(world,ensure_ascii=False,indent=2),encoding='utf-8')
-    report = dict(banks={name:len(bank['ranges']) for name,bank in banks.items()},doors=doors,field_items=len(field),source='original USA disc and decomp tables')
+    report = dict(banks={name:len(bank['ranges']) for name,bank in banks.items()},doors=doors,field_items=field_count,source='original USA disc and decomp tables')
     (ROOT/'verification/source-actions-assets.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     print('ACTION_ASSETS_OK',report)
 
@@ -159,9 +211,17 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('disc',type=Path,nargs='?')
     parser.add_argument('--check',action='store_true')
+    parser.add_argument('--items-only',action='store_true',help='Refresh ground ANI and source item footprints without rebaking player actions or maps')
     args = parser.parse_args()
     if args.disc:
         expected = json.loads((ROOT/'tools/generated/source_manifest.json').read_text())['disc_sha256']
         assert hashlib.file_digest(args.disc.open('rb'),'sha256').hexdigest()==expected,'Wrong source disc'
-        extract(Disc(args.disc))
+        disc = Disc(args.disc)
+        if args.items_only:
+            extract_items(disc)
+        else:
+            extract(disc)
+        check_items(disc)
+    else:
+        check_items()
     check()

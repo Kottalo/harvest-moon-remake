@@ -1,0 +1,2 @@
+SOURCE_ITEM_OFFSETS_OK: {"stone": {"half_extents": [0.1, 0.1], "ground_bounds": [53, 96, 77, 118], "held_bounds": [53, 97, 77, 119]}, "branch": {"half_extents": [0.1, 0.1], "ground_bounds": [53, 96, 73, 117], "held_bounds": [55, 98, 75, 119]}, "weeds": {"half_extents": [0.1, 0.1], "ground_bounds": [52, 98, 82, 122], "held_bounds": [52, 99, 82, 123]}} ground draw offset= [0.15, 0.1, 0.15]
+ACTION_ASSETS_CHECK_OK: 6212 frames; common canvas margins, bounded pages and original 90 frames unchanged

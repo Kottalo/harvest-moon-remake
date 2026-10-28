@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+GROUND_ITEM_GPU_OK: 18 stone/branch/weeds cases; original ANI canvas and (+150,-100,-150) anchor match cropped batches across farm corners and 1x/1.44x cameras

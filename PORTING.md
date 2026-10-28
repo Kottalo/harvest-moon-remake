@@ -7,6 +7,14 @@
 - Godot：4.7.2 stable，官方 Windows x64 便携版。
 - 本地 USA 镜像 SHA256：`41f81532a5fd70d6f79e7b5750513c35eee732d5e31ba144a1db7e90d84d97de`。
 
+## 2026-10-29 地面物件 offset 的来源
+
+`field_draw_grid` 用 `(col*400-4050,-100,1250-row*400)` 投影，等于逻辑格心 `(col*400-4200,0,1400-row*400)` 加 `(150,-100,-150)`；`estate_draw_records` 对独立记录使用相同绘制偏移。图片来自 `farm_item_toc_0` 槽 0／4／6 的 range 0，不能换成 `0x3C19000+item*2048` 的手持 ANI：图案相同但部件偏移不同（树枝横纵差 2 像素，石头／杂草纵向差 1 像素）。地面批次以独立材质参数恢复原版投影点，碰撞中心不跟着画面偏移移动。
+
+田地占格由 `field_world_to_cell` 的 `/399` 决定，和 400 单位美术格心有随行列累积的偏差；最后一格的碰撞中心比美术格心在 Godot X/Z 分别少 0.0445／0.0245。原版 `farm_record_hit_test` 对独立物件采用 `position±ItemInfo.halfWidth/halfDepth`，石头／树枝／杂草均为 100／100。用户要求的连续自由落点采用这一独立记录规则，保留初始田地占格。Godot 玩家胶囊及高 0.4 的防攀爬屏障仍是原生物理适配，不等同于 PS1 的二维点探测。
+
+可运行 `tools/import_player_actions.py <disc> --items-only` 只刷新物件原生资源，`--check` 校验导出表与动画画布；`tools/verify_item_offsets_gpu.gd` 验证 18 个实际 GPU 场景，`tools/verify_item_collision.gd` 验证源区间、独立半宽、四向运动与自由放置。ROM 仅供离线提取，不在运行时读取。
+
 ## 已实现的转换链
 
 `tools/import_disc.py` → 原版素材 PNG / JSON → `tools/bake_assets.gd` → Godot 原生 `scenes/original_farm.scn`。

@@ -59,6 +59,7 @@ func _run() -> void:
 	items.field_cells.fill(0x167)
 	items.records[0] = []
 	items.set_area(0)
+	if not _source_offsets(): return
 	if not await _placement_probe(arena): return
 	var cell := 4*45+11
 	var centre := Vector3(0.1885,0,0.1955) # Source cell's 399-unit bounds, not its 400-unit art position.
@@ -100,7 +101,10 @@ func _run() -> void:
 			await _frames(2)
 			var dropped: Vector3 = items.batches[id].records.back().position
 			var restored := await _walk(centre-Vector3(0,0,0.5),0,true)
-			if not _require(absf(restored.z-(dropped.z-0.2595))<0.006,"Placed item obstruction does not follow its continuous position"): return
+			# Native swept contact can conservatively stop up to one run tick early.
+			# Exact shape size/centre is checked independently in _source_offsets().
+			var gap := dropped.z-restored.z
+			if not _require(gap>=0.159 and gap<=0.162+player.RUN_SPEED/Engine.physics_ticks_per_second,"Placed item obstruction does not use the source 100-unit half extent at its actual position: "+str([id,restored,dropped,gap])): return
 			items._remove(items.batches[id].records.back())
 			await _frames(2)
 		print("FIELD_ITEM_OK: ",id," four sides, centre/edges, walk/run, empty neighbour, tool clears obstruction", "; placement restores" if id in [58,62] else "")
@@ -110,6 +114,28 @@ func _run() -> void:
 	arena.queue_free()
 	await process_frame
 	quit()
+
+func _source_offsets() -> bool:
+	for id in [58,62,64]:
+		for cell in [0,44,4*45+11,24*45,1124]:
+			var column: int = cell%45
+			var row: int = cell/45
+			var art := Vector3((column*400-4200)/1000.0,0,(row*400-1400)/1000.0)
+			var node: Node3D = items._spawn(id,art,true)
+			var collision: CollisionShape3D = node.get_node("Obstruction").get_child(0)
+			# Independent field_world_to_cell interval, not the runtime _cell_bounds helper.
+			var expected := Vector3((column*399-4400+199.5)/1000.0,0.2,(row*399-1600+199.5)/1000.0)
+			if not _require(collision.global_position.distance_to(expected)<0.00001 and collision.shape.size.is_equal_approx(Vector3(0.399,0.4,0.399)),"Imported collision offset differs from source 399-unit bounds: "+str([id,cell,collision.global_position,expected])): return false
+			node.get_node("Obstruction").collision_layer = 0
+			node.queue_free()
+		var point := Vector3(0.237,0,0.183)
+		var loose: Node3D = items._spawn(id,point,true,false)
+		var shape: CollisionShape3D = loose.get_node("Obstruction").get_child(0)
+		if not _require(shape.global_position.distance_to(point+Vector3.UP*0.2)<0.00001 and shape.shape.size.is_equal_approx(Vector3(0.2,0.4,0.2)),"Free item offset/extent differs from source farm_record_hit_test + ItemInfo(100,100)"): return false
+		loose.get_node("Obstruction").collision_layer = 0
+		loose.queue_free()
+	print("SOURCE_ITEM_COLLISION_OFFSETS_OK: stone/branch/weeds; 15 source-grid corner/interior boxes incl. 44.5mm X and 24.5mm Z art offsets; free records use centred 100-unit half-width/depth")
+	return true
 
 func _probe_blocker(arena: Node3D, point: Vector3, size: Vector3) -> StaticBody3D:
 	var body := StaticBody3D.new()
@@ -157,7 +183,7 @@ func _placement_probe(arena: Node3D) -> bool:
 	player.position = centre-Vector3(0,0,0.4)+Vector3.UP*0.001
 	player.facing = 0
 	var strips := []
-	for offset in [-0.25,0.0,0.25]:
+	for offset in [-0.35,-0.15,0.05,0.25]:
 		strips.append(_probe_blocker(arena,centre+Vector3(offset,0.2,0.08),Vector3(0.02,0.4,0.8)))
 	await _frames(2)
 	var fragmented: Dictionary = items._placement(58)
@@ -198,7 +224,7 @@ func _assisted_placement(arena: Node3D, floor_body: StaticBody3D) -> bool:
 	var obstacle: Node3D = items._spawn(58,Vector3(0.2,0,0.2),true)
 	await _frames(2)
 	var beside: Dictionary = items._placement(58)
-	if not _require(not beside.get("blocked",false) and beside.position.distance_to(Vector3(0.2,0,0.2))>0.39,"Placement ignored a real obstacle or failed to find the clear space beside it"): return false
+	if not _require(not beside.get("blocked",false) and maxf(absf(beside.position.x-0.1885),absf(beside.position.z-0.1955))>=0.298,"Placement ignored a real obstacle or failed to find the clear space beside it"): return false
 	obstacle.get_node("Obstruction").collision_layer = 0
 	obstacle.queue_free()
 	await _frames(2)
@@ -253,12 +279,12 @@ func _placement_retreat(arena: Node3D, floor_body: StaticBody3D) -> bool:
 		player.velocity = Vector3.ZERO
 		player.facing = facing
 		await _frames(2)
-		var wall_size := Vector3(4,0.4,0.4) if facing%2==0 else Vector3(0.4,0.4,4)
-		var wall := _probe_blocker(arena,centre+direction*0.25+Vector3.UP*0.2,wall_size)
+		var wall_size := Vector3(4,0.4,0.04) if facing%2==0 else Vector3(0.04,0.4,4)
+		var wall := _probe_blocker(arena,centre-direction*0.14+Vector3.UP*0.2,wall_size)
 		await _frames(2)
 		var before: Vector3 = player.position
 		var target: Dictionary = items._placement(58)
-		if not _require(not target.get("blocked",false) and target.backstep>0 and target.backstep<0.04 and target.position.distance_to(centre)<0.151,"Nearest continuous landing did not allow a small safe retreat: "+str([facing,target])): return false
+		if not _require(not target.get("blocked",false) and target.backstep>0 and target.backstep<0.05 and target.position.distance_to(centre)<0.276,"Nearest continuous landing did not allow a small safe retreat: "+str([facing,target])): return false
 		player.actions.carried_id = 58
 		items.interact()
 		if not _require(player.actions.busy(),"Assisted retreat did not start the actual drop animation"): return false
