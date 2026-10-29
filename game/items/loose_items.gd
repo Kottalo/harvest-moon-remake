@@ -15,8 +15,6 @@ var prefab_scenes := {58:preload("res://game/items/prefabs/stone.tscn"),62:prelo
 var prefab_definitions := {}
 const VISUAL_CELL_SIZE := 0.4 # Original field quad spacing; placement shares its centres.
 const PLACEMENT_PROBE_SIZE := 0.8
-const PLACEMENT_MIN_FREE_RATIO := 0.5
-const PLACEMENT_PROBE_STEPS := 8
 
 func setup(owner_world) -> void:
 	world = owner_world
@@ -132,6 +130,9 @@ func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Nod
 		shape.debug_fill = definition.debug_fill
 		node.add_child(body)
 		body.add_child(shape)
+		# Release can query a just-created neighbour in the same frame.
+		body.force_update_transform()
+		shape.force_update_transform()
 	return node
 
 func _prefab_definition(item: int) -> Dictionary:
@@ -208,10 +209,9 @@ func _placement(item: int) -> Dictionary:
 	# User requests nearest available visual cell centre, rather than a free drop.
 	var facing: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
 	var point: Vector3 = world.player.position + facing*0.4
-	var free_ratio := _placement_free_ratio(point)
-	var best := {"blocked":true,"free_ratio":free_ratio}
-	if free_ratio < PLACEMENT_MIN_FREE_RATIO:
-		return best
+	# A full valid cell is sufficient even in a crowded patch. Neighbours must
+	# not veto the empty cell through an unrelated total free-area threshold.
+	var best := {"blocked":true}
 	var feet := Vector2(world.player.position.x,world.player.position.z)
 	var ideal := Vector2(point.x,point.z)
 	var direction := Vector2(facing.x,facing.z)
@@ -219,8 +219,9 @@ func _placement(item: int) -> Dictionary:
 	var row := floori((point.z+1.6)/VISUAL_CELL_SIZE)
 	# The 3x3 cells overlapping the forward detector; snap to their real centres.
 	var candidates: Array[Vector2i] = []
-	for y in range(row-1,row+2):
-		for x in range(column-1,column+2):
+	var reach := ceili(PLACEMENT_PROBE_SIZE*0.5/VISUAL_CELL_SIZE)
+	for y in range(row-reach,row+reach+1):
+		for x in range(column-reach,column+reach+1):
 			if x>=0 and x<45 and y>=0 and y<25:
 				candidates.append(Vector2i(x,y))
 	candidates.sort_custom(func(a: Vector2i,b: Vector2i):
@@ -264,7 +265,7 @@ func _placement(item: int) -> Dictionary:
 		var backstep := _placement_backstep(target+local.origin,facing,half_size)
 		if backstep<0:
 			continue
-		return {"cell":cell.y*45+cell.x,"position":target,"free_ratio":free_ratio,"backstep":backstep}
+		return {"cell":cell.y*45+cell.x,"position":target,"backstep":backstep}
 	return best
 
 func _placement_cell_center(cell: Vector2i) -> Vector2:
@@ -292,30 +293,6 @@ func _placement_backstep(point: Vector3, facing: Vector3, half_size: Vector2) ->
 		if hit.is_empty() or hit.normal.y<cos(world.player.floor_max_angle) or absf(hit.position.y-world.player.position.y)>0.02:
 			return -1
 	return distance
-
-func _placement_free_ratio(point: Vector3) -> float:
-	# ponytail: 8x8 area estimate on interaction only; the final full-size query
-	# remains authoritative even for obstacles narrower than a sample.
-	var step := PLACEMENT_PROBE_SIZE/PLACEMENT_PROBE_STEPS
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(step-0.001,0.39,step-0.001)
-	var query := PhysicsShapeQueryParameters3D.new()
-	query.shape = shape
-	query.collision_mask = 1
-	query.exclude = [world.player.get_rid()]
-	var space := get_world_3d().direct_space_state
-	var free := 0
-	for y in PLACEMENT_PROBE_STEPS:
-		for x in PLACEMENT_PROBE_STEPS:
-			var sample := point+Vector3((x+0.5)*step-PLACEMENT_PROBE_SIZE*0.5,0.2,(y+0.5)*step-PLACEMENT_PROBE_SIZE*0.5)
-			var column := floori((sample.x+4.4)/VISUAL_CELL_SIZE)
-			var row := floori((sample.z+1.6)/VISUAL_CELL_SIZE)
-			if column<0 or column>=45 or row<0 or row>=25:
-				continue
-			query.transform = Transform3D(Basis.IDENTITY,sample)
-			if space.intersect_shape(query,1).is_empty():
-				free += 1
-	return float(free)/(PLACEMENT_PROBE_STEPS*PLACEMENT_PROBE_STEPS)
 
 func release_item(item: int, thrown: bool) -> void:
 	var direction: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]

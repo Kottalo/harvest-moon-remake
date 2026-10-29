@@ -62,6 +62,7 @@ func _run() -> void:
 	if not _grid_footprints(): return
 	if not await _authored_prefab(arena): return
 	if not await _placement_probe(arena): return
+	if not await _crowded_pickup_return(arena): return
 	var cell := 4*45+11
 	var centre := Vector3(0.2,0,0.2) # Visible soil cell centre, shared by initial and placed item boxes.
 	for id in [58,62,64]:
@@ -202,16 +203,15 @@ func _placement_probe(arena: Node3D) -> bool:
 		player.facing = facing
 		await _frames(2)
 		var clear: Dictionary = items._placement(58)
-		if not _require(not clear.get("blocked",false) and clear.free_ratio==1.0,"Empty forward detector counts the player as an obstacle"): return false
+		if not _require(not clear.get("blocked",false),"Empty forward detector counts the player as an obstacle"): return false
 		for width in [0.4,0.5]:
 			var size := Vector3(width,0.4,0.8) if facing%2==0 else Vector3(0.8,0.4,width)
-			# Leave the capsule clear of the near edge; every probe row still overlaps.
+			# Leave the capsule clear of the near edge; validate the full box and reach path.
 			var obstacle := _probe_blocker(arena,centre+direction*0.08+side*(-0.4+width*0.5)+Vector3.UP*0.2,size)
 			await _frames(2)
 			for item in [58,62]:
 				var target: Dictionary = items._placement(item)
-				var expected := 0.5 if width==0.4 else 0.375
-				if not _require(is_equal_approx(target.free_ratio,expected) and target.get("blocked",false)==(expected<0.5),"Forward free-area threshold failed: "+str([facing,item,width,target])): return false
+				if not _require(target.get("blocked",false)==(width>0.4),"Full landing footprint/path check failed beside a wide obstacle: "+str([facing,item,width,target])): return false
 			obstacle.collision_layer = 0
 			obstacle.queue_free()
 			await _frames(2)
@@ -231,13 +231,13 @@ func _placement_probe(arena: Node3D) -> bool:
 		strips.append(_probe_blocker(arena,centre+Vector3(offset,0.2,0.08),Vector3(0.02,0.4,0.8)))
 	await _frames(2)
 	var fragmented: Dictionary = items._placement(58)
-	if not _require(fragmented.free_ratio>=0.5 and fragmented.get("blocked",false),"Disconnected free slivers did not require a complete landing footprint: "+str(fragmented)): return false
+	if not _require(fragmented.get("blocked",false),"Disconnected free slivers did not require a complete landing footprint: "+str(fragmented)): return false
 	for obstacle in strips:
 		obstacle.collision_layer = 0
 		obstacle.queue_free()
 	await _frames(2)
 	player.set_physics_process(true)
-	print("PLACEMENT_PROBE_OK: four facings, stone/branch, nearest visual centres across midpoints, clear player exclusion, 50% allowed, 37.5% blocked, fragmented gaps rejected")
+	print("PLACEMENT_PROBE_OK: four facings, stone/branch, nearest visual centres across midpoints, clear player exclusion, actual full-cell landing/path checks beside wide obstacles, no global free-area gate, fragmented gaps rejected")
 	return true
 
 func _assisted_placement(arena: Node3D, floor_body: StaticBody3D) -> bool:
@@ -306,7 +306,7 @@ func _assisted_placement(arena: Node3D, floor_body: StaticBody3D) -> bool:
 			items._add_record(record) # Other occupants arrive before release completes.
 	player.actions.carried_id = 0
 	items.release_item(58,false)
-	if not _require(player.actions.carried_id==58 and items.batches[58].records.size()==9,"Release did not revalidate occupancy or lost the item"): return false
+	if not _require(player.actions.carried_id==58 and items.batches[58].records.size()==9,"Release did not revalidate occupancy or lost the item: "+str([player.position,player.actions.carried_id,items.batches[58].records.size(),items.batches[58].records.back().position])): return false
 	for record in items.batches[58].records.duplicate(): items._remove(record)
 	items.field_cells.fill(0x167)
 	player.actions.carried_id = 0
@@ -357,3 +357,57 @@ func _placement_retreat(arena: Node3D, floor_body: StaticBody3D) -> bool:
 	player.actions.item_released.disconnect(items.release_item)
 	print("PLACEMENT_RETREAT_OK: actual drop animation in all four facings keeps nearest point with small swept retreat; rear obstacles and missing support use safe alternatives")
 	return true
+
+func _crowded_pickup_return(_arena: Node3D) -> bool:
+	# A dense 3x3 patch leaves only the player's entry cell and the lifted cell
+	# free: a global 50% detector rule used to reject a physically valid return.
+	var cell := Vector2i(11,4)
+	var centre := Vector3(0.2,0,0.2)
+	player.actions.interact_requested.connect(items.interact)
+	player.actions.item_released.connect(items.release_item)
+	for item in [58,62]:
+		for facing in 4:
+			var direction: Vector3 = DIRECTIONS[facing]
+			var entry := cell-Vector2i(int(direction.x),int(direction.z))
+			var target: Dictionary
+			for row in range(3,6):
+				for column in range(10,13):
+					if Vector2i(column,row)==entry: continue
+					var record := {"id":item,"cell":row*45+column,"position":Vector3(column*0.4-4.2,0,row*0.4-1.4),"active":true}
+					items.records[0].append(record)
+					items.field_cells[record.cell] = item
+					items._add_record(record)
+					if Vector2i(column,row)==cell: target = record
+			player.position = centre-direction*0.275+Vector3.UP*0.001
+			player.velocity = Vector3.ZERO
+			player.facing = facing
+			await _frames(2)
+			var before: Vector3 = player.position
+			_interact_key(true)
+			await _frames(2)
+			_interact_key(false)
+			await _frames(ceili(0.7*Engine.physics_ticks_per_second))
+			if not _require(player.actions.carried_id==item and not target.active,"Dense-patch E pickup failed"): return false
+			var landing: Dictionary = items._placement(item)
+			if not _require(not landing.get("blocked",false) and landing.position.distance_to(centre)<0.001,"Lifted cell is empty but same-position return is rejected: "+str([item,facing,landing])): return false
+			_interact_key(true)
+			await _frames(2)
+			_interact_key(false)
+			await _frames(ceili(0.7*Engine.physics_ticks_per_second))
+			var placed: Dictionary = items.batches[item].records.back()
+			if not _require(player.actions.carried_id==0 and placed.position.distance_to(centre)<0.001 and player.position.distance_to(before)<0.002 and items.batches[item].records.size()==8,"Dense-patch actual E return moved the player/item, lost or duplicated the item"): return false
+			for record in items.batches[item].records.duplicate(): items._remove(record)
+			items.field_cells.fill(0x167)
+			await _frames(2)
+	player.actions.interact_requested.disconnect(items.interact)
+	player.actions.item_released.disconnect(items.release_item)
+	print("CROWDED_PICKUP_RETURN_OK: physical E pickup/drop without moving, stone and branch in four facings, original cell restored among seven full-cell neighbours, no duplicate/loss")
+	return true
+
+func _interact_key(pressed: bool) -> void:
+	var event := InputEventKey.new()
+	event.physical_keycode = KEY_E
+	event.keycode = KEY_E
+	event.pressed = pressed
+	Input.parse_input_event(event)
+	Input.flush_buffered_events()
