@@ -34,7 +34,7 @@ func _run() -> void:
 	root.add_child(viewport)
 	var world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
-	for route in [[0,0],[0,3],[40,1],[180,0],[204,0],[168,0]]:
+	for route in [[0,0],[0,3],[40,1],[180,0],[204,0],[168,0],[44,0]]:
 		var area: int = route[0]
 		var exit: Dictionary
 		for candidate in world.world[str(area)].exits:
@@ -70,23 +70,40 @@ func _run() -> void:
 		_key(false)
 		if not _require(world.transitioning,"Physical E did not begin the door passage"): return
 		var second_stage := false
+		var back_step := false
+		var minimum_distance := 0.0
 		var captured := false
+		var sequence: Image
+		var sequence_frame := 0
+		if DisplayServer.get_name()!="headless" and route==[44,0]: sequence = Image.create(800,600,false,Image.FORMAT_RGB8)
 		for tick in Engine.physics_ticks_per_second*2:
 			if world.transition_effect.phase=="out": break
-			if float(Engine.get_physics_frames()-began)/Engine.physics_ticks_per_second>0.55 and world.player.scripted_walk_time>0:
-				second_stage = true
+			var travelled: float = (world.player.position-before).dot(direction)
+			minimum_distance = minf(minimum_distance,travelled)
+			if travelled < -0.2 and world.player.facing==posmod(int(exit.facing)+2,4): back_step = true
+			if back_step and world.player.facing==int(exit.facing) and world.player.scripted_walk_time>0: second_stage = true
 			if DisplayServer.get_name()!="headless" and route==[0,0] and second_stage and not captured:
 				for frame in 2: await RenderingServer.frame_post_draw
 				viewport.get_texture().get_image().save_png("res://verification/door_opening.png")
 				captured = true
+			if sequence!=null and sequence_frame<4 and float(Engine.get_physics_frames()-began)/Engine.physics_ticks_per_second>=[0.2,0.36,0.7,1.0][sequence_frame]:
+				await RenderingServer.frame_post_draw
+				var sample: Image = viewport.get_texture().get_image()
+				sample.resize(400,300,Image.INTERPOLATE_LANCZOS)
+				sample.convert(Image.FORMAT_RGB8)
+				sequence.blit_rect(sample,Rect2i(0,0,400,300),Vector2i(sequence_frame%2*400,sequence_frame/2 as int*300))
+				sequence_frame += 1
 			await _frames(1)
 		var seconds := float(Engine.get_physics_frames()-began)/Engine.physics_ticks_per_second
 		var distance: float = (world.player.position-before).dot(direction)
 		for index in world.player.get_slide_collision_count():
 			var collision: KinematicCollision3D = world.player.get_slide_collision(index)
 			print("PASSAGE_CONTACT: ",collision.get_collider().get_path()," normal=",collision.get_normal())
-		if not _require(world.transition_effect.phase=="out" and seconds>=0.95 and seconds<1.2 and second_stage and distance>1.15 and absf(world.player.position.y-before.y)<0.21,"Source 10+20 tick door passage was skipped or blocked: "+str([route,seconds,distance,second_stage])): return
-		print("DOOR_ENTRY_OK: ",route," source 10+20 ticks before fade; elapsed=",seconds," movement=",distance)
+		if not _require(world.transition_effect.phase=="out" and seconds>=1.03 and seconds<1.25 and back_step and second_stage and minimum_distance<-0.40 and minimum_distance>-.49 and absf(distance-0.41)<0.035 and absf(world.player.position.y-before.y)<0.21,"Source turn/back-step/return-entry sequence was skipped or blocked: "+str([route,seconds,distance,minimum_distance,second_stage])): return
+		print("DOOR_ENTRY_OK: ",route," source 10+20 countdowns including tick 0; elapsed=",seconds," back step=",minimum_distance," net entry=",distance)
+		if sequence!=null:
+			if not _require(sequence_frame==4,"Church entry sequence frames missing"): return
+			sequence.save_png("res://verification/door_sequence.png")
 		for tick in Engine.physics_ticks_per_second*3:
 			if not world.transitioning: break
 			await _frames(1)
@@ -105,5 +122,5 @@ func _run() -> void:
 	print("DOOR_CANCEL_OK: normal collision mask/input restored and old coroutine cancelled")
 	world.queue_free()
 	await process_frame
-	print("DOOR_ENTRY_CHECK_OK: ",Engine.physics_ticks_per_second," Hz; six exterior/interior single/twin doors via actual E, correct approach and cancellation")
+	print("DOOR_ENTRY_CHECK_OK: ",Engine.physics_ticks_per_second," Hz; seven exterior/interior single/twin doors via actual E, turn away/back-step/turn back/enter/fade and cancellation")
 	quit()

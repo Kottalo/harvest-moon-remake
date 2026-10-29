@@ -36,7 +36,7 @@ debug_fill = false
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
 material_override = SubResource("PlayerMaterial")
-offset = Vector2(0, 53)
+offset = Vector2(0, 49)
 pixel_size = 0.009827848
 billboard = 1
 texture_filter = 1

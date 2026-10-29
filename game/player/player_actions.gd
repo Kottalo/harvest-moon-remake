@@ -233,7 +233,7 @@ func update_held(running: bool) -> void:
 	held_sprite.material_override.set_shader_parameter("albedo_texture",held_sprite.texture)
 	var group := 0 if showing or pending_item != 0 or state in ["drop","throw"] else (2 if running else 1)
 	var offset: Array = data.item_offsets[0 if showing else group*4+player.facing]
-	held_sprite.offset = Vector2(offset[0],53-offset[1])
+	held_sprite.offset = Vector2(offset[0],player.sprite.offset.y-offset[1])
 	held_sprite.position = player.sprite.position
 	# PS1 addPrim prepends: item submitted before body is drawn AFTER it.
 	# Carry poses put the object in front; pickup/release use the facing order.

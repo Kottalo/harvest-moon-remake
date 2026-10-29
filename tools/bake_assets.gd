@@ -29,6 +29,8 @@ func _initialize() -> void:
 func _bake_scene(info: Dictionary) -> void:
 	var source = JSON.parse_string(FileAccess.get_file_as_string(info.source_json))
 	assert(source is Dictionary, "Run tools/import_disc.py first")
+	if info.slug == "farm":
+		_remove_doghouse_backplate(source.surfaces)
 	var texture_base: String = info.texture_base
 	var ramps: Array = []
 	if FileAccess.file_exists(texture_base + "walkable_ramps.json"):
@@ -56,6 +58,27 @@ func _bake_scene(info: Dictionary) -> void:
 	assert(ResourceSaver.save(scene, info.scene) == OK)
 	print("BAKE_OK: area ", info.id, ", ", source.entries.size(), " positioned zone models")
 	farm.free()
+
+func _remove_doghouse_backplate(surfaces: Array) -> void:
+	# Original painter geometry: the wooden gable fully covers two grey triangles.
+	# Both occupy z=-3.4; keeping both in a native depth buffer causes stippling.
+	var removed := 0
+	var widths := {"vertices":9,"colors":9,"uv":6,"sort_centers":9,"primitive_flags":1}
+	for surface in surfaces:
+		if not surface.texture.is_empty(): continue
+		for triangle in range(surface.primitive_flags.size()-1,-1,-1):
+			var covered := true
+			for corner in 3:
+				var start := triangle*9+corner*3
+				var point := Vector3(surface.vertices[start],surface.vertices[start+1],surface.vertices[start+2])
+				covered = covered and point.x>=-1.904001 and point.x<=-1.695999 and point.y>=0.359999 and point.y<=0.400001 and absf(point.z+3.4)<0.000001
+			if not covered: continue
+			for field in widths:
+				var width: int = widths[field]
+				surface[field] = surface[field].slice(0,triangle*width)+surface[field].slice((triangle+1)*width)
+			removed += 1
+	assert(removed==2,"Expected the original two covered doghouse backplate triangles")
+	print("DOGHOUSE_BACKPLATE_OK: removed two covered coplanar triangles; wooden gable preserved")
 
 func _ramp_planes(ramp: Dictionary) -> Array:
 	var low := _ramp_point(ramp, [minf(ramp["from"][0], ramp.to[0]), minf(ramp["from"][1], ramp.to[1]) - 0.001], ramp.cross[0])

@@ -1,0 +1,22 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+AREA_READY: 0 农场
+SHADOW_GRID_CENTRE: facing=0 pixel delta=(0.0, 0.008392)
+SHADOW_GRID_CENTRE: facing=1 pixel delta=(0.0, 0.0)
+SHADOW_GRID_CENTRE: facing=2 pixel delta=(0.0, 0.0)
+SHADOW_GRID_CENTRE: facing=3 pixel delta=(0.0, 0.0)
+SHADOW_GRID_ALIGNMENT_OK: four actual tilled cell centres/facings, fixed source foot pivot and continuous motion
+AREA_READY: 0 农场
+SHADOW_GPU_PIXELS: standing visible=229 body-interior changed=0
+AREA_READY: 32 镇南街区
+SHADOW_GPU_PIXELS: slope visible=252 body-interior changed=0
+AREA_READY: 0 农场
+PLAYER_SHADOW_OK: 60 Hz; source UI shadow, fixed size/pivot, flat and visible ramp ground, ground remains below airborne body

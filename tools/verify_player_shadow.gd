@@ -31,7 +31,7 @@ func grid_alignment() -> bool:
 		await frames(8)
 		world._update_camera()
 		var shadow: Sprite3D = world.player.get_node("GroundShadow")
-		if not require_ok(Vector2(shadow.global_position.x,shadow.global_position.z).distance_to(Vector2(centre.x,centre.z))<0.00001 and world.player.sprite.offset==Vector2(0,53),"Grid/foot origin moved or source animation pivot changed"): return false
+		if not require_ok(Vector2(shadow.global_position.x,shadow.global_position.z).distance_to(Vector2(centre.x,centre.z))<0.00001 and world.player.sprite.offset==Vector2(0,49),"Grid/shadow origin moved or the lowered common body pivot changed"): return false
 		if DisplayServer.get_name()=="headless": continue
 		world.player.set_physics_process(false)
 		shadow.set_physics_process(false)

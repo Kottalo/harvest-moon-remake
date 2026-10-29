@@ -174,11 +174,14 @@ func _begin_transition(exit: Dictionary) -> void:
 	if exit.has("door"):
 		doors.open(get_node("Location"),exit.door,player.facing)
 		player.set_door_passage(true)
-		player.scripted_direction = Vector2(player.actions.DIRECTIONS[player.facing].x,player.actions.DIRECTIONS[player.facing].z)
-		# player_pending_transition starts 10 source ticks; farm_event_step then
-		# starts the 20-tick passage before freezing the old image for the fade.
+		var direction: Vector3 = player.actions.DIRECTIONS[player.facing]
+		# player_walk_start -> facing_buttons -> player_dpad_facing reverses facing:
+		# first turn away/back out for 10, then turn back/enter for 20.
+		# The source checks countdown==0 after moving, so each stage includes tick 0.
 		for ticks in [10,20]:
-			player.scripted_walk_time = ticks/30.0
+			var motion: Vector3 = -direction if ticks==10 else direction
+			player.scripted_direction = Vector2(motion.x,motion.z)
+			player.scripted_walk_time = (ticks+1)/30.0
 			while player.scripted_walk_time>0:
 				await get_tree().physics_frame
 				if token != transition_token:

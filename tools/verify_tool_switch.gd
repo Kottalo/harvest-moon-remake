@@ -49,7 +49,7 @@ func run() -> void:
 			await frames(1)
 			var id: int = action.equipped+action.upgrade if action.equipped<=25 else action.equipped
 			if not require_ok(action.state=="show_tool" and action.bank=="base" and action.range_id==71 and action.frame==facing and action.equipped==action.TOOL_IDS[index],"Q did not select and play original show-tool range"): return
-			if not require_ok(action.held_sprite.visible and action.held_sprite.texture.resource_path==action.data.tool_pictures[str(id)] and action.held_sprite.offset==Vector2(-8,63) and action.held_sprite.material_override.get_shader_parameter("sort_bias")<0,"Tool picture, source offset or front layering is wrong"): return
+			if not require_ok(action.held_sprite.visible and action.held_sprite.texture.resource_path==action.data.tool_pictures[str(id)] and action.held_sprite.offset==Vector2(-8,59) and action.held_sprite.material_override.get_shader_parameter("sort_bias")<0,"Tool picture, body-relative offset or front layering is wrong"): return
 			key(KEY_RIGHT,true)
 			if facing==0 and index==1 and DisplayServer.get_name()!="headless":
 				for frame in 2: await RenderingServer.frame_post_draw

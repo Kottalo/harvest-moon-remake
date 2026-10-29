@@ -60,7 +60,7 @@ func _run() -> void:
 						return
 					if not _finish_action(action):
 						return
-					if not _require(world.player.sprite.offset==Vector2(0,53) and is_equal_approx(world.player.sprite.pixel_size,0.009827848),"Action changed the fixed world size or common pivot"):
+					if not _require(world.player.sprite.offset==Vector2(0,49) and is_equal_approx(world.player.sprite.pixel_size,0.009827848),"Action changed the fixed world size or lowered common pivot"):
 						return
 					checks += 1
 	for tool in [26,27,28,29,56,57,30,31,32,34]:
