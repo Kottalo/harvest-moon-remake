@@ -1,5 +1,5 @@
 extends Sprite3D
-## Original UI range 24, frame 0; keep its native picture/offset on the ground.
+## Original UI range 24, frame 0; its visible centre follows the logical foot point.
 @onready var player: CharacterBody3D = get_parent()
 func _ready() -> void:
 	material_override = material_override.duplicate()

@@ -14,6 +14,51 @@ func frames(count: int) -> void:
 func picture() -> Image:
 	for frame in 3: await RenderingServer.frame_post_draw
 	return viewport.get_texture().get_image()
+func grid_alignment() -> bool:
+	# Real tilled cell centres; no snapping is added to the player controller.
+	world._change_area(0,Vector3(-0.2,0.05,1.8))
+	for record in world.loose_items.records[0]:
+		if record.active: world.loose_items._remove(record)
+	for cell in [Vector2i(10,8),Vector2i(11,8),Vector2i(10,9),Vector2i(11,9)]:
+		if not require_ok(world.farm_field._till(cell),"Alignment fixture could not till a clear cell"): return false
+	for facing in 4:
+		var cell := Vector2i(10+facing%2,8+facing/2)
+		var centre := Vector3(cell.x*0.4-4.2,0,cell.y*0.4-1.4)
+		world.player.position = centre+Vector3.UP*0.05
+		world.player.velocity = Vector3.ZERO
+		world.player.facing = facing
+		world.player._update_animation(Vector2.ZERO,false,0)
+		await frames(8)
+		world._update_camera()
+		var shadow: Sprite3D = world.player.get_node("GroundShadow")
+		if not require_ok(Vector2(shadow.global_position.x,shadow.global_position.z).distance_to(Vector2(centre.x,centre.z))<0.00001 and world.player.sprite.offset==Vector2(0,53),"Grid/foot origin moved or source animation pivot changed"): return false
+		if DisplayServer.get_name()=="headless": continue
+		world.player.set_physics_process(false)
+		shadow.set_physics_process(false)
+		if facing==0: (await picture()).save_png("res://verification/player_grid_alignment.png")
+		world.player.sprite.hide()
+		var shown := await picture()
+		shadow.hide()
+		var background := await picture()
+		var low := Vector2i(viewport.size)
+		var high := Vector2i(-1,-1)
+		for y in shown.get_height():
+			for x in shown.get_width():
+				var a := shown.get_pixel(x,y)
+				var b := background.get_pixel(x,y)
+				if Vector3(a.r-b.r,a.g-b.g,a.b-b.b).length()<0.02: continue
+				low = low.min(Vector2i(x,y))
+				high = high.max(Vector2i(x,y))
+		var actual := (Vector2(low)+Vector2(high)+Vector2.ONE)*0.5
+		var expected: Vector2 = world.camera.unproject_position(shadow.global_position)
+		world.player.sprite.show()
+		shadow.show()
+		world.player.set_physics_process(true)
+		shadow.set_physics_process(true)
+		print("SHADOW_GRID_CENTRE: facing=",facing," pixel delta=",actual-expected)
+		if not require_ok(high.x>=low.x and actual.distance_to(expected)<1.5,"Visible shadow is not centred on the tilled cell/foot origin"): return false
+	print("SHADOW_GRID_ALIGNMENT_OK: four actual tilled cell centres/facings, fixed source foot pivot and continuous motion")
+	return true
 func pixels(label: String) -> bool:
 	var player = world.player
 	var shadow: Sprite3D = player.get_node("GroundShadow")
@@ -58,12 +103,13 @@ func run() -> void:
 	world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
 	world.set_physics_process(false)
+	if not await grid_alignment(): return
 	for fixture in [[0,Vector3(0,0.1,-2),"standing"],[32,Vector3(1.205002,1,4.8),"slope"]]:
 		world._change_area(fixture[0],fixture[1])
 		await frames(Engine.physics_ticks_per_second)
 		var shadow: Sprite3D = world.player.get_node("GroundShadow")
 		var feet: Vector3 = world.player.global_position+Vector3.UP*world.player.sprite.position.y
-		if not require_ok(shadow.visible and shadow.global_position.distance_to(feet)<0.00001 and shadow.offset==Vector2(0,48) and is_equal_approx(shadow.pixel_size,world.player.sprite.pixel_size),"Original shadow is not on the visible foot contact point"): return
+		if not require_ok(shadow.visible and shadow.global_position.distance_to(feet)<0.00001 and shadow.offset==Vector2(-1,47.5) and is_equal_approx(shadow.pixel_size,world.player.sprite.pixel_size),"Centred shadow is not on the visible foot contact point"): return
 		if DisplayServer.get_name()!="headless":
 			if not await pixels(fixture[2]): return
 	world._change_area(0,Vector3(0.03,0.01,-2.65))
