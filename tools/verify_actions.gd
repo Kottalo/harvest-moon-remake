@@ -137,18 +137,21 @@ func _run() -> void:
 	if not _require(action.carried_id==58 and int(world.loose_items.field_cells[stone.cell])==0x167,"Stone pickup did not free its original field cell"):
 		return
 	var planned: Dictionary = world.loose_items._placement(58)
-	if not _require(not planned.get("blocked",false),"Stone has no valid continuous placement target"):
+	if not _require(not planned.get("blocked",false),"Stone has no valid grid-centred placement target"):
 		return
 	_key(KEY_E,true)
 	await _frames(2)
 	_key(KEY_E,false)
 	await _frames(30)
+	var grid := Vector2((planned.position.x+4.2)/0.4,(planned.position.z+1.4)/0.4)
+	if not _require(grid.distance_to(grid.round())<0.0001,"Actual E drop missed the visible soil grid centres"):
+		return
 	var copies := 0
 	for record in world.loose_items.records[0]:
 		if record.active and record.id==58 and record.position.distance_to(planned.position)<0.001:
 			copies += 1
 	var dropped: Dictionary = world.loose_items.batches[58].records.back()
-	if not _require(action.carried_id==0 and copies==1 and dropped.free_position and world.loose_items.flights.is_empty() and int(world.loose_items.field_cells[dropped.cell])==58,"Continuous stone placement failed or duplicated the item"):
+	if not _require(action.carried_id==0 and copies==1 and dropped.free_position and world.loose_items.flights.is_empty() and int(world.loose_items.field_cells[dropped.cell])==58,"Grid-centred stone placement failed or duplicated the item"):
 		return
 	world.player.position.z -= 0.2
 	world.player.velocity = Vector3.ZERO
@@ -160,7 +163,7 @@ func _run() -> void:
 	_key(KEY_DOWN,false)
 	if not _require(absf(world.player.position.z-(dropped.position.z-0.16))<0.006 and world.player.position.z>approach.z+0.02,"Placed stone did not restore its source-size obstruction at its actual position: "+str([approach,world.player.position,dropped.position])):
 		return
-	print("PLACEMENT_OK: physical E places one stone at its continuous target, restores obstruction at its actual position and preserves field bookkeeping")
+	print("PLACEMENT_OK: physical E places one stone at its nearest available visual grid centre, restores obstruction at its actual position and preserves field bookkeeping")
 	# Exercise hole removal, tail removal, an empty batch and repeated slot reuse.
 	world.set_physics_process(false)
 	world.player.set_physics_process(false)
@@ -170,7 +173,7 @@ func _run() -> void:
 		items._remove(placed)
 		items.placement = {"cell":placed.cell,"position":placed.position}
 		items.release_item(58,false)
-		if not _require(action.carried_id==0,"Repeated continuous placement failed and restored the held item"):
+		if not _require(action.carried_id==0,"Repeated grid-centred placement failed and restored the held item"):
 			return
 		placed = items.batches[58].records.back()
 		await _frames(1)

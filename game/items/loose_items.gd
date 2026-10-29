@@ -13,12 +13,11 @@ var batches := {}
 var meshes := {}
 var prefab_scenes := {58:preload("res://game/items/prefabs/stone.tscn"),62:preload("res://game/items/prefabs/branch.tscn"),64:preload("res://game/items/prefabs/weeds.tscn")}
 var prefab_definitions := {}
-var placement_offsets: Array[Vector2] = []
 const FIELD_CELL_SIZE := 0.399 # field_world_to_cell: the source 399-unit grid.
+const VISUAL_CELL_SIZE := 0.4 # Original field quad spacing; placement shares its centres.
 const PLACEMENT_PROBE_SIZE := 0.8
 const PLACEMENT_MIN_FREE_RATIO := 0.5
 const PLACEMENT_PROBE_STEPS := 8
-const PLACEMENT_SEARCH_STEP := 0.025
 
 func setup(owner_world) -> void:
 	world = owner_world
@@ -213,7 +212,7 @@ func _remove(record: Dictionary) -> void:
 func _placement(item: int) -> Dictionary:
 	if current_area != 0 or not catalogue.pictures[str(item)].place_on_farm:
 		return {}
-	# Keep the source forward reach, without snapping the actual drop to field cells.
+	# User requests nearest available visual cell centre, rather than a free drop.
 	var facing: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
 	var point: Vector3 = world.player.position + facing*0.4
 	var free_ratio := _placement_free_ratio(point)
@@ -221,16 +220,20 @@ func _placement(item: int) -> Dictionary:
 	if free_ratio < PLACEMENT_MIN_FREE_RATIO:
 		return best
 	var feet := Vector2(world.player.position.x,world.player.position.z)
+	var ideal := Vector2(point.x,point.z)
 	var direction := Vector2(facing.x,facing.z)
-	var side := Vector2(-direction.y,direction.x)
-	if placement_offsets.is_empty():
-		# ponytail: nearest fallback is sampled every 2.5 cm; the unobstructed
-		# target is exact and never snapped to either this sampling or field cells.
-		var steps := floori(PLACEMENT_PROBE_SIZE*0.5/PLACEMENT_SEARCH_STEP)
-		for y in range(-steps,steps+1):
-			for x in range(-steps,steps+1):
-				placement_offsets.append(Vector2(x,y)*PLACEMENT_SEARCH_STEP)
-		placement_offsets.sort_custom(func(a: Vector2,b: Vector2): return a.length_squared()<b.length_squared())
+	var column := floori((point.x+4.4)/VISUAL_CELL_SIZE)
+	var row := floori((point.z+1.6)/VISUAL_CELL_SIZE)
+	# The 3x3 cells overlapping the forward detector; snap to their real centres.
+	var candidates: Array[Vector2i] = []
+	for y in range(row-1,row+2):
+		for x in range(column-1,column+2):
+			if x>=0 and x<45 and y>=0 and y<25:
+				candidates.append(Vector2i(x,y))
+	candidates.sort_custom(func(a: Vector2i,b: Vector2i):
+		var da := _placement_cell_center(a).distance_squared_to(ideal)
+		var db := _placement_cell_center(b).distance_squared_to(ideal)
+		return _placement_cell_center(a).distance_squared_to(feet)<_placement_cell_center(b).distance_squared_to(feet) if is_equal_approx(da,db) else da<db)
 	var query := PhysicsShapeQueryParameters3D.new()
 	var box := BoxShape3D.new()
 	# One source unit of clearance permits touching neighbouring occupied cells.
@@ -243,15 +246,14 @@ func _placement(item: int) -> Dictionary:
 	query.collision_mask = 1
 	query.exclude = [world.player.get_rid()]
 	var space := get_world_3d().direct_space_state
-	var field := Rect2(Vector2(-4.4,-1.6),Vector2(45,25)*FIELD_CELL_SIZE)
-	var detector := Rect2(Vector2(point.x,point.z)-Vector2.ONE*PLACEMENT_PROBE_SIZE*0.5,Vector2.ONE*PLACEMENT_PROBE_SIZE)
-	for offset in placement_offsets:
-		var centre := Vector2(point.x,point.z)+side*offset.x+direction*offset.y
+	var field := Rect2(Vector2(-4.4,-1.6),Vector2(45,25)*VISUAL_CELL_SIZE)
+	for cell in candidates:
+		var centre := _placement_cell_center(cell)
 		if (centre-feet).dot(direction)<=0:
 			continue
 		var collision_centre := centre+Vector2(local.origin.x,local.origin.z)
 		var bounds := Rect2(collision_centre-half_size,half_size*2)
-		if not field.encloses(bounds) or not detector.encloses(bounds):
+		if not field.encloses(bounds):
 			continue
 		var ray := PhysicsRayQueryParameters3D.create(Vector3(centre.x,world.player.position.y+0.5,centre.y),Vector3(centre.x,world.player.position.y-0.5,centre.y),2)
 		var floor_hit := space.intersect_ray(ray)
@@ -269,10 +271,11 @@ func _placement(item: int) -> Dictionary:
 		var backstep := _placement_backstep(target+local.origin,facing,half_size)
 		if backstep<0:
 			continue
-		var column := floori((centre.x+4.4)/FIELD_CELL_SIZE)
-		var row := floori((centre.y+1.6)/FIELD_CELL_SIZE)
-		return {"cell":row*45+column,"position":target,"free_ratio":free_ratio,"backstep":backstep}
+		return {"cell":cell.y*45+cell.x,"position":target,"free_ratio":free_ratio,"backstep":backstep}
 	return best
+
+func _placement_cell_center(cell: Vector2i) -> Vector2:
+	return Vector2(cell.x*VISUAL_CELL_SIZE-4.2,cell.y*VISUAL_CELL_SIZE-1.4)
 
 func _placement_backstep(point: Vector3, facing: Vector3, half_size: Vector2) -> float:
 	var delta: Vector3 = point-world.player.position
