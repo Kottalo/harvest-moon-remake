@@ -26,7 +26,11 @@ func area_to_world(area: int, point: Vector3) -> Vector3:
 func world_to_area(area: int, point: Vector3) -> Vector3:
 	return point - area_to_world(area, Vector3.ZERO)
 
+func _enter_tree() -> void:
+	print("BOOT_STAGE: world entered")
+
 func _ready() -> void:
+	print("BOOT_STAGE: world setup")
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
 	location_loader = load("res://game/world/location_loader.gd").new()
 	location_loader.catalogue = world
@@ -53,6 +57,7 @@ func _ready() -> void:
 	loose_items.name = "LooseItems"
 	add_child(loose_items)
 	loose_items.setup(self)
+	print("BOOT_STAGE: items ready")
 	day_cycle = load("res://game/time/day_cycle.gd").new()
 	day_cycle.name = "DayCycle"
 	add_child(day_cycle)

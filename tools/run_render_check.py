@@ -22,7 +22,7 @@ class ProcessInfo(c.Structure):
     _fields_ = [('process',w.HANDLE),('thread',w.HANDLE),('pid',w.DWORD),('tid',w.DWORD)]
 
 
-def run(log, script='tools/render_actions_check.gd', timeout=60, project=None):
+def run(log, script='tools/render_actions_check.gd', timeout=60, project=None, extra_args=()):
     user = c.WinDLL('user32',use_last_error=True)
     kernel = c.WinDLL('kernel32',use_last_error=True)
     user.CreateDesktopW.argtypes = [w.LPCWSTR,w.LPCWSTR,c.c_void_p,w.DWORD,w.DWORD,c.c_void_p]
@@ -51,7 +51,8 @@ def run(log, script='tools/render_actions_check.gd', timeout=60, project=None):
 
     source_root = Path(__file__).resolve().parents[1]
     root = project.resolve() if project else source_root
-    godot = source_root.parent/'Tools/Godot/Godot_v4.7.2-stable_win64_console.exe'
+    # Own the engine process itself, so a timeout cannot orphan a console wrapper's child.
+    godot = source_root.parent/'Tools/Godot/Godot_v4.7.2-stable_win64.exe'
     before = input_desktop()
     name = 'CodexRenderCheck'
     desktop = user.CreateDesktopW(name,None,None,0,0x000F01FF,None)
@@ -64,7 +65,11 @@ def run(log, script='tools/render_actions_check.gd', timeout=60, project=None):
         startup.desktop = 'WinSta0\\'+name
         startup.flags = 1 # STARTF_USESHOWWINDOW
         startup.show = 0 # SW_HIDE
-        command = c.create_unicode_buffer(subprocess.list2cmdline([str(godot),'--path',str(root),'--resolution','64x64','--script',script,'--log-file',str(log)]))
+        arguments = [str(godot),'--path',str(root),'--resolution','64x64','--log-file',str(log)]
+        if script:
+            arguments += ['--script',script]
+        arguments += list(extra_args)
+        command = c.create_unicode_buffer(subprocess.list2cmdline(arguments))
         if not kernel.CreateProcessW(str(godot),command,None,None,False,0x08000000,None,str(root),c.byref(startup),c.byref(info)):
             raise c.WinError(c.get_last_error())
         if kernel.WaitForSingleObject(info.process,timeout*1000) != 0:

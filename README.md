@@ -78,3 +78,5 @@ git -C harvest-moon-remake lfs pull
 玩家调试胶囊用亮青色透视轮廓显示，直接取真实 Shape3D 的 debug mesh，避免被角色图片遮住。按用户要求半径加宽至 0.09（直径 0.18），高度 0.24、中心偏移 (0,0.12,0) 和脚底位置保持不变；只在调试构建且开启碰撞显示时创建。
 
 已补齐有门入口的两段原版自动步进：先 10、再 20 个 30 Hz 逻辑帧，然后冻结旧画面淡出。门板按原版逐帧加速、保持、回关及双门镜像转动，保留“先绘制转角再限制内部角度”的细节。开门／重复触发与真实自宅、牛棚、医院入口检查见 `tools/verify_actions.gd`、`tools/verify_door_entry.gd`。
+
+启动诊断：输出中的 BOOT_STAGE 标记依次显示世界进入、玩家初始化、世界初始化和物件就绪，之后为 WORLD_READY。邻接地图预加载在初始化完成后的普通帧逐张启动，最多一张并行。`tools/verify_startup.py --log-dir <绝对目录> --runs 20` 使用独立 Windows 桌面测试完整主场景启动，`tools/verify_startup.gd` 检查预加载队列和缓存释放。

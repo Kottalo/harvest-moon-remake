@@ -19,6 +19,7 @@ const GROUND_PROBE_HEIGHT := 200.0 / 1000.0
 const GROUND_PROBE_REACH := 48.0 / 1000.0
 
 func _ready() -> void:
+	print("BOOT_STAGE: player setup")
 	if OS.is_debug_build() and get_tree().debug_collisions_hint:
 		_show_debug_footprint()
 	_setup_input()
@@ -29,6 +30,7 @@ func _ready() -> void:
 	add_child(actions)
 	actions.setup(self)
 	_update_animation(Vector2.ZERO, false, 0.0)
+	print("BOOT_STAGE: player ready")
 
 func _show_debug_footprint() -> void:
 	# The source-depth billboard hides native collision lines; show the actual

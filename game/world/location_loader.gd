@@ -22,11 +22,6 @@ func warm(area: int) -> void:
 			wanted[path_for(int(exit.target))] = true
 	for path in ready.keys():
 		if not wanted.has(path): ready.erase(path)
-	if DisplayServer.get_name() == "headless": return
-	for path in wanted:
-		if not ready.has(path) and not requested.has(path):
-			if ResourceLoader.load_threaded_request(path,"PackedScene") == OK:
-				requested[path] = true
 
 func poll() -> void:
 	for path in requested.keys():
@@ -37,3 +32,11 @@ func poll() -> void:
 			requested.erase(path)
 		elif status in [ResourceLoader.THREAD_LOAD_FAILED,ResourceLoader.THREAD_LOAD_INVALID_RESOURCE]:
 			requested.erase(path)
+	# Start prefetch only after world._ready has completed, one map at a time.
+	# Concurrent startup loads may contend with synchronous script/font setup.
+	if DisplayServer.get_name()=="headless" or not requested.is_empty(): return
+	for path in wanted:
+		if not ready.has(path):
+			if ResourceLoader.load_threaded_request(path,"PackedScene")==OK:
+				requested[path] = true
+			break
