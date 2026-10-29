@@ -19,6 +19,8 @@ const GROUND_PROBE_HEIGHT := 200.0 / 1000.0
 const GROUND_PROBE_REACH := 48.0 / 1000.0
 
 func _ready() -> void:
+	if OS.is_debug_build() and get_tree().debug_collisions_hint:
+		_show_debug_footprint()
 	_setup_input()
 	sprite.material_override = sprite.material_override.duplicate()
 	animation_data = JSON.parse_string(FileAccess.get_file_as_string("res://game/player/player_animations.json"))
@@ -27,6 +29,25 @@ func _ready() -> void:
 	add_child(actions)
 	actions.setup(self)
 	_update_animation(Vector2.ZERO, false, 0.0)
+
+func _show_debug_footprint() -> void:
+	# The source-depth billboard hides native collision lines; show the actual
+	# engine capsule mesh through it, only when collision debugging is enabled.
+	var collision: CollisionShape3D = $CollisionShape3D
+	var wire := MeshInstance3D.new()
+	wire.name = "DebugFootprint"
+	wire.mesh = footprint.get_debug_mesh()
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = collision.debug_color
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.no_depth_test = true
+	material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	material.render_priority = 127
+	wire.material_override = material
+	wire.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	collision.add_child(wire,false,Node.INTERNAL_MODE_BACK)
+	footprint.changed.connect(func(): wire.mesh = footprint.get_debug_mesh())
 
 func _physics_process(delta: float) -> void:
 	actions.poll_input()

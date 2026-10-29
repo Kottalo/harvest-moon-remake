@@ -74,3 +74,5 @@ git -C harvest-moon-remake lfs pull
 调试运行默认通过 `editor/run/main_run_args="--debug-collisions"` 开启 Godot 原生碰撞显示：包括玩家胶囊、地面物件、建筑、地面／斜坡和查询用形状。只显示已有真实形状，不添加或改变碰撞；正式导出不受编辑器启动参数影响。需关闭时清除 Project Settings → Editor → Run → Main Run Args 中的该参数。
 
 小物件调试碰撞采用无填充的高亮原生线框：石头亮粉、树枝黄、草荧光绿，便于从其他地图碰撞中辨认；两种放置模式的实际大小和位置不变。
+
+玩家调试胶囊用亮青色透视轮廓显示，直接取真实 Shape3D 的 debug mesh，避免被角色图片遮住。半径 0.06、高度 0.24、中心偏移 (0,0.12,0) 保持不变；只在调试构建且开启碰撞显示时创建。

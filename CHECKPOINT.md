@@ -1,5 +1,12 @@
 # Checkpoint — 2026-10-28
 
+## 2026-10-29 玩家碰撞胶囊透视显示
+
+- 用户指出玩家 collider 仍看不到，要求先显示而非调整尺寸。根因是整个角色图片使用 source hand point 的固定深度，遮住原生碰撞线；之前的小物件调试预览只证明物件线可见，未证明玩家胶囊可见。
+- 玩家碰撞节点设为青色无填充。在已开启碰撞显示的 debug build 中，从真实 CapsuleShape3D.get_debug_mesh() 取得轮廓，作为实际 CollisionShape3D 的内部子节点绘制，禁用深度测试／写入、提高透明渲染优先级，使其透过人物图片可见。相同形状 changed 时刷新，节点变换自然跟随碰撞体。
+- 玩家半径 0.06、高 0.24、中心 (0,0.12,0)、碰撞层、运动和贴地逻辑均未改动；未开启调试显示或正式构建不创建该轮廓。
+- tools/verify_item_debug.gd 增加四朝向的实际 GPU 对照：角色图片显示／隐藏时，青色胶囊可见像素均为 84，确认没有再次被遮挡；同时确认使用同一个原生 debug mesh、相同实际碰撞变换及未改变的尺寸。原生运行和结构检查通过，证据见 verification/player-debug-collider-*.txt，实际预览为 verification/player_debug_collider.png。Godot AI 无在线会话，未启动或操作用户游戏。
+
 ## 2026-10-29 小物件调试框高亮
 
 - 用户要求小物件 collider 更明显。三份 prefab 的原生 CollisionShape3D 设置高亮 Debug Color：石头亮粉、树枝黄、草荧光绿，并关闭 Debug Fill，避免半透明面遮住图片。初始和放下后的模式都应用。

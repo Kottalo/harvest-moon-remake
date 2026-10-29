@@ -58,6 +58,39 @@ func _run() -> void:
 			push_error("Native item wireframe is not clearly visible: "+str([ITEMS[index],counts]))
 			quit(1)
 			return
+	var collision: CollisionShape3D = player.get_node("CollisionShape3D")
+	var wire: MeshInstance3D = collision.get_node_or_null("DebugFootprint")
+	if wire==null or wire.mesh!=player.footprint.get_debug_mesh() or not wire.global_transform.is_equal_approx(collision.global_transform) or not is_equal_approx(player.footprint.radius,0.06) or not is_equal_approx(player.footprint.height,0.24):
+		push_error("Player debug wire does not match the actual unchanged capsule")
+		quit(1)
+		return
+	var visible_counts := []
+	for facing in 4:
+		player.facing = facing
+		player._update_animation(Vector2.ZERO,false,0.0)
+		player.sprite.show()
+		for frame in 3: await RenderingServer.frame_post_draw
+		var shown := viewport.get_texture().get_image()
+		player.sprite.hide()
+		for frame in 3: await RenderingServer.frame_post_draw
+		var hidden := viewport.get_texture().get_image()
+		var visible_cyan := 0
+		var hidden_cyan := 0
+		for y in shown.get_height():
+			for x in shown.get_width():
+				var a := shown.get_pixel(x,y)
+				var b := hidden.get_pixel(x,y)
+				if a.r<0.1 and a.g>0.9 and a.b>0.9: visible_cyan += 1
+				if b.r<0.1 and b.g>0.9 and b.b>0.9: hidden_cyan += 1
+		if visible_cyan<30 or absi(visible_cyan-hidden_cyan)>2:
+			push_error("Player billboard hides the collision capsule: "+str([facing,visible_cyan,hidden_cyan]))
+			quit(1)
+			return
+		visible_counts.append(visible_cyan)
+		if facing==0:
+			shown.save_png("res://verification/player_debug_collider.png")
+	print("PLAYER_DEBUG_CAPSULE_OK: all four facings keep cyan capsule visible through actual sprite; cyan pixels=",visible_counts,"; engine debug mesh follows actual collider, radius=0.06 height=0.24 unchanged")
+	player.sprite.show()
 	picture.save_png("res://verification/item_debug_colliders.png")
 	print("ITEM_DEBUG_COLLIDERS_OK: native magenta/yellow/lime wireframes visible; pixel counts=",counts,"; initial and placed full-cell boxes unchanged; actual item batches and player included")
 	viewport.queue_free()
