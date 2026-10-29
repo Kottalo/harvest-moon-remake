@@ -159,9 +159,9 @@ func _run() -> void:
 	await _frames(2)
 	var approach: Vector3 = world.player.position
 	_key(KEY_DOWN,true)
-	await _frames(40) # The smaller source loose-item box takes longer to reach.
+	await _frames(40) # Approach the same full-cell footprint used by initial debris.
 	_key(KEY_DOWN,false)
-	if not _require(absf(world.player.position.z-(dropped.position.z-0.16))<0.006 and world.player.position.z>approach.z+0.02,"Placed stone did not restore its source-size obstruction at its actual position: "+str([approach,world.player.position,dropped.position])):
+	if not _require(absf(world.player.position.z-(dropped.position.z-0.26))<0.006 and world.player.position.z>approach.z+0.02,"Placed stone did not restore its full-cell obstruction at its actual position: "+str([approach,world.player.position,dropped.position])):
 		return
 	print("PLACEMENT_OK: physical E places one stone at its nearest available visual grid centre, restores obstruction at its actual position and preserves field bookkeeping")
 	# Exercise hole removal, tail removal, an empty batch and repeated slot reuse.

@@ -65,7 +65,7 @@ func _run() -> void:
 		actual.multimesh.mesh = items._item_mesh(item)
 		reference.texture = load(items.catalogue.pictures[str(item)].ground_texture)
 		material.set_shader_parameter("albedo_texture",reference.texture)
-		reference.offset = Vector2(3,46) if index==3 else Vector2(0,48)
+		reference.offset = Vector2(3,46) if index==3 else (Vector2(1,43.05) if item==62 else Vector2(0,48))
 		reference.pixel_size = player.sprite.pixel_size*(1.1 if index==3 else 1.0)
 		for point in [Vector3(-4.2,0,-1.4),Vector3(0.2,0,0.2),Vector3(13.4,0,8.2)]:
 			actual.multimesh.set_instance_transform(0,Transform3D(Basis.IDENTITY,point))
@@ -91,8 +91,14 @@ func _run() -> void:
 					push_error("Ground ANI projection/batch offset differs from source canvas: "+str([item,point,distance,error,drawn.get_used_rect(),expected.get_used_rect()]))
 					quit(1)
 					return
+				if item==62:
+					var centre_error := Rect2(drawn.get_used_rect()).get_center().distance_to(camera.unproject_position(point))
+					if centre_error>1.1:
+						push_error("Branch is not centred on its soil cell: "+str([point,distance,centre_error]))
+						quit(1)
+						return
 				cases += 1
-	print("GROUND_ITEM_GPU_OK: ",cases," cases; 18 source ANI/anchor cases plus 6 manually authored prefab position/offset/pixel-size overrides match actual MultiMesh drawing")
+	print("GROUND_ITEM_GPU_OK: ",cases," cases; 12 source ANI/anchor cases, 6 branch cell-centre corrections and 6 manually authored prefab overrides match actual MultiMesh drawing")
 	actual.hide()
 	reference.hide()
 	var preview: Node3D = load("res://game/items/prefabs/stone.tscn").instantiate()

@@ -13,7 +13,6 @@ var batches := {}
 var meshes := {}
 var prefab_scenes := {58:preload("res://game/items/prefabs/stone.tscn"),62:preload("res://game/items/prefabs/branch.tscn"),64:preload("res://game/items/prefabs/weeds.tscn")}
 var prefab_definitions := {}
-const FIELD_CELL_SIZE := 0.399 # field_world_to_cell: the source 399-unit grid.
 const VISUAL_CELL_SIZE := 0.4 # Original field quad spacing; placement shares its centres.
 const PLACEMENT_PROBE_SIZE := 0.8
 const PLACEMENT_MIN_FREE_RATIO := 0.5
@@ -128,12 +127,6 @@ func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Nod
 		var shape := CollisionShape3D.new()
 		shape.shape = _obstruction_box(item,not cell_aligned)
 		shape.transform = _prefab_definition(item).loose.transform if not cell_aligned else _prefab_definition(item).field.transform
-		var column := floori((point.x+4.4)/FIELD_CELL_SIZE)
-		var row := floori((point.z+1.6)/FIELD_CELL_SIZE)
-		var centre := _cell_bounds(column,row).get_center()
-		# Preserve the source grid/art difference, then apply the user's prefab offset.
-		if cell_aligned:
-			shape.position += Vector3(centre.x-point.x,0,centre.y-point.z)
 		node.add_child(body)
 		body.add_child(shape)
 	return node
@@ -156,9 +149,6 @@ func _prefab_definition(item: int) -> Dictionary:
 
 func _obstruction_box(item: int, free_position := false) -> BoxShape3D:
 	return _prefab_definition(item)["loose" if free_position else "field"].shape
-
-func _cell_bounds(column: int, row: int) -> Rect2:
-	return Rect2(Vector2(column*FIELD_CELL_SIZE-4.4,row*FIELD_CELL_SIZE-1.6),Vector2.ONE*FIELD_CELL_SIZE)
 
 func _target() -> Dictionary:
 	var ahead: Vector3 = world.player.position + world.player.actions.DIRECTIONS[world.player.facing]*0.224
@@ -315,8 +305,8 @@ func _placement_free_ratio(point: Vector3) -> float:
 	for y in PLACEMENT_PROBE_STEPS:
 		for x in PLACEMENT_PROBE_STEPS:
 			var sample := point+Vector3((x+0.5)*step-PLACEMENT_PROBE_SIZE*0.5,0.2,(y+0.5)*step-PLACEMENT_PROBE_SIZE*0.5)
-			var column := floori((sample.x+4.4)/FIELD_CELL_SIZE)
-			var row := floori((sample.z+1.6)/FIELD_CELL_SIZE)
+			var column := floori((sample.x+4.4)/VISUAL_CELL_SIZE)
+			var row := floori((sample.z+1.6)/VISUAL_CELL_SIZE)
 			if column<0 or column>=45 or row<0 or row>=25:
 				continue
 			query.transform = Transform3D(Basis.IDENTITY,sample)

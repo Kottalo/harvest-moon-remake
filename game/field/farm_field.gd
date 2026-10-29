@@ -82,12 +82,12 @@ func _till(cell: Vector2i) -> bool:
 		if record.active and not record.get("free_position",false) and record.get("cell",-1)==index:
 			return false
 	var shape := BoxShape3D.new()
-	shape.size = Vector3(0.397,0.35,0.397)
+	shape.size = Vector3(0.398,0.35,0.398)
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = shape
 	query.collision_mask = 1
 	query.exclude = [world.player.get_rid()]
-	query.transform = Transform3D(Basis.IDENTITY,Vector3(cell.x*0.399-4.2005,0.2,cell.y*0.399-1.4005))
+	query.transform = Transform3D(Basis.IDENTITY,Vector3(cell.x*0.4-4.2,0.2,cell.y*0.4-1.4))
 	if not world.player.get_world_3d().direct_space_state.intersect_shape(query,1).is_empty():
 		return false
 	# field_request_dispatch keeps already-watered ground wet when hoed again.
