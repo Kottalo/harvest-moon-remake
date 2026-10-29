@@ -195,6 +195,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	if packed == null:
 		transitioning = false
 		return
+	player.hop.cancel()
 	var previous := get_node("Location")
 	remove_child(previous)
 	previous.free()
@@ -230,7 +231,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if overview:
 			_set_overview()
 		else:
-			camera.reset_perspective()
+			camera.reset_gameplay()
 		_update_camera()
 
 func _sleep_until_morning(automatic: bool) -> void:

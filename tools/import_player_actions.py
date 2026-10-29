@@ -58,6 +58,42 @@ def extract_items(disc):
     return len(field)
 
 
+
+def extract_tool_icons(disc):
+    # picture_cell_build_prim uses the ordinary per-item ANI, not the tool swing atlas.
+    names = [f'{kind}_{grade}' for kind in ['sickle','hoe','axe','hammer','watering_can']
+             for grade in ['normal','copper','silver','gold','mystrile']]
+    names += ['milker','clippers','brush','bell','animal_medicine','cow_potion','sheep_potion']
+    icons = dict(zip(range(1,33),names))
+    icons.update({34:'turnip_seeds',56:'fishing_rod',57:'fishing_pole'})
+    directory = ROOT/'game/player/actions/tool_icons'
+    directory.mkdir(exist_ok=True)
+    paths = {}
+    for item,name in icons.items():
+        frames,_,_ = compose_animations(disc.asset(0x3c19000+item*2048,2048),0x100,[0])
+        frames[0].save(directory/f'{name}.png')
+        paths[str(item)] = f'res://game/player/actions/tool_icons/{name}.png'
+    path = ROOT/'game/player/actions/action_catalog.json'
+    catalogue = json.loads(path.read_text(encoding='utf-8'))
+    catalogue['tool_pictures'] = paths
+    path.write_text(json.dumps(catalogue,separators=(',',':')),encoding='utf-8')
+    print('TOOL_ICONS_OK:',len(paths),'source item ANI pictures, original canvases retained')
+
+
+
+def check_tool_icons(disc=None):
+    catalogue = json.loads((ROOT/'game/player/actions/action_catalog.json').read_text(encoding='utf-8'))
+    pictures = catalogue['tool_pictures']
+    assert {int(item) for item in pictures} == set(range(1,33)) | {34,56,57}
+    for item,path in pictures.items():
+        image = Image.open(ROOT/path[6:]).convert('RGBA')
+        assert image.size == (128,128) and image.getbbox(),path
+        if disc:
+            frames,_,_ = compose_animations(disc.asset(0x3c19000+int(item)*2048,2048),0x100,[0])
+            assert image.tobytes() == frames[0].tobytes(),path
+    print('SOURCE_TOOL_ICONS_CHECK_OK: 35 semantic native pictures; original ANI canvas and pixels')
+
+
 def check_items(disc=None):
     catalogue = json.loads((ROOT/'game/items/item_catalog.json').read_text())
     extents = item_half_extents()
@@ -150,6 +186,7 @@ def extract(disc):
                      source='player.c, anim.c, fishing.c; original ANI durations/control/part offsets')
     (destination/'action_catalog.json').write_text(json.dumps(catalogue,separators=(',',':')),encoding='utf-8')
 
+    extract_tool_icons(disc)
     field_count = extract_items(disc)
     for obsolete in destination.glob('tool_level_[0-4]_??.png'):
         obsolete.unlink()
@@ -211,17 +248,22 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('disc',type=Path,nargs='?')
     parser.add_argument('--check',action='store_true')
+    parser.add_argument('--tool-icons-only',action='store_true')
     parser.add_argument('--items-only',action='store_true',help='Refresh ground ANI and source item footprints without rebaking player actions or maps')
     args = parser.parse_args()
     if args.disc:
         expected = json.loads((ROOT/'tools/generated/source_manifest.json').read_text())['disc_sha256']
         assert hashlib.file_digest(args.disc.open('rb'),'sha256').hexdigest()==expected,'Wrong source disc'
         disc = Disc(args.disc)
-        if args.items_only:
+        if args.tool_icons_only:
+            extract_tool_icons(disc)
+        elif args.items_only:
             extract_items(disc)
         else:
             extract(disc)
+        check_tool_icons(disc)
         check_items(disc)
     else:
+        check_tool_icons()
         check_items()
     check()

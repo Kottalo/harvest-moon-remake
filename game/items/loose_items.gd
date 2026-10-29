@@ -162,6 +162,7 @@ func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Nod
 	if solid and item in [58,62,64]:
 		var body := StaticBody3D.new()
 		body.name = "Obstruction"
+		body.set_meta("hop_obstacle",true)
 		body.collision_layer = 1
 		body.collision_mask = 0
 		var shape := CollisionShape3D.new()

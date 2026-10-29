@@ -21,6 +21,10 @@ func _require(ok: bool, message: String) -> bool:
 	return ok
 
 func _walk(point: Vector3, facing: int, running: bool, seconds := 0.3) -> Vector3:
+	# Measure the physical footprint in isolation; running hops have their own
+	# actual-input single/blocked-cell checks in verify_running_hop.gd.
+	for body in player.get_parent().find_children("*","StaticBody3D",true,false):
+		body.set_meta("hop_obstacle",false)
 	player.position = point+Vector3.UP*0.001
 	player.reset_physics_interpolation()
 	player.velocity = Vector3.ZERO

@@ -31,16 +31,16 @@ func _run() -> void:
 	var camera_delta: Vector3 = farm.camera.position - start
 	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 12.96) < 0.00001 and absf(camera_delta.y - 6.48) < 0.00001 and absf(camera_delta.length() - sqrt(209.952)) < 0.00001, "User's 1.44x camera distance was not applied"):
 		return
-	# Character/world scale stays fixed for distance, FOV and orthographic zoom.
+	# Character/world scale stays fixed for distance and orthographic zoom.
 	var sprite: Sprite3D = farm.player.get_node("Sprite3D")
 	var sprite_size := sprite.get_aabb().size
 	var original_offset: Vector3 = farm.camera.eye_offset
 	for mode in 4:
-		farm.camera.reset_perspective()
+		farm.camera.reset_gameplay()
 		farm.camera.eye_offset = original_offset * (2.0 if mode == 1 else 1.0)
 		farm.overview = mode == 3
 		if mode == 2:
-			farm.camera.fov = 30.0
+			farm.camera.size *= 1.2
 		if farm.overview:
 			farm._set_overview()
 		farm._update_camera()
@@ -52,9 +52,9 @@ func _run() -> void:
 			return
 	farm.overview = false
 	farm.camera.eye_offset = original_offset
-	farm.camera.reset_perspective()
+	farm.camera.reset_gameplay()
 	farm._update_camera()
-	print("PLAYER_SCALE_OK: fixed world dimensions; distance, FOV and orthographic zoom preserve player/world ratio")
+	print("PLAYER_SCALE_OK: fixed world dimensions; distance and orthographic zoom preserve player/world ratio")
 	# User-visible regression: the four keys project NE, SW, NW, SE, with four facings.
 	var directions := ["move_up", "move_down", "move_left", "move_right"]
 	var screen_signs := [Vector2(1, -1), Vector2(-1, 1), Vector2(-1, -1), Vector2(1, 1)]
@@ -69,22 +69,16 @@ func _run() -> void:
 		var projected := Vector2(farm.camera.basis.x.dot(delta), -farm.camera.basis.y.dot(delta))
 		if not _require(projected.x * screen_signs[i].x > 0 and projected.y * screen_signs[i].y > 0 and farm.player.facing == facings[i], "Wrong screen direction or pose: " + directions[i] + str(projected)):
 			return
-	# Original camera_build_view + GTE H=1000 equations, at the user's 1.44x distance.
+	# Orthographic gameplay: equal world lengths project equally at every depth.
 	farm.player.position = start
 	farm._update_camera()
-	var eye := Vector3(6363, -4500, -6363) * 1.44
-	var forward := (-eye).normalized()
-	var side := Vector3(forward.z, 0, -forward.x).normalized()
-	var down := forward.cross(side).normalized()
+	if not _require(farm.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and is_equal_approx(farm.camera.size,sqrt(209.952)*0.24),"Gameplay camera must stay orthographic at the previous centre-plane framing"): return
 	var size: Vector2 = root.get_visible_rect().size
-	for point in [Vector3.ZERO, Vector3(400, 0, 0), Vector3(0, 0, 400), Vector3(150, -100, -150)]:
-		var relative: Vector3 = point - eye
-		var depth := forward.dot(relative)
-		var expected := Vector2(160 + 1000 * side.dot(relative) / depth, 120 + 1000 * down.dot(relative) / depth)
-		var actual: Vector2 = farm.camera.unproject_position(start + Vector3(point.x, -point.y, -point.z) / 1000.0)
-		actual /= size / Vector2(320, 240)
-		if not _require(actual.distance_to(expected) < 0.05, "Original projection mismatch: " + str([actual, expected, size])):
-			return
+	for depth in [-3.0,0.0,3.0]:
+		var centre: Vector3 = start+farm.camera.global_basis.z*depth
+		var a: Vector2 = farm.camera.unproject_position(centre-farm.camera.global_basis.x*0.5)
+		var b: Vector2 = farm.camera.unproject_position(centre+farm.camera.global_basis.x*0.5)
+		if not _require(absf(a.distance_to(b)-size.y/farm.camera.size)<0.001,"Orthographic camera has perspective size changes"): return
 	var entry0: Node3D = farm.get_node("Location/ZoneModel_00")
 	var entry1: Node3D = farm.get_node("Location/ZoneModel_01")
 	if not _require(entry0.position.is_equal_approx(Vector3(-4.78, 0, -4.28)) and entry1.position.is_equal_approx(Vector3(1.53, 0.04, -3.18)), "Original scene-object placement changed"):
@@ -134,7 +128,7 @@ func _run() -> void:
 	var collision = farm.player.move_and_collide(-normal * 1.4)
 	if not _require(collision != null, "Player passed through imported wall"):
 		return
-	print("NATIVE_CHECK_OK: 1.44x camera distance with original perspective/angle, four diagonal screen directions/facings, scene object positions, walk/run speeds=", distances, "; imported wall blocks player")
+	print("NATIVE_CHECK_OK: orthographic camera with existing angle/framing, four diagonal screen directions/facings, scene object positions, walk/run speeds=", distances, "; imported wall blocks player")
 	farm.queue_free()
 	await process_frame
 	quit()

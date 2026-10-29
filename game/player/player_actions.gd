@@ -57,6 +57,9 @@ func poll_input() -> void:
 		return
 	if Input.is_action_just_pressed("next_tool") and carried_id == 0:
 		equipped = TOOL_IDS[(TOOL_IDS.find(equipped) + 1) % TOOL_IDS.size()]
+		# player_check_tool_slots: show animation 0x47 for ten source ticks.
+		play("base",71,"show_tool",player.facing)
+		return
 	if Input.is_action_just_pressed("tool_level") and equipped <= 25:
 		upgrade = (upgrade + 1) % 5
 	if Input.is_action_just_pressed("use_tool"):
@@ -155,6 +158,10 @@ func go_to_bed(target: Vector3) -> void:
 		if not cinematic: return
 
 func advance(delta: float) -> void:
+	if state == "show_tool":
+		elapsed += delta
+		if elapsed+0.0000001 >= 10.0/30.0: _finish()
+		return
 	if state == "bed_hold":
 		_draw()
 		return
@@ -217,20 +224,21 @@ func draw_carry(direction: Vector2, running: bool, delta: float) -> void:
 	_draw()
 
 func update_held(running: bool) -> void:
-	var item := pending_item if pending_item != 0 else carried_id
+	var showing := state == "show_tool"
+	var item := (equipped+upgrade if equipped<=25 else equipped) if showing else (pending_item if pending_item != 0 else carried_id)
 	held_sprite.visible = item != 0
 	if item == 0:
 		return
-	held_sprite.texture = _texture(items[str(item)].texture)
+	held_sprite.texture = _texture(data.tool_pictures[str(item)] if showing else items[str(item)].texture)
 	held_sprite.material_override.set_shader_parameter("albedo_texture",held_sprite.texture)
-	var group := 0 if pending_item != 0 or state in ["drop","throw"] else (2 if running else 1)
-	var offset: Array = data.item_offsets[group*4+player.facing]
+	var group := 0 if showing or pending_item != 0 or state in ["drop","throw"] else (2 if running else 1)
+	var offset: Array = data.item_offsets[0 if showing else group*4+player.facing]
 	held_sprite.offset = Vector2(offset[0],53-offset[1])
 	held_sprite.position = player.sprite.position
 	# PS1 addPrim prepends: item submitted before body is drawn AFTER it.
 	# Carry poses put the object in front; pickup/release use the facing order.
 	var carrying: bool = carried_id != 0 and state not in ["drop","throw"]
-	var behind: bool = not (carrying or player.facing in [0,3])
+	var behind: bool = not (showing or carrying or player.facing in [0,3])
 	held_sprite.material_override.set_shader_parameter("sort_bias",0.005 if behind else -0.005)
 
 func _texture(path: String) -> Texture2D:

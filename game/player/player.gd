@@ -6,6 +6,7 @@ var animation_frame := 0
 var animation_time := 0.0
 var animation_data: Dictionary
 var actions
+var hop
 var input_locked := false
 var scripted_direction := Vector2.ZERO
 var scripted_walk_time := 0.0
@@ -29,6 +30,7 @@ func _ready() -> void:
 	actions = load("res://game/player/player_actions.gd").new()
 	add_child(actions)
 	actions.setup(self)
+	hop = preload("res://game/player/player_hop.gd").new(self)
 	_update_animation(Vector2.ZERO, false, 0.0)
 	print("BOOT_STAGE: player ready")
 
@@ -53,6 +55,9 @@ func _show_debug_footprint() -> void:
 
 func _physics_process(delta: float) -> void:
 	actions.poll_input()
+	if hop.active:
+		hop.advance(delta)
+		return
 	if actions.cinematic:
 		if actions.busy(): actions.advance(delta)
 		return # Source bedtime arc owns motion until the morning scene is ready.
@@ -61,6 +66,9 @@ func _physics_process(delta: float) -> void:
 		direction = scripted_direction
 		scripted_walk_time = maxf(0,scripted_walk_time-delta)
 	var running := Input.is_action_pressed("run") and not input_locked
+	if running and not input_locked and not actions.busy() and scripted_walk_time<=0 and hop.try_start(Vector3(direction.x,0,direction.y),delta):
+		hop.advance(delta)
+		return
 	var speed := RUN_SPEED if running else WALK_SPEED
 	velocity.x = direction.x * speed
 	velocity.z = direction.y * speed

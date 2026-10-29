@@ -1,5 +1,9 @@
 # 实现与验证记录
 
+## 2026-10-29 跑跳、换工具与正交投影
+
+默认投影按用户要求改为正交，相同深度方向上的世界尺寸不再近大远小；保留原角度与既有中心取景比例。关闭默认碰撞显示。跑跳参考 player_slide_on_bump / farm_probe_steps 的单阻碍格＋下一格空闲规则，使用 range 10/28 原姿势与 -80/+16/30 Hz 的 11 tick 弧线；完整胶囊先验证弧线和落点，只临时忽略被跨越的那一个小物件，以适配用户保留的 0.4 整格屏障，落地/换图清理。Q 参考 player_check_tool_slots 的 0x47 姿势与 10 tick 展示，图片来自 per-item ANI，保持 mark_screen_offsets 组 0/方向 0 和身体前层。新增 35 个语义工具图通过 import_player_actions.py --tool-icons-only 离线提取；工具、携物与原有动画图未替换。原生物理/实际 Q 与方向键在 60/120 Hz 验证，GPU 图和记录见 CHECKPOINT.md 最新条目。
+
 ## 固定来源
 
 2026-10-29 锄地接入：`tools/import_farm_field.py` 校验并导出 `field.c` 的 cell_looks／column_mirror_table、`farm_tables.c` 锄头 picture_grids 与 `player.c` 的 tool_charge_steps_a。真实挥锄结束触发原版逐格结果：1／2／3／4／6 格，失败即终止后续格子，已有湿土不被锄干。耕地使用 page 8 / CLUT 0x3E95，湿土保留使用 CLUT 0x3E5F；shader 用原版 31 texel 角点跨度重算目标格 UV，替换原地面颜色，几何和碰撞不变。离线检查涵盖全部 1125 个田地四边形及镜像；GPU 中真实 Space 操作产生的耕地与独立原版四边形参考的 9 个采样像素一致。土壤在本次运行内跨区保留，不代表完整作物／挖矿／存档系统已接入。
