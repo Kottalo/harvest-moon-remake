@@ -1,0 +1,12 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+SOIL_CELL_FOOTPRINTS_OK: stone/branch/weeds; 15 initial corner/interior and 3 placed boxes have 0.4 x 0.4 ground footprints at their visual cell centres
+AUTHORED_ITEM_PREFAB_OK: saved prefab edits control field/loose box position, rotation and size; placement uses the same authored footprint
+PLACEMENT_PROBE_OK: four facings, stone/branch, nearest visual centres across midpoints, clear player exclusion, 50% allowed, 37.5% blocked, fragmented gaps rejected
+FIELD_ITEM_OK: 58 four sides, centre/edges, walk/run, empty neighbour, tool clears obstruction; placement restores
+FIELD_ITEM_OK: 62 four sides, centre/edges, walk/run, empty neighbour, tool clears obstruction; placement restores
+FIELD_ITEM_OK: 64 four sides, centre/edges, walk/run, empty neighbour, tool clears obstruction
+ASSISTED_PLACEMENT_OK: four facings, nearest visual grid-centred stone/branch targets and colliders, safe capsule clearance, real obstacles, wall, support floor, no invisible-placeholder blocks, release revalidation and no item loss
+PLACEMENT_RETREAT_OK: actual drop animation in all four facings keeps nearest point with small swept retreat; rear obstacles and missing support use safe alternatives
+ITEM_COLLISION_CHECK_OK: 60 Hz; 72 physical approaches; stone/branch/weeds match visible soil cells
