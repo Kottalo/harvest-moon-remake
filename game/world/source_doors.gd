@@ -15,14 +15,21 @@ func open(location: Node3D, metadata: Dictionary, facing: int, arriving := false
 			var twins := location.find_children("ZoneModel_%02d" % int(metadata.twin),"Node3D",true,false)
 			if not twins.is_empty():
 				twin = twins[0]
-		doors[key] = {"panel":panel,"twin":twin,"base":panel.rotation.y,"twin_base":twin.rotation.y if twin != null else 0.0,"angle":0,"speed":0,"phase":"opening","hold":11,"facing":facing}
+		doors[key] = {"panel":panel,"twin":twin,"base":panel.rotation.y,"twin_base":twin.rotation.y if twin != null else 0.0,"angle":0,"draw_angle":0,"speed":0,"phase":"opening","hold":11,"facing":facing}
 	var door: Dictionary = doors[key]
-	door.phase = "hold" if arriving else "opening"
-	door.speed = 0
-	door.hold = 11
 	if arriving:
+		door.phase = "hold"
+		door.speed = 0
+		door.hold = 11
 		door.angle = 0x420
+		door.draw_angle = door.angle
 		_apply(door)
+	elif door.phase=="hold":
+		# farm_zone_trigger extends an already-open door without restarting it.
+		door.hold += 5
+	else:
+		door.facing = facing
+		door.phase = "opening"
 	return panel
 
 func is_open(panel: Node3D) -> bool:
@@ -30,7 +37,7 @@ func is_open(panel: Node3D) -> bool:
 
 func _apply(door: Dictionary) -> void:
 	var sign := 1.0 if int(door.facing) in [1,2] else -1.0
-	var turn: float = sign*door.angle*TAU/4096.0
+	var turn: float = sign*door.draw_angle*TAU/4096.0
 	door.panel.rotation.y = door.base+turn
 	if is_instance_valid(door.twin):
 		door.twin.rotation.y = door.twin_base-turn
@@ -47,8 +54,12 @@ func _physics_process(delta: float) -> void:
 			match door.phase:
 				"opening":
 					door.speed += 8
-					door.angle = mini(door.angle+door.speed,0x420)
-					if door.angle == 0x420:
+					door.angle += door.speed
+					# doors.c applies the new turn BEFORE clamping its logical state.
+					door.draw_angle = door.angle
+					if door.angle >= 0x420:
+						door.angle = 0x420
+						door.hold = 11
 						door.phase = "hold"
 						door.speed = 0
 				"hold":
@@ -58,6 +69,8 @@ func _physics_process(delta: float) -> void:
 				"closing":
 					door.speed -= 8
 					door.angle = maxi(door.angle+door.speed,0)
+					door.draw_angle = door.angle
 					if door.angle == 0:
 						door.phase = "closed"
+						door.speed = 0
 			_apply(door)

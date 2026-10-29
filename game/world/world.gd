@@ -139,13 +139,16 @@ func _begin_transition(exit: Dictionary) -> void:
 	var origin := current_area
 	player.input_locked = true
 	if exit.has("door"):
-		var panel = doors.open(get_node("Location"),exit.door,player.facing)
+		doors.open(get_node("Location"),exit.door,player.facing)
 		player.scripted_direction = Vector2(player.actions.DIRECTIONS[player.facing].x,player.actions.DIRECTIONS[player.facing].z)
-		player.scripted_walk_time = 10.0/30.0
-		while is_instance_valid(panel) and not doors.is_open(panel):
-			await get_tree().physics_frame
-			if token != transition_token:
-				return
+		# player_pending_transition starts 10 source ticks; farm_event_step then
+		# starts the 20-tick passage before freezing the old image for the fade.
+		for ticks in [10,20]:
+			player.scripted_walk_time = ticks/30.0
+			while player.scripted_walk_time>0:
+				await get_tree().physics_frame
+				if token != transition_token:
+					return
 	player.scripted_walk_time = 0
 	transition_effect.start_out()
 	while transition_effect.phase != "black":

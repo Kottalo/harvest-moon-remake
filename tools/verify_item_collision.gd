@@ -78,7 +78,7 @@ func _run() -> void:
 				for running in [false,true]:
 					var stop := await _walk(centre-direction*0.5+side*offset,facing,running)
 					var reach := (stop-centre).dot(direction)
-					if not _require(reach <= -0.258 and reach > -0.275 and stop.y<0.015,"Field item can be crossed/climbed or has an oversized blocker: "+str([id,facing,offset,running,stop,reach])): return
+					if not _require(reach <= -(0.2+player.footprint.radius)+0.002 and reach > -(0.2+player.footprint.radius)-0.015 and stop.y<0.015,"Field item can be crossed/climbed or has an oversized blocker: "+str([id,facing,offset,running,stop,reach])): return
 					checks += 1
 		# An adjacent empty cell must remain traversable.
 		var lane := await _walk(centre+Vector3(0.4,0,-0.5),0,true,0.5)
@@ -106,7 +106,7 @@ func _run() -> void:
 			# Native swept contact can conservatively stop up to one run tick early.
 			# Exact shape size/centre is checked independently in _grid_footprints().
 			var gap := dropped.z-restored.z
-			if not _require(gap>=0.259 and gap<=0.262+player.RUN_SPEED/Engine.physics_ticks_per_second,"Placed item obstruction does not use the full soil-cell half extent at its actual position: "+str([id,restored,dropped,gap])): return
+			if not _require(gap>=0.2+player.footprint.radius-0.001 and gap<=0.2+player.footprint.radius+0.002+player.RUN_SPEED/Engine.physics_ticks_per_second,"Placed item obstruction does not use the full soil-cell half extent at its actual position: "+str([id,restored,dropped,gap])): return
 			items._remove(items.batches[id].records.back())
 			await _frames(2)
 		print("FIELD_ITEM_OK: ",id," four sides, centre/edges, walk/run, empty neighbour, tool clears obstruction", "; placement restores" if id in [58,62] else "")
@@ -318,7 +318,7 @@ func _placement_retreat(arena: Node3D, floor_body: StaticBody3D) -> bool:
 	player.actions.item_released.connect(items.release_item)
 	for facing in 4:
 		var direction: Vector3 = DIRECTIONS[facing]
-		player.position = centre-direction*0.48+Vector3.UP*0.001
+		player.position = centre-direction*0.51+Vector3.UP*0.001
 		player.velocity = Vector3.ZERO
 		player.facing = facing
 		await _frames(2)
@@ -378,7 +378,7 @@ func _crowded_pickup_return(_arena: Node3D) -> bool:
 					items.field_cells[record.cell] = item
 					items._add_record(record)
 					if Vector2i(column,row)==cell: target = record
-			player.position = centre-direction*0.275+Vector3.UP*0.001
+			player.position = centre-direction*(0.2+player.footprint.radius+0.015)+Vector3.UP*0.001
 			player.velocity = Vector3.ZERO
 			player.facing = facing
 			await _frames(2)

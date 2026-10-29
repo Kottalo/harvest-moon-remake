@@ -60,8 +60,8 @@ func _run() -> void:
 			return
 	var collision: CollisionShape3D = player.get_node("CollisionShape3D")
 	var wire: MeshInstance3D = collision.get_node_or_null("DebugFootprint")
-	if wire==null or wire.mesh!=player.footprint.get_debug_mesh() or not wire.global_transform.is_equal_approx(collision.global_transform) or not is_equal_approx(player.footprint.radius,0.06) or not is_equal_approx(player.footprint.height,0.24):
-		push_error("Player debug wire does not match the actual unchanged capsule")
+	if wire==null or wire.mesh!=player.footprint.get_debug_mesh() or not wire.global_transform.is_equal_approx(collision.global_transform) or not is_equal_approx(player.footprint.radius,0.09) or not is_equal_approx(player.footprint.height,0.24):
+		push_error("Player debug wire does not match the actual widened capsule")
 		quit(1)
 		return
 	var visible_counts := []
@@ -89,7 +89,7 @@ func _run() -> void:
 		visible_counts.append(visible_cyan)
 		if facing==0:
 			shown.save_png("res://verification/player_debug_collider.png")
-	print("PLAYER_DEBUG_CAPSULE_OK: all four facings keep cyan capsule visible through actual sprite; cyan pixels=",visible_counts,"; engine debug mesh follows actual collider, radius=0.06 height=0.24 unchanged")
+	print("PLAYER_DEBUG_CAPSULE_OK: all four facings keep cyan capsule visible through actual sprite; cyan pixels=",visible_counts,"; engine debug mesh follows actual collider, radius=0.09 height=0.24; bottom remains at ground")
 	player.sprite.show()
 	picture.save_png("res://verification/item_debug_colliders.png")
 	print("ITEM_DEBUG_COLLIDERS_OK: native magenta/yellow/lime wireframes visible; pixel counts=",counts,"; initial and placed full-cell boxes unchanged; actual item batches and player included")

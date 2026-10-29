@@ -161,7 +161,7 @@ func _run() -> void:
 	_key(KEY_DOWN,true)
 	await _frames(40) # Approach the same full-cell footprint used by initial debris.
 	_key(KEY_DOWN,false)
-	if not _require(absf(world.player.position.z-(dropped.position.z-0.26))<0.006 and world.player.position.z>approach.z+0.02,"Placed stone did not restore its full-cell obstruction at its actual position: "+str([approach,world.player.position,dropped.position])):
+	if not _require(absf(world.player.position.z-(dropped.position.z-0.2-world.player.footprint.radius))<0.006 and world.player.position.z>approach.z+0.02,"Placed stone did not restore its full-cell obstruction at its actual position: "+str([approach,world.player.position,dropped.position])):
 		return
 	print("PLACEMENT_OK: physical E places one stone at its nearest available visual grid centre, restores obstruction at its actual position and preserves field bookkeeping")
 	# Exercise hole removal, tail removal, an empty batch and repeated slot reuse.
@@ -216,16 +216,29 @@ func _run() -> void:
 	var doors = load("res://game/world/source_doors.gd").new()
 	root.add_child(doors)
 	doors.set_physics_process(false)
+	for facing in 4:
+		doors.open(location,{"model":0,"twin":1},facing)
+		var sign := 1.0 if facing in [1,2] else -1.0
+		for tick in range(1,17):
+			doors._physics_process(1.0/30.0)
+			if not _require(is_equal_approx(panel.rotation.y,sign*4.0*tick*(tick+1)*TAU/4096) and is_equal_approx(twin.rotation.y,-panel.rotation.y),"Door source per-tick opening or mirrored twin differs"): return
+		for tick in 11:
+			doors._physics_process(1.0/30.0)
+			if not _require(is_equal_approx(panel.rotation.y,sign*1088.0*TAU/4096),"Door failed to preserve its source pre-clamp drawing while held"): return
+		for tick in range(1,17):
+			doors._physics_process(1.0/30.0)
+			if not _require(is_equal_approx(panel.rotation.y,sign*maxf(1056-4*tick*(tick+1),0)*TAU/4096),"Door source per-tick closing differs"): return
+	# Held-open retrigger adds five ticks; a closing retrigger keeps its speed.
 	doors.open(location,{"model":0,"twin":1},0)
-	for i in 16:
-		doors._physics_process(1.0/30.0)
-	if not _require(is_equal_approx(panel.rotation.y,-1056.0*TAU/4096) and is_equal_approx(twin.rotation.y,-panel.rotation.y),"Door acceleration/hinge or mirrored twin differs from source"):
-		return
-	for i in 27:
-		doors._physics_process(1.0/30.0)
-	if not _require(is_zero_approx(panel.rotation.y),"Door did not close after source hold and accelerated return"):
-		return
-	print("DOORS_OK: 16 opening ticks, 11 held ticks, 16 closing ticks, mirrored twin")
+	for tick in 16: doors._physics_process(1.0/30.0)
+	doors.open(location,{"model":0,"twin":1},0)
+	var state: Dictionary = doors.doors[panel.get_instance_id()]
+	if not _require(state.phase=="hold" and state.hold==16,"Door retrigger reset instead of extending its hold"): return
+	for tick in 20: doors._physics_process(1.0/30.0)
+	var speed: int = state.speed
+	doors.open(location,{"model":0,"twin":1},0)
+	if not _require(state.phase=="opening" and state.speed==speed,"Closing-door retrigger lost its source swing speed"): return
+	print("DOORS_OK: all four facings, per-tick 8-unit acceleration, pre-clamp drawn angle, 11 held ticks, mirrored twin and source retriggers")
 	var effect = world.transition_effect
 	effect.set_process(false)
 	for rate in [60,120]:
