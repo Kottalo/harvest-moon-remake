@@ -1,5 +1,11 @@
 # Checkpoint — 2026-10-28
 
+## 2026-10-29 显示全部调试碰撞体
+
+- 按用户要求，在 project.godot 的 editor/run/main_run_args 设置 --debug-collisions，使用 Godot 自带碰撞可视化，包含玩家胶囊、物件、建筑、地面、斜坡和查询层形状；不新增代理网格或修改物理。
+- 用编辑器原生“Reload from disk”载入工程设置；Godot AI 回读当前值为 --debug-collisions，下一次 F5/F6 调试启动生效。编辑器与用户场景标签保持，未启动或控制用户游戏。编辑器启动参数不影响正式导出；离屏检查仍由独立入口控制。
+- Godot 4.7.2 --help 已确认该启动参数；开启参数后的原生集成检查见 verification/debug-colliders-native.txt。
+
 ## 2026-10-29 树枝居中与统一整格碰撞
 
 - 用户确认石头和草已对位，仅要求校正树枝，并让三种物件的 collider 等于耕土格大小。本次是对先前用户手工对位约定的明确授权补充：只修改树枝图片 Offset 为 (1,43.05)，石头／草图片与所有手持素材保持不变。原始 PNG 和 ANI 数据未改写。

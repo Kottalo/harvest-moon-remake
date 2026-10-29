@@ -70,3 +70,5 @@ git -C harvest-moon-remake lfs pull
 昼夜／睡眠检查：`godot --headless --path . --script tools/verify_day_cycle.gd`；画面与物品批绘制对照：`python tools/run_render_check.py --script tools/render_day_cycle_check.gd --log <绝对日志路径>`。`tools/profile_world.gd` 在相同分辨率、4× MSAA、关闭帧率上限／VSync 后记录真实帧间隔，性能对照见 `verification/performance-day-cycle.json`。散落物使用三个裁切但保持原画布坐标的 MultiMesh，物理碰撞单独保留；中文和 ASCII 统一字体减少绘制切换，相邻地点通过 Godot 原生线程加载器预载。镜头跟随插值后的身体位置，重置地点时清除插值历史。
 
 这个私有 checkpoint 包含用户授权保存的项目素材，不包含 ROM；不要改为公开仓库。历史实现记录见 `PORTING.md`，当前目录及进度以本文件和 `CHECKPOINT.md` 为准。
+
+调试运行默认通过 `editor/run/main_run_args="--debug-collisions"` 开启 Godot 原生碰撞显示：包括玩家胶囊、地面物件、建筑、地面／斜坡和查询用形状。只显示已有真实形状，不添加或改变碰撞；正式导出不受编辑器启动参数影响。需关闭时清除 Project Settings → Editor → Run → Main Run Args 中的该参数。
