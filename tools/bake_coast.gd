@@ -7,7 +7,7 @@ func bake() -> void:
 		var folder: String = "res://game/locations/" + entry[0] + "/"
 		var scene: Node3D = load(folder + entry[0] + ".scn").instantiate()
 		var geometry: MeshInstance3D = scene.get_node("Geometry")
-		geometry.mesh = _clip_mesh(geometry.mesh, entry[1])
+		geometry.mesh = _clip_mesh(geometry.mesh, entry[1], entry[0]=="beach")
 		for shape_node: CollisionShape3D in scene.find_children("*", "CollisionShape3D", true, false):
 			var source: ConcavePolygonShape3D = shape_node.shape
 			var faces := PackedVector3Array()
@@ -30,7 +30,7 @@ func bake() -> void:
 		scene.free()
 		print("COAST_SEGMENT_OK: ", entry[0])
 
-func _clip_mesh(source: ArrayMesh, plane: Plane) -> ArrayMesh:
+func _clip_mesh(source: ArrayMesh, plane: Plane, owns_boundary := true) -> ArrayMesh:
 	var result := ArrayMesh.new()
 	for surface in source.get_surface_count():
 		var arrays := source.surface_get_arrays(surface)
@@ -38,6 +38,13 @@ func _clip_mesh(source: ArrayMesh, plane: Plane) -> ArrayMesh:
 		var colors := PackedColorArray()
 		var uv := PackedVector2Array()
 		for triangle in range(0, arrays[Mesh.ARRAY_VERTEX].size(), 3):
+			# The shared x=5 riser exists in BOTH original preview meshes.
+			# Give exactly coplanar boundary faces to the beach staircase only.
+			if not owns_boundary:
+				var boundary := true
+				for corner in 3:
+					boundary = boundary and absf(plane.distance_to(arrays[Mesh.ARRAY_VERTEX][triangle+corner]))<=0.000001
+				if boundary: continue
 			var input := []
 			for corner in 3:
 				var index := triangle + corner

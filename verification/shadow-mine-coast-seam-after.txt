@@ -1,0 +1,13 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+AREA_READY: 52 小镇广场
+COAST_BOUNDARY_OWNER_OK: town=0, beach=4 exact source triangles; no doubled riser
+COAST_RISER_SAMPLES: 0/192 differ from beach-only reference; max_rgb_delta=0.0

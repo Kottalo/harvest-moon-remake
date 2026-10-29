@@ -1,0 +1,32 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+AREA_READY: 0 农场
+DOOR_ENTRY_OK: [0, 0] source 10+20 ticks before fade; elapsed=1.03333333333333 movement=1.23001098632813
+AREA_READY: 80 自宅
+AREA_READY: 0 农场
+DOOR_ENTRY_OK: [0, 3] source 10+20 ticks before fade; elapsed=1.05 movement=1.23000025749207
+AREA_READY: 96 牛羊棚
+AREA_READY: 40 杂货店街区
+DOOR_ENTRY_OK: [40, 1] source 10+20 ticks before fade; elapsed=1.03333333333333 movement=1.2299976348877
+AREA_READY: 188 医院
+AREA_READY: 180 杂货店
+DOOR_ENTRY_OK: [180, 0] source 10+20 ticks before fade; elapsed=1.03333333333333 movement=1.22999668121338
+AREA_READY: 184 杂货店楼上
+AREA_READY: 204 旅馆
+DOOR_ENTRY_OK: [204, 0] source 10+20 ticks before fade; elapsed=1.05 movement=1.22999930381775
+AREA_READY: 208 旅馆楼上
+AREA_READY: 168 植物学家住宅卧室
+DOOR_ENTRY_OK: [168, 0] source 10+20 ticks before fade; elapsed=1.03333333333333 movement=1.22999680042267
+AREA_READY: 160 图书馆
+AREA_READY: 0 农场
+AREA_READY: 80 自宅
+DOOR_CANCEL_OK: normal collision mask/input restored and old coroutine cancelled
+DOOR_ENTRY_CHECK_OK: 60 Hz; six exterior/interior single/twin doors via actual E, correct approach and cancellation

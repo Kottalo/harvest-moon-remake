@@ -1,0 +1,23 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+AREA_READY: 234 泉边矿洞
+MINE_GPU_SOURCE_QUAD_OK: area=234 nine sample RGB max delta=0.0
+AREA_READY: 0 农场
+AREA_READY: 234 泉边矿洞
+MINE_DIG_AREA_OK: 234 four facings, real Space, single-cell charged action, winter, blockers/bounds, repeat/reload, stable mesh/texture
+AREA_READY: 245 湖边矿洞
+MINE_GPU_SOURCE_QUAD_OK: area=245 nine sample RGB max delta=0.0
+AREA_READY: 0 农场
+AREA_READY: 245 湖边矿洞
+MINE_DIG_AREA_OK: 245 four facings, real Space, single-cell charged action, winter, blockers/bounds, repeat/reload, stable mesh/texture
+AREA_READY: 68 山间湖畔
+AREA_READY: 234 泉边矿洞
+MINE_DIG_OK: 60 Hz; both native mines retain independent original dug-cell state

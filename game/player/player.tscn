@@ -1,8 +1,16 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://game/player/player.gd" id="1"]
 [ext_resource type="Texture2D" path="res://game/player/player_atlas.png" id="2"]
 [ext_resource type="Shader" path="res://game/rendering/player_sprite.gdshader" id="3"]
+
+[ext_resource type="Script" path="res://game/player/player_shadow.gd" id="4"]
+[ext_resource type="Texture2D" path="res://game/player/player_shadow.png" id="5"]
+[ext_resource type="Shader" path="res://game/player/player_shadow.gdshader" id="6"]
+
+[sub_resource type="ShaderMaterial" id="ShadowMaterial"]
+shader = ExtResource("6")
+shader_parameter/albedo_texture = ExtResource("5")
 
 [sub_resource type="CapsuleShape3D" id="PlayerFootprint"]
 radius = 0.09
@@ -35,3 +43,12 @@ texture_filter = 1
 texture = ExtResource("2")
 hframes = 8
 vframes = 12
+
+[node name="GroundShadow" type="Sprite3D" parent="."]
+script = ExtResource("4")
+texture = ExtResource("5")
+material_override = SubResource("ShadowMaterial")
+offset = Vector2(0, 48)
+pixel_size = 0.009827848
+texture_filter = 1
+cast_shadow = 0

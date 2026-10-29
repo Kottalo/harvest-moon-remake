@@ -17,6 +17,7 @@ var day_cycle
 var hud_elapsed := 0.0
 var location_loader
 var farm_field
+var mine_field
 
 func area_to_world(area: int, point: Vector3) -> Vector3:
 	if area == 56:
@@ -69,6 +70,10 @@ func _ready() -> void:
 	farm_field.name = "FarmField"
 	add_child(farm_field)
 	farm_field.setup(self)
+	mine_field = load("res://game/field/mine_field.gd").new()
+	mine_field.name = "MineField"
+	add_child(mine_field)
+	mine_field.setup(self)
 	_refresh_hud()
 	_update_camera()
 	print("WORLD_READY: ", world.size(), " native locations")
@@ -136,8 +141,23 @@ func _check_exits(_delta: float) -> void:
 			continue
 		var bounds := Rect2(Vector2(exit.min[0], exit.min[1]), Vector2(exit.max[0] - exit.min[0], exit.max[1] - exit.min[1]))
 		var action: bool = exit.requires_action
-		if not bounds.has_point(point) and not (action and bounds.has_point(ahead)):
-			continue
+		# farm_zone_find tests the player's actual foot position, strictly inside
+		# the door zone. A forward interaction probe opened doors too early.
+		var inside := bounds.has_point(point)
+		if exit.has("door"):
+			inside = point.x>bounds.position.x and point.x<bounds.end.x and point.y>bounds.position.y and point.y<bounds.end.y
+			if not inside:
+				# A native capsule can stop a few centimetres before a narrow indoor
+				# door zone that the original 48-unit point probe could enter.
+				# Compensate only while actually blocked, never by the old .224 reach.
+				var facing: Vector3 = player.actions.DIRECTIONS[player.facing]
+				var shape: CollisionShape3D = player.get_node("CollisionShape3D")
+				var reach := maxf(player.footprint.radius-player.GROUND_PROBE_REACH+shape.position.dot(facing),0)
+				var foot := point+Vector2(facing.x,facing.z)*reach
+				inside = foot.x>bounds.position.x and foot.x<bounds.end.x and foot.y>bounds.position.y and foot.y<bounds.end.y and player.test_move(player.global_transform,facing*0.005)
+		elif action:
+			inside = inside or bounds.has_point(ahead)
+		if not inside: continue
 		if exit.requires_facing and int(exit.facing) in [0, 1, 2, 3] and int(exit.facing) != player.facing:
 			continue
 		nearby_exit = exit
@@ -153,6 +173,7 @@ func _begin_transition(exit: Dictionary) -> void:
 	player.input_locked = true
 	if exit.has("door"):
 		doors.open(get_node("Location"),exit.door,player.facing)
+		player.set_door_passage(true)
 		player.scripted_direction = Vector2(player.actions.DIRECTIONS[player.facing].x,player.actions.DIRECTIONS[player.facing].z)
 		# player_pending_transition starts 10 source ticks; farm_event_step then
 		# starts the 20-tick passage before freezing the old image for the fade.
@@ -182,6 +203,7 @@ func _begin_transition(exit: Dictionary) -> void:
 	transitioning = false
 
 func _change_area(area: int, entry: Vector3, during_transition := false) -> void:
+	player.set_door_passage(false)
 	if not during_transition:
 		transition_token += 1
 		player.input_locked = false
@@ -216,6 +238,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	nearby_exit = {}
 	loose_items.set_area(area)
 	farm_field.bind_location()
+	mine_field.bind_location()
 	day_cycle.refresh()
 	if overview:
 		_set_overview()
@@ -224,7 +247,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	print("AREA_READY: ", area, " ", world[str(area)].name)
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if day_cycle.menu_open or day_cycle.sleeping:
+	if transitioning or day_cycle.menu_open or day_cycle.sleeping:
 		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB:
 		overview = not overview

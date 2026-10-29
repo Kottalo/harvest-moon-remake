@@ -1,0 +1,90 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+AREA_READY: 128 约德尔牧场住宅
+AREA_READY: 132 牧场住宅卧室
+STAIR_ROUTE_OK: 128 -> 132.0 action=false
+AREA_READY: 128 约德尔牧场住宅
+STAIR_RETURN_OK: 132.0 -> 128 immediate=true
+AREA_READY: 132 牧场住宅卧室
+AREA_READY: 128 约德尔牧场住宅
+STAIR_ROUTE_OK: 132 -> 128.0 action=false
+AREA_READY: 132 牧场住宅卧室
+STAIR_RETURN_OK: 128.0 -> 132 immediate=true
+AREA_READY: 136 养鸡场住宅
+AREA_READY: 140 养鸡场卧室
+STAIR_ROUTE_OK: 136 -> 140.0 action=false
+AREA_READY: 136 养鸡场住宅
+STAIR_RETURN_OK: 140.0 -> 136 immediate=true
+AREA_READY: 140 养鸡场卧室
+AREA_READY: 136 养鸡场住宅
+STAIR_ROUTE_OK: 140 -> 136.0 action=false
+AREA_READY: 140 养鸡场卧室
+STAIR_RETURN_OK: 136.0 -> 140 immediate=true
+AREA_READY: 144 锻冶屋
+AREA_READY: 148 锻冶屋卧室
+STAIR_ROUTE_OK: 144 -> 148.0 action=false
+AREA_READY: 144 锻冶屋
+STAIR_RETURN_OK: 148.0 -> 144 immediate=true
+AREA_READY: 148 锻冶屋卧室
+AREA_READY: 144 锻冶屋
+STAIR_ROUTE_OK: 148 -> 144.0 action=false
+AREA_READY: 148 锻冶屋卧室
+STAIR_RETURN_OK: 144.0 -> 148 immediate=true
+AREA_READY: 160 图书馆
+AREA_READY: 168 植物学家住宅卧室
+STAIR_ROUTE_OK: 160 -> 168.0 action=false
+AREA_READY: 160 图书馆
+STAIR_RETURN_OK: 168.0 -> 160 immediate=true
+AREA_READY: 164 植物学家住宅
+AREA_READY: 168 植物学家住宅卧室
+STAIR_ROUTE_OK: 164 -> 168.0 action=false
+AREA_READY: 164 植物学家住宅
+STAIR_RETURN_OK: 168.0 -> 164 immediate=true
+AREA_READY: 168 植物学家住宅卧室
+AREA_READY: 160 图书馆
+STAIR_ROUTE_OK: 168 -> 160.0 action=true
+AREA_READY: 168 植物学家住宅卧室
+STAIR_RETURN_OK: 160.0 -> 168 immediate=true
+AREA_READY: 168 植物学家住宅卧室
+AREA_READY: 164 植物学家住宅
+STAIR_ROUTE_OK: 168 -> 164.0 action=false
+AREA_READY: 168 植物学家住宅卧室
+STAIR_RETURN_OK: 164.0 -> 168 immediate=true
+AREA_READY: 180 杂货店
+AREA_READY: 184 杂货店楼上
+STAIR_ROUTE_OK: 180 -> 184.0 action=true
+AREA_READY: 180 杂货店
+STAIR_RETURN_OK: 184.0 -> 180 immediate=true
+AREA_READY: 184 杂货店楼上
+AREA_READY: 180 杂货店
+STAIR_ROUTE_OK: 184 -> 180.0 action=false
+AREA_READY: 184 杂货店楼上
+STAIR_RETURN_OK: 180.0 -> 184 immediate=true
+AREA_READY: 188 医院
+AREA_READY: 192 医院楼上
+STAIR_ROUTE_OK: 188 -> 192.0 action=false
+AREA_READY: 188 医院
+STAIR_RETURN_OK: 192.0 -> 188 immediate=true
+AREA_READY: 192 医院楼上
+AREA_READY: 188 医院
+STAIR_ROUTE_OK: 192 -> 188.0 action=false
+AREA_READY: 192 医院楼上
+STAIR_RETURN_OK: 188.0 -> 192 immediate=true
+AREA_READY: 204 旅馆
+AREA_READY: 208 旅馆楼上
+STAIR_ROUTE_OK: 204 -> 208.0 action=true
+AREA_READY: 204 旅馆
+STAIR_RETURN_OK: 208.0 -> 204 immediate=true
+AREA_READY: 208 旅馆楼上
+AREA_READY: 204 旅馆
+STAIR_ROUTE_OK: 208 -> 204.0 action=false
+AREA_READY: 208 旅馆楼上
+STAIR_RETURN_OK: 204.0 -> 208 immediate=true
+STAIR_TRANSITIONS_OK: 13 automatic and 3 action-gated room transitions via physical keys; all immediate returns passed without waits or resets

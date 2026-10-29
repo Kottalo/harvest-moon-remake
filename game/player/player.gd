@@ -10,6 +10,8 @@ var hop
 var input_locked := false
 var scripted_direction := Vector2.ZERO
 var scripted_walk_time := 0.0
+var door_passage := false
+var door_collision_mask := 0
 var normal_texture: Texture2D
 @onready var sprite: Sprite3D = $Sprite3D
 @onready var footprint: CapsuleShape3D = $CollisionShape3D.shape
@@ -65,6 +67,7 @@ func _physics_process(delta: float) -> void:
 	if scripted_walk_time > 0:
 		direction = scripted_direction
 		scripted_walk_time = maxf(0,scripted_walk_time-delta)
+		if scripted_walk_time<0.000001: scripted_walk_time = 0
 	var running := Input.is_action_pressed("run") and not input_locked
 	if running and not input_locked and not actions.busy() and scripted_walk_time<=0 and hop.try_start(Vector3(direction.x,0,direction.y),delta):
 		hop.advance(delta)
@@ -72,8 +75,16 @@ func _physics_process(delta: float) -> void:
 	var speed := RUN_SPEED if running else WALK_SPEED
 	velocity.x = direction.x * speed
 	velocity.z = direction.y * speed
-	velocity.y -= 14 * delta
-	_constrain_to_ground(Vector3(velocity.x, 0, velocity.z) * delta)
+	if door_passage:
+		# Source AUTO_WALK also sets NO_INPUT: no ordinary bump/edge probe.
+		# The outside map need not contain floor beyond its doorway threshold.
+		var next := global_position+Vector3(velocity.x,0,velocity.z)*delta
+		var query := PhysicsRayQueryParameters3D.create(next+Vector3.UP*GROUND_PROBE_HEIGHT,next-Vector3.UP*GROUND_PROBE_HEIGHT,2)
+		var ground := get_world_3d().direct_space_state.intersect_ray(query)
+		velocity.y = (ground.position.y+0.001-global_position.y)/delta if not ground.is_empty() and ground.normal.y>=cos(floor_max_angle) else 0.0
+	else:
+		velocity.y -= 14 * delta
+		_constrain_to_ground(Vector3(velocity.x, 0, velocity.z) * delta)
 	move_and_slide()
 	# Align the visible feet to the support plane, not the capsule's rounded bottom.
 	sprite.position.y = -footprint.radius * (1.0 / get_floor_normal().y - 1.0) if is_on_floor() else 0.0
@@ -88,6 +99,15 @@ func _physics_process(delta: float) -> void:
 	else:
 		_update_animation(direction, running, delta)
 	actions.update_held(running and not direction.is_zero_approx())
+
+func set_door_passage(enabled: bool) -> void:
+	if enabled==door_passage: return
+	if enabled:
+		door_collision_mask = collision_mask
+		collision_mask = 0 # Source NO_INPUT transit bypasses ordinary blocking probes.
+	else:
+		collision_mask = door_collision_mask
+	door_passage = enabled
 
 func _constrain_to_ground(motion: Vector3) -> void:
 	if velocity.y > 0 or motion.is_zero_approx():

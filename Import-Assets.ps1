@@ -8,6 +8,8 @@ $godotExe = Join-Path $PSScriptRoot '..\Tools\Godot\Godot_v4.7.2-stable_win64_co
 if ($LASTEXITCODE -ne 0) { throw 'Disc conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\import_player_actions.py') $Disc
 if ($LASTEXITCODE -ne 0) { throw 'Player action conversion failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\import_shadow_mine.py') $Disc
+if ($LASTEXITCODE -ne 0) { throw 'Shadow/mine conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\import_day_cycle.py') $Disc
 if ($LASTEXITCODE -ne 0) { throw 'Day cycle conversion failed' }
 $openEditor = Get-Process Godot* -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -match 'Harvest Moon BTN - Godot Remake.*Godot Engine' }
