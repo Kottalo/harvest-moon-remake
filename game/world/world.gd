@@ -149,12 +149,13 @@ func _check_exits(_delta: float) -> void:
 			if not inside:
 				# A native capsule can stop a few centimetres before a narrow indoor
 				# door zone that the original 48-unit point probe could enter.
-				# Compensate only while actually blocked, never by the old .224 reach.
+				# Check both capsule and walkability blocking, even when standing still.
+				# Never replace this with the old .224 interaction reach.
 				var facing: Vector3 = player.actions.DIRECTIONS[player.facing]
 				var shape: CollisionShape3D = player.get_node("CollisionShape3D")
 				var reach := maxf(player.footprint.radius-player.GROUND_PROBE_REACH+shape.position.dot(facing),0)
 				var foot := point+Vector2(facing.x,facing.z)*reach
-				inside = foot.x>bounds.position.x and foot.x<bounds.end.x and foot.y>bounds.position.y and foot.y<bounds.end.y and player.test_move(player.global_transform,facing*0.005)
+				inside = foot.x>bounds.position.x and foot.x<bounds.end.x and foot.y>bounds.position.y and foot.y<bounds.end.y and (not player.has_walkable_ground(facing*player.RUN_SPEED/Engine.physics_ticks_per_second) or player.test_move(player.global_transform,facing*0.005))
 		elif action:
 			inside = inside or bounds.has_point(ahead)
 		if not inside: continue
@@ -193,15 +194,25 @@ func _begin_transition(exit: Dictionary) -> void:
 		if token != transition_token:
 			return
 	_change_area(int(exit.target),Vector3(exit.entry[0],exit.entry[1],exit.entry[2]),true)
+	var arrival_panel: Node3D
 	for reverse in world[str(current_area)].exits:
 		if int(reverse.target) == origin and reverse.has("door"):
-			doors.open(get_node("Location"),reverse.door,int(reverse.facing),true)
+			arrival_panel = doors.open(get_node("Location"),reverse.door,int(reverse.facing),true)
+			if arrival_panel != null:
+				var outward: Vector3 = -player.actions.DIRECTIONS[int(reverse.facing)]
+				doors.guard_arrival(arrival_panel,player,outward)
+				if not doors.arrival_clear(arrival_panel):
+					player.facing = posmod(int(reverse.facing)+2,4)
+					player.scripted_direction = Vector2(outward.x,outward.z)
+					player.scripted_walk_time = 21/30.0
 			break
 	transition_effect.start_in()
-	while transition_effect.phase != "idle":
-		await get_tree().process_frame
+	while transition_effect.phase != "idle" or player.scripted_walk_time>0:
+		await get_tree().physics_frame
 		if token != transition_token:
 			return
+		if arrival_panel != null and doors.arrival_clear(arrival_panel):
+			player.scripted_walk_time = 0
 	player.input_locked = false
 	transitioning = false
 

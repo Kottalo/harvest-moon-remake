@@ -35,6 +35,30 @@ func open(location: Node3D, metadata: Dictionary, facing: int, arriving := false
 func is_open(panel: Node3D) -> bool:
 	return is_instance_valid(panel) and doors.has(panel.get_instance_id()) and doors[panel.get_instance_id()].phase != "opening"
 
+func guard_arrival(panel: Node3D, player: CharacterBody3D, outward: Vector3) -> void:
+	var door: Dictionary = doors[panel.get_instance_id()]
+	var limit := -INF
+	for leaf in [door.panel,door.twin]:
+		if not is_instance_valid(leaf): continue
+		var radius := 0.0
+		for geometry: MeshInstance3D in leaf.find_children("*","MeshInstance3D",true,false):
+			var bounds := geometry.mesh.get_aabb()
+			for corner in 8:
+				var offset: Vector3 = geometry.global_transform*bounds.get_endpoint(corner)-leaf.global_position
+				radius = maxf(radius,Vector2(offset.x,offset.z).length())
+		# A full hinge-radius bound contains the complete closing arc, including twins.
+		limit = maxf(limit,leaf.global_position.dot(outward)+radius+0.02)
+	door["clearance"] = {"player":player,"outward":outward,"limit":limit}
+
+func arrival_clear(panel: Node3D) -> bool:
+	if not is_instance_valid(panel) or not doors.has(panel.get_instance_id()): return true
+	var door: Dictionary = doors[panel.get_instance_id()]
+	if not door.has("clearance"): return true
+	var guard: Dictionary = door.clearance
+	if not is_instance_valid(guard.player): return true
+	var shape: CollisionShape3D = guard.player.get_node("CollisionShape3D")
+	return shape.global_position.dot(guard.outward)-guard.player.footprint.radius>guard.limit
+
 func _apply(door: Dictionary) -> void:
 	var sign := 1.0 if int(door.facing) in [1,2] else -1.0
 	var turn: float = sign*door.draw_angle*TAU/4096.0
@@ -63,14 +87,17 @@ func _physics_process(delta: float) -> void:
 						door.phase = "hold"
 						door.speed = 0
 				"hold":
+					if not arrival_clear(door.panel): continue
 					door.hold -= 1
 					if door.hold <= 0:
 						door.phase = "closing"
 				"closing":
+					if not arrival_clear(door.panel): continue
 					door.speed -= 8
 					door.angle = maxi(door.angle+door.speed,0)
 					door.draw_angle = door.angle
 					if door.angle == 0:
 						door.phase = "closed"
 						door.speed = 0
+						door.erase("clearance")
 			_apply(door)

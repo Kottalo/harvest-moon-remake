@@ -1,0 +1,34 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+AREA_READY: 0 农场
+DOOR_ENTRY_OK: [0, 0] source 10+20 countdowns including tick 0; elapsed=1.1 back step=-0.45100402832031 net entry=0.41000366210938
+AREA_READY: 80 自宅
+AREA_READY: 0 农场
+DOOR_ENTRY_OK: [0, 3] source 10+20 countdowns including tick 0; elapsed=1.1 back step=-0.45099878311157 net entry=0.40999889373779
+AREA_READY: 96 牛羊棚
+AREA_READY: 40 杂货店街区
+DOOR_ENTRY_OK: [40, 1] source 10+20 countdowns including tick 0; elapsed=1.1 back step=-0.45100009441376 net entry=0.40999978780746
+AREA_READY: 188 医院
+AREA_READY: 180 杂货店
+DOOR_ENTRY_OK: [180, 0] source 10+20 countdowns including tick 0; elapsed=1.1 back step=-0.45099878311157 net entry=0.40999889373779
+AREA_READY: 184 杂货店楼上
+AREA_READY: 204 旅馆
+DOOR_ENTRY_OK: [204, 0] source 10+20 countdowns including tick 0; elapsed=1.1 back step=-0.45100003480911 net entry=0.41000008583069
+AREA_READY: 208 旅馆楼上
+AREA_READY: 168 植物学家住宅卧室
+DOOR_ENTRY_OK: [168, 0] source 10+20 countdowns including tick 0; elapsed=1.1 back step=-0.45099878311157 net entry=0.40999889373779
+AREA_READY: 160 图书馆
+AREA_READY: 44 教堂街区
+DOOR_ENTRY_OK: [44, 0] source 10+20 countdowns including tick 0; elapsed=1.1 back step=-0.45099878311157 net entry=0.40999889373779
+AREA_READY: 196 教堂
+AREA_READY: 0 农场
+AREA_READY: 80 自宅
+DOOR_CANCEL_OK: normal collision mask/input restored and old coroutine cancelled
+DOOR_ENTRY_CHECK_OK: 60 Hz; seven exterior/interior single/twin doors via actual E, turn away/back-step/turn back/enter/fade and cancellation

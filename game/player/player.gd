@@ -112,6 +112,11 @@ func set_door_passage(enabled: bool) -> void:
 func _constrain_to_ground(motion: Vector3) -> void:
 	if velocity.y > 0 or motion.is_zero_approx():
 		return
+	if has_walkable_ground(motion): return
+	velocity.x = 0
+	velocity.z = 0
+
+func has_walkable_ground(motion: Vector3) -> bool:
 	# farm_probe.c: settle against walkable ground, not every visible model face.
 	# The native capsule must reach the next tread even when one 120 Hz step is tiny.
 	var ahead := motion + motion.normalized() * maxf(GROUND_PROBE_REACH, footprint.radius)
@@ -122,9 +127,8 @@ func _constrain_to_ground(motion: Vector3) -> void:
 		query.collision_mask = 8 # Original forward probe: skip mask 0xE080.
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty() and hit.normal.dot(up_direction) >= cos(floor_max_angle):
-			return
-	velocity.x = 0
-	velocity.z = 0
+			return true
+	return false
 
 func _setup_input() -> void:
 	var keys := {
