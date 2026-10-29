@@ -1,5 +1,11 @@
 # Checkpoint — 2026-10-28
 
+## 2026-10-29 小物件调试框高亮
+
+- 用户要求小物件 collider 更明显。三份 prefab 的原生 CollisionShape3D 设置高亮 Debug Color：石头亮粉、树枝黄、草荧光绿，并关闭 Debug Fill，避免半透明面遮住图片。初始和放下后的模式都应用。
+- loose_items 缓存并复制 prefab 的 debug_color / debug_fill 到真实运行时碰撞节点；尺寸、位置、旋转、碰撞层和放置规则不变，不增加代理网格或持续绘制循环。
+- 新检查 tools/verify_item_debug.gd 在创建场景前开启原生 debug_collisions_hint，使用实际物件批次及玩家；校验三种物件初始／放下后的 0.4 整格及偏移，并统计 GPU 画面的三类高亮线条。独立桌面验证和原生运行／资源结构检查通过。记录见 verification/item-debug-colliders-*.txt，实际预览见 verification/item_debug_colliders.png。Godot AI 当前无连接会话，未主动启动或控制编辑器／用户游戏。
+
 ## 2026-10-29 显示全部调试碰撞体
 
 - 按用户要求，在 project.godot 的 editor/run/main_run_args 设置 --debug-collisions，使用 Godot 自带碰撞可视化，包含玩家胶囊、物件、建筑、地面、斜坡和查询层形状；不新增代理网格或修改物理。

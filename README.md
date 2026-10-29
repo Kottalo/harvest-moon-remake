@@ -72,3 +72,5 @@ git -C harvest-moon-remake lfs pull
 这个私有 checkpoint 包含用户授权保存的项目素材，不包含 ROM；不要改为公开仓库。历史实现记录见 `PORTING.md`，当前目录及进度以本文件和 `CHECKPOINT.md` 为准。
 
 调试运行默认通过 `editor/run/main_run_args="--debug-collisions"` 开启 Godot 原生碰撞显示：包括玩家胶囊、地面物件、建筑、地面／斜坡和查询用形状。只显示已有真实形状，不添加或改变碰撞；正式导出不受编辑器启动参数影响。需关闭时清除 Project Settings → Editor → Run → Main Run Args 中的该参数。
+
+小物件调试碰撞采用无填充的高亮原生线框：石头亮粉、树枝黄、草荧光绿，便于从其他地图碰撞中辨认；两种放置模式的实际大小和位置不变。

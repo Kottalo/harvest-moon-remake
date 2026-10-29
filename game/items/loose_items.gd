@@ -125,8 +125,11 @@ func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Nod
 		body.collision_layer = 1
 		body.collision_mask = 0
 		var shape := CollisionShape3D.new()
+		var definition: Dictionary = _prefab_definition(item)["field" if cell_aligned else "loose"]
 		shape.shape = _obstruction_box(item,not cell_aligned)
-		shape.transform = _prefab_definition(item).loose.transform if not cell_aligned else _prefab_definition(item).field.transform
+		shape.transform = definition.transform
+		shape.debug_color = definition.debug_color
+		shape.debug_fill = definition.debug_fill
 		node.add_child(body)
 		body.add_child(shape)
 	return node
@@ -142,7 +145,7 @@ func _prefab_definition(item: int) -> Dictionary:
 		var transform: Transform3D = prefab.get_node("Obstruction").transform*node.transform
 		var shape := BoxShape3D.new()
 		shape.size = node.shape.size*transform.basis.get_scale().abs()
-		definition[kind] = {"shape":shape,"transform":Transform3D(transform.basis.orthonormalized(),transform.origin)}
+		definition[kind] = {"shape":shape,"transform":Transform3D(transform.basis.orthonormalized(),transform.origin),"debug_color":node.debug_color,"debug_fill":node.debug_fill}
 	prefab.free()
 	prefab_definitions[item] = definition
 	return definition

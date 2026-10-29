@@ -12,3 +12,5 @@
 放下时，物件根坐标会选择最近的可用耕土格心（格距 0.4）。GroundSprite 的图片偏移与 LooseFootprint 的碰撞偏移继续使用你保存的数值；吸附格心不会重置它们。Preview Mode 中现有的 Freely placed item 名称表示使用独立物件碰撞盒。
 
 2026-10-29：按用户要求，树枝 GroundSprite 的 Offset 单独校正为 (1,43.05)，使其可见图案居中；石头和草的图片设置不变。FieldFootprint / LooseFootprint 均为 Vector3(0.4,0.4,0.4)，底部贴地。仍可通过这些 prefab 手工调整。
+
+调试线框：石头为亮粉色、树枝为黄色、草为荧光绿，关闭 Debug Fill 以免半透明色块遮住物品。FieldFootprint 和 LooseFootprint 的 Debug Color / Debug Fill 会原样应用到游戏里的真实碰撞体；这些显示属性不改变碰撞大小和位置。

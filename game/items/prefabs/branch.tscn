@@ -29,9 +29,13 @@ collision_mask = 0
 [node name="FieldFootprint" type="CollisionShape3D" parent="Obstruction"]
 position = Vector3(0, 0.2, 0)
 shape = SubResource("FieldFootprint")
+debug_color = Color(1, 0.7, 0.05, 1)
+debug_fill = false
 
 [node name="LooseFootprint" type="CollisionShape3D" parent="Obstruction"]
 visible = false
 position = Vector3(0, 0.2, 0)
 shape = SubResource("LooseFootprint")
+debug_color = Color(1, 0.7, 0.05, 1)
+debug_fill = false
 disabled = true
