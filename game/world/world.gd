@@ -31,6 +31,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	print("BOOT_STAGE: world setup")
+	_wireframe_colliders(get_node("Location"))
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
 	location_loader = load("res://game/world/location_loader.gd").new()
 	location_loader.catalogue = world
@@ -71,6 +72,13 @@ func _ready() -> void:
 	_refresh_hud()
 	_update_camera()
 	print("WORLD_READY: ", world.size(), " native locations")
+
+func _wireframe_colliders(location: Node3D) -> void:
+	if OS.is_debug_build() and get_tree().debug_collisions_hint:
+		# Floor, walkability and visual-reference meshes overlap. Keep every
+		# native edge visible without blending their triangle fills over the map.
+		for collision: CollisionShape3D in location.find_children("*","CollisionShape3D",true,false):
+			collision.debug_fill = false
 
 func _physics_process(delta: float) -> void:
 	if transitioning:
@@ -191,6 +199,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	remove_child(previous)
 	previous.free()
 	var scene := packed.instantiate()
+	_wireframe_colliders(scene)
 	scene.name = "Location"
 	add_child(scene)
 	current_area = area

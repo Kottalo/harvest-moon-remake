@@ -1,0 +1,19 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 - Build 31.0.101.2130 - Compatibility - Using Device: Intel - Intel(R) UHD Graphics 620
+
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+TOOLS_OK: 260 source combinations; uncharged/charged, all metal tiers/facings, auxiliary tools and refills
+AREA_READY: 0 农场
+CARRY_OK: physical E pickup, real carry walking and E discard; no duplicated item
+AREA_READY: 0 农场
+PLACEMENT_OK: physical E places one stone at its nearest available visual grid centre, restores obstruction at its actual position and preserves field bookkeeping
+INCREMENTAL_ITEMS_OK: physical pickup/place and 24 repeats preserve unrelated nodes/colliders, GPU batches/capacity and flights; empty batch restores correctly
+DOORS_OK: all four facings, per-tick 8-unit acceleration, pre-clamp drawn angle, 11 held ticks, mirrored twin and source retriggers
+TRANSITIONS_OK: old frame subtracts 12/255 at 30 Hz; new scene fades at 60 Hz; identical at 60/120 FPS
+ACTIONS_CHECK_OK

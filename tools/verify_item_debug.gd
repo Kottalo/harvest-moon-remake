@@ -58,9 +58,77 @@ func _run() -> void:
 			push_error("Native item wireframe is not clearly visible: "+str([ITEMS[index],counts]))
 			quit(1)
 			return
+	# Compare batched engine edges against the actual native per-shape drawing.
+	# This checks authored placed/initial transforms rather than a second set of bounds.
+	var native_nodes := []
+	for item in ITEMS:
+		var batch: Dictionary = items.batches[item]
+		if not batch.has("debug") or batch.debug.visible_instance_count!=2:
+			push_error("Item debug wires were not batched with the live records")
+			quit(1)
+			return
+		batch.debug.visible_instance_count = 0
+	for frame in 3: await RenderingServer.frame_post_draw
+	var suppressed := viewport.get_texture().get_image()
+	for y in suppressed.get_height():
+		for x in suppressed.get_width():
+			var pixel := suppressed.get_pixel(x,y)
+			for colour: Color in COLOURS:
+				if Vector3(pixel.r-colour.r,pixel.g-colour.g,pixel.b-colour.b).length()<0.08:
+					push_error("Native item wires are still drawn underneath the debug batches")
+					quit(1)
+					return
+	# Hidden debug drawing must leave the actual obstruction in the physics space.
+	for item in ITEMS:
+		for record in items.batches[item].records:
+			var body: StaticBody3D = record.node.get_node("Obstruction")
+			var point: Vector3 = body.get_child(0).global_position
+			var query := PhysicsRayQueryParameters3D.create(point+Vector3.UP,point-Vector3.UP,1)
+			var hit := body.get_world_3d().direct_space_state.intersect_ray(query)
+			if hit.is_empty() or hit.collider!=body or not debug_collisions_hint:
+				push_error("Batched debug drawing changed physics or failed to restore the debug hint")
+				quit(1)
+				return
+			native_nodes.append(items._spawn(item,record.position,true,not record.get("free_position",false)))
+	for frame in 3: await RenderingServer.frame_post_draw
+	var native := viewport.get_texture().get_image()
+	var different := 0
+	var wire_pixels := 0
+	for y in native.get_height():
+		for x in native.get_width():
+			var a := picture.get_pixel(x,y)
+			var b := native.get_pixel(x,y)
+			for colour: Color in COLOURS:
+				var aa := Vector3(a.r-colour.r,a.g-colour.g,a.b-colour.b).length()<0.08
+				var bb := Vector3(b.r-colour.r,b.g-colour.g,b.b-colour.b).length()<0.08
+				if aa or bb: wire_pixels += 1
+				if aa!=bb: different += 1
+	if different>maxi(10,int(wire_pixels*0.03)):
+		push_error("Batched wires differ from actual native box drawing: "+str([different,wire_pixels]))
+		quit(1)
+		return
+	for node in native_nodes: node.free()
+	for item in ITEMS:
+		var batch: Dictionary = items.batches[item]
+		batch.debug.visible_instance_count = batch.records.size()
+		var before: Transform3D = batch.debug.get_instance_transform(1)
+		var victim: Dictionary = batch.records[0]
+		items._remove(victim)
+		if batch.debug.visible_instance_count!=1 or not batch.debug.get_instance_transform(0).is_equal_approx(before):
+			push_error("Removing an item left a ghost debug collider or lost the swapped slot")
+			quit(1)
+			return
+		var record := {"id":item,"position":victim.position,"active":true,"cell":victim.cell}
+		items.records[0].append(record)
+		items._add_record(record)
+		if batch.debug.visible_instance_count!=2:
+			push_error("Restoring an item lost its batched debug collider")
+			quit(1)
+			return
+	print("ITEM_DEBUG_BATCH_OK: native per-shape and batched edges agree; differing pixels=",different,"/",wire_pixels,"; dense swap/remove/reinsert preserves live wire slots")
 	var collision: CollisionShape3D = player.get_node("CollisionShape3D")
 	var wire: MeshInstance3D = collision.get_node_or_null("DebugFootprint")
-	if wire==null or wire.mesh!=player.footprint.get_debug_mesh() or not wire.global_transform.is_equal_approx(collision.global_transform) or not is_equal_approx(player.footprint.radius,0.09) or not is_equal_approx(player.footprint.height,0.24):
+	if wire==null or wire.mesh!=player.footprint.get_debug_mesh() or not wire.global_transform.is_equal_approx(collision.global_transform) or not collision.position.is_equal_approx(Vector3(-0.03,0.12,0)) or not is_equal_approx(player.footprint.radius,0.09) or not is_equal_approx(player.footprint.height,0.24):
 		push_error("Player debug wire does not match the actual widened capsule")
 		quit(1)
 		return

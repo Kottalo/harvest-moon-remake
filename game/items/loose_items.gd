@@ -55,6 +55,34 @@ func set_area(area: int) -> void:
 		batch.multimesh.visible_instance_count = 0
 		add_child(batch)
 		batches[item] = {"mesh":batch.multimesh,"records":[]}
+		if OS.is_debug_build() and get_tree().debug_collisions_hint and not _prefab_definition(item).field.debug_fill and not _prefab_definition(item).loose.debug_fill:
+			# Draw the actual native box meshes together; hundreds of separate
+			# debug MeshInstances otherwise undo the item sprite batching.
+			var wire := MultiMeshInstance3D.new()
+			wire.name = batch.name+"Colliders"
+			wire.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+			wire.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			wire.multimesh = MultiMesh.new()
+			wire.multimesh.transform_format = MultiMesh.TRANSFORM_3D
+			wire.multimesh.use_colors = true
+			# Preserve native edges, but replace their cached vertex tint with white:
+			# MultiMesh instance colours carry each actual shape's debug colour.
+			var edges := _obstruction_box(item).get_debug_mesh().surface_get_arrays(0)
+			var colours := PackedColorArray()
+			colours.resize(edges[Mesh.ARRAY_VERTEX].size())
+			colours.fill(Color.WHITE)
+			edges[Mesh.ARRAY_COLOR] = colours
+			wire.multimesh.mesh = ArrayMesh.new()
+			wire.multimesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES,edges)
+			wire.multimesh.instance_count = field_cells.size()
+			wire.multimesh.visible_instance_count = 0
+			var material := StandardMaterial3D.new()
+			material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			material.vertex_color_use_as_albedo = true
+			material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			wire.material_override = material
+			add_child(wire)
+			batches[item]["debug"] = wire.multimesh
 	for record in records[area]:
 		if record.active:
 			_add_record(record)
@@ -94,7 +122,21 @@ func _add_record(record: Dictionary) -> void:
 	batch.records.append(record)
 	batch.mesh.visible_instance_count = batch.records.size()
 	record["batch_slot"] = slot
+	# CollisionObject3D creates its native debug instances when shapes enter.
+	# Suppress only that synchronous creation; the exact boxes are drawn below.
+	var native_debug := get_tree().debug_collisions_hint
+	if batch.has("debug"): get_tree().debug_collisions_hint = false
 	record["node"] = _spawn(record.id,record.position,true,not record.get("free_position",false))
+	get_tree().debug_collisions_hint = native_debug
+	if batch.has("debug"):
+		var collision: CollisionShape3D = record.node.get_node("Obstruction").get_child(0)
+		# Native box edges, scaled to this actual authored shape, including
+		# independently edited placed-item sizes, rotations and offsets.
+		var wire_scale: Vector3 = collision.shape.size/_obstruction_box(record.id).size
+		var wire_transform := global_transform.affine_inverse()*collision.global_transform
+		batch.debug.set_instance_transform(slot,wire_transform.scaled_local(wire_scale))
+		batch.debug.set_instance_color(slot,collision.debug_color)
+		batch.debug.visible_instance_count = batch.records.size()
 
 func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Node3D:
 	var node := Node3D.new()
@@ -193,7 +235,12 @@ func _remove(record: Dictionary) -> void:
 		batch.records[slot] = last
 		last.batch_slot = slot
 		batch.mesh.set_instance_transform(slot,Transform3D(Basis.IDENTITY,last.position))
+		if batch.has("debug"):
+			batch.debug.set_instance_transform(slot,batch.debug.get_instance_transform(batch.records.size()))
+			batch.debug.set_instance_color(slot,batch.debug.get_instance_color(batch.records.size()))
 	batch.mesh.visible_instance_count = batch.records.size()
+	if batch.has("debug"):
+		batch.debug.visible_instance_count = batch.records.size()
 	record.batch_slot = -1
 	# Same-tick placement queries must not see a collider awaiting queue_free().
 	var body: Node = record.node.get_node_or_null("Obstruction")
@@ -272,7 +319,7 @@ func _placement_cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(cell.x*VISUAL_CELL_SIZE-4.2,cell.y*VISUAL_CELL_SIZE-1.4)
 
 func _placement_backstep(point: Vector3, facing: Vector3, half_size: Vector2) -> float:
-	var delta: Vector3 = point-world.player.position
+	var delta: Vector3 = point-world.player.get_node("CollisionShape3D").global_position
 	var forward_half := half_size.dot(Vector2(absf(facing.x),absf(facing.z)))
 	var side_half := half_size.dot(Vector2(absf(facing.z),absf(facing.x)))
 	var lateral := maxf(absf(delta.dot(Vector3(-facing.z,0,facing.x)))-side_half,0)

@@ -77,7 +77,7 @@ func _run() -> void:
 			for offset in [-0.14,0.0,0.14]:
 				for running in [false,true]:
 					var stop := await _walk(centre-direction*0.5+side*offset,facing,running)
-					var reach := (stop-centre).dot(direction)
+					var reach: float = (stop+player.get_node("CollisionShape3D").position-centre).dot(direction)
 					if not _require(reach <= -(0.2+player.footprint.radius)+0.002 and reach > -(0.2+player.footprint.radius)-0.015 and stop.y<0.015,"Field item can be crossed/climbed or has an oversized blocker: "+str([id,facing,offset,running,stop,reach])): return
 					checks += 1
 		# An adjacent empty cell must remain traversable.
@@ -319,6 +319,7 @@ func _placement_retreat(arena: Node3D, floor_body: StaticBody3D) -> bool:
 	for facing in 4:
 		var direction: Vector3 = DIRECTIONS[facing]
 		player.position = centre-direction*0.51+Vector3.UP*0.001
+		player.position -= Vector3(player.get_node("CollisionShape3D").position.x,0,player.get_node("CollisionShape3D").position.z)
 		player.velocity = Vector3.ZERO
 		player.facing = facing
 		await _frames(2)
@@ -379,6 +380,7 @@ func _crowded_pickup_return(_arena: Node3D) -> bool:
 					items._add_record(record)
 					if Vector2i(column,row)==cell: target = record
 			player.position = centre-direction*(0.2+player.footprint.radius+0.015)+Vector3.UP*0.001
+			player.position -= Vector3(player.get_node("CollisionShape3D").position.x,0,player.get_node("CollisionShape3D").position.z)
 			player.velocity = Vector3.ZERO
 			player.facing = facing
 			await _frames(2)

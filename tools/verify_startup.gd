@@ -17,6 +17,11 @@ func run() -> void:
 		if area==80:
 			var spawn: Array = world.world["80"].spawn
 			world._change_area(80,Vector3(spawn[0],spawn[1],spawn[2]))
+		var shapes: Array[Node] = world.get_node("Location").find_children("*","CollisionShape3D",true,false)
+		if not require_ok(not shapes.is_empty(),"Map debug verification found no real collision shapes"): return
+		for shape: CollisionShape3D in shapes:
+			if not require_ok(not shape.debug_fill,"A source map collider still draws an overlapping triangle fill"): return
+		print("MAP_DEBUG_WIRES_OK: area=",area," shapes=",shapes.size(),"; native outlines retained, triangle fills disabled")
 		var began := Time.get_ticks_msec()
 		for frame in 600:
 			await process_frame
