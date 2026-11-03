@@ -1,5 +1,11 @@
 # 实现与验证记录
 
+## 2026-11-03 阻挡接触与跳跃通道
+
+落地且实际速度为零时，镜头保持碰撞 safe_margin 四倍范围内的稳定渲染焦点，避免毫米级碰撞恢复变成地面物件的亚像素抖动。真正移动、大位移和直接换图会立即恢复跟随；固定观察角度不再逐帧从世界坐标差值重算。玩家物理、正常插值和物件位置保持原样。
+
+跑跳按前进方向的一层检查：胶囊可以跨过同排左右并列的合法低物件，后面的第二排、侧面实体墙、天花板和缺失落点仍拒绝。仅对完整弧线/落点均已验证的那一排暂时增加例外，按 RID 统一清理，覆盖物件中途被删除的情况。verify_blocked_camera.gd / verify_running_hop.gd 的 60/120 Hz 检查及既有碰撞回归记录于 verification/blocked-camera-*、hop-rows-*、contact-*。
+
 ## 2026-11-03 原生图集管线
 
 Free Texture Packer CLI 已接入完整离线导入。原 1633 张游戏/兼容 PNG 放在 tools/texture_packer/source；动作 spritesheet 按原帧表拆开，原 margin 保存在目录清单里，再打包为运行图集。texture_packer/.gdignore 排除原图、独立帧、npm 模块与构建项目；游戏只使用输出图集、AtlasTexture、JSON 和原生场景，不扫描或读取源目录。

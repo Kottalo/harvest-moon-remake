@@ -36,10 +36,11 @@ func box(point: Vector3,size: Vector3) -> StaticBody3D:
 	body.position = point
 	arena.add_child(body)
 	return body
-func drive(facing: int,running: bool) -> Dictionary:
+func drive(facing: int,running: bool,lateral := 0.0) -> Dictionary:
 	player.hop.cancel()
 	player.actions.state = ""
 	player.position = -DIRS[facing]*0.65-Vector3(-0.03,0,0)+Vector3.UP*0.001
+	player.position += Vector3(DIRS[facing].z,0,-DIRS[facing].x)*lateral
 	player.velocity = Vector3.ZERO
 	player.reset_physics_interpolation()
 	await frames(0.1)
@@ -50,6 +51,7 @@ func drive(facing: int,running: bool) -> Dictionary:
 	var peak := 0.0
 	var started := 0
 	var hop_seconds := 0.0
+	var max_exceptions := 0
 	var until := Engine.get_physics_frames()+ceili(0.9*Engine.physics_ticks_per_second)
 	while Engine.get_physics_frames()<until:
 		await physics_frame
@@ -61,10 +63,11 @@ func drive(facing: int,running: bool) -> Dictionary:
 			hop_seconds = float(Engine.get_physics_frames()-started)/Engine.physics_ticks_per_second
 		was_hopping = player.hop.active
 		peak = maxf(peak,player.position.y)
+		max_exceptions = maxi(max_exceptions,player.get_collision_exceptions().size())
 	key(KEYS[facing],false)
 	key(KEY_SHIFT,false)
 	await frames(0.1)
-	return {"hops":hops,"peak":peak,"time":hop_seconds,"end":player.get_node("CollisionShape3D").global_position,"exceptions":player.get_collision_exceptions().size()}
+	return {"hops":hops,"peak":peak,"time":hop_seconds,"end":player.get_node("CollisionShape3D").global_position,"exceptions":player.get_collision_exceptions().size(),"max_exceptions":max_exceptions}
 func run() -> void:
 	if OS.get_cmdline_user_args().has("--120hz"): Engine.physics_ticks_per_second = 120
 	arena = Node3D.new()
@@ -97,6 +100,34 @@ func run() -> void:
 				blocker.free()
 			obstacle.free()
 			checks += 1
+	# A seam between two lateral items is still one row, including slightly off-centre approaches.
+	for facing in 4:
+		var side := Vector3(DIRS[facing].z,0,-DIRS[facing].x)
+		var left: Node3D = items._spawn(58,Vector3.ZERO,true)
+		var right: Node3D = items._spawn(62,side*0.4,true)
+		for offset in [0.19,0.2,0.21]:
+			var crossing: Dictionary = await drive(facing,true,offset)
+			if not require_ok(crossing.hops==1 and crossing.end.dot(DIRS[facing])>0.3 and crossing.max_exceptions==2 and crossing.exceptions==0,"Lateral single-row seam refused or leaked exceptions: "+str([facing,offset,crossing])): return
+		var deeper: Node3D = items._spawn(64,DIRS[facing]*0.4+side*0.2,true)
+		var two_rows: Dictionary = await drive(facing,true,0.2)
+		if not require_ok(two_rows.hops==0 and two_rows.exceptions==0,"A second row behind the seam was ignored"): return
+		deeper.free()
+		var wall := box(Vector3.UP*0.3+side*0.4,Vector3(0.4,0.6,0.4))
+		var solid_side: Dictionary = await drive(facing,true,0.2)
+		if not require_ok(solid_side.hops==0 and solid_side.exceptions==0,"An unrelated lateral wall was treated as a jumpable item"): return
+		wall.free()
+		# Cancellation must release every body, including after one item is removed.
+		player.hop.cancel();player.position=-DIRS[facing]*0.65+side*0.2+Vector3(0.03,0.001,0);player.velocity=Vector3.ZERO
+		await frames(0.1);key(KEY_SHIFT,true);key(KEYS[facing],true)
+		for tick in Engine.physics_ticks_per_second:
+			await physics_frame;await process_frame
+			if player.hop.active: break
+		key(KEY_SHIFT,false);key(KEYS[facing],false)
+		if not require_ok(player.hop.active and player.get_collision_exceptions().size()==2,"Cancellation fixture did not enter a multi-item row hop"): return
+		left.free();player.hop.cancel()
+		if not require_ok(player.get_collision_exceptions().is_empty(),"Cancelling left a lateral collision exception"): return
+		right.free()
+	print("HOP_ROW_SEAMS_OK: four directions, mixed stone/branch, 0.19/0.20/0.21 seams, two-row/wall refusal, multi-body cleanup")
 	# Carrying retains its original airborne pose/item; oversized authored boxes refuse.
 	var carried_obstacle: Node3D = items._spawn(62,Vector3.ZERO,true)
 	player.actions.carried_id = 58

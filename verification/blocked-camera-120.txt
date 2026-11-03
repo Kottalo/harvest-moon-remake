@@ -1,0 +1,16 @@
+ERROR: Failed to open 'user://logs/godot2026-11-03T21.43.22.log'.
+   at: copy (core/io/dir_access.cpp:429)
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BLOCKED_CAMERA_SAMPLE: 0 physical recovery range=(0.0, 0.001244, 0.0) projected scenery drift=0.0
+BLOCKED_CAMERA_SAMPLE: 1 physical recovery range=(0.0, 0.001135, 0.0) projected scenery drift=0.0
+BLOCKED_CAMERA_SAMPLE: 2 physical recovery range=(0.0, 0.001137, 0.0) projected scenery drift=0.0
+BLOCKED_CAMERA_SAMPLE: 3 physical recovery range=(0.0, 0.001138, 0.0) projected scenery drift=0.0
+BLOCKED_CAMERA_OK: 120 Hz; four blocked seams have zero camera/projected-scenery drift; real movement/direct resets work

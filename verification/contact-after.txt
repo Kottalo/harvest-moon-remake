@@ -1,0 +1,8 @@
+BLOCKED_DIAGNOSTIC 0.0 body_range=(0.0, 0.002096, 0.0) camera_range=(0.0, 0.0, 0.0) projected_range=(0.0, 0.0) velocity=(0.0, 0.0, 0.0)
+SIDE_HOP_DIAGNOSTIC 0.0 hopped=true end=(0.03, 0.00084, 1.754046)
+BLOCKED_DIAGNOSTIC 0.2 body_range=(0.0, 0.001429, 0.0) camera_range=(0.0, 0.0, 0.0) projected_range=(0.0, 0.0) velocity=(0.0, 0.0, 0.0)
+SIDE_HOP_DIAGNOSTIC 0.2 hopped=true end=(0.23, 0.00084, 1.352547)
+BLOCKED_DIAGNOSTIC 0.2001 body_range=(0.0, 0.00156, 0.0) camera_range=(0.0, 0.0, 0.0) projected_range=(0.0, 0.0) velocity=(0.0, 0.0, 0.0)
+SIDE_HOP_DIAGNOSTIC 0.2001 hopped=true end=(0.2301, 0.00084, 1.316046)
+BLOCKED_DIAGNOSTIC 0.19 body_range=(0.0, 0.001168, 0.0) camera_range=(0.0, 0.0, 0.0) projected_range=(0.0, 0.0) velocity=(0.0, 0.0, 0.0)
+SIDE_HOP_DIAGNOSTIC 0.19 hopped=true end=(0.22, 0.00084, 1.316047)

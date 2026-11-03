@@ -1,0 +1,25 @@
+ERROR: Failed to open 'user://logs/godot2026-11-03T21.45.19.log'.
+   at: copy (core/io/dir_access.cpp:429)
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+HOP_SAMPLE: [58, 0, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (0.0, 0.12084, 1.097044), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [58, 1, { "hops": 1, "peak": 0.24290637671947, "time": 0.36666666666667, "end": (-1.133544, 0.12084, 0.0), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [58, 2, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (0.0, 0.12084, -1.097044), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [58, 3, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (1.097044, 0.12084, 0.0), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [62, 0, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (0.0, 0.12084, 1.097044), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [62, 1, { "hops": 1, "peak": 0.24290637671947, "time": 0.36666666666667, "end": (-1.097044, 0.12084, 0.0), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [62, 2, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (0.0, 0.12084, -1.097044), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [62, 3, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (1.097044, 0.12084, 0.0), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [64, 0, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (0.0, 0.12084, 1.097044), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [64, 1, { "hops": 1, "peak": 0.24290637671947, "time": 0.36666666666667, "end": (-1.097044, 0.12084, 0.0), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [64, 2, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (0.0, 0.12084, -1.097044), "exceptions": 0, "max_exceptions": 1 }]
+HOP_SAMPLE: [64, 3, { "hops": 1, "peak": 0.2429064065218, "time": 0.36666666666667, "end": (1.097044, 0.12084, 0.0), "exceptions": 0, "max_exceptions": 1 }]
+HOP_ROW_SEAMS_OK: four directions, mixed stone/branch, 0.19/0.20/0.21 seams, two-row/wall refusal, multi-body cleanup
+RUNNING_HOP_OK: 60 Hz; 12 stone/branch/weeds approaches, real keys; walk blocks, single item hops, source arc, adjacent obstacles/walls/ceilings/unsupported landing refuse; exceptions restored
