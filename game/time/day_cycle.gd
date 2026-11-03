@@ -21,6 +21,8 @@ var tint_elapsed := 256.0/30.0
 var period := 0
 var menu_selection := 0
 var menu_text: Label
+var debug_period := -1
+var debug_panel
 
 func setup(owner_world) -> void:
 	world = owner_world
@@ -60,6 +62,9 @@ func setup(owner_world) -> void:
 	tint_from = tint_rgb
 	tint_to = tint_rgb
 	refresh()
+	debug_panel = load("res://game/time/day_cycle_debug.gd").new()
+	add_child(debug_panel)
+	debug_panel.setup(self)
 
 func time_period() -> int:
 	var hour := minute/60 as int
@@ -172,8 +177,13 @@ func close_menu() -> void:
 	world.player.input_locked = false
 
 func _apply_tint() -> void:
-	tint.visible = catalogue.areas[str(world.current_area)].tint_enabled and tint_rgb.length_squared()>0.0001
-	tint.material.set_shader_parameter("subtract_rgb",tint_rgb/255.0)
+	var rgb := _period_rgb(debug_period) if debug_period>=0 else tint_rgb
+	tint.visible = (debug_period>=0 or catalogue.areas[str(world.current_area)].tint_enabled) and rgb.length_squared()>0.0001
+	tint.material.set_shader_parameter("subtract_rgb",rgb/255.0)
+
+func set_debug_period(value: int) -> void:
+	debug_period = clampi(value,-1,3)
+	_apply_tint()
 
 func refresh() -> void:
 	clock_label.text = "第 %d 年 · %s %d 日 · 周%s  %02d:%02d" % [year+1,["春","夏","秋","冬"][season],day+1,["日","一","二","三","四","五","六"][weekday],minute/60 as int,minute%60/10 as int*10]

@@ -1,0 +1,23 @@
+ERROR: Failed to open log file for writing: C:/Users/kottalo/Documents/Codex/2026-10-27/c-users-kottalo-downloads-harvest-moon/work/debug-day-cycle.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+AREA_READY: 80 自宅
+AREA_READY: 0 农场
+CLOCK_OK: 0.5 s/min at 30/60/120 FPS; indoor/menu/overview pause; source four periods and 256-tick subtractive tint
+AREA_READY: 80 自宅
+AREA_READY: 80 自宅
+SLEEP_OK: physical E menu, Esc cancel, Enter sleep; original ANI and 18-tick bed arc; spring 30 -> summer 1, 06:00, farmhouse spawn grounded
+AREA_READY: 0 农场
+AREA_READY: 80 自宅
+OVERNIGHT_OK: natural 06:00 returns home; winter 30 -> year 2 spring 1 exactly once
+DAY_CYCLE_CHECK_OK
