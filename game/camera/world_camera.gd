@@ -2,7 +2,7 @@ extends Camera3D
 ## Orthographic gameplay at the existing angle and centre-plane framing.
 const HORIZONTAL_DISTANCE := 9000.0 / 1000.0
 const HEIGHT := 4500.0 / 1000.0
-const DISTANCE_SCALE := 1.2
+const DISTANCE_SCALE := 1.3
 const EDGE_PADDING := 0.05
 const YAW := -512.0 * TAU / 4096.0
 const PROJECTION_DISTANCE := 1000.0

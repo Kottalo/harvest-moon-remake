@@ -30,7 +30,7 @@ func _run() -> void:
 	var start: Vector3 = farm.player.position
 	var camera_delta: Vector3 = farm.camera.eye_offset
 	if not _require((farm.camera.position-farm.camera.limited_focus(start)-camera_delta).length()<0.005,"Camera lost its limited player focus"): return
-	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 10.8) < 0.00001 and absf(camera_delta.y - 5.4) < 0.00001 and absf(camera_delta.length() - sqrt(145.8)) < 0.00001, "Requested 1.2x closer camera calibration was not applied"):
+	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 11.7) < 0.00001 and absf(camera_delta.y - 5.85) < 0.00001 and absf(camera_delta.length() - sqrt(171.1125)) < 0.00001, "Requested 1.3x camera calibration was not applied"):
 		return
 	# Character/world scale stays fixed for distance and orthographic zoom.
 	var sprite: Sprite3D = farm.player.get_node("Sprite3D")
@@ -73,7 +73,7 @@ func _run() -> void:
 	# Orthographic gameplay: equal world lengths project equally at every depth.
 	farm.player.position = start
 	farm._update_camera()
-	if not _require(farm.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and is_equal_approx(farm.camera.size,sqrt(145.8)*0.24),"Gameplay camera must stay orthographic at the previous centre-plane framing"): return
+	if not _require(farm.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and is_equal_approx(farm.camera.size,sqrt(171.1125)*0.24),"Gameplay camera must stay orthographic at the previous centre-plane framing"): return
 	var size: Vector2 = root.get_visible_rect().size
 	for depth in [-3.0,0.0,3.0]:
 		var centre: Vector3 = start+farm.camera.global_basis.z*depth
