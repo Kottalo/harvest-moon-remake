@@ -120,16 +120,18 @@ func _set_overview() -> void:
 	camera.show_overview(get_node("Location"))
 
 func _refresh_hud() -> void:
-	hud.text = str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · E 交互 · Space/X 工具 · Q 换工具 · R 等级 · Tab 全景"
-	hud.text += "\n" + player.actions.tool_name()
+	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · E 交互 · Space/X 工具 · Q 换工具 · R 等级 · Tab 全景"
+	text += "\n" + player.actions.tool_name()
 	if player.actions.state == "charge":
-		hud.text += " · 蓄力 " + str(mini(int(player.actions.charge_ticks/20),player.actions.upgrade))
+		text += " · 蓄力 " + str(mini(int(player.actions.charge_ticks/20),player.actions.upgrade))
 	if player.actions.carried_id != 0:
-		hud.text += " · E / Space 放下或丢弃 · Shift+Space 投掷"
+		text += " · E / Space 放下或丢弃 · Shift+Space 投掷"
 	if not nearby_exit.is_empty():
-		hud.text += "\nE 进入 " + str(world[str(int(nearby_exit.target))].name)
+		text += "\nE 进入 " + str(world[str(int(nearby_exit.target))].name)
 	elif day_cycle != null and day_cycle.nearby_bed():
-		hud.text += "\nE 床边休息"
+		text += "\nE 床边休息"
+	if hud.text != text:
+		hud.text = text
 
 func _check_exits(_delta: float) -> void:
 	nearby_exit = {}
