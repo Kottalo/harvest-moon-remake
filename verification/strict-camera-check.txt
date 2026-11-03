@@ -1,4 +1,4 @@
-ERROR: Failed to open 'user://logs/godot2026-11-03T22.52.20.log'.
+ERROR: Failed to open 'user://logs/godot2026-11-03T23.21.11.log'.
    at: copy (core/io/dir_access.cpp:429)
 ERROR: Failed to open log file for writing: user://logs/godot.log
    at: rotate_file (core/io/logger.cpp:169)
@@ -99,4 +99,4 @@ AREA_READY: 234 泉边矿洞
 CAMERA_LOCATION_OK: 234 spring_mine outdoors=false
 AREA_READY: 245 湖边矿洞
 CAMERA_LOCATION_OK: 245 lake_mine outdoors=false
-CAMERA_LIMITS_OK: 15 outdoor + 28 indoor areas; 516 poses; four aspect ratios, edge coverage, narrow map, full player visibility, unchanged orthographic framing, overview restore
+CAMERA_LIMITS_OK: 15 outdoor + 28 indoor areas; 516 poses; four aspect ratios, edge coverage, narrow map, strict bounds even for border/outside player poses, closer-only zoom fitting, overview restore

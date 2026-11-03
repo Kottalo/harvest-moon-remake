@@ -1,4 +1,4 @@
-ERROR: Failed to open 'user://logs/godot2026-11-03T22.52.20.log'.
+ERROR: Failed to open 'user://logs/godot2026-11-03T23.21.49.log'.
    at: copy (core/io/dir_access.cpp:429)
 ERROR: Failed to open log file for writing: user://logs/godot.log
    at: rotate_file (core/io/logger.cpp:169)
@@ -14,15 +14,15 @@ BOOT_STAGE: world setup
 BOOT_STAGE: items ready
 WORLD_READY: 43 native locations
 AREA_READY: 56 海滩
-COAST_ROUTE_OK: side=-1.1 running=false position=(6.134252, -0.559361, -0.299905)
+COAST_ROUTE_OK: side=-1.1 running=false position=(6.134241, -0.559361, -0.299905)
 AREA_READY: 56 海滩
-COAST_ROUTE_OK: side=-1.1 running=true position=(6.145247, -0.559359, -0.299973)
+COAST_ROUTE_OK: side=-1.1 running=true position=(6.126978, -0.559359, -0.299994)
 AREA_READY: 56 海滩
-COAST_ROUTE_OK: side=-0.8 running=false position=(6.121448, -0.559197, 0.000114)
+COAST_ROUTE_OK: side=-0.8 running=false position=(6.13173, -0.559197, 0.000119)
 AREA_READY: 56 海滩
-COAST_ROUTE_OK: side=-0.8 running=true position=(6.144915, -0.559196, 0.000086)
+COAST_ROUTE_OK: side=-0.8 running=true position=(6.126729, -0.559196, 0.000088)
 AREA_READY: 56 海滩
-COAST_ROUTE_OK: side=-0.5 running=false position=(6.131965, -0.559211, 0.300073)
+COAST_ROUTE_OK: side=-0.5 running=false position=(6.131945, -0.559211, 0.300073)
 AREA_READY: 56 海滩
-COAST_ROUTE_OK: side=-0.5 running=true position=(6.126727, -0.559268, 0.300088)
+COAST_ROUTE_OK: side=-0.5 running=true position=(6.12674, -0.559268, 0.300088)
 COAST_CHECK_OK: 120 Hz; three lanes walk/run; immediate return; same scene/meshes, continuous player/camera/floor

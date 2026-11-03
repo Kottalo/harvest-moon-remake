@@ -1,0 +1,18 @@
+{
+  "phase": "before removing rejected outdoor continuation",
+  "fps": 47,
+  "frames": 100,
+  "frame_p50_ms": 20.053,
+  "frame_p95_ms": 29.739,
+  "cpu_snapshot_ms": 30.911,
+  "physics_snapshot_ms": 3.37,
+  "draw_calls": 70,
+  "area": 0,
+  "viewport": [
+    1152,
+    720
+  ],
+  "adapter": "Intel UHD Graphics 620",
+  "after_measured": false,
+  "after_reason": "User stopped the game; no live A/B or confirmed 60 FPS"
+}

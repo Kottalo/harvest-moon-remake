@@ -1,4 +1,4 @@
-ERROR: Failed to open 'user://logs/godot2026-11-03T22.52.20.log'.
+ERROR: Failed to open 'user://logs/godot2026-11-03T23.21.49.log'.
    at: copy (core/io/dir_access.cpp:429)
 ERROR: Failed to open log file for writing: user://logs/godot.log
    at: rotate_file (core/io/logger.cpp:169)
