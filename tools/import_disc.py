@@ -31,6 +31,7 @@ class Disc:
         directory = self.read(lba * 2048, size)
         pos = 0
         self.archive = None
+        self.archive_toc = None
         while pos < len(directory):
             length = directory[pos]
             if not length:
@@ -38,8 +39,12 @@ class Disc:
                 continue
             record = directory[pos:pos + length]
             name = record[33:33 + record[32]].decode('ascii', errors='replace')
-            if name.split(';')[0] == 'A_FILE.BIN':
+            name = name.split(';')[0]
+            if name == 'A_FILE.BIN':
                 self.archive = struct.unpack_from('<I', record, 2)[0] * 2048
+            elif name == 'A_FILE.HDT':
+                offset = struct.unpack_from('<I', record, 2)[0] * 2048
+                self.archive_toc = struct.unpack('<33I', self.read(offset, 132))
             pos += length
         assert self.archive is not None, 'A_FILE.BIN is missing'
 
@@ -218,7 +223,7 @@ def texture_motion(vram, page, clut, filename, out, frames, semi):
     return result
 
 
-def model_mesh(data, vram, out, offset=0x2000, texture_names=None, animations=()):
+def model_mesh(data, vram, out, offset=0x2000, texture_names=None, animations=(), *, primitive_filter=None):
     assert struct.unpack_from('<I', data, offset)[0] in (0x41, 0x42)
     base = offset + 12
     objects = struct.unpack_from('<I', data, offset + 8)[0]
@@ -238,6 +243,9 @@ def model_mesh(data, vram, out, offset=0x2000, texture_names=None, animations=()
             assert len(packet) == size
             indices = struct.unpack_from('<' + 'H' * count, packet, vi)
             assert all(i < nv for i in indices), (obj, primitive, indices, nv)
+            if primitive_filter is not None and not primitive_filter(obj, [points[i] for i in indices]):
+                pos += size
+                continue
             page = struct.unpack_from('<H', packet, 10)[0] if textured else 0
             clut = struct.unpack_from('<H', packet, 6)[0] if textured else 0
             name = f'p{page:04x}_c{clut:04x}' if textured else 'solid'

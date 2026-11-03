@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 
 from PIL import Image
 
-from import_disc import Disc, ROOT, compose_animations, texture_bank
+from import_disc import Disc, ROOT, compose_animations, model_mesh, texture_bank
 from pack_textures import NODE, TOOL
 
 FARM = ROOT / "reference/hmbtn-decomp/src/overlay/11_GF_FARM"
@@ -61,13 +61,16 @@ class Library:
                     frame["image"] = None
                     continue
                 crop = picture.crop(bounds)
-                digest = hashlib.sha256(struct.pack("<2H", *crop.size) + crop.tobytes()).hexdigest()
-                if digest not in self.images:
-                    self.images[digest] = crop.size
-                    crop.save(self.frames / f"{digest}.png")
-                frame["image"] = digest
+                frame["image"] = self.add_picture(crop)
                 frame["offset"] = [bounds[0] - CANVAS // 2, bounds[1] - (CANVAS // 2 + 48)]
         return animations
+
+    def add_picture(self, picture):
+        digest = hashlib.sha256(struct.pack("<2H", *picture.size) + picture.tobytes()).hexdigest()
+        if digest not in self.images:
+            self.images[digest] = picture.size
+            picture.save(self.frames / f"{digest}.png")
+        return digest
 
     def pack(self, work, destination):
         project = work / "sprites.ftpp"
@@ -98,6 +101,50 @@ class Library:
                 entries[key] = [len(pages)-1, x, y, w, h]
         assert entries.keys() == self.images.keys()
         return pages, entries, packed
+
+
+def extract_event_actors(disc, library, people, item_names, npc, items):
+    source = (FARM / "event/event_script.c").read_text(encoding="utf-8")
+    offsets = table(source, "event_script_offsets")
+    member = int(re.search(r"#define EVENT_SCRIPT_AFILE (0x[0-9A-Fa-f]+)", source)[1], 0)
+    base = disc.archive_toc[member]
+    assert offsets[-1] <= disc.archive_toc[member + 1] - base
+    for event, (start, end) in enumerate(zip(offsets, offsets[1:])):
+        if end == start:
+            continue
+        block = disc.asset(base + start, end - start)
+        _, count, *flags = struct.unpack_from("<26H", block)
+        origin = 52 + (count + 1) * 4
+        assert 0 <= count <= 24 and origin <= len(block), event
+        slots = [
+            (flag, origin + struct.unpack_from("<I", block, 52 + index * 4)[0])
+            for index, flag in enumerate(flags[:count])
+        ]
+        actors = [
+            (flag, position) for flag, position in slots
+            if flag & 0x3C00 and block[position:position + 4] == b"\x0e\0\0\0"
+        ]
+        if not actors:
+            continue
+        vram = bytearray(1024 * 512 * 2)
+        texture_count = 0
+        for flag, position in slots:
+            if flag & 0x8000:
+                _, textures = texture_bank(block[position:], vram)
+                texture_count += textures
+        assert texture_count, event
+        for index, (flag, position) in enumerate(actors):
+            id_ = flag & 0x3FF
+            variant = f"event_{event:03d}_{index:02d}"
+            animation = library.decode(block, position, 0, decoded=(vram, texture_count))
+            if flag & 0x2000 or flag == 0x401:
+                if flag == 0x401:
+                    id_ = 41
+                name = people.get(id_, f"actor_{id_:03d}")
+                npc.setdefault(name, dict(id=id_, packs={}))["packs"][variant] = animation
+            else:
+                items.setdefault(id_, {})[variant] = animation
+
 
 
 def extract(disc, library):
@@ -173,6 +220,9 @@ def extract(disc, library):
     offsets = table(load, "farm_item_file_offsets")
     ids = table(data, "place_entries")
     indices = numbers(re.search(r"\bresource_lists\[10\]\s*=\s*\{([^}]+)", data)[1])
+    # These plant IDs are selected by field.c from an art slot, rather than
+    # by the shop/rucksack ID alongside that slot.
+    plant_slots = {2: {0x178: 17, 0x179: 25}, 4: {0x178: 22, 0x179: 27}}
     for index, first in enumerate(indices):
         block = read_pack(disc, offsets, index)
         starts, (bank,) = toc(data, "farm_item_toc", index)
@@ -181,13 +231,73 @@ def extract(disc, library):
         for id_, start in zip(ids[first + 1:], starts):
             if id_ > 0:
                 items.setdefault(id_, {})[str(index)] = library.decode(block, start, bank, decoded=decoded)
+        for id_, slot in plant_slots.get(index, {}).items():
+            items.setdefault(id_, {})[f"field_{index}"] = library.decode(
+                block, starts[slot], bank, decoded=decoded)
     assert packed_only <= items.keys()
+    extract_event_actors(disc, library, people, item_names, npc, items)
+    stray = disc.asset(0x7F000, 0x4800)
+    animals["stray_dog"] = {0: library.decode(stray, 0, 0x770)}
+    assert "gourmet" in npc
+    actor_resources = {
+        "cat": "actor_043", "visiting_cow": "actor_040", "visiting_sheep": "player",
+        "actor_item_17a": "all_villagers", "actor_item_17b": "actor_044",
+    }
+    for animal, entry in actor_resources.items():
+        # Event variants may reuse the same numeric slot for a different actor.
+        animals[animal] = {key: value for key, value in npc[entry]["packs"].items()
+                           if isinstance(key, int)}
+        assert animals[animal], animal
     return dict(npc=npc, animals=animals, items={
         item_names.get(id_, f"item_{id_:03x}"): dict(id=id_, variants=variants)
         for id_, variants in sorted(items.items())
+    }, item_actor_links={
+        "visitor": ["visitor"], "156": ["actor_item_156"], "157": ["actor_item_157"],
+        "stray_dog": ["stray_dog"], "pony": ["pony"], "horse": ["horse"], "calf": ["calf"],
+        "young_cow": ["cow"], "cow": ["cow"], "visiting_cow": ["visiting_cow"],
+        "lamb": ["lamb"], "sheep": ["sheep"], "visiting_sheep": ["visiting_sheep"],
+        "harvest_sprite": [f"harvest_sprite_{index}" for index in range(1, 8)],
+        "17a": ["actor_item_17a"], "17b": ["actor_item_17b"],
     }, items_without_picture={
         name: id_ for id_, name in item_names.items() if 0 < id_ < 380 and id_ not in items
     })
+
+
+def extract_makers(disc, library, work):
+    source = (ROOT / "reference/hmbtn-decomp/src/overlay/common/farm_section_table.h").read_text(encoding="utf-8")
+    offsets = table(source, "section_table")
+    makers = {}
+    # Source TMD objects group by draw packet, so each also contains adjacent wall faces.
+    for name, area, object_index, x, z in (
+        ("mayonnaise_maker", 120, 15, 1400, 2140),
+        ("cheese_maker", 104, 26, -200, 2540),
+        ("yarn_maker", 108, 34, 600, 2540),
+    ):
+        start, textures, end = offsets[area * 4:area * 4 + 3]
+        data = disc.asset(start, textures - start)
+        vram, _ = texture_bank(disc.asset(textures, end - textures))
+        directory = work / name
+        (directory / "textures").mkdir(parents=True)
+        def machine_primitive(index, points):
+            return index == object_index and all(
+                abs(px - x) <= 172 and -500 <= py <= 0 and z - 204 <= pz <= z + 172
+                for px, py, pz in points)
+        surfaces, report = model_mesh(data, vram, directory, primitive_filter=machine_primitive)
+        assert report["primitives"] > 60, (name, report)
+        for surface in surfaces:
+            assert surface["visible"] and surface["blend_mode"] == -1, name
+            texture = surface["texture"]
+            surface["image"] = library.add_picture(Image.open(directory / texture).convert("RGBA")) if texture else None
+            vertices = surface["vertices"]
+            for vertex in range(0, len(vertices), 3):
+                vertices[vertex] = round(vertices[vertex] - x / 1000, 6)
+                vertices[vertex + 2] = round(vertices[vertex + 2] + z / 1000, 6)
+        makers[name] = dict(area=area, tmd_object=object_index, primitives=report["primitives"],
+                            position=[x / 1000, 0, -z / 1000],
+                            surfaces=[{key: surface[key] for key in ("vertices", "colors", "uv", "image")}
+                                      for surface in surfaces])
+    return makers
+
 
 
 def main():
@@ -203,13 +313,29 @@ def main():
         frames = work / "frames"
         frames.mkdir()
         library = Library(frames)
-        catalogue = extract(Disc(args.disc), library)
+        disc = Disc(args.disc)
+        catalogue = extract(disc, library)
+        models = extract_makers(disc, library, work)
         pages, images, packed = library.pack(work, destination)
         catalogue.update(pages=pages, images=images, canvas=CANVAS, origin=[128, 176], source_tick_rate=30)
+        for model in models.values():
+            for surface in model["surfaces"]:
+                image = surface.pop("image")
+                if image:
+                    page, *region = images[image]
+                    surface["atlas"] = pages[page]
+                    surface["region"] = region
+        for name in catalogue["item_actor_links"]:
+            catalogue["items_without_picture"].pop(name, None)
+        catalogue["items_without_picture"].pop("mayonnaise_maker")
+        catalogue["item_models"] = {name: f"res://game/original_sprites/models/{name}.tscn" for name in models}
         output = json.dumps(catalogue, separators=(",", ":")) + "\n"
+        model_output = json.dumps(models, separators=(",", ":")) + "\n"
         if not args.check:
-            destination.mkdir(exist_ok=True)
+            (destination / "models").mkdir(parents=True, exist_ok=True)
             (destination / "catalogue.json").write_text(output, encoding="utf-8")
+            (destination / "models/makers.json").write_text(model_output, encoding="utf-8")
+        assert (destination / "models/makers.json").read_text(encoding="utf-8") == model_output
         assert (destination / "catalogue.json").read_text(encoding="utf-8") == output
         for page in pages:
             target = ROOT / page[6:]
