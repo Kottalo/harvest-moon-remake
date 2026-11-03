@@ -65,7 +65,10 @@ func try_start(motion_direction: Vector3, delta: float) -> bool:
 	query.shape = capsule.shape
 	query.collision_mask = 3
 	query.exclude = [player.get_rid()]
-	query.transform = capsule.global_transform.translated(motion_direction*travel)
+	# Collision recovery can leave the grounded body slightly below its support.
+	# Test clearance above the destination support, not inside the floor mesh.
+	var support_clearance: float = floor_hit.position.y-player.global_position.y+maxf(0.003,player.safe_margin*2.0)
+	query.transform = capsule.global_transform.translated(motion_direction*travel+Vector3.UP*support_clearance)
 	if not space.intersect_shape(query,1).is_empty(): return false
 	# Source farm_probe_steps refuses two blocked cells. Also sweep the whole arc
 	# for walls/ceilings and neighbouring rows. Exclude only the validated row.

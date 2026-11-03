@@ -1,0 +1,23 @@
+Expected regression failure with pre-fix hop from commit 4e2b0a2; all other logs in this group use the fix.
+
+ERROR: Failed to open 'user://logs/godot2026-11-03T22.21.24.log'.
+   at: copy (core/io/dir_access.cpp:429)
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+BOOT_STAGE: world entered
+BOOT_STAGE: player setup
+BOOT_STAGE: player ready
+BOOT_STAGE: world setup
+BOOT_STAGE: items ready
+WORLD_READY: 43 native locations
+NATIVE_FARM_CORNER_OK: (-0.27, -0.000155, 0.11) -> (-0.86425, 0.000709, 0.11)
+ERROR: Native farm floor was mistaken for a blocked landing: [(-0.28, -0.000155, 0.11), (-0.28, -0.000155, 0.11)]
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] require_ok (res://tools/verify_running_hop.gd:13)
+       [1] run (res://tools/generated/verify_hop_ground_before.gd:25)

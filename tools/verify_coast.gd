@@ -41,7 +41,7 @@ func _travel(target: float, key: int, running: bool) -> bool:
 		if not _require(world.get_node("Location").get_instance_id() == identity and world.get_node("Location/TownSquare/Geometry").mesh.get_rid() == square_mesh and world.get_node("Location/Beach/Geometry").mesh.get_rid() == beach_mesh, "Coast crossing replaced the scene or either mesh"):
 			return false
 		var camera_step: float = (world.camera.position - camera_before).length()
-		var offset_error: float = (world.camera.position - point - world.camera.eye_offset).length()
+		var offset_error: float = (world.camera.position - world.camera.limited_focus(point) - world.camera.eye_offset).length()
 		var ticks := maxi(Engine.get_physics_frames() - physics_before, 1)
 		var frame_limit := speed / Engine.physics_ticks_per_second * (ticks + 1) * 1.6 + 0.004
 		# process_frame is emitted before the camera's _process. At 120 Hz / 60 FPS,

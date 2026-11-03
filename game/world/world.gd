@@ -75,6 +75,7 @@ func _ready() -> void:
 	add_child(mine_field)
 	mine_field.setup(self)
 	_refresh_hud()
+	_configure_camera_limits()
 	_update_camera()
 	print("WORLD_READY: ", world.size(), " native locations")
 
@@ -107,6 +108,10 @@ func _process(delta: float) -> void:
 	if hud_elapsed >= 0.1:
 		hud_elapsed = 0
 		_refresh_hud()
+
+func _configure_camera_limits() -> void:
+	var flags: int = day_cycle.catalogue.areas[str(current_area)].source_flags
+	camera.set_location(get_node("Location"),flags&0x1800==0)
 
 func _update_camera(interpolate := false) -> void:
 	camera.follow(player, overview, interpolate)
@@ -254,6 +259,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	farm_field.bind_location()
 	mine_field.bind_location()
 	day_cycle.refresh()
+	_configure_camera_limits()
 	if overview:
 		_set_overview()
 	_update_camera()
