@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 
 from PIL import Image
 
-from import_disc import Disc, ROOT, compose_animations, model_mesh, texture_bank
+from import_disc import Disc, ROOT, compose_animations, model_mesh, texture_bank, texture_page
 from pack_textures import NODE, TOOL
 
 FARM = ROOT / "reference/hmbtn-decomp/src/overlay/11_GF_FARM"
@@ -263,6 +263,30 @@ def extract(disc, library):
     })
 
 
+def extract_soil_states(disc, library):
+    source = (FARM / "field/field.c").read_text(encoding="utf-8")
+    body = source.split("cell_looks[30] = {", 1)[1].split("\n};", 1)[0]
+    looks = [(numbers(uv), int(clut, 0)) for uv, clut in
+             re.findall(r"\{\{([^}]+)\},\s*(0x[0-9A-F]+)\}", body)]
+    assert len(looks) == 30
+    section_source = (ROOT / "reference/hmbtn-decomp/src/overlay/common/farm_section_table.h").read_text(encoding="utf-8")
+    offsets = table(section_source, "section_table")
+    states = {}
+    names = ("soil", "tilled_soil", "watered_soil", "sown_soil", "watered_sown_soil")
+    for season in range(4):
+        start, end = offsets[season * 4 + 1:season * 4 + 3]
+        vram, _ = texture_bank(disc.asset(start, end - start))
+        for index, name in enumerate(names):
+            uv, clut = looks[29 if season == 3 else index]
+            u, v = uv[::2], uv[1::2]
+            rect = (min(u), min(v), max(u) + 1, max(v) + 1)
+            tile = texture_page(vram, 7 if season == 3 else 8, clut).crop(rect)
+            assert tile.getbbox(), (season, name)
+            states.setdefault(name, dict(id=359 + index, seasons={}))["seasons"][season] = dict(
+                image=library.add_picture(tile), corners=[[x - rect[0], y - rect[1]] for x, y in zip(u, v)])
+    return states
+
+
 def extract_makers(disc, library, work):
     source = (ROOT / "reference/hmbtn-decomp/src/overlay/common/farm_section_table.h").read_text(encoding="utf-8")
     offsets = table(source, "section_table")
@@ -316,6 +340,7 @@ def main():
         disc = Disc(args.disc)
         catalogue = extract(disc, library)
         models = extract_makers(disc, library, work)
+        catalogue["field_surfaces"] = extract_soil_states(disc, library)
         pages, images, packed = library.pack(work, destination)
         catalogue.update(pages=pages, images=images, canvas=CANVAS, origin=[128, 176], source_tick_rate=30)
         for model in models.values():
@@ -325,9 +350,12 @@ def main():
                     page, *region = images[image]
                     surface["atlas"] = pages[page]
                     surface["region"] = region
-        for name in catalogue["item_actor_links"]:
+        for name in catalogue["item_actor_links"] | catalogue["field_surfaces"]:
             catalogue["items_without_picture"].pop(name, None)
         catalogue["items_without_picture"].pop("mayonnaise_maker")
+        catalogue["nonvisual_action_ids"] = catalogue.pop("items_without_picture")
+        # These three handlers leave the ANI base unset in farm_actor_load_sprite.
+        assert set(catalogue["nonvisual_action_ids"].values()) == {0x153, 0x155, 0x159}
         catalogue["item_models"] = {name: f"res://game/original_sprites/models/{name}.tscn" for name in models}
         output = json.dumps(catalogue, separators=(",", ":")) + "\n"
         model_output = json.dumps(models, separators=(",", ":")) + "\n"
@@ -344,7 +372,7 @@ def main():
                 target.write_bytes(pixels)
             assert target.read_bytes() == pixels
     print("ORIGINAL_SPRITES_OK:", {key: len(catalogue[key]) for key in
-          ("npc", "animals", "items", "items_without_picture", "images", "pages")})
+          ("npc", "animals", "items", "field_surfaces", "nonvisual_action_ids", "images", "pages")})
 
 
 if __name__ == "__main__":

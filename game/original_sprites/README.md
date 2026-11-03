@@ -12,14 +12,17 @@ selected by the field renderer. `item_actor_links` maps shared actor art.
 with origin (128, 176). Keep that origin fixed across all poses. Duration and
 control are the original ANI bytes. A duration is max(1, ceil(duration / 2))
 ticks at 30 Hz. A null image marks an empty picture in the original sequence.
-The `items_without_picture` index lists named IDs without a picture in the
-decoded item banks. Some are actors or field states with their own rendering.
+The five soil states are in `field_surfaces`, with source corner order and a
+packed tile for each season. Winter uses the same tile across all states, as
+in the source field renderer.
 
 The event archive contributes Gourmet, alternate costumes and staged props.
 The three makers in `models/` are standalone Godot scenes cut from the original
 upgraded coop and barn meshes. Their original placements are in `makers.json`.
-The remaining picture gaps include field surface states and source action IDs
-whose art has not been identified. The catalogue does not include face portraits.
+The only named item-range IDs without a bound picture are action codes
+0x153, 0x155 and 0x159. The original animal action loader does not bind a
+sprite for those codes, so they are recorded under `nonvisual_action_ids`.
+Dialogue portraits are outside this world-sprite catalogue.
 
 These assets are available on demand. Map placement, schedules, dialogue,
 livestock gameplay and inventory behavior are separate systems.
