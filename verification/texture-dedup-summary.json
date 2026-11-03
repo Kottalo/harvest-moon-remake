@@ -1,0 +1,25 @@
+{
+  "png_before": 1733,
+  "duplicate_png_removed": 100,
+  "runtime_duplicate_png_removed": 47,
+  "png_bytes_removed": 5054357,
+  "preserved_import_variants": [
+    [
+      "game/locations/farm/textures/farm_atlas_22.png",
+      "assets/original/textures/p0005_c3e94.png"
+    ],
+    [
+      "game/locations/farm/textures/farm_atlas_32.png",
+      "assets/original/textures/p0025_c3e54.png"
+    ],
+    [
+      "game/player/player_atlas.png",
+      "assets/original/player.png"
+    ]
+  ],
+  "native_scenes_verified": 46,
+  "native_scene_bytes_before": 28198491,
+  "native_scene_bytes_after": 28840413,
+  "png_after": 1633,
+  "native_scenes_rewritten": 23
+}

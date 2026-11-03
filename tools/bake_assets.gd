@@ -1,6 +1,7 @@
 extends SceneTree
 ## Run after importing PNGs: godot --headless --path . --script tools/bake_assets.gd
 var motion_textures := {}
+var texture_dedup: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/texture_dedup_manifest.json"))
 
 func _initialize() -> void:
 	if OS.get_cmdline_user_args().has("--check"):
@@ -218,7 +219,7 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 		if blend_mode >= 0:
 			material.set_shader_parameter("alpha_scissor_threshold", 0.75)
 		if not surface.texture.is_empty():
-			material.set_shader_parameter("albedo_texture", load(texture_base + surface.texture))
+			material.set_shader_parameter("albedo_texture", load(_texture_path(texture_base + surface.texture)))
 		_set_motion(material, surface, texture_base)
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
 		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
@@ -227,7 +228,7 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 			blended.resource_name = material.resource_name + "_blend"
 			var effect: String = ["average", "add", "subtract", "add"][blend_mode]
 			blended.shader = load("res://game/rendering/source_blend_" + effect + ".gdshader")
-			blended.set_shader_parameter("albedo_texture", load(texture_base + surface.texture))
+			blended.set_shader_parameter("albedo_texture", load(_texture_path(texture_base + surface.texture)))
 			blended.set_shader_parameter("opacity", [0.5, 1.0, 1.0, 0.25][blend_mode])
 			_set_motion(blended, surface, texture_base)
 			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
@@ -278,13 +279,16 @@ func _set_motion(material: ShaderMaterial, surface: Dictionary, texture_base: St
 	var motion: Dictionary = surface.get("motion", {})
 	if motion.is_empty():
 		return
-	var path: String = texture_base + motion.texture
+	var path: String = _texture_path(texture_base + motion.texture)
 	if not motion_textures.has(path):
-		var image := Image.load_from_file(path)
-		assert(image != null, "Missing motion atlas: " + path)
-		var texture := ImageTexture.create_from_image(image)
-		texture.resource_name = motion.texture.get_file().get_basename()
-		motion_textures[path] = texture
+		if path in texture_dedup.motion.values():
+			motion_textures[path] = load(path)
+		else:
+			var image := Image.load_from_file(path)
+			assert(image != null, "Missing motion atlas: " + path)
+			var texture := ImageTexture.create_from_image(image)
+			texture.resource_name = motion.texture.get_file().get_basename()
+			motion_textures[path] = texture
 	material.set_shader_parameter("motion_texture", motion_textures[path])
 	material.set_shader_parameter("motion_size", Vector2(motion.size[0], motion.size[1]))
 	material.set_shader_parameter("motion_count", motion.records.size())
@@ -296,3 +300,6 @@ func _set_motion(material: ShaderMaterial, surface: Dictionary, texture_base: St
 			values.append(Vector4(value[0], value[1], value[2], value[3]))
 		values.resize(16)
 		material.set_shader_parameter("motion_" + field, values)
+
+func _texture_path(path: String) -> String:
+	return texture_dedup.aliases.get(path,path)

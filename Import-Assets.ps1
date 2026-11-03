@@ -12,6 +12,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Player action conversion failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Shadow/mine conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\import_day_cycle.py') $Disc
 if ($LASTEXITCODE -ne 0) { throw 'Day cycle conversion failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\texture_dedup.py') apply
+if ($LASTEXITCODE -ne 0) { throw 'Texture consolidation failed' }
 $openEditor = Get-Process Godot* -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -match 'Harvest Moon BTN - Godot Remake.*Godot Engine' }
 if ($openEditor) {
     $mcpPython = Join-Path $env:APPDATA 'uv\tools\godot-ai\Scripts\python.exe'

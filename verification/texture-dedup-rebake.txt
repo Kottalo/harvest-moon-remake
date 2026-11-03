@@ -1,0 +1,958 @@
+ERROR: Failed to open 'user://logs/godot2026-11-03T18.08.53.log'.
+   at: copy (core/io/dir_access.cpp:429)
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+DOGHOUSE_BACKPLATE_OK: removed two covered coplanar triangles; wooden gable preserved
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_01_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_03_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_04_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_06_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_14_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_18_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_20_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_22_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_23_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_24_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_30_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_34_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_38_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_41_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_43_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_44_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/farm/textures/farm_atlas_48_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 0.0, 8 positioned zone models
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_13_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_17_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_18_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_29_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_46_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 24.0, 3 positioned zone models
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_07_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_08_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_16_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_18_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_19_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_21_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_22_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_23_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_24_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_25_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_26_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_27_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_28_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_29_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_39_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_40_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_47_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_48_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_49_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_54_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/poultry_farm/textures/poultry_farm_atlas_55_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 28.0, 1 positioned zone models
+BAKE_OK: area 32.0, 3 positioned zone models
+BAKE_OK: area 36.0, 4 positioned zone models
+BAKE_OK: area 40.0, 2 positioned zone models
+BAKE_OK: area 44.0, 4 positioned zone models
+BAKE_OK: area 48.0, 2 positioned zone models
+BAKE_OK: area 52.0, 0 positioned zone models
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_08_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_21_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_22_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_23_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_24_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_25_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_27_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_29_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_33_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_34_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_21_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_67_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_70_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_71_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/beach/textures/beach_atlas_73_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 56.0, 0 positioned zone models
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_summit/textures/mother_hill_summit_atlas_02_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 60.0, 0 positioned zone models
+BAKE_OK: area 64.0, 0 positioned zone models
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_04_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_06_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_07_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_19_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_21_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_19_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_25_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_26_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_27_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_28_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 68.0, 0 positioned zone models
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_01_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_03_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_04_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_06_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_07_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_08_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_09_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_10_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_12_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_13_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_15_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_17_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_18_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_19_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_20_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_21_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_22_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_23_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_24_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_25_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_26_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_27_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_30_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_31_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_32_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_36_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_37_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_38_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/hot_spring/textures/hot_spring_atlas_39_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:56)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 72.0, 2 positioned zone models
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_06_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_07_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_08_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_09_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_17_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_18_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_21_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_22_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_23_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_24_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_25_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_26_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_27_blend_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_28_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 76.0, 1 positioned zone models
+BAKE_OK: area 80.0, 2 positioned zone models
+BAKE_OK: area 92.0, 0 positioned zone models
+BAKE_OK: area 96.0, 1 positioned zone models
+BAKE_OK: area 112.0, 1 positioned zone models
+BAKE_OK: area 128.0, 0 positioned zone models
+BAKE_OK: area 132.0, 0 positioned zone models
+BAKE_OK: area 136.0, 0 positioned zone models
+BAKE_OK: area 140.0, 0 positioned zone models
+BAKE_OK: area 144.0, 2 positioned zone models
+BAKE_OK: area 148.0, 2 positioned zone models
+BAKE_OK: area 152.0, 0 positioned zone models
+BAKE_OK: area 156.0, 1 positioned zone models
+BAKE_OK: area 160.0, 0 positioned zone models
+BAKE_OK: area 164.0, 0 positioned zone models
+BAKE_OK: area 168.0, 1 positioned zone models
+BAKE_OK: area 172.0, 0 positioned zone models
+BAKE_OK: area 176.0, 0 positioned zone models
+BAKE_OK: area 180.0, 1 positioned zone models
+BAKE_OK: area 184.0, 0 positioned zone models
+BAKE_OK: area 188.0, 1 positioned zone models
+BAKE_OK: area 192.0, 2 positioned zone models
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_02_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_03_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_05_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_06_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_07_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_08_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_09_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_10_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_11_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_12_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_13_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_14_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_16_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_17_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_18_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_19_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:44)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+WARNING: Loaded resource as image file, this will not work on export: 'res://game/locations/church/textures/church_atlas_20_motion.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+   at: load_from_file (core/io/image.cpp:2780)
+   GDScript backtrace (most recent call first):
+       [0] _set_motion (res://tools/bake_assets.gd:287)
+       [1] _add_mesh (res://tools/bake_assets.gd:223)
+       [2] _bake_scene (res://tools/bake_assets.gd:56)
+       [3] _initialize (res://tools/bake_assets.gd:24)
+BAKE_OK: area 196.0, 1 positioned zone models
+BAKE_OK: area 200.0, 0 positioned zone models
+BAKE_OK: area 204.0, 3 positioned zone models
+BAKE_OK: area 208.0, 3 positioned zone models
+BAKE_OK: area 212.0, 0 positioned zone models
+BAKE_OK: area 234.0, 0 positioned zone models
+BAKE_OK: area 245.0, 0 positioned zone models
+COAST_SEGMENT_OK: town_square
+COAST_SEGMENT_OK: beach
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)

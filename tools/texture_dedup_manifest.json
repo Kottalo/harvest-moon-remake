@@ -1,0 +1,684 @@
+{
+  "aliases": {
+    "res://game/field/spring_mine_dug_soil.png": "res://game/field/lake_mine_dug_soil.png",
+    "res://game/locations/barn/textures/barn_atlas_02.png": "res://game/locations/barn/textures/barn_atlas_01.png",
+    "res://game/locations/barn/textures/barn_atlas_07.png": "res://game/locations/barn/textures/barn_atlas_06.png",
+    "res://game/locations/basil_bedroom/textures/basil_bedroom_atlas_03.png": "res://game/locations/basil_bedroom/textures/basil_bedroom_atlas_01.png",
+    "res://game/locations/basil_house/textures/basil_house_atlas_22.png": "res://game/locations/basil_house/textures/basil_house_atlas_05.png",
+    "res://game/locations/blacksmith_bedroom/textures/blacksmith_bedroom_atlas_04.png": "res://game/locations/blacksmith_bedroom/textures/blacksmith_bedroom_atlas_01.png",
+    "res://game/locations/blacksmith_bedroom/textures/blacksmith_bedroom_atlas_24.png": "res://game/locations/blacksmith_bedroom/textures/blacksmith_bedroom_atlas_10.png",
+    "res://game/locations/blacksmith_forge/textures/blacksmith_forge_atlas_04.png": "res://game/locations/blacksmith_forge/textures/blacksmith_forge_atlas_01.png",
+    "res://game/locations/chicken_coop/textures/chicken_coop_atlas_02.png": "res://game/locations/chicken_coop/textures/chicken_coop_atlas_01.png",
+    "res://game/locations/chicken_coop/textures/chicken_coop_atlas_09.png": "res://game/locations/chicken_coop/textures/chicken_coop_atlas_05.png",
+    "res://game/locations/chicken_coop/textures/chicken_coop_atlas_10.png": "res://game/locations/chicken_coop/textures/chicken_coop_atlas_06.png",
+    "res://game/locations/church/textures/church_atlas_02.png": "res://game/locations/church/textures/church_atlas_01.png",
+    "res://game/locations/church_street/textures/church_street_atlas_59.png": "res://game/locations/church_street/textures/church_street_atlas_01.png",
+    "res://game/locations/clinic/textures/clinic_atlas_02.png": "res://game/locations/clinic/textures/clinic_atlas_01.png",
+    "res://game/locations/clinic/textures/clinic_atlas_13.png": "res://game/locations/clinic/textures/clinic_atlas_10.png",
+    "res://game/locations/clinic_upstairs/textures/clinic_upstairs_atlas_13.png": "res://game/locations/clinic_upstairs/textures/clinic_upstairs_atlas_01.png",
+    "res://game/locations/clinic_upstairs/textures/clinic_upstairs_atlas_17.png": "res://game/locations/clinic_upstairs/textures/clinic_upstairs_atlas_03.png",
+    "res://assets/original/textures/p0005_c3e1a.png": "res://game/locations/farm/textures/farm_atlas_01.png",
+    "res://assets/original/textures/p0005_c3dde.png": "res://game/locations/farm/textures/farm_atlas_02.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_26_motion.png": "res://game/locations/farm/textures/farm_atlas_02_motion.png",
+    "res://assets/original/textures/p0005_c3e96.png": "res://game/locations/farm/textures/farm_atlas_03.png",
+    "res://assets/original/textures/p0005_c3e9a.png": "res://game/locations/farm/textures/farm_atlas_04.png",
+    "res://assets/original/textures/p0008_c3c60.png": "res://game/locations/farm/textures/farm_atlas_05.png",
+    "res://assets/original/textures/p0005_c3ca0.png": "res://game/locations/farm/textures/farm_atlas_06.png",
+    "res://assets/original/textures/p0008_c3e61.png": "res://game/locations/farm/textures/farm_atlas_07.png",
+    "res://assets/original/textures/p0008_c3ea0.png": "res://game/locations/farm/textures/farm_atlas_08.png",
+    "res://assets/original/textures/p0087_c3f94.png": "res://game/locations/farm/textures/farm_atlas_09.png",
+    "res://assets/original/textures/p0006_c3ce0.png": "res://game/locations/farm/textures/farm_atlas_10.png",
+    "res://assets/original/textures/p0088_c3fd4.png": "res://game/locations/farm/textures/farm_atlas_11.png",
+    "res://assets/original/textures/p0006_c3e58.png": "res://game/locations/farm/textures/farm_atlas_12.png",
+    "res://assets/original/textures/p0088_c3f54.png": "res://game/locations/farm/textures/farm_atlas_13.png",
+    "res://assets/original/textures/p0005_c3e59.png": "res://game/locations/farm/textures/farm_atlas_14.png",
+    "res://assets/original/textures/p0006_c3d60.png": "res://game/locations/farm/textures/farm_atlas_15.png",
+    "res://assets/original/textures/p0007_c3d20.png": "res://game/locations/farm/textures/farm_atlas_16.png",
+    "res://assets/original/textures/p0087_c3ed4.png": "res://game/locations/farm/textures/farm_atlas_17.png",
+    "res://assets/original/textures/p0005_c3e5e.png": "res://game/locations/farm/textures/farm_atlas_18.png",
+    "res://assets/original/textures/p0006_c3e1c.png": "res://game/locations/farm/textures/farm_atlas_19.png",
+    "res://assets/original/textures/p0005_c3e5a.png": "res://game/locations/farm/textures/farm_atlas_20.png",
+    "res://assets/original/textures/p0008_c3e55.png": "res://game/locations/farm/textures/farm_atlas_21.png",
+    "res://assets/original/textures/p0005_c3e60.png": "res://game/locations/farm/textures/farm_atlas_23.png",
+    "res://assets/original/textures/p0005_c3d9e.png": "res://game/locations/farm/textures/farm_atlas_24.png",
+    "res://assets/original/textures/p0008_c3da0.png": "res://game/locations/farm/textures/farm_atlas_25.png",
+    "res://assets/original/textures/p0008_c3e5d.png": "res://game/locations/farm/textures/farm_atlas_26.png",
+    "res://assets/original/textures/p0008_c3e5c.png": "res://game/locations/farm/textures/farm_atlas_27.png",
+    "res://assets/original/textures/p0086_c3ed4.png": "res://game/locations/farm/textures/farm_atlas_28.png",
+    "res://assets/original/textures/p0008_c3e1b.png": "res://game/locations/farm/textures/farm_atlas_29.png",
+    "res://assets/original/textures/p0005_c3e15.png": "res://game/locations/farm/textures/farm_atlas_30.png",
+    "res://assets/original/textures/p0005_c3e20.png": "res://game/locations/farm/textures/farm_atlas_31.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_22_motion.png": "res://game/locations/farm/textures/farm_atlas_31_motion.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_19_blend_motion.png": "res://game/locations/farm/textures/farm_atlas_32_blend_motion.png",
+    "res://assets/original/textures/p0005_c3de0.png": "res://game/locations/farm/textures/farm_atlas_33.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_53_motion.png": "res://game/locations/farm/textures/farm_atlas_33_motion.png",
+    "res://assets/original/textures/p0005_c3e17.png": "res://game/locations/farm/textures/farm_atlas_34.png",
+    "res://assets/original/textures/p0005_c3e16.png": "res://game/locations/farm/textures/farm_atlas_35.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_21_motion.png": "res://game/locations/farm/textures/farm_atlas_35_motion.png",
+    "res://assets/original/textures/p0005_c3e1f.png": "res://game/locations/farm/textures/farm_atlas_36.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_44_motion.png": "res://game/locations/farm/textures/farm_atlas_36_motion.png",
+    "res://assets/original/textures/p0005_c3d5e.png": "res://game/locations/farm/textures/farm_atlas_37.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_54_motion.png": "res://game/locations/farm/textures/farm_atlas_37_motion.png",
+    "res://assets/original/textures/p0005_c3e97.png": "res://game/locations/farm/textures/farm_atlas_38.png",
+    "res://assets/original/textures/p0008_c3e57.png": "res://game/locations/farm/textures/farm_atlas_39.png",
+    "res://assets/original/textures/p0006_c3e18.png": "res://game/locations/farm/textures/farm_atlas_40.png",
+    "res://assets/original/textures/p0005_c3e9d.png": "res://game/locations/farm/textures/farm_atlas_41.png",
+    "res://assets/original/textures/p0086_c3f54.png": "res://game/locations/farm/textures/farm_atlas_42.png",
+    "res://assets/original/textures/p0005_c3e9e.png": "res://game/locations/farm/textures/farm_atlas_43.png",
+    "res://assets/original/textures/p0005_c3e9c.png": "res://game/locations/farm/textures/farm_atlas_44.png",
+    "res://assets/original/textures/p0007_c3e19.png": "res://game/locations/farm/textures/farm_atlas_45.png",
+    "res://assets/original/textures/p0008_c3c20.png": "res://game/locations/farm/textures/farm_atlas_46.png",
+    "res://assets/original/textures/p0006_c3e14.png": "res://game/locations/farm/textures/farm_atlas_47.png",
+    "res://assets/original/textures/p0005_c3e1d.png": "res://game/locations/farm/textures/farm_atlas_48.png",
+    "res://assets/original/textures/p0006_c3d1e.png": "res://game/locations/farm/textures/farm_atlas_49.png",
+    "res://assets/original/textures/p0008_c3e98.png": "res://game/locations/farm/textures/farm_atlas_50.png",
+    "res://assets/original/textures/p0086_c3f14.png": "res://game/locations/farm/textures/farm_atlas_51.png",
+    "res://assets/original/textures/p0087_c3f54.png": "res://game/locations/farm/textures/farm_atlas_52.png",
+    "res://assets/original/textures/p0008_c3e1e.png": "res://game/locations/farm/textures/farm_atlas_53.png",
+    "res://assets/original/textures/p0006_c3e21.png": "res://game/locations/farm/textures/farm_atlas_54.png",
+    "res://assets/original/textures/p0008_c3ea1.png": "res://game/locations/farm/textures/farm_atlas_55.png",
+    "res://game/locations/hot_spring/textures/hot_spring_atlas_38.png": "res://game/locations/hot_spring/textures/hot_spring_atlas_10.png",
+    "res://game/locations/hot_spring/textures/hot_spring_atlas_35.png": "res://game/locations/hot_spring/textures/hot_spring_atlas_29.png",
+    "res://game/locations/inn/textures/inn_atlas_03.png": "res://game/locations/inn/textures/inn_atlas_01.png",
+    "res://game/locations/inn/textures/inn_atlas_08.png": "res://game/locations/inn/textures/inn_atlas_02.png",
+    "res://game/locations/inn_street/textures/inn_street_atlas_42.png": "res://game/locations/inn_street/textures/inn_street_atlas_17.png",
+    "res://game/locations/inn_upstairs/textures/inn_upstairs_atlas_05.png": "res://game/locations/inn_upstairs/textures/inn_upstairs_atlas_03.png",
+    "res://game/locations/spring_mine/textures/spring_mine_atlas_01.png": "res://game/locations/lake_mine/textures/lake_mine_atlas_01.png",
+    "res://game/locations/spring_mine/textures/spring_mine_atlas_02.png": "res://game/locations/lake_mine/textures/lake_mine_atlas_02.png",
+    "res://game/locations/spring_mine/textures/spring_mine_atlas_03.png": "res://game/locations/lake_mine/textures/lake_mine_atlas_03.png",
+    "res://game/locations/library/textures/library_atlas_04.png": "res://game/locations/library/textures/library_atlas_01.png",
+    "res://game/locations/library/textures/library_atlas_10.png": "res://game/locations/library/textures/library_atlas_09.png",
+    "res://game/locations/library_street/textures/library_street_atlas_55.png": "res://game/locations/library_street/textures/library_street_atlas_07.png",
+    "res://game/locations/market_street/textures/market_street_atlas_65.png": "res://game/locations/market_street/textures/market_street_atlas_11.png",
+    "res://game/locations/poultry_farm/textures/poultry_farm_atlas_35.png": "res://game/locations/poultry_farm/textures/poultry_farm_atlas_10.png",
+    "res://game/locations/poultry_farm_bedroom/textures/poultry_farm_bedroom_atlas_30.png": "res://game/locations/poultry_farm_bedroom/textures/poultry_farm_bedroom_atlas_04.png",
+    "res://game/locations/poultry_farm_house/textures/poultry_farm_house_atlas_06.png": "res://game/locations/poultry_farm_house/textures/poultry_farm_house_atlas_01.png",
+    "res://game/locations/town_south/textures/town_south_atlas_58.png": "res://game/locations/town_south/textures/town_south_atlas_17.png",
+    "res://game/locations/winery_cellar/textures/winery_cellar_atlas_03.png": "res://game/locations/winery_cellar/textures/winery_cellar_atlas_01.png",
+    "res://game/locations/winery_house/textures/winery_house_atlas_07.png": "res://game/locations/winery_house/textures/winery_house_atlas_01.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_47.png": "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_15.png",
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_29.png": "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_19.png",
+    "res://game/locations/yodel_ranch_house/textures/yodel_ranch_house_atlas_19.png": "res://game/locations/yodel_ranch_house/textures/yodel_ranch_house_atlas_01.png",
+    "res://game/player/actions/potion_00.png": "res://game/player/actions/medicine_00.png"
+  },
+  "pixels": {
+    "res://game/field/lake_mine_dug_soil.png": [
+      256,
+      256,
+      "3855643e66c7bc971b79142710ed626e69bcfabac22f8be9c03960c2192746ac"
+    ],
+    "res://game/locations/barn/textures/barn_atlas_01.png": [
+      256,
+      256,
+      "3d707311cf9f6d8ca82a80dced59ff6fec6e464613794791ab5e0e6ff6869503"
+    ],
+    "res://game/locations/barn/textures/barn_atlas_06.png": [
+      256,
+      256,
+      "badbccfb6a420007bc279796bbffc73ba5c952703335776f0594e92706e1b705"
+    ],
+    "res://game/locations/basil_bedroom/textures/basil_bedroom_atlas_01.png": [
+      256,
+      256,
+      "cdbb73ffcadce73a95bbd6c58ec336582547a0e6084dc90021df5d7ce92787da"
+    ],
+    "res://game/locations/basil_house/textures/basil_house_atlas_05.png": [
+      256,
+      256,
+      "214f7c61fb7bc568be36c2025747ea4826f6c83f65216a8d1d3f222279e61aba"
+    ],
+    "res://game/locations/blacksmith_bedroom/textures/blacksmith_bedroom_atlas_01.png": [
+      256,
+      256,
+      "8615322549df741e6e9158af7d20fada5c741c790e1cc0aaa11397d062bd2be0"
+    ],
+    "res://game/locations/blacksmith_bedroom/textures/blacksmith_bedroom_atlas_10.png": [
+      256,
+      256,
+      "12f7dbbc8a2a369590d743e4d357fc61de5a782e12c616171cf2a74f2c2c40f5"
+    ],
+    "res://game/locations/blacksmith_forge/textures/blacksmith_forge_atlas_01.png": [
+      256,
+      256,
+      "a54b78307e5f88838fede6c3001189e01dc209f7aa71de1a6386490a89891b57"
+    ],
+    "res://game/locations/chicken_coop/textures/chicken_coop_atlas_01.png": [
+      256,
+      256,
+      "684c39141066cd9cffc6792974314f9eb13c93f47343a46d4bcd455f79b45081"
+    ],
+    "res://game/locations/chicken_coop/textures/chicken_coop_atlas_05.png": [
+      256,
+      256,
+      "b578c8545b057d9797c3257620f0f580e10fd52c154684f38eb6aa42f89b2461"
+    ],
+    "res://game/locations/chicken_coop/textures/chicken_coop_atlas_06.png": [
+      256,
+      256,
+      "cf1b6c70cddf5069c0fb466f2cc070d6d898a7cd0eb3689880525563dba0147f"
+    ],
+    "res://game/locations/church/textures/church_atlas_01.png": [
+      256,
+      256,
+      "3ccb1f9350b93502301c54020d36429c3d5f9a7301f42750682f522c92114410"
+    ],
+    "res://game/locations/church_street/textures/church_street_atlas_01.png": [
+      256,
+      256,
+      "0abe7927452d1054bdf0300e021941dddff0a0d7227cb4527a5136b4eadaa969"
+    ],
+    "res://game/locations/clinic/textures/clinic_atlas_01.png": [
+      256,
+      256,
+      "9acac76ee66ffcd1dd4bbf12f7e682a62a6f8760789e80dfa7c66d60517f261d"
+    ],
+    "res://game/locations/clinic/textures/clinic_atlas_10.png": [
+      256,
+      256,
+      "d890585750acb77728f8f6add0e88fc6f76d70f4689f71ccec526bc954dee328"
+    ],
+    "res://game/locations/clinic_upstairs/textures/clinic_upstairs_atlas_01.png": [
+      256,
+      256,
+      "14a719710668f0af03c4e98c75dcad875598de0f468481f8d8882aec1a14c3dc"
+    ],
+    "res://game/locations/clinic_upstairs/textures/clinic_upstairs_atlas_03.png": [
+      256,
+      256,
+      "2189182182ae168cbd688052c5fa6d3c3d42a380fbdb2a36d69e524988a77ece"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_01.png": [
+      256,
+      256,
+      "70aab6ca3f665b3c6de35c5d7310ac9910ef468c1f3ffb03801a7e5d59838b2c"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_02.png": [
+      256,
+      256,
+      "89b01d62cf88326724209220c9b5d47a989654652e64b87e254edf0496f044ef"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_02_motion.png": [
+      64,
+      31,
+      "e56e77955a450637a28029fa881a52b7cf5c165c5d1e881f32645970c0ddfc54"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_03.png": [
+      256,
+      256,
+      "1700403a3f3833dc68741eb3a21b68b6ca0ee97246582769b281a9cfcdc8077f"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_04.png": [
+      256,
+      256,
+      "625a726deb83b83141e4eb82a3e71fddeb8a52df95bca1a6f2ea20e64ed25816"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_05.png": [
+      256,
+      256,
+      "db08506f1ded4942e68769621eb653c119ea0c9ff7bc90ef10cc9a8ce5becb7b"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_06.png": [
+      256,
+      256,
+      "b98a33153c8b716715d33257935cbfa4415c4011ff7dadf076d940053bf2ee22"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_07.png": [
+      256,
+      256,
+      "9e5c7b40727b6e1774da1b834cc75cb00d43a00a72cdfcf0fd9e3b55de44be15"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_08.png": [
+      256,
+      256,
+      "f9d79a0bfcbb8fbf51207d439551abbdd1f4a0efa912cdfe4bfb9139382c911c"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_09.png": [
+      256,
+      256,
+      "456476a66597362162d761c0a09853e96fd0a6854cb064a6cb459a8d8871484c"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_10.png": [
+      256,
+      256,
+      "9cd15a7f417a9fba3cca33543d982b8d5d0dd9a7b07675657fac5a2f1467edf8"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_11.png": [
+      256,
+      256,
+      "25709ad083bb4904d4c651934d241cb945d7826f2fbce4e053715af550715e6c"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_12.png": [
+      256,
+      256,
+      "5711dfafbed9040372914165fcefa5204b74ea9493ac0a90b04e3a1eeaba7afa"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_13.png": [
+      256,
+      256,
+      "ebfc2a6bdcd7500bf1da2f87f1722abf83e037ab8dc59e808f97914f50ba6edc"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_14.png": [
+      256,
+      256,
+      "2d8c53f6d0b21e7990584f12e2ba1885812261de2fbab79332da8686feff6e97"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_15.png": [
+      256,
+      256,
+      "9784ccff5e036b85bd610c7987c868f282c4be19ca369eff24ee478ba5be2854"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_16.png": [
+      256,
+      256,
+      "f327bf9dd6df9669e3c739a7d65cc0663ff8396db885829955f69a7f890be426"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_17.png": [
+      256,
+      256,
+      "46923b438fff7edb711dc76dca3a5c8c7f4f92840d4dda6030b767ce40e96b4f"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_18.png": [
+      256,
+      256,
+      "5bdeff286bad0eb3567b26638676214f5da861f970d77a82a914ca36c7bb691c"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_19.png": [
+      256,
+      256,
+      "773230148c19fb4108676672688979f37044a58a399d511a2201199ebd675a69"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_20.png": [
+      256,
+      256,
+      "60c02ffe78db1d8437b9c779c434bc6d0eeacb9f51154a6500cdce41dfbbf560"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_21.png": [
+      256,
+      256,
+      "edd822f3ff74859fd40f6afbaae2f0b02a23c15733d3a6478ecd7b124bf6e31a"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_23.png": [
+      256,
+      256,
+      "747302b0a32186c9c1166416d215619bc2f996c489306f9ee7a4c0453657987b"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_24.png": [
+      256,
+      256,
+      "d906143d0725ceaf549d63f7048facbde917bd12f2d969e23c6d07976752e6c7"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_25.png": [
+      256,
+      256,
+      "809850c1d7b4675b8de549c322934a94d85f670d0a3a3357c9dcd5323ae73ec1"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_26.png": [
+      256,
+      256,
+      "a46b5361c461aedb8302ece2b499bbdef05b8d34aa7e26876d6ae7497a8ed3f0"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_27.png": [
+      256,
+      256,
+      "23e5e893d7c13b540176b684010a8d48e6e5c56609efbccb52fc777e8c703ba7"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_28.png": [
+      256,
+      256,
+      "7e762a829c979b1e30431f423ad108d295e7111be69cb6b3aa142430a4413cec"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_29.png": [
+      256,
+      256,
+      "aebaeb0d05508e82f3d4a2c81abcda660ce7439fa77e393209aa1d0084c20763"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_30.png": [
+      256,
+      256,
+      "1657332e30da79dc18bc0204e206be48e56bccd6cd7677662431fe1a38e32d9d"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_31.png": [
+      256,
+      256,
+      "0b0d0ff79fbbe43e94e427dacaf5e6d231f07f3590944ccee703f613e33bf6c2"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_31_motion.png": [
+      64,
+      31,
+      "5b43eafe3ecfe744e1243f99d08548627be0cfdc9b76557ccc3f4193b9b72ac5"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_32_blend_motion.png": [
+      64,
+      31,
+      "0a85bcb5821fe9039afd3f8f3e45058d361bf31e3224f202ef5377c0f7e8351d"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_33.png": [
+      256,
+      256,
+      "579093cedd6226662c16fa961c5a867c8964cbb531010d0bd6b318877d757531"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_33_motion.png": [
+      64,
+      31,
+      "a4c81915d1de6722da4842f51ff5577603d35c214298f4bc4177a57fb451e050"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_34.png": [
+      256,
+      256,
+      "70ede518f78371bf6b3aabc3fcdd9cf0023e85eaa9e0ba700f684f9026feca3d"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_35.png": [
+      256,
+      256,
+      "799cc050665abe4d918d9312a40fc0fde8667edad156e202ddaf84c967e08cc3"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_35_motion.png": [
+      64,
+      31,
+      "d7213bbba0ca2aa213e664d181c3e13cd2a75f80b651f91ba2b82153429b37a2"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_36.png": [
+      256,
+      256,
+      "04497f65ef4b2253f8c742f7be73cb8755fd7db9535d249534412fdbceffdce6"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_36_motion.png": [
+      64,
+      31,
+      "6ef662d188225ff95ae5aebef8452d79fc05787c2a316e55e1699bd72abe7a02"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_37.png": [
+      256,
+      256,
+      "f1a35d726ca070c4976943a979a982657588cd1c6773dfa762f483014c53af5a"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_37_motion.png": [
+      64,
+      31,
+      "6d29796e2d467c31e025920ebb5e4efaece6036e36caac647cddb66a301c9abc"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_38.png": [
+      256,
+      256,
+      "21afe7e19262b7b5f7dd8cf677357b5fc51cec67513543a934ca5068dfd4f530"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_39.png": [
+      256,
+      256,
+      "4f08b2fc51805f999d70402a4ea380ea3e6ccbf5a965d60b36a51f5b3caea45c"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_40.png": [
+      256,
+      256,
+      "4de4b38363423ddae7754b77a901f73507d14324e39c23aef685ab6695bf0100"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_41.png": [
+      256,
+      256,
+      "6662368d8ef1729fdc8d579d7f6d27cdf867b8e964d6e5f22ac86f273f6fcfba"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_42.png": [
+      256,
+      256,
+      "71e3e910ca7ca62636fd06957c1c6326e12ece753f27aa1577c2337608b23102"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_43.png": [
+      256,
+      256,
+      "f2780c25f577d7442cd9acae7f4f3e70413e357bd6b5aacc8355d7782928dd88"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_44.png": [
+      256,
+      256,
+      "46b9efddc012044cfce0bbf8785354fcf8fb73dc2b110bfb1a80661563d65ea1"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_45.png": [
+      256,
+      256,
+      "95095ae28810567c0c15059a02b9431d3435ba49e5cbae6c49c6e739cd75b4fe"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_46.png": [
+      256,
+      256,
+      "b6abc573ae04025fdb1b9f799956a514b1cd87cc13893c0d88dc30e8772f8106"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_47.png": [
+      256,
+      256,
+      "fec124c47467f53f601ba3954b348802b509eb87fab59c00c628f778cb30c9e8"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_48.png": [
+      256,
+      256,
+      "e3ca892aa4b77a0824be1c68306932e3aad45292a04ff24681df2fed4dfc6f55"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_49.png": [
+      256,
+      256,
+      "bd3913f85b98d8edffc58fcd1ec5487dd8d082bf55fae5dfa51001e4b23c4334"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_50.png": [
+      256,
+      256,
+      "a45a4d5aaa7cce0076e72739247ccc1aef002bd3d7957c071db446f074a9af84"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_51.png": [
+      256,
+      256,
+      "8e453deca39559f5fc17bc11dd30caf2f28a17758d5991ab6f32e84820ae777b"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_52.png": [
+      256,
+      256,
+      "96bccd90a3bb0f731343d4014e8aca540a2d1916501157201f7ac32bf12705a8"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_53.png": [
+      256,
+      256,
+      "61da741146ccc3d154f39c7e15e46839859e52ae6a5640655c46b42aecdb19ad"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_54.png": [
+      256,
+      256,
+      "cca0406f3924a8cb496cd624a06c131bda476a98b9f31b549ca35077a98216cf"
+    ],
+    "res://game/locations/farm/textures/farm_atlas_55.png": [
+      256,
+      256,
+      "becfed2a0a610d207f0d00f0844226ae3d43ee8435265fdab785960a9fb7a44a"
+    ],
+    "res://game/locations/hot_spring/textures/hot_spring_atlas_10.png": [
+      256,
+      256,
+      "361c492eee4fa698c2aeebe0f840d4aad998399f3530d5dd5ea457c1af789d10"
+    ],
+    "res://game/locations/hot_spring/textures/hot_spring_atlas_29.png": [
+      256,
+      256,
+      "9641fc1a6476ad70d4966fdf685df96e90cc29c542f71aa3af04a8c4f67ced7c"
+    ],
+    "res://game/locations/inn/textures/inn_atlas_01.png": [
+      256,
+      256,
+      "033d326a0791237c556a7f68170c1912ed6eeeffac63a2f7072fb7bdf9cd0c05"
+    ],
+    "res://game/locations/inn/textures/inn_atlas_02.png": [
+      256,
+      256,
+      "f0c21bb461cb2b857346750c2f84507d5ed0add4d84154e74d6249325f1f60c2"
+    ],
+    "res://game/locations/inn_street/textures/inn_street_atlas_17.png": [
+      256,
+      256,
+      "7b8552f404ac185b135849e2e4929d63bae63f4c6addab87c901a3e793f0aa2f"
+    ],
+    "res://game/locations/inn_upstairs/textures/inn_upstairs_atlas_03.png": [
+      256,
+      256,
+      "ea80a59876e15f49b8261bfe80e02890c06e9faf6c619cddcaa6210816d1f560"
+    ],
+    "res://game/locations/lake_mine/textures/lake_mine_atlas_01.png": [
+      256,
+      256,
+      "36700cf5ff037c35592c9e0ff30dd9975245cdb87be0b503f2722934800cfd10"
+    ],
+    "res://game/locations/lake_mine/textures/lake_mine_atlas_02.png": [
+      256,
+      256,
+      "203b904abaa5a453ac33a2b22c500faccbb85fa92ee313b10430f8967769fcdb"
+    ],
+    "res://game/locations/lake_mine/textures/lake_mine_atlas_03.png": [
+      256,
+      256,
+      "1dc8579822cbcf44aeed913ef013d57b873f6303153e9fd5689a8298c58a86e1"
+    ],
+    "res://game/locations/library/textures/library_atlas_01.png": [
+      256,
+      256,
+      "e49d5effcf44299691a7733ae6e118489792f03bef3f6c004afeb44eae8db0a3"
+    ],
+    "res://game/locations/library/textures/library_atlas_09.png": [
+      256,
+      256,
+      "43b271c06c591565f8425bc2817093c4ccb3f0a0a72187c932778540bcdedc9b"
+    ],
+    "res://game/locations/library_street/textures/library_street_atlas_07.png": [
+      256,
+      256,
+      "2c00b0ace8926380ca2738e08f29b5dc43714b6d39cb5149335f1dff48f8736b"
+    ],
+    "res://game/locations/market_street/textures/market_street_atlas_11.png": [
+      256,
+      256,
+      "b708eb8106a32379cd745c2d6bdd52a032922472e7b481dd9abb94cf59845dec"
+    ],
+    "res://game/locations/poultry_farm/textures/poultry_farm_atlas_10.png": [
+      256,
+      256,
+      "b3579fc411917acec621b84c9654640c1d814979054b9f8530484b946e010550"
+    ],
+    "res://game/locations/poultry_farm_bedroom/textures/poultry_farm_bedroom_atlas_04.png": [
+      256,
+      256,
+      "6c561930066b72d0d494bd7ca89d3ebaf117f3902e5bdaf6f40ba4143fd5cb76"
+    ],
+    "res://game/locations/poultry_farm_house/textures/poultry_farm_house_atlas_01.png": [
+      256,
+      256,
+      "bfff7e0e486ca0fecd112b4d0a6e94cb1c908b74827da497d29353ec2db78856"
+    ],
+    "res://game/locations/town_south/textures/town_south_atlas_17.png": [
+      256,
+      256,
+      "6ceacd4e2aa284df0eb120ee5c78529844a02c3b86384808c6b4750ef0a5cb98"
+    ],
+    "res://game/locations/winery_cellar/textures/winery_cellar_atlas_01.png": [
+      256,
+      256,
+      "c2212440c4e1b0839e70bd4331748036b28590125dca9264ec6df2e11e58d9a6"
+    ],
+    "res://game/locations/winery_house/textures/winery_house_atlas_01.png": [
+      256,
+      256,
+      "e6868b4fee2ba637552aee9ed126e2620cb05fd41c4860c56c4b05d5225a04dc"
+    ],
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_15.png": [
+      256,
+      256,
+      "c84ad59c6d42436ab65bd04916fee68c781715473447da538fb23ea4e27f832a"
+    ],
+    "res://game/locations/yodel_ranch/textures/yodel_ranch_atlas_19.png": [
+      256,
+      256,
+      "7a651ed48f7daec59b601ce49196b211cc5cc78ee7313a297690874e6b575bdf"
+    ],
+    "res://game/locations/yodel_ranch_house/textures/yodel_ranch_house_atlas_01.png": [
+      256,
+      256,
+      "206ff4218cfa9b8bf31cf506378b191c72d9ee5cdb66856931cbe028207dcb2c"
+    ],
+    "res://game/player/actions/medicine_00.png": [
+      1024,
+      2048,
+      "eb88593a7485d7cd6e0b76d5a5ace3fab081cab31e9b30894b9a2d2c30222778"
+    ]
+  },
+  "motion": {
+    "farm_atlas_02_motion": "res://game/locations/farm/textures/farm_atlas_02_motion.png",
+    "yodel_ranch_atlas_26_motion": "res://game/locations/farm/textures/farm_atlas_02_motion.png",
+    "farm_atlas_31_motion": "res://game/locations/farm/textures/farm_atlas_31_motion.png",
+    "yodel_ranch_atlas_22_motion": "res://game/locations/farm/textures/farm_atlas_31_motion.png",
+    "farm_atlas_32_blend_motion": "res://game/locations/farm/textures/farm_atlas_32_blend_motion.png",
+    "yodel_ranch_atlas_19_blend_motion": "res://game/locations/farm/textures/farm_atlas_32_blend_motion.png",
+    "farm_atlas_33_motion": "res://game/locations/farm/textures/farm_atlas_33_motion.png",
+    "yodel_ranch_atlas_53_motion": "res://game/locations/farm/textures/farm_atlas_33_motion.png",
+    "farm_atlas_35_motion": "res://game/locations/farm/textures/farm_atlas_35_motion.png",
+    "yodel_ranch_atlas_21_motion": "res://game/locations/farm/textures/farm_atlas_35_motion.png",
+    "farm_atlas_36_motion": "res://game/locations/farm/textures/farm_atlas_36_motion.png",
+    "yodel_ranch_atlas_44_motion": "res://game/locations/farm/textures/farm_atlas_36_motion.png",
+    "farm_atlas_37_motion": "res://game/locations/farm/textures/farm_atlas_37_motion.png",
+    "yodel_ranch_atlas_54_motion": "res://game/locations/farm/textures/farm_atlas_37_motion.png"
+  },
+  "scenes": [
+    "res://game/locations/barn/barn.scn",
+    "res://game/locations/basil_bedroom/basil_bedroom.scn",
+    "res://game/locations/basil_house/basil_house.scn",
+    "res://game/locations/beach/beach.scn",
+    "res://game/locations/beach/coast_segment.scn",
+    "res://game/locations/blacksmith_bedroom/blacksmith_bedroom.scn",
+    "res://game/locations/blacksmith_forge/blacksmith_forge.scn",
+    "res://game/locations/chicken_coop/chicken_coop.scn",
+    "res://game/locations/church/church.scn",
+    "res://game/locations/church_street/church_street.scn",
+    "res://game/locations/clinic/clinic.scn",
+    "res://game/locations/clinic_upstairs/clinic_upstairs.scn",
+    "res://game/locations/ellen_house/ellen_house.scn",
+    "res://game/locations/farm/farm.scn",
+    "res://game/locations/farmhouse/farmhouse.scn",
+    "res://game/locations/harvest_sprite_home/harvest_sprite_home.scn",
+    "res://game/locations/hot_spring/hot_spring.scn",
+    "res://game/locations/inn/inn.scn",
+    "res://game/locations/inn_street/inn_street.scn",
+    "res://game/locations/inn_upstairs/inn_upstairs.scn",
+    "res://game/locations/lake_mine/lake_mine.scn",
+    "res://game/locations/library/library.scn",
+    "res://game/locations/library_street/library_street.scn",
+    "res://game/locations/lumberjack_forest/lumberjack_forest.scn",
+    "res://game/locations/lumberjack_house/lumberjack_house.scn",
+    "res://game/locations/market_street/market_street.scn",
+    "res://game/locations/mayor_house/mayor_house.scn",
+    "res://game/locations/mother_hill_lake/mother_hill_lake.scn",
+    "res://game/locations/mother_hill_summit/mother_hill_summit.scn",
+    "res://game/locations/mother_hill_trail/mother_hill_trail.scn",
+    "res://game/locations/poultry_farm/poultry_farm.scn",
+    "res://game/locations/poultry_farm_bedroom/poultry_farm_bedroom.scn",
+    "res://game/locations/poultry_farm_house/poultry_farm_house.scn",
+    "res://game/locations/spring_mine/spring_mine.scn",
+    "res://game/locations/stable/stable.scn",
+    "res://game/locations/supermarket/supermarket.scn",
+    "res://game/locations/supermarket_upstairs/supermarket_upstairs.scn",
+    "res://game/locations/town_south/town_south.scn",
+    "res://game/locations/town_square/coast_segment.scn",
+    "res://game/locations/town_square/town_square.scn",
+    "res://game/locations/winery_cellar/winery_cellar.scn",
+    "res://game/locations/winery_house/winery_house.scn",
+    "res://game/locations/yodel_ranch/yodel_ranch.scn",
+    "res://game/locations/yodel_ranch_bedroom/yodel_ranch_bedroom.scn",
+    "res://game/locations/yodel_ranch_house/yodel_ranch_house.scn",
+    "res://scenes/original_farm.scn"
+  ],
+  "retained_import_variants": [
+    [
+      "game/locations/farm/textures/farm_atlas_22.png",
+      "assets/original/textures/p0005_c3e94.png"
+    ],
+    [
+      "game/locations/farm/textures/farm_atlas_32.png",
+      "assets/original/textures/p0025_c3e54.png"
+    ],
+    [
+      "game/player/player_atlas.png",
+      "assets/original/player.png"
+    ]
+  ]
+}

@@ -3,6 +3,7 @@ import argparse,hashlib,json,re,struct
 from pathlib import Path
 from PIL import Image
 from import_disc import ROOT,Disc,compose_animations,texture_bank,texture_page
+from texture_dedup import canonical_path
 
 def build(disc,check=False):
     frame=compose_animations(disc.asset(0x25000,0x5800),0x13dc,[24])[0][0]
@@ -22,7 +23,7 @@ def build(disc,check=False):
         vram,_=texture_bank(disc.asset(texture,end-texture))
         image=texture_page(vram,9,looks[1][1])
         path=ROOT/f'game/field/{slug}_dug_soil.png'
-        if check: assert Image.open(path).convert('RGBA').tobytes()==image.tobytes()
+        if check: assert Image.open(canonical_path(path)).convert('RGBA').tobytes()==image.tobytes()
         else: image.save(path)
         surfaces=json.loads((ROOT/f'tools/generated/locations/{slug}.json').read_text())['surfaces']
         floor=[s for s in surfaces if any(f&8 for f in s['primitive_flags'])]
@@ -47,7 +48,8 @@ def build(disc,check=False):
             assert orientations[index] is None
             orientations[index]=code
         assert None not in orientations
-        catalogue[str(area)]={'bare_texture':f'res://game/locations/{slug}/'+floor['texture'],'dug_texture':f'res://game/field/{slug}_dug_soil.png','orientations':orientations}
+        bare=canonical_path(ROOT/f'game/locations/{slug}'/floor['texture'])
+        catalogue[str(area)]={'bare_texture':'res://'+bare.relative_to(ROOT).as_posix(),'dug_texture':'res://'+canonical_path(path).relative_to(ROOT).as_posix(),'orientations':orientations}
     catalogue['source']='mine.c mine_dig/mine_world_to_cell/mine_retexture_cell; 10x10, origin (-2,-2), step .4; clear UV 131..159 x 0..31, CLUT 0x3DE4 page 9'
     target=ROOT/'game/field/mine_field_catalog.json'
     if check: assert json.loads(target.read_text())==catalogue

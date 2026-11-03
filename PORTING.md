@@ -1,5 +1,13 @@
 # 实现与验证记录
 
+## 2026-11-03 贴图去重
+
+相同 RGBA 像素且导入配置相同的 PNG 现在共享一份既有资源。`tools/texture_dedup_manifest.json` 记录 100 个旧路径到保留路径的映射；47 个运行资源和 53 个旧农场别名删除，共减少 5,054,357 字节源 PNG。旧农场场景仍可打开，53 个别名引用改指向现有农场贴图；另外 3 组源图相同但导入设置不同的版本保留。
+
+`Import-Assets.ps1` 在原始素材提取后执行 `python tools/texture_dedup.py apply`，随后刷新并烘焙。烘焙和矿洞素材校验使用同一离线映射，不要求修改原始转换中间数据，不增加运行时依赖。7 组农场/Yodel motion atlas 改用共享导入 Texture2D，保持未压缩、无 mipmaps、无 alpha-border fix、无自动 3D 压缩，匹配先前内嵌 ImageTexture。每个材质的 STP/混合模式、动画表、shader 和 UV 独立保留；去重并不代表合并材质或减少 draw calls。
+
+`texture_dedup.py check` 验证保留像素与已删除别名，`tools/verify_texture_dedup.gd` 核对 46 个原生场景的迁移前指纹、外部依赖和实际共享 Resource。指纹包含几何、UV、变换、碰撞、shader 源参数及普通材质配置，排除被替换的纹理资源身份与 Godot 自动生成节点名的进程编号；数组顺序仍区分各节点。基线/汇总及运行日志保存在 `verification/texture-dedup-*`，原图完整 RGBA 哈希在离线清单中。
+
 ## 2026-11-03 F1 天色调试
 
 F1 面板在游戏暂停时提供自动/清晨/白天/傍晚/夜晚预览，复用既有减色 shader 和源色值；不改游戏日期、时钟或自然插值。手动预览可覆盖室内限制，隐藏保留选择，自动恢复地图原规则。面板独立持有 SceneTree 暂停，不改玩家操作锁，并处理下拉弹窗 F1 与退出清理。原生 headless 输入/布局/选择信号及昼夜、睡眠、运行回归通过；本机隔离 GPU 初始化失败，本轮未做截图验收，具体限制见 CHECKPOINT.md。
