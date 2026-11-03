@@ -1,0 +1,25 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://game/rendering/outdoor_backdrop.gdshader" id="1_wv1w3"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/poultry_farm/poultry_farm_edge_axes.res" id="2_kewta"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/poultry_farm/poultry_farm_edge_bounds.res" id="3_dqqh3"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/poultry_farm/poultry_farm_edge_tint.res" id="4_3dv36"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/poultry_farm/poultry_farm_edge_uv.res" id="5_omi2p"]
+[ext_resource type="Texture2D" path="res://game/locations/poultry_farm/textures/poultry_farm_atlas_pack_56fc2945-0.png" id="6_asdi6"]
+[ext_resource type="Texture2D" path="res://game/locations/poultry_farm/textures/poultry_farm_atlas_pack_56fc2945-1.png" id="7_3j82t"]
+
+[resource]
+resource_name = "poultry_farm_edge_continuation"
+render_priority = 0
+shader = ExtResource("1_wv1w3")
+shader_parameter/scene_atlas_0 = ExtResource("6_asdi6")
+shader_parameter/scene_atlas_1 = ExtResource("7_3j82t")
+shader_parameter/scene_atlas_2 = ExtResource("7_3j82t")
+shader_parameter/patch_uv = ExtResource("5_omi2p")
+shader_parameter/patch_axes = ExtResource("2_kewta")
+shader_parameter/patch_bounds = ExtResource("3_dqqh3")
+shader_parameter/patch_tint = ExtResource("4_3dv36")
+shader_parameter/field_rect = Vector4(-11.956063, -6.6814423, 25.835457, 14.332372)
+shader_parameter/view_right = Vector3(0.70710677, 0, -0.70710677)
+shader_parameter/view_up = Vector3(-0.31622776, 0.8944272, -0.31622776)
+metadata/source_geometry_sha256 = "ae9a6ad325847a811d037b5ab0e4ec413953c0d98c5b13e6598cb818994a0b23"

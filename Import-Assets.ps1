@@ -32,6 +32,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Native scene baking failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Native atlas binding failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\pack_textures.py') finish
 if ($LASTEXITCODE -ne 0) { throw 'Atlas source cleanup failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\build_outdoor_backdrops.py')
+if ($LASTEXITCODE -ne 0) { throw 'Outdoor backdrop baking failed' }
+& $godotExe --headless --path $PSScriptRoot --script tools/verify_outdoor_backdrop.gd
+if ($LASTEXITCODE -ne 0) { throw 'Outdoor backdrop coverage failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_runtime.gd
 if ($LASTEXITCODE -ne 0) { throw 'Native runtime check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_actions.gd

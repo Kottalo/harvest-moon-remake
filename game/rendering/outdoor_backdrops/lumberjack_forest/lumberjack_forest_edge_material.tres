@@ -1,0 +1,24 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://game/rendering/outdoor_backdrop.gdshader" id="1_q4cff"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/lumberjack_forest/lumberjack_forest_edge_axes.res" id="2_bvsl2"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/lumberjack_forest/lumberjack_forest_edge_bounds.res" id="3_roda2"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/lumberjack_forest/lumberjack_forest_edge_tint.res" id="4_8fdyv"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/lumberjack_forest/lumberjack_forest_edge_uv.res" id="5_sf315"]
+[ext_resource type="Texture2D" path="res://game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_pack_56fc2945.png" id="6_gjvvs"]
+
+[resource]
+resource_name = "lumberjack_forest_edge_continuation"
+render_priority = 0
+shader = ExtResource("1_q4cff")
+shader_parameter/scene_atlas_0 = ExtResource("6_gjvvs")
+shader_parameter/scene_atlas_1 = ExtResource("6_gjvvs")
+shader_parameter/scene_atlas_2 = ExtResource("6_gjvvs")
+shader_parameter/patch_uv = ExtResource("5_sf315")
+shader_parameter/patch_axes = ExtResource("2_bvsl2")
+shader_parameter/patch_bounds = ExtResource("3_roda2")
+shader_parameter/patch_tint = ExtResource("4_8fdyv")
+shader_parameter/field_rect = Vector4(-14.439423, -2, 25.490389, 14.656718)
+shader_parameter/view_right = Vector3(0.70710677, 0, -0.70710677)
+shader_parameter/view_up = Vector3(-0.31622776, 0.8944272, -0.31622776)
+metadata/source_geometry_sha256 = "ae9a6ad325847a811d037b5ab0e4ec413953c0d98c5b13e6598cb818994a0b23"

@@ -11,8 +11,11 @@ var _coverage := PackedVector2Array()
 var _limits := PackedVector2Array()
 var _screen_bounds := Rect2()
 var _half_view := Vector2.ZERO
+var backdrop: MeshInstance3D
 
-func set_location(location: Node3D, outdoors: bool) -> void:
+func set_location(location: Node3D, outdoors: bool, map_name := "") -> void:
+	backdrop.configure(map_name if outdoors else "")
+	backdrop.fit(self)
 	_coverage.clear()
 	_limits.clear()
 	_half_view = Vector2.ZERO
@@ -25,8 +28,8 @@ func set_location(location: Node3D, outdoors: bool) -> void:
 		for vertex in geometry.mesh.get_faces():
 			points.append(_project(geometry.global_transform*vertex))
 	if points.size()<3: return
-	# ponytail: the projected convex envelope reduces border exposure; concave
-	# cutouts can still show void. Keep the player visible rather than zooming.
+	# The envelope limits the native map. The separate opaque visual backdrop
+	# covers concave cutouts/narrow tips while the full player remains visible.
 	_coverage = Geometry2D.convex_hull(points)
 	if _coverage[0].is_equal_approx(_coverage[-1]): _coverage.remove_at(_coverage.size()-1)
 	_screen_bounds = Rect2(_coverage[0],Vector2.ZERO)
@@ -88,6 +91,8 @@ func _ready() -> void:
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	keep_aspect = Camera3D.KEEP_HEIGHT
 	reset_gameplay()
+	backdrop = preload("res://game/rendering/outdoor_backdrop.gd").new()
+	add_child(backdrop)
 
 func reset_gameplay() -> void:
 	set_orthogonal(sqrt(HORIZONTAL_DISTANCE*HORIZONTAL_DISTANCE+HEIGHT*HEIGHT)*DISTANCE_SCALE*240.0/PROJECTION_DISTANCE, 0.05, 200.0)
@@ -112,6 +117,7 @@ func follow(player: CharacterBody3D, overview: bool, interpolate := false) -> vo
 		# additional tiny rotations, which also changed billboard orientations.
 		basis = Basis.looking_at(-eye_offset)
 		position = limited_focus(focus) + eye_offset
+		backdrop.fit(self)
 
 func show_overview(location: Node3D) -> void:
 	var bounds: AABB
@@ -124,3 +130,4 @@ func show_overview(location: Node3D) -> void:
 	set_orthogonal(maxf(bounds.size.x, bounds.size.z) * 1.25, 0.05, 200)
 	position = focus + eye_offset * 3
 	look_at(focus)
+	backdrop.fit(self)

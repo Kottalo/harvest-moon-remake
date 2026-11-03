@@ -1,0 +1,24 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://game/rendering/outdoor_backdrop.gdshader" id="1_bmgn5"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/mother_hill_lake/mother_hill_lake_edge_axes.res" id="2_ga0m5"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/mother_hill_lake/mother_hill_lake_edge_bounds.res" id="3_ejsv1"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/mother_hill_lake/mother_hill_lake_edge_tint.res" id="4_aaxc0"]
+[ext_resource type="Texture2D" path="res://game/rendering/outdoor_backdrops/mother_hill_lake/mother_hill_lake_edge_uv.res" id="5_f6g62"]
+[ext_resource type="Texture2D" path="res://game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_pack_56fc2945.png" id="6_1c0yr"]
+
+[resource]
+resource_name = "mother_hill_lake_edge_continuation"
+render_priority = 0
+shader = ExtResource("1_bmgn5")
+shader_parameter/scene_atlas_0 = ExtResource("6_1c0yr")
+shader_parameter/scene_atlas_1 = ExtResource("6_1c0yr")
+shader_parameter/scene_atlas_2 = ExtResource("6_1c0yr")
+shader_parameter/patch_uv = ExtResource("5_f6g62")
+shader_parameter/patch_axes = ExtResource("2_ga0m5")
+shader_parameter/patch_bounds = ExtResource("3_ejsv1")
+shader_parameter/patch_tint = ExtResource("4_aaxc0")
+shader_parameter/field_rect = Vector4(-13.698374, -2.8605351, 23.485035, 16.15086)
+shader_parameter/view_right = Vector3(0.70710677, 0, -0.70710677)
+shader_parameter/view_up = Vector3(-0.31622776, 0.8944272, -0.31622776)
+metadata/source_geometry_sha256 = "ae9a6ad325847a811d037b5ab0e4ec413953c0d98c5b13e6598cb818994a0b23"

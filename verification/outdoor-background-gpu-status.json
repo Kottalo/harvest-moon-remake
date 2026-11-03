@@ -1,0 +1,8 @@
+{
+  "gpu_accepted": false,
+  "exit_code": 3221225794,
+  "code_hex": "0xC0000142",
+  "stage": "before engine initialization",
+  "input_desktop_unchanged": true,
+  "notes": "No GPU screenshot acceptance. Headless projection checks, CPU reference previews and Godot AI shader parser validation are separate."
+}

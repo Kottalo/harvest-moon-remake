@@ -1,0 +1,16 @@
+{
+	"church_street": "res://game/rendering/outdoor_backdrops/church_street/church_street_edge_material.tres",
+	"coast": "res://game/rendering/outdoor_backdrops/coast/coast_edge_material.tres",
+	"farm": "res://game/rendering/outdoor_backdrops/farm/farm_edge_material.tres",
+	"hot_spring": "res://game/rendering/outdoor_backdrops/hot_spring/hot_spring_edge_material.tres",
+	"inn_street": "res://game/rendering/outdoor_backdrops/inn_street/inn_street_edge_material.tres",
+	"library_street": "res://game/rendering/outdoor_backdrops/library_street/library_street_edge_material.tres",
+	"lumberjack_forest": "res://game/rendering/outdoor_backdrops/lumberjack_forest/lumberjack_forest_edge_material.tres",
+	"market_street": "res://game/rendering/outdoor_backdrops/market_street/market_street_edge_material.tres",
+	"mother_hill_lake": "res://game/rendering/outdoor_backdrops/mother_hill_lake/mother_hill_lake_edge_material.tres",
+	"mother_hill_summit": "res://game/rendering/outdoor_backdrops/mother_hill_summit/mother_hill_summit_edge_material.tres",
+	"mother_hill_trail": "res://game/rendering/outdoor_backdrops/mother_hill_trail/mother_hill_trail_edge_material.tres",
+	"poultry_farm": "res://game/rendering/outdoor_backdrops/poultry_farm/poultry_farm_edge_material.tres",
+	"town_south": "res://game/rendering/outdoor_backdrops/town_south/town_south_edge_material.tres",
+	"yodel_ranch": "res://game/rendering/outdoor_backdrops/yodel_ranch/yodel_ranch_edge_material.tres"
+}

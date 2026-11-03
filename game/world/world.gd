@@ -111,7 +111,7 @@ func _process(delta: float) -> void:
 
 func _configure_camera_limits() -> void:
 	var flags: int = day_cycle.catalogue.areas[str(current_area)].source_flags
-	camera.set_location(get_node("Location"),flags&0x1800==0)
+	camera.set_location(get_node("Location"),flags&0x1800==0,"coast" if current_area in [52,56] else world[str(current_area)].slug)
 
 func _update_camera(interpolate := false) -> void:
 	camera.follow(player, overview, interpolate)
