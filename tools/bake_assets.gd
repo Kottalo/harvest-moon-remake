@@ -2,6 +2,7 @@ extends SceneTree
 ## Run after importing PNGs: godot --headless --path . --script tools/bake_assets.gd
 var motion_textures := {}
 var texture_dedup: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/texture_dedup_manifest.json"))
+var packed_textures: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/texture_packer/atlas_manifest.json"))
 
 func _initialize() -> void:
 	if OS.get_cmdline_user_args().has("--check"):
@@ -219,7 +220,7 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 		if blend_mode >= 0:
 			material.set_shader_parameter("alpha_scissor_threshold", 0.75)
 		if not surface.texture.is_empty():
-			material.set_shader_parameter("albedo_texture", load(_texture_path(texture_base + surface.texture)))
+			load("res://game/rendering/atlas_binding.gd").bind(material,"albedo_texture",load(_texture_path(texture_base+surface.texture)))
 		_set_motion(material, surface, texture_base)
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
 		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
@@ -228,7 +229,7 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 			blended.resource_name = material.resource_name + "_blend"
 			var effect: String = ["average", "add", "subtract", "add"][blend_mode]
 			blended.shader = load("res://game/rendering/source_blend_" + effect + ".gdshader")
-			blended.set_shader_parameter("albedo_texture", load(_texture_path(texture_base + surface.texture)))
+			load("res://game/rendering/atlas_binding.gd").bind(blended,"albedo_texture",load(_texture_path(texture_base+surface.texture)))
 			blended.set_shader_parameter("opacity", [0.5, 1.0, 1.0, 0.25][blend_mode])
 			_set_motion(blended, surface, texture_base)
 			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
@@ -281,7 +282,7 @@ func _set_motion(material: ShaderMaterial, surface: Dictionary, texture_base: St
 		return
 	var path: String = _texture_path(texture_base + motion.texture)
 	if not motion_textures.has(path):
-		if path in texture_dedup.motion.values():
+		if path.ends_with(".tres") or path in texture_dedup.motion.values():
 			motion_textures[path] = load(path)
 		else:
 			var image := Image.load_from_file(path)
@@ -289,7 +290,7 @@ func _set_motion(material: ShaderMaterial, surface: Dictionary, texture_base: St
 			var texture := ImageTexture.create_from_image(image)
 			texture.resource_name = motion.texture.get_file().get_basename()
 			motion_textures[path] = texture
-	material.set_shader_parameter("motion_texture", motion_textures[path])
+	load("res://game/rendering/atlas_binding.gd").bind(material,"motion_texture",motion_textures[path])
 	material.set_shader_parameter("motion_size", Vector2(motion.size[0], motion.size[1]))
 	material.set_shader_parameter("motion_count", motion.records.size())
 	material.set_shader_parameter("motion_ripples", texture_base.trim_suffix("/").get_file() in ["farm", "yodel_ranch", "beach", "mother_hill_lake", "hot_spring", "lumberjack_forest"])
@@ -302,4 +303,5 @@ func _set_motion(material: ShaderMaterial, surface: Dictionary, texture_base: St
 		material.set_shader_parameter("motion_" + field, values)
 
 func _texture_path(path: String) -> String:
-	return texture_dedup.aliases.get(path,path)
+	var canonical: String = texture_dedup.aliases.get(path,path)
+	return packed_textures.aliases.get(canonical,canonical)

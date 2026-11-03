@@ -7,3 +7,6 @@ tools/generated/
 *.cue
 *.iso
 *.env
+tools/texture_packer/node_modules/
+tools/texture_packer/frames/
+tools/texture_packer/projects/

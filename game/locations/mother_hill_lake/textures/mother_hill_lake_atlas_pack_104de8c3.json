@@ -1,0 +1,255 @@
+{
+  "frames": {
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_04_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_06_motion.png": {
+      "frame": {
+        "x": 64,
+        "y": 8,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_07_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 118,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_19_blend_motion.png": {
+      "frame": {
+        "x": 64,
+        "y": 118,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_19_motion.png": {
+      "frame": {
+        "x": 120,
+        "y": 8,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_21_blend_motion.png": {
+      "frame": {
+        "x": 120,
+        "y": 118,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_25_motion.png": {
+      "frame": {
+        "x": 176,
+        "y": 8,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_26_motion.png": {
+      "frame": {
+        "x": 176,
+        "y": 118,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_27_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 228,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/mother_hill_lake/textures/mother_hill_lake_atlas_28_motion.png": {
+      "frame": {
+        "x": 64,
+        "y": 228,
+        "w": 40,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 94
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "mother_hill_lake_atlas_pack_104de8c3.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 224,
+      "h": 330
+    },
+    "scale": 1
+  }
+}

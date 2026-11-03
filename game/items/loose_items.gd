@@ -104,6 +104,12 @@ func _item_mesh(item: int) -> ArrayMesh:
 	arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(left,bottom,0),Vector3(right,bottom,0),Vector3(right,top,0),Vector3(left,top,0)])
 	var uv := Rect2(bounds)
 	arrays[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(uv.position.x,uv.end.y)/128,uv.end/128,Vector2(uv.end.x,uv.position.y)/128,uv.position/128])
+	if texture is AtlasTexture:
+		var region: Vector4 = preload("res://game/rendering/atlas_binding.gd").region(texture)
+		var atlas_uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
+		for i in 4:
+			atlas_uvs[i] = Vector2(region.x,region.y)+atlas_uvs[i]*Vector2(region.z,region.w)
+		arrays[Mesh.ARRAY_TEX_UV] = atlas_uvs
 	arrays[Mesh.ARRAY_INDEX] = PackedInt32Array([0,1,2,0,2,3])
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)

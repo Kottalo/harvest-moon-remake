@@ -1,0 +1,375 @@
+{
+  "frames": {
+    "game/locations/beach/textures/beach_atlas_08_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_21_blend_motion.png": {
+      "frame": {
+        "x": 88,
+        "y": 8,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_21_motion.png": {
+      "frame": {
+        "x": 168,
+        "y": 8,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_22_motion.png": {
+      "frame": {
+        "x": 248,
+        "y": 8,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_23_motion.png": {
+      "frame": {
+        "x": 328,
+        "y": 8,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_24_motion.png": {
+      "frame": {
+        "x": 408,
+        "y": 8,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_25_motion.png": {
+      "frame": {
+        "x": 488,
+        "y": 8,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_27_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 555,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_29_motion.png": {
+      "frame": {
+        "x": 88,
+        "y": 555,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_33_motion.png": {
+      "frame": {
+        "x": 168,
+        "y": 555,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_34_motion.png": {
+      "frame": {
+        "x": 248,
+        "y": 555,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_67_motion.png": {
+      "frame": {
+        "x": 328,
+        "y": 555,
+        "w": 32,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_70_motion.png": {
+      "frame": {
+        "x": 376,
+        "y": 555,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_71_motion.png": {
+      "frame": {
+        "x": 456,
+        "y": 555,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/beach/textures/beach_atlas_73_motion.png": {
+      "frame": {
+        "x": 536,
+        "y": 555,
+        "w": 64,
+        "h": 531
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 531
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 531
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "beach_atlas_pack_104de8c3.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 608,
+      "h": 1094
+    },
+    "scale": 1
+  }
+}

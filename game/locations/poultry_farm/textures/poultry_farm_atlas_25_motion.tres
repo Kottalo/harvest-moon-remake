@@ -1,0 +1,9 @@
+[gd_resource type="AtlasTexture" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://game/locations/poultry_farm/textures/poultry_farm_atlas_pack_104de8c3.png" id="1"]
+
+[resource]
+atlas = ExtResource("1")
+region = Rect2(168, 55, 64, 31)
+margin = Rect2(0, 0, 0, 0)
+filter_clip = true

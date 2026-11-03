@@ -1,0 +1,447 @@
+{
+  "frames": {
+    "game/locations/church/textures/church_atlas_01_blend_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_02_motion.png": {
+      "frame": {
+        "x": 56,
+        "y": 8,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_03_motion.png": {
+      "frame": {
+        "x": 104,
+        "y": 8,
+        "w": 16,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_05_motion.png": {
+      "frame": {
+        "x": 136,
+        "y": 8,
+        "w": 16,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_06_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 141,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_07_motion.png": {
+      "frame": {
+        "x": 56,
+        "y": 141,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_08_motion.png": {
+      "frame": {
+        "x": 104,
+        "y": 141,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_09_motion.png": {
+      "frame": {
+        "x": 152,
+        "y": 141,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_10_motion.png": {
+      "frame": {
+        "x": 168,
+        "y": 8,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_11_motion.png": {
+      "frame": {
+        "x": 200,
+        "y": 141,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_12_motion.png": {
+      "frame": {
+        "x": 216,
+        "y": 8,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_13_motion.png": {
+      "frame": {
+        "x": 248,
+        "y": 141,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_14_motion.png": {
+      "frame": {
+        "x": 264,
+        "y": 8,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_16_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 274,
+        "w": 16,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_17_motion.png": {
+      "frame": {
+        "x": 40,
+        "y": 274,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_18_motion.png": {
+      "frame": {
+        "x": 88,
+        "y": 274,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_19_motion.png": {
+      "frame": {
+        "x": 136,
+        "y": 274,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/church/textures/church_atlas_20_motion.png": {
+      "frame": {
+        "x": 184,
+        "y": 274,
+        "w": 32,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 117
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "church_atlas_pack_104de8c3.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 304,
+      "h": 399
+    },
+    "scale": 1
+  }
+}

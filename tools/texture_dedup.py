@@ -5,6 +5,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 from PIL import Image
+from pack_textures import source_path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'tools/texture_dedup_manifest.json'
@@ -19,7 +20,7 @@ def canonical_path(path):
     return ROOT / read_manifest()['aliases'].get(relative, relative)[6:]
 
 def pixels(path):
-    with Image.open(path) as image:
+    with Image.open(source_path(path)) as image:
         rgba = image.convert('RGBA')
         return [*rgba.size, hashlib.sha256(rgba.tobytes()).hexdigest()]
 

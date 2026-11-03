@@ -35,8 +35,8 @@ func bind_location() -> void:
 		if texture==null or texture.resource_path!=catalogue[area].bare_texture: continue
 		material = ShaderMaterial.new()
 		material.shader = load("res://game/field/mine_soil.gdshader")
-		material.set_shader_parameter("albedo_texture",texture)
-		material.set_shader_parameter("dug_texture",load(catalogue[area].dug_texture))
+		preload("res://game/rendering/atlas_binding.gd").bind(material,"albedo_texture",texture)
+		preload("res://game/rendering/atlas_binding.gd").bind(material,"dug_texture",load(catalogue[area].dug_texture))
 		material.set_shader_parameter("cell_states",textures[area])
 		material.set_shader_parameter("orientations",PackedFloat32Array(catalogue[area].orientations))
 		geometry.set_surface_override_material(surface,material)

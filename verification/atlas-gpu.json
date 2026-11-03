@@ -1,0 +1,24 @@
+{
+	"checks": {
+		"farm": {
+			"different_pixels": 0,
+			"ok": false,
+			"visible_pixels": 0
+		},
+		"mine": {
+			"different_pixels": 0,
+			"ok": false,
+			"visible_pixels": 0
+		},
+		"surface": {
+			"different_pixels": 0,
+			"ok": false,
+			"visible_pixels": 0
+		},
+		"water": {
+			"error": "No varied exported animation found: res://game/locations/hot_spring/hot_spring.scn",
+			"ok": false
+		}
+	},
+	"ok": false
+}

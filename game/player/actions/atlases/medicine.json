@@ -1,0 +1,975 @@
+{
+  "frames": {
+    "player/actions/medicine/range_000/frame_003.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 117,
+        "h": 100
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 117,
+        "h": 100
+      },
+      "sourceSize": {
+        "w": 117,
+        "h": 100
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_004.png": {
+      "frame": {
+        "x": 8,
+        "y": 124,
+        "w": 115,
+        "h": 101
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 101
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 101
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_003.png": {
+      "frame": {
+        "x": 141,
+        "y": 8,
+        "w": 114,
+        "h": 96
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 114,
+        "h": 96
+      },
+      "sourceSize": {
+        "w": 114,
+        "h": 96
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_004.png": {
+      "frame": {
+        "x": 139,
+        "y": 124,
+        "w": 112,
+        "h": 101
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 101
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 101
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_004.png": {
+      "frame": {
+        "x": 8,
+        "y": 241,
+        "w": 112,
+        "h": 97
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 97
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 97
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_004.png": {
+      "frame": {
+        "x": 136,
+        "y": 241,
+        "w": 112,
+        "h": 97
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 97
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 97
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_003.png": {
+      "frame": {
+        "x": 271,
+        "y": 8,
+        "w": 112,
+        "h": 100
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 100
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 100
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_005.png": {
+      "frame": {
+        "x": 267,
+        "y": 124,
+        "w": 111,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 111,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 111,
+        "h": 99
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_005.png": {
+      "frame": {
+        "x": 264,
+        "y": 241,
+        "w": 111,
+        "h": 95
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 111,
+        "h": 95
+      },
+      "sourceSize": {
+        "w": 111,
+        "h": 95
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_005.png": {
+      "frame": {
+        "x": 8,
+        "y": 354,
+        "w": 110,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 110,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 110,
+        "h": 99
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_003.png": {
+      "frame": {
+        "x": 134,
+        "y": 354,
+        "w": 109,
+        "h": 96
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 109,
+        "h": 96
+      },
+      "sourceSize": {
+        "w": 109,
+        "h": 96
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_002.png": {
+      "frame": {
+        "x": 259,
+        "y": 354,
+        "w": 108,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 108,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 108,
+        "h": 99
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_002.png": {
+      "frame": {
+        "x": 399,
+        "y": 8,
+        "w": 108,
+        "h": 95
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 108,
+        "h": 95
+      },
+      "sourceSize": {
+        "w": 108,
+        "h": 95
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_005.png": {
+      "frame": {
+        "x": 399,
+        "y": 119,
+        "w": 107,
+        "h": 95
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 107,
+        "h": 95
+      },
+      "sourceSize": {
+        "w": 107,
+        "h": 95
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_002.png": {
+      "frame": {
+        "x": 383,
+        "y": 352,
+        "w": 103,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 103,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 103,
+        "h": 99
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_002.png": {
+      "frame": {
+        "x": 391,
+        "y": 239,
+        "w": 100,
+        "h": 95
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 100,
+        "h": 95
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 95
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_001.png": {
+      "frame": {
+        "x": 8,
+        "y": 469,
+        "w": 30,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 30,
+        "h": 44
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_001.png": {
+      "frame": {
+        "x": 54,
+        "y": 469,
+        "w": 30,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 30,
+        "h": 44
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_000.png": {
+      "frame": {
+        "x": 100,
+        "y": 469,
+        "w": 33,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 33,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 33,
+        "h": 42
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_000.png": {
+      "frame": {
+        "x": 149,
+        "y": 469,
+        "w": 29,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 29,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 29,
+        "h": 42
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_001.png": {
+      "frame": {
+        "x": 194,
+        "y": 469,
+        "w": 30,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 30,
+        "h": 42
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_000.png": {
+      "frame": {
+        "x": 240,
+        "y": 469,
+        "w": 29,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 29,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 29,
+        "h": 42
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_001.png": {
+      "frame": {
+        "x": 285,
+        "y": 469,
+        "w": 30,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 30,
+        "h": 42
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_000.png": {
+      "frame": {
+        "x": 331,
+        "y": 469,
+        "w": 33,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 33,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 33,
+        "h": 42
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_006.png": {
+      "frame": {
+        "x": 259,
+        "y": 354,
+        "w": 108,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 108,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 108,
+        "h": 99
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_007.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 117,
+        "h": 100
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 117,
+        "h": 100
+      },
+      "sourceSize": {
+        "w": 117,
+        "h": 100
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_008.png": {
+      "frame": {
+        "x": 139,
+        "y": 124,
+        "w": 112,
+        "h": 101
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 101
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 101
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_000/frame_009.png": {
+      "frame": {
+        "x": 267,
+        "y": 124,
+        "w": 111,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 111,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 111,
+        "h": 99
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_006.png": {
+      "frame": {
+        "x": 399,
+        "y": 8,
+        "w": 108,
+        "h": 95
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 108,
+        "h": 95
+      },
+      "sourceSize": {
+        "w": 108,
+        "h": 95
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_007.png": {
+      "frame": {
+        "x": 141,
+        "y": 8,
+        "w": 114,
+        "h": 96
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 114,
+        "h": 96
+      },
+      "sourceSize": {
+        "w": 114,
+        "h": 96
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_008.png": {
+      "frame": {
+        "x": 8,
+        "y": 241,
+        "w": 112,
+        "h": 97
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 97
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 97
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_001/frame_009.png": {
+      "frame": {
+        "x": 264,
+        "y": 241,
+        "w": 111,
+        "h": 95
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 111,
+        "h": 95
+      },
+      "sourceSize": {
+        "w": 111,
+        "h": 95
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_006.png": {
+      "frame": {
+        "x": 391,
+        "y": 239,
+        "w": 100,
+        "h": 95
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 100,
+        "h": 95
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 95
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_007.png": {
+      "frame": {
+        "x": 134,
+        "y": 354,
+        "w": 109,
+        "h": 96
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 109,
+        "h": 96
+      },
+      "sourceSize": {
+        "w": 109,
+        "h": 96
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_008.png": {
+      "frame": {
+        "x": 136,
+        "y": 241,
+        "w": 112,
+        "h": 97
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 97
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 97
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_002/frame_009.png": {
+      "frame": {
+        "x": 399,
+        "y": 119,
+        "w": 107,
+        "h": 95
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 107,
+        "h": 95
+      },
+      "sourceSize": {
+        "w": 107,
+        "h": 95
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_006.png": {
+      "frame": {
+        "x": 383,
+        "y": 352,
+        "w": 103,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 103,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 103,
+        "h": 99
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_007.png": {
+      "frame": {
+        "x": 271,
+        "y": 8,
+        "w": 112,
+        "h": 100
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 100
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 100
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_008.png": {
+      "frame": {
+        "x": 8,
+        "y": 124,
+        "w": 115,
+        "h": 101
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 101
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 101
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "player/actions/medicine/range_003/frame_009.png": {
+      "frame": {
+        "x": 8,
+        "y": 354,
+        "w": 110,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 110,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 110,
+        "h": 99
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "medicine.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 515,
+      "h": 521
+    },
+    "scale": 1
+  }
+}

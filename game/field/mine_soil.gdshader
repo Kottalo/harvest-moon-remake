@@ -3,11 +3,14 @@ render_mode unshaded, cull_back;
 uniform sampler2D albedo_texture : source_color, filter_linear, repeat_disable;
 uniform sampler2D dug_texture : source_color, filter_linear, repeat_disable;
 uniform sampler2D cell_states : filter_nearest, repeat_disable;
+uniform vec4 albedo_texture_region = vec4(0.0,0.0,1.0,1.0);
+uniform vec4 dug_texture_region = vec4(0.0,0.0,1.0,1.0);
+#include "res://game/rendering/atlas_sampling.gdshaderinc"
 uniform float orientations[100];
 varying vec3 world_point;
 void vertex() { world_point = (MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
 void fragment() {
-	vec4 pixel = texture(albedo_texture,UV);
+	vec4 pixel = texture(albedo_texture,atlas_uv(UV,albedo_texture_region,textureSize(albedo_texture,0)));
 	vec2 grid = (world_point.xz+vec2(2.0))/0.4;
 	vec2 cell = floor(grid);
 	if (abs(world_point.y)<0.001 && all(greaterThanEqual(cell,vec2(0.0))) && all(lessThan(cell,vec2(10.0)))) {
@@ -18,7 +21,7 @@ void fragment() {
 			if ((code&2)!=0) local.x = 1.0-local.x;
 			if ((code&4)!=0) local.y = 1.0-local.y;
 			// mine_retexture_cell: original FT4 corner spans and clear-cell CLUT.
-			pixel = texture(dug_texture,(vec2(131.5,0.5)+vec2(28.0,31.0)*local)/256.0);
+			pixel = texture(dug_texture,atlas_uv((vec2(131.5,0.5)+vec2(28.0,31.0)*local)/256.0,dug_texture_region,textureSize(dug_texture,0)));
 		}
 	}
 	if (pixel.a<0.5) discard;

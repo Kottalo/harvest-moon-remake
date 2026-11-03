@@ -1,0 +1,63 @@
+{
+  "frames": {
+    "game/field/tilled_soil.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/field/watered_soil.png": {
+      "frame": {
+        "x": 280,
+        "y": 8,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "soil_atlas_00098751.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 544,
+      "h": 272
+    },
+    "scale": 1
+  }
+}

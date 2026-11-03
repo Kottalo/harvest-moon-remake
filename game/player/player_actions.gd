@@ -249,7 +249,8 @@ func _texture(path: String) -> Texture2D:
 func _draw() -> void:
 	var source: Dictionary = data.banks[bank]
 	var pose: Dictionary = source.ranges[str(range_id)][frame]
-	var key: String = source.pages[pose.page]+str(pose.rect)
+	# Identical cropped pictures may share an atlas region but retain different ANI offsets.
+	var key: String = source.pages[pose.page]+str(pose.rect)+str(pose.margin)
 	if not frame_textures.has(key):
 		var texture := AtlasTexture.new()
 		texture.atlas = _texture(source.pages[pose.page])

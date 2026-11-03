@@ -1,5 +1,13 @@
 # Checkpoint — 2026-10-28
 
+## 2026-11-03 Free Texture Packer、离线拆帧与运行图集
+
+- 接入本地 Free Texture Packer CLI 0.3.0（core 0.3.9，npm lock 固定依赖）。1633 张原图迁入 tools/texture_packer/source，完整保留像素和原导入配置；6212 条动作帧及普通动画的 96 个格子按原始帧表拆出独立 PNG，再通过真实 CLI 打包。旧兼容主角图的 96 个格子也独立拆分。总计 8012 个输入图/帧条目，输出 88 张游戏图集；运行目录内旧散图为 0。
+- 独立帧位于 tools/texture_packer/frames，项目配置位于 projects，均可由源图重建，不进入 Git；整个 texture_packer 目录以 .gdignore 排除 Godot 导入/导出。Godot AI 文件系统查询 frames 的结果为 0 条。源图、原始帧表、配置清单及打包依赖锁文件随工程保留，源 PNG 和生成 PNG/原生场景走 LFS；没有上传 ROM 或把图片交给远程服务。
+- 不旋转、缩放或再次 trim，保留原 ANI 128/256 画布、每帧 margin、时序、原版 alpha/STP 及 blend shader。按地点和兼容导入配置分组，MaxRectsPacker/Smart 紧凑布局、2048 最大页、4 像素 padding/extrude；兼容的完整重复输出继续共享（medicine/potion）。原图总纹素 146,652,176，最终图集 134,468,939；没有据此声称实际 VRAM/FPS 提升。地图纹理页及水流 VRAM 缓冲保留内部布局，通过显式 shader region 采样；Sprite3D 使用原生 AtlasTexture UV，物件 MultiMesh 单独变换其 UV，兼容旧农场普通材质使用 UV scale/offset。农场/矿洞地面状态仍原地更新，不打包动态状态纹理或屏幕过渡截图。
+- 完整重复构建的 88 张 PNG 与首次输出逐字节一致，不读取 ROM。46 个原生场景与之前的几何/UV/碰撞/源动画指纹一致，1691 个 shader 纹理绑定共享 61 张地图图集；其余图集用于角色、物件、工具、土壤与兼容素材。6212 帧实际动作绘制的缓存/margin/材质/固定 pivot 检查通过：发现 128 组相同 crop、不同源 margin，缓存键已同时包含 margin，避免去重后动画错位。已有动作、拿放/增量物件、68 帧普通动画对位、原生移动/正交比例、农场锄地、两矿洞挖掘和 60 次真实 Q 换工具回归通过。证据见 verification/atlas-*。
+- GPU 验收未完成：隔离进程仍在引擎初始化前返回 Windows 0xC0000142。随后尝试编辑器内离屏检查，误用了强制绘制调用，导致编辑器挂起；已向用户说明并获得重启同意。自动审批拒绝了强制结束/重启命令，仅返回 blocked by policy；普通关闭请求后，用户手动恢复了编辑器。Godot AI 新连接确认 world.tscn、stopped/ready，编辑器响应正常且新错误日志为空。失败 GPU runner/test 已删除，不会自动运行；未将其记为通过。headless 平台日志/证书库错误原样留存。
+
 ## 2026-11-03 重复贴图共享
 
 - 对 game/assets 的 1733 张 PNG 按解码后的完整 RGBA 像素及导入参数核对，合并 100 组兼容重复资源：47 组运行素材、53 组旧农场别名。剩余 1633 张 PNG，删除源文件 5,054,357 字节。3 组相同源图因导入设置不同保留，不将不同调色板或混合用途强行合图；每组保留现有语义路径。

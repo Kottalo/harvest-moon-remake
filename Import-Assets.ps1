@@ -14,6 +14,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Shadow/mine conversion failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Day cycle conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\texture_dedup.py') apply
 if ($LASTEXITCODE -ne 0) { throw 'Texture consolidation failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\pack_textures.py') build
+if ($LASTEXITCODE -ne 0) { throw 'Free Texture Packer atlas build failed' }
 $openEditor = Get-Process Godot* -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -match 'Harvest Moon BTN - Godot Remake.*Godot Engine' }
 if ($openEditor) {
     $mcpPython = Join-Path $env:APPDATA 'uv\tools\godot-ai\Scripts\python.exe'
@@ -22,8 +24,14 @@ if ($openEditor) {
     & $godotExe --headless --path $PSScriptRoot --editor --import --quit
 }
 if ($LASTEXITCODE -ne 0) { throw 'Godot asset refresh failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\pack_textures.py') check-imports
+if ($LASTEXITCODE -ne 0) { throw 'Packed atlas import is stale' }
 & $godotExe --headless --path $PSScriptRoot --script tools/bake_assets.gd
 if ($LASTEXITCODE -ne 0) { throw 'Native scene baking failed' }
+& $godotExe --headless --path $PSScriptRoot --script tools/pack_native_textures.gd
+if ($LASTEXITCODE -ne 0) { throw 'Native atlas binding failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\pack_textures.py') finish
+if ($LASTEXITCODE -ne 0) { throw 'Atlas source cleanup failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_runtime.gd
 if ($LASTEXITCODE -ne 0) { throw 'Native runtime check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_actions.gd

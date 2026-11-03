@@ -39,9 +39,9 @@ func bind_location() -> void:
 			continue
 		material = ShaderMaterial.new()
 		material.shader = load("res://game/field/farm_soil.gdshader")
-		material.set_shader_parameter("albedo_texture",texture)
-		material.set_shader_parameter("tilled_texture",load(catalogue.tilled_texture))
-		material.set_shader_parameter("watered_texture",load(catalogue.watered_texture))
+		preload("res://game/rendering/atlas_binding.gd").bind(material,"albedo_texture",texture)
+		preload("res://game/rendering/atlas_binding.gd").bind(material,"tilled_texture",load(catalogue.tilled_texture))
+		preload("res://game/rendering/atlas_binding.gd").bind(material,"watered_texture",load(catalogue.watered_texture))
 		material.set_shader_parameter("field_states",state_texture)
 		geometry.set_surface_override_material(surface,material)
 		return

@@ -4,6 +4,7 @@ extends RefCounted
 var aliases: Dictionary
 var motion: Dictionary
 var replacements := 0
+var pack_regions := false
 
 func _texture(texture: Texture2D) -> Texture2D:
 	if texture==null: return null
@@ -19,12 +20,21 @@ func _material(material: Material) -> void:
 		for slot in BaseMaterial3D.TEXTURE_MAX:
 			var texture: Texture2D = material.get_texture(slot)
 			if texture!=null: material.set_texture(slot,_texture(texture))
+		if pack_regions and material.albedo_texture is AtlasTexture:
+			var rect: Vector4 = load("res://game/rendering/atlas_binding.gd").region(material.albedo_texture)
+			material.uv1_scale = Vector3(rect.z,rect.w,1)
+			material.uv1_offset = Vector3(rect.x,rect.y,0)
+			replacements += 1
 		return
 	if not material is ShaderMaterial: return
 	for uniform in ["albedo_texture","motion_texture"]:
 		var value: Variant = material.get_shader_parameter(uniform)
 		if value is Texture2D:
-			material.set_shader_parameter(uniform,_texture(value))
+			var texture := _texture(value)
+			if pack_regions:
+				load("res://game/rendering/atlas_binding.gd").bind(material,uniform,texture)
+				replacements += 1
+			else: material.set_shader_parameter(uniform,texture)
 
 func snapshot(scene: Node) -> Array:
 	var state := []
@@ -52,6 +62,9 @@ func snapshot(scene: Node) -> Array:
 					for property in material.get_property_list():
 						if not property.usage&PROPERTY_USAGE_STORAGE or property.name in ["resource_name","resource_path","script"]: continue
 						var value: Variant = material.get(property.name)
+						if material.albedo_texture is AtlasTexture:
+							if property.name=="uv1_scale": value = Vector3.ONE
+							elif property.name=="uv1_offset": value = Vector3.ZERO
 						if value is Texture2D: value = Vector2i(value.get_width(),value.get_height())
 						elif value is Resource: value = [value.get_class(),value.resource_name]
 						item.append([str(property.name),value])
@@ -67,6 +80,7 @@ func digest(state: Array) -> String:
 func rewrite(path: String, plan: Dictionary) -> Dictionary:
 	aliases = plan.aliases
 	motion = plan.motion
+	pack_regions = plan.get("pack_regions",false)
 	replacements = 0
 	var source: PackedScene = ResourceLoader.load(path,"PackedScene",ResourceLoader.CACHE_MODE_IGNORE_DEEP)
 	var scene := source.instantiate()

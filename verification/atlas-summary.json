@@ -1,0 +1,14 @@
+{
+  "source_png_count": 1633,
+  "packed_png_count": 88,
+  "action_frames": 6212,
+  "normal_tiles": 96,
+  "source_entries": 8012,
+  "original_runtime_pngs_remaining": 0,
+  "raw_source_pixels": 146652176,
+  "packed_pixels": 134468939,
+  "native_scenes_verified": 46,
+  "frames_ignored_by_godot": true,
+  "gpu_visual_acceptance": false,
+  "rebuild_byte_identical": true
+}

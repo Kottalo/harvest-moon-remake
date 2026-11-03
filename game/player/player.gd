@@ -12,7 +12,6 @@ var scripted_direction := Vector2.ZERO
 var scripted_walk_time := 0.0
 var door_passage := false
 var door_collision_mask := 0
-var normal_texture: Texture2D
 @onready var sprite: Sprite3D = $Sprite3D
 @onready var footprint: CapsuleShape3D = $CollisionShape3D.shape
 const WALK_SPEED := 41.0 * 30.0 / 1000.0
@@ -28,7 +27,6 @@ func _ready() -> void:
 	_setup_input()
 	sprite.material_override = sprite.material_override.duplicate()
 	animation_data = JSON.parse_string(FileAccess.get_file_as_string("res://game/player/player_animations.json"))
-	normal_texture = sprite.texture
 	actions = load("res://game/player/player_actions.gd").new()
 	add_child(actions)
 	actions.setup(self)
@@ -168,11 +166,6 @@ func _update_animation(direction: Vector2, running: bool, delta: float) -> void:
 	if actions != null and actions.carried_id != 0:
 		actions.draw_carry(direction,running,delta)
 		return
-	if sprite.texture != normal_texture:
-		sprite.texture = normal_texture
-		sprite.hframes = 8
-		sprite.vframes = 12
-		sprite.material_override.set_shader_parameter("albedo_texture",normal_texture)
 	# Original player.c: idle range 0 indexed by facing; walk 1+facing; run 6+facing.
 	var selected := (6 if running else 1) + facing if moving else 0
 	if selected != animation:
@@ -199,4 +192,10 @@ func _update_animation(direction: Vector2, running: bool, delta: float) -> void:
 		animation_frame = facing
 	# ANI frame/part offsets are already baked into the common atlas canvas.
 	# Keep its pivot fixed: alpha bounds move naturally as the legs and body animate.
-	sprite.frame = int(frames[animation_frame].tile)
+	var texture: Texture2D = actions._texture(frames[animation_frame].texture)
+	sprite.hframes = 1
+	sprite.vframes = 1
+	sprite.frame = 0
+	if sprite.texture != texture:
+		sprite.texture = texture
+		sprite.material_override.set_shader_parameter("albedo_texture",texture)

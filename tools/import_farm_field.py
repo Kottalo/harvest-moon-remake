@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from pack_textures import source_path
 from PIL import Image
 from import_disc import ROOT, Disc, texture_bank, texture_page
 
@@ -92,7 +93,7 @@ def check():
     rules = json.loads((ROOT/'game/field/farm_field_catalog.json').read_text())
     for key,value in source_rules().items():
         assert rules[key]==value,(key,'Source field rules changed')
-    assert Image.open(ROOT/rules['tilled_texture'][6:]).size==(256,256)
+    assert Image.open(source_path(ROOT/rules['tilled_texture'][6:])).size==(256,256)
     print('FARM_FIELD_SOURCE_CHECK_OK: four facings, five source hoe levels, palettes/UVs and sequential result limits')
 
 

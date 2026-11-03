@@ -1,4 +1,7 @@
 uniform sampler2D motion_texture : source_color, filter_linear, repeat_disable;
+uniform vec4 albedo_texture_region = vec4(0.0,0.0,1.0,1.0);
+uniform vec4 motion_texture_region = vec4(0.0,0.0,1.0,1.0);
+#include "res://game/rendering/atlas_sampling.gdshaderinc"
 uniform int motion_count = 0;
 uniform vec2 motion_size = vec2(1.0);
 uniform vec4 motion_destination[16];
@@ -20,7 +23,7 @@ vec4 sample_motion(vec4 source, vec2 local, float seconds) {
 	}
 	local = mod(local, source.zw);
 	local = clamp(local, vec2(0.5), source.zw - vec2(0.5));
-	return texture(motion_texture, (source.xy + local) / motion_size);
+	return texture(motion_texture, atlas_uv((source.xy+local)/motion_size,motion_texture_region,textureSize(motion_texture,0)));
 }
 
 vec4 sample_source(vec2 uv) {
@@ -71,5 +74,5 @@ vec4 sample_source(vec2 uv) {
 			return current_pixel;
 		}
 	}
-	return texture(albedo_texture, uv);
+	return texture(albedo_texture, atlas_uv(uv,albedo_texture_region,textureSize(albedo_texture,0)));
 }

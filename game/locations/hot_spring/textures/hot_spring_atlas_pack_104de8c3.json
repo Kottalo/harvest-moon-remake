@@ -1,0 +1,711 @@
+{
+  "frames": {
+    "game/locations/hot_spring/textures/hot_spring_atlas_01_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_03_motion.png": {
+      "frame": {
+        "x": 64,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_04_motion.png": {
+      "frame": {
+        "x": 120,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_06_motion.png": {
+      "frame": {
+        "x": 176,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_07_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_08_motion.png": {
+      "frame": {
+        "x": 64,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_09_blend_motion.png": {
+      "frame": {
+        "x": 120,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_10_blend_motion.png": {
+      "frame": {
+        "x": 176,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_12_blend_motion.png": {
+      "frame": {
+        "x": 232,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_13_motion.png": {
+      "frame": {
+        "x": 232,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_15_motion.png": {
+      "frame": {
+        "x": 288,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_17_motion.png": {
+      "frame": {
+        "x": 288,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_18_motion.png": {
+      "frame": {
+        "x": 344,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_19_motion.png": {
+      "frame": {
+        "x": 344,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_20_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_21_motion.png": {
+      "frame": {
+        "x": 64,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_22_motion.png": {
+      "frame": {
+        "x": 120,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_23_motion.png": {
+      "frame": {
+        "x": 176,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_24_motion.png": {
+      "frame": {
+        "x": 232,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_25_motion.png": {
+      "frame": {
+        "x": 288,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_26_motion.png": {
+      "frame": {
+        "x": 344,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_27_motion.png": {
+      "frame": {
+        "x": 400,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_30_motion.png": {
+      "frame": {
+        "x": 400,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_31_motion.png": {
+      "frame": {
+        "x": 400,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_32_motion.png": {
+      "frame": {
+        "x": 456,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_36_motion.png": {
+      "frame": {
+        "x": 456,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_37_motion.png": {
+      "frame": {
+        "x": 456,
+        "y": 376,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_38_motion.png": {
+      "frame": {
+        "x": 512,
+        "y": 8,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/hot_spring/textures/hot_spring_atlas_39_motion.png": {
+      "frame": {
+        "x": 512,
+        "y": 192,
+        "w": 40,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 168
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "hot_spring_atlas_pack_104de8c3.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 560,
+      "h": 552
+    },
+    "scale": 1
+  }
+}

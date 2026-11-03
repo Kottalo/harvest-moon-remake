@@ -1,0 +1,351 @@
+{
+  "frames": {
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_06_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 64,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_27_blend_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 87,
+        "w": 64,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_07_motion.png": {
+      "frame": {
+        "x": 88,
+        "y": 8,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_08_motion.png": {
+      "frame": {
+        "x": 88,
+        "y": 87,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_09_motion.png": {
+      "frame": {
+        "x": 136,
+        "y": 8,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_17_motion.png": {
+      "frame": {
+        "x": 136,
+        "y": 87,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_18_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 166,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_21_motion.png": {
+      "frame": {
+        "x": 56,
+        "y": 166,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_22_motion.png": {
+      "frame": {
+        "x": 104,
+        "y": 166,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_23_motion.png": {
+      "frame": {
+        "x": 152,
+        "y": 166,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_24_motion.png": {
+      "frame": {
+        "x": 184,
+        "y": 8,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_25_motion.png": {
+      "frame": {
+        "x": 184,
+        "y": 87,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_26_motion.png": {
+      "frame": {
+        "x": 200,
+        "y": 166,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "game/locations/lumberjack_forest/textures/lumberjack_forest_atlas_28_motion.png": {
+      "frame": {
+        "x": 232,
+        "y": 8,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "lumberjack_forest_atlas_pack_104de8c3.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 272,
+      "h": 237
+    },
+    "scale": 1
+  }
+}

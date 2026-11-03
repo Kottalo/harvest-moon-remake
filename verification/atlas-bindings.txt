@@ -1,0 +1,56 @@
+ERROR: Failed to open 'user://logs/godot2026-11-03T19.18.55.log'.
+   at: copy (core/io/dir_access.cpp:429)
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+NATIVE_ATLAS_OK: res://game/locations/barn/barn.scn
+NATIVE_ATLAS_OK: res://game/locations/basil_bedroom/basil_bedroom.scn
+NATIVE_ATLAS_OK: res://game/locations/basil_house/basil_house.scn
+NATIVE_ATLAS_OK: res://game/locations/beach/beach.scn
+NATIVE_ATLAS_OK: res://game/locations/beach/coast_segment.scn
+NATIVE_ATLAS_OK: res://game/locations/blacksmith_bedroom/blacksmith_bedroom.scn
+NATIVE_ATLAS_OK: res://game/locations/blacksmith_forge/blacksmith_forge.scn
+NATIVE_ATLAS_OK: res://game/locations/chicken_coop/chicken_coop.scn
+NATIVE_ATLAS_OK: res://game/locations/church/church.scn
+NATIVE_ATLAS_OK: res://game/locations/church_street/church_street.scn
+NATIVE_ATLAS_OK: res://game/locations/clinic/clinic.scn
+NATIVE_ATLAS_OK: res://game/locations/clinic_upstairs/clinic_upstairs.scn
+NATIVE_ATLAS_OK: res://game/locations/ellen_house/ellen_house.scn
+NATIVE_ATLAS_OK: res://game/locations/farm/farm.scn
+NATIVE_ATLAS_OK: res://game/locations/farmhouse/farmhouse.scn
+NATIVE_ATLAS_OK: res://game/locations/harvest_sprite_home/harvest_sprite_home.scn
+NATIVE_ATLAS_OK: res://game/locations/hot_spring/hot_spring.scn
+NATIVE_ATLAS_OK: res://game/locations/inn/inn.scn
+NATIVE_ATLAS_OK: res://game/locations/inn_street/inn_street.scn
+NATIVE_ATLAS_OK: res://game/locations/inn_upstairs/inn_upstairs.scn
+NATIVE_ATLAS_OK: res://game/locations/lake_mine/lake_mine.scn
+NATIVE_ATLAS_OK: res://game/locations/library/library.scn
+NATIVE_ATLAS_OK: res://game/locations/library_street/library_street.scn
+NATIVE_ATLAS_OK: res://game/locations/lumberjack_forest/lumberjack_forest.scn
+NATIVE_ATLAS_OK: res://game/locations/lumberjack_house/lumberjack_house.scn
+NATIVE_ATLAS_OK: res://game/locations/market_street/market_street.scn
+NATIVE_ATLAS_OK: res://game/locations/mayor_house/mayor_house.scn
+NATIVE_ATLAS_OK: res://game/locations/mother_hill_lake/mother_hill_lake.scn
+NATIVE_ATLAS_OK: res://game/locations/mother_hill_summit/mother_hill_summit.scn
+NATIVE_ATLAS_OK: res://game/locations/mother_hill_trail/mother_hill_trail.scn
+NATIVE_ATLAS_OK: res://game/locations/poultry_farm/poultry_farm.scn
+NATIVE_ATLAS_OK: res://game/locations/poultry_farm_bedroom/poultry_farm_bedroom.scn
+NATIVE_ATLAS_OK: res://game/locations/poultry_farm_house/poultry_farm_house.scn
+NATIVE_ATLAS_OK: res://game/locations/spring_mine/spring_mine.scn
+NATIVE_ATLAS_OK: res://game/locations/stable/stable.scn
+NATIVE_ATLAS_OK: res://game/locations/supermarket/supermarket.scn
+NATIVE_ATLAS_OK: res://game/locations/supermarket_upstairs/supermarket_upstairs.scn
+NATIVE_ATLAS_OK: res://game/locations/town_south/town_south.scn
+NATIVE_ATLAS_OK: res://game/locations/town_square/coast_segment.scn
+NATIVE_ATLAS_OK: res://game/locations/town_square/town_square.scn
+NATIVE_ATLAS_OK: res://game/locations/winery_cellar/winery_cellar.scn
+NATIVE_ATLAS_OK: res://game/locations/winery_house/winery_house.scn
+NATIVE_ATLAS_OK: res://game/locations/yodel_ranch/yodel_ranch.scn
+NATIVE_ATLAS_OK: res://game/locations/yodel_ranch_bedroom/yodel_ranch_bedroom.scn
+NATIVE_ATLAS_OK: res://game/locations/yodel_ranch_house/yodel_ranch_house.scn
+NATIVE_ATLAS_OK: res://scenes/original_farm.scn
+NATIVE_ATLASES_OK: 46 native scenes; original geometry, UVs, collision and animation records preserved
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)

@@ -42,7 +42,7 @@ func _run() -> void:
 					for frame in 60:
 						player._update_animation(motion, running, 1.0 / 30.0)
 						var current: Dictionary = player.animation_data.animations[player.animation][player.animation_frame]
-						if sprite.offset != fixed_pivot or sprite.frame != int(current.tile):
+						if sprite.offset != fixed_pivot or sprite.texture.resource_path != current.texture:
 							push_error("ANI frame shifted the shared canvas pivot: " + str([player.animation, player.animation_frame, sprite.offset, fixed_pivot]))
 							quit(1)
 							return

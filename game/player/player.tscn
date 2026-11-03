@@ -1,11 +1,11 @@
 [gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://game/player/player.gd" id="1"]
-[ext_resource type="Texture2D" path="res://game/player/player_atlas.png" id="2"]
+[ext_resource type="Texture2D" path="res://game/player/frames/normal_000.tres" id="2"]
 [ext_resource type="Shader" path="res://game/rendering/player_sprite.gdshader" id="3"]
 
 [ext_resource type="Script" path="res://game/player/player_shadow.gd" id="4"]
-[ext_resource type="Texture2D" path="res://game/player/player_shadow.png" id="5"]
+[ext_resource type="Texture2D" path="res://game/player/player_shadow.tres" id="5"]
 [ext_resource type="Shader" path="res://game/player/player_shadow.gdshader" id="6"]
 
 [sub_resource type="ShaderMaterial" id="ShadowMaterial"]
@@ -41,8 +41,8 @@ pixel_size = 0.009827848
 billboard = 1
 texture_filter = 1
 texture = ExtResource("2")
-hframes = 8
-vframes = 12
+hframes = 1
+vframes = 1
 
 [node name="GroundShadow" type="Sprite3D" parent="."]
 script = ExtResource("4")

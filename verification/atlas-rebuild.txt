@@ -1,0 +1,1 @@
+ATLAS_REBUILD_OK: 88 byte-identical final compact atlas PNGs after deterministic cross-bank sharing; source PNGs/frame tables only, no ROM read

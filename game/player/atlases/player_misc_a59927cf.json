@@ -1,0 +1,39 @@
+{
+  "frames": {
+    "game/player/player_shadow.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 128,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 128
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "player_misc_a59927cf.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 144,
+      "h": 144
+    },
+    "scale": 1
+  }
+}

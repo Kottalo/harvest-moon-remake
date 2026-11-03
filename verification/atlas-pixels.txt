@@ -1,0 +1,1 @@
+ATLAS_PIXELS_OK: 8012 unrotated, unscaled source images/frames; 88 runtime atlases; offline frames excluded

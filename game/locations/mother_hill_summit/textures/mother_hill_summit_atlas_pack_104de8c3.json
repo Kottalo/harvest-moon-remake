@@ -1,0 +1,39 @@
+{
+  "frames": {
+    "game/locations/mother_hill_summit/textures/mother_hill_summit_atlas_02_blend_motion.png": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 128,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 128,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 128,
+        "h": 128
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-cli",
+    "version": "0.3.0",
+    "image": "mother_hill_summit_atlas_pack_104de8c3.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 144,
+      "h": 144
+    },
+    "scale": 1
+  }
+}

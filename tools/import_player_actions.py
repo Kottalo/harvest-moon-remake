@@ -5,6 +5,7 @@ import json
 import re
 import struct
 from pathlib import Path
+from pack_textures import source_path
 from PIL import Image
 from import_disc import ROOT, Disc, compose_animations
 
@@ -86,7 +87,7 @@ def check_tool_icons(disc=None):
     pictures = catalogue['tool_pictures']
     assert {int(item) for item in pictures} == set(range(1,33)) | {34,56,57}
     for item,path in pictures.items():
-        image = Image.open(ROOT/path[6:]).convert('RGBA')
+        image = Image.open(source_path(ROOT/path[6:])).convert('RGBA')
         assert image.size == (128,128) and image.getbbox(),path
         if disc:
             frames,_,_ = compose_animations(disc.asset(0x3c19000+int(item)*2048,2048),0x100,[0])
@@ -102,8 +103,8 @@ def check_items(disc=None):
     for key,picture in catalogue['pictures'].items():
         item = int(key)
         assert picture['half_extents']==extents[item], 'Item footprint differs from farm_tables.c'
-        ground = Image.open(ROOT/picture['ground_texture'][6:]).convert('RGBA')
-        held = Image.open(ROOT/picture['texture'][6:]).convert('RGBA')
+        ground = Image.open(source_path(ROOT/picture['ground_texture'][6:])).convert('RGBA')
+        held = Image.open(source_path(ROOT/picture['texture'][6:])).convert('RGBA')
         if disc:
             assert ground.tobytes()==original[item].tobytes(), 'Ground ANI offsets differ from field sprite pack'
         report[picture['name']] = dict(half_extents=extents[item],ground_bounds=ground.getchannel('A').getbbox(),held_bounds=held.getchannel('A').getbbox())
@@ -223,7 +224,7 @@ def check():
             for frame in frames:
                 path = bank['pages'][frame['page']]
                 if path not in pages:
-                    pages[path] = Image.open(ROOT/path[6:]).convert('RGBA')
+                    pages[path] = Image.open(source_path(ROOT/path[6:])).convert('RGBA')
                 page = pages[path]
                 x,y,w,h = frame['rect']; left,top,extra_w,extra_h = frame['margin']
                 assert x>=2 and y>=2 and x+w<=page.width-2 and y+h<=page.height-2
@@ -231,7 +232,7 @@ def check():
                 assert left>=0 and top>=0 and left+w<=256 and top+h<=256
                 checked += 1
     old = json.loads((ROOT/'game/player/player_animations.json').read_text())
-    atlas = Image.open(ROOT/'game/player/player_atlas.png').convert('RGBA')
+    atlas = Image.open(source_path(ROOT/'game/player/player_atlas.png')).convert('RGBA')
     base = catalogue['banks']['base']
     for animation in range(15):
         for original,frame in zip(old['animations'][animation],base['ranges'][str(animation)]):
