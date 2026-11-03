@@ -49,7 +49,8 @@ def capture():
     generated = {entry['atlas'] for entry in old.get('entries',{}).values()} | set(old.get('obsolete_atlases',[]))
     candidates = {ROOT/p[6:] for p in old['images']}
     candidates.update(p for base in ['game','assets'] for p in (ROOT/base).rglob('*.png')
-                      if 'res://'+p.relative_to(ROOT).as_posix() not in generated)
+                      if 'res://'+p.relative_to(ROOT).as_posix() not in generated
+                      and not p.is_relative_to(ROOT/'game/original_sprites'))
     for path in candidates:
         if path.exists():
             destination = SOURCE/path.relative_to(ROOT)

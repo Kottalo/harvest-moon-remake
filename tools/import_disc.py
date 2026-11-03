@@ -80,9 +80,10 @@ def expand_rle(data, length):
     return result
 
 
-def texture_bank(data):
+def texture_bank(data, vram=None):
     assert data[0] == 0x0d, 'Expected image bank'
-    vram = bytearray(1024 * 512 * 2)
+    if vram is None:
+        vram = bytearray(1024 * 512 * 2)
     count = struct.unpack_from('<H', data, 2)[0]
     pos = 4
     for index in range(count):
@@ -378,11 +379,11 @@ def import_world(disc, offsets, out):
     return reports
 
 
-def compose_animations(data, bank_offset, range_ids, palette_rule=None, canvas_size=128):
+def compose_animations(data, bank_offset, range_ids, palette_rule=None, canvas_size=128, *, decoded_bank=None, palette_y=0):
     """Compose the original ANI parts with their original palette and frame timing."""
     assert struct.unpack_from('<I', data)[0] == 14
     images, lists, parts, ranges, frames = struct.unpack_from('<5I', data, 16)
-    vram, blocks = texture_bank(data[bank_offset:])
+    vram, blocks = decoded_bank if decoded_bank is not None else texture_bank(data[bank_offset:])
     words = memoryview(vram).cast('H')
     rendered, animations, cache = [], [], {}
     for animation in range_ids:
@@ -410,7 +411,7 @@ def compose_animations(data, bank_offset, range_ids, palette_rule=None, canvas_s
                             for col in range(width):
                                 packed = vram[((y + row) * 1024 + x) * 2 + col] if depth else vram[((y + row) * 1024 + x) * 2 + col // 2]
                                 index = packed if depth else (packed >> ((col & 1) * 4)) & 15
-                                colors.append(rgba(words[cy * 1024 + cx + index]))
+                                colors.append(rgba(words[(cy + palette_y) * 1024 + cx + index]))
                         image = Image.new('RGBA', (width, h))
                         image.putdata(colors)
                         if attr & 1:
