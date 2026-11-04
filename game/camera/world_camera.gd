@@ -9,6 +9,12 @@ const FARM_COVERAGE := [
 	Vector2(-15.58,-0.814), Vector2(1.719,-8.55), Vector2(3.561,-8.55),
 	Vector2(16.965,-2.556), Vector2(-1.825,5.847), Vector2(-15.58,-0.304),
 ]
+# Measured inside the spring's notched grass edges and transparent tree silhouettes.
+const HOT_SPRING_COVERAGE := [
+	Vector2(-9.9,4.45), Vector2(-7.0,2.75), Vector2(-3.7,2.1),
+	Vector2(6.96,2.3), Vector2(7.01,3.17), Vector2(6.8,5.6),
+	Vector2(0.2,9.4), Vector2(-3.6,9.48), Vector2(-7.3,7.85),
+]
 const FOLLOW_RESPONSE_SECONDS := 0.035
 const FOLLOW_SETTLE_DISTANCE := 0.00005
 const YAW := -512.0 * TAU / 4096.0
@@ -30,18 +36,19 @@ func set_location(location: Node3D, outdoors: bool, area_id := -1) -> void:
 	reset_gameplay()
 	if not outdoors: return
 	basis = Basis.looking_at(-eye_offset)
-	if area_id == 0:
-		_coverage = PackedVector2Array(FARM_COVERAGE)
-	else:
-		var points := PackedVector2Array()
-		for geometry: MeshInstance3D in location.find_children("*","MeshInstance3D",true,false):
-			if geometry.mesh==null or not geometry.is_visible_in_tree(): continue
-			for vertex in geometry.mesh.get_faces():
-				points.append(_project(geometry.global_transform*vertex))
-		if points.size()<3: return
-		# Strict camera bounds: do not relax them to recenter a border-positioned player.
-		_coverage = Geometry2D.convex_hull(points)
-		if _coverage[0].is_equal_approx(_coverage[-1]): _coverage.remove_at(_coverage.size()-1)
+	match area_id:
+		0: _coverage = PackedVector2Array(FARM_COVERAGE)
+		72: _coverage = PackedVector2Array(HOT_SPRING_COVERAGE)
+		_:
+			var points := PackedVector2Array()
+			for geometry: MeshInstance3D in location.find_children("*","MeshInstance3D",true,false):
+				if geometry.mesh==null or not geometry.is_visible_in_tree(): continue
+				for vertex in geometry.mesh.get_faces():
+					points.append(_project(geometry.global_transform*vertex))
+			if points.size()<3: return
+			# Strict camera bounds: do not relax them to recenter a border-positioned player.
+			_coverage = Geometry2D.convex_hull(points)
+			if _coverage[0].is_equal_approx(_coverage[-1]): _coverage.remove_at(_coverage.size()-1)
 	_screen_bounds = Rect2(_coverage[0],Vector2.ZERO)
 	for point in _coverage: _screen_bounds = _screen_bounds.expand(point)
 

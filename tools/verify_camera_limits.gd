@@ -61,6 +61,17 @@ func run() -> void:
 				var point: Vector3 = camera.basis.x*centre.x+camera.basis.y*centre.y
 				if not require_ok(covered_corners(camera,camera.limited_focus(point),camera._coverage),"Viewport escaped the map envelope: "+str([id,viewport])): return
 		print("CAMERA_LOCATION_OK: ",id," ",info.slug," outdoors=",outdoors)
+	# The spring path has two recesses at the right of the reported viewport.
+	var spring_foot := Vector3(-0.833304,0.191526,-8.398523)
+	world._change_area(72,spring_foot)
+	root.size = Vector2i(1036,648)
+	var spring_focus: Vector3 = camera.limited_focus(spring_foot)
+	var spring_centre: Vector2 = camera._project(spring_focus)
+	if not require_ok(is_equal_approx(camera.size,original_size) and spring_centre.x+camera._half_view.x<7.05,
+			"Hot spring right edge exposed the path-side notches"): return
+	var spring_offset: Vector2 = (camera._project(spring_foot)-spring_centre).abs() / camera._half_view
+	if not require_ok(spring_offset.x<0.5 and spring_offset.y<0.5,
+			"Hot spring framing drifted away from the reported trail"): return
 	# Player position from the latest watermill bridge report.
 	var bridge_foot := Vector3(-5.08569,0.15878,10.62352)
 	world._change_area(0,bridge_foot)
