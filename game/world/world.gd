@@ -18,6 +18,7 @@ var hud_elapsed := 0.0
 var location_loader
 var farm_field
 var mine_field
+var tool_picker
 
 func area_to_world(area: int, point: Vector3) -> Vector3:
 	if area == 56:
@@ -82,6 +83,9 @@ func _ready() -> void:
 	mine_field.name = "MineField"
 	add_child(mine_field)
 	mine_field.setup(self)
+	tool_picker = preload("res://game/player/tool_picker.gd").new()
+	add_child(tool_picker)
+	tool_picker.setup(player.actions,ui_font)
 	_refresh_hud()
 	_configure_camera_limits()
 	_update_camera()
@@ -139,7 +143,7 @@ func _set_overview() -> void:
 	camera.show_overview(get_node("Location"))
 
 func _refresh_hud() -> void:
-	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · E 交互 · Space/X 工具 · Q 换工具 · R 等级 · Tab 全景"
+	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · E 交互 · Space/X 工具 · I 工具栏 · Q 快切 · R 等级/选种 · Tab 全景"
 	text += "\n" + player.actions.tool_name()
 	if player.actions.equipped == 34:
 		text += " · R 选种"
@@ -300,7 +304,12 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 func _unhandled_key_input(event: InputEvent) -> void:
 	if transitioning or day_cycle.menu_open or day_cycle.sleeping:
 		return
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB:
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+	if event.physical_keycode == KEY_I:
+		tool_picker.open()
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_TAB:
 		overview = not overview
 		if overview:
 			_set_overview()

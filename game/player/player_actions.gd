@@ -76,6 +76,27 @@ func tool_name() -> String:
 	var index := TOOL_IDS.find(equipped)
 	return TOOL_NAMES[index] + (" · " + LEVEL_NAMES[upgrade] if equipped <= 25 else "")
 
+func can_select_tool() -> bool:
+	return not player.input_locked and not busy() and carried_id == 0
+
+func select_tool(tool: int, seed := -1) -> bool:
+	if not can_select_tool() or not TOOL_IDS.has(tool):
+		return false
+	if seed != -1:
+		if tool != 34 or not seed_catalogue.has(str(seed)):
+			return false
+		selected_seed = seed
+	equipped = tool
+	# player_check_tool_slots: show animation 0x47 for ten source ticks.
+	play("base",71,"show_tool",player.facing)
+	return true
+
+func tool_picture(tool: int, seed := -1) -> Texture2D:
+	if tool == 34 and seed != 34 and seed_catalogue.has(str(seed)):
+		return crop_picture_provider.call(seed_catalogue[str(seed)].icon)
+	var item := tool + upgrade if tool <= 25 else tool
+	return _texture(data.tool_pictures[str(item)])
+
 func poll_input() -> void:
 	if player.input_locked:
 		return
@@ -85,11 +106,9 @@ func poll_input() -> void:
 		elif state == "fishing_wait" and not Input.is_action_pressed("use_tool"):
 			play("fishing", player.facing + 4, "reel")
 		return
-	if Input.is_action_just_pressed("next_tool") and carried_id == 0:
-		equipped = TOOL_IDS[(TOOL_IDS.find(equipped) + 1) % TOOL_IDS.size()]
-		# player_check_tool_slots: show animation 0x47 for ten source ticks.
-		play("base",71,"show_tool",player.facing)
-		return
+	if Input.is_action_just_pressed("next_tool"):
+		if select_tool(TOOL_IDS[(TOOL_IDS.find(equipped) + 1) % TOOL_IDS.size()]):
+			return
 	if Input.is_action_just_pressed("tool_level"):
 		if equipped <= 25:
 			upgrade = (upgrade + 1) % 5
@@ -263,12 +282,12 @@ func update_held(running: bool) -> void:
 	held_sprite.visible = item != 0
 	if item == 0:
 		return
-	if showing and equipped == 34 and selected_seed != 34 and seed_catalogue.has(str(selected_seed)):
-		held_sprite.texture = crop_picture_provider.call(seed_catalogue[str(selected_seed)].icon)
-	elif not showing and crop_produce.has(item):
+	if showing:
+		held_sprite.texture = tool_picture(equipped,selected_seed)
+	elif crop_produce.has(item):
 		held_sprite.texture = crop_produce[item]
 	else:
-		held_sprite.texture = _texture(data.tool_pictures[str(item)] if showing else items[str(item)].texture)
+		held_sprite.texture = _texture(items[str(item)].texture)
 	held_sprite.material_override.set_shader_parameter("albedo_texture",held_sprite.texture)
 	var group := 0 if showing or pending_item != 0 or state in ["drop","throw"] else (2 if running else 1)
 	var offset: Array = data.item_offsets[0 if showing else group*4+player.facing]

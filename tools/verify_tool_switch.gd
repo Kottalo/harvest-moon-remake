@@ -74,7 +74,54 @@ func run() -> void:
 		key(KEY_Q,false)
 		await frames(2)
 		if not require_ok(action.equipped==previous and not action.busy(),"Q switched while carrying or input-locked"): return
+	world.player.input_locked = false
+	action.carried_id = 0
+	var picker = world.tool_picker
+	_picker_key(viewport,KEY_I)
+	await process_frame
+	if not require_ok(paused and picker.panel.visible and picker.entries.size()==35
+			and picker.tabs.current_tab==1,"I did not open the modal on the equipped seed tab"): return
+	for id in picker.entries:
+		var button: Button = picker.entries[id]
+		if not require_ok(button.icon != null and button.icon.get_width() in [16,36],"Picker icon is missing or includes its transparent source canvas: "+str(id)): return
+	_picker_key(viewport,KEY_F1)
+	if not require_ok(paused and picker.panel.visible and not world.day_cycle.debug_panel.panel.visible,"Picker let another pause menu open"): return
+	_picker_key(viewport,KEY_TAB)
+	if not require_ok(picker.tabs.current_tab==0,"Tab did not switch to tools"): return
+	await process_frame
+	var can: Button = picker.entries[21]
+	if not require_ok(viewport.get_visible_rect().encloses(can.get_global_rect()),"Tool grid is clipped at the gameplay resolution"): return
+	for pressed in [true,false]:
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = pressed
+		click.position = can.get_global_rect().get_center()
+		viewport.push_input(click,true)
+	await frames(2)
+	if not require_ok(not paused and not picker.panel.visible and action.equipped==21
+			and action.state=="show_tool" and action.range_id==71,"Picker failed to equip the watering can with the source pose"): return
+	while action.busy(): await frames(1)
+	_picker_key(viewport,KEY_I)
+	_picker_key(viewport,KEY_TAB)
+	picker.entries[54].pressed.emit()
+	await frames(2)
+	if not require_ok(not paused and action.equipped==34 and action.selected_seed==54
+			and action.state=="show_tool" and action.held_sprite.texture==action.tool_picture(34,54),"Picker failed to equip grass with its own seed bag"): return
+	while action.busy(): await frames(1)
+	_picker_key(viewport,KEY_I)
+	_picker_key(viewport,KEY_ESCAPE)
+	if not require_ok(not paused and not picker.panel.visible and action.selected_seed==54 and not action.busy(),"Cancel altered the selection or left the game paused"): return
+	action.carried_id = 58
+	_picker_key(viewport,KEY_I)
+	if not require_ok(not paused and not picker.panel.visible,"I opened while carrying an item"): return
 	if not require_ok(effects==0 and world.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and not debug_collisions_hint,"Switching used a tool, changed the orthographic camera or enabled colliders"): return
-	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical Q selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders")
+	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical Q selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders; modal tool and seed selection, icon crop, tabs, pause and cancellation")
 	viewport.free()
 	quit()
+
+func _picker_key(viewport: Viewport, code: Key) -> void:
+	var event := InputEventKey.new()
+	event.keycode = code
+	event.physical_keycode = code
+	event.pressed = true
+	viewport.push_input(event,true)
