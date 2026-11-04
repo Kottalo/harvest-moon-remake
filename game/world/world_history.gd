@@ -15,13 +15,17 @@ func record(kind: String, actor: String, content: String, witnesses: PackedStrin
 		"known_by":known_by,"place":place,"date":date})
 	return entries.size()-1
 
-func memory_for(npc_id: String, query: String, excluded := -1) -> Array[Dictionary]:
+func memory_for(npc_id: String, query: String, excluded := -1,
+		conversation_group := PackedStringArray()) -> Array[Dictionary]:
 	var memory: Array[Dictionary] = []
 	var related := 0
 	var words := _query_fragments(query)
 	for index in range(entries.size()-1,-1,-1):
 		var event := entries[index]
 		if index == excluded or not event.known_by.has(npc_id):
+			continue
+		# A group reply may quote a past conversation only if the group heard it.
+		if event.kind=="speech" and not _shared_with(event,conversation_group):
 			continue
 		if memory.size() >= RECENT_LIMIT:
 			if words.is_empty() or related >= RELATED_LIMIT:
@@ -33,6 +37,12 @@ func memory_for(npc_id: String, query: String, excluded := -1) -> Array[Dictiona
 		detail.erase("known_by")
 		memory.push_front(detail)
 	return memory
+
+func _shared_with(event: Dictionary, group: PackedStringArray) -> bool:
+	for id in group:
+		if not event.known_by.has(id):
+			return false
+	return true
 
 func _query_fragments(query: String) -> PackedStringArray:
 	var fragments := PackedStringArray()

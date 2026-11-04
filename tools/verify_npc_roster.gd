@@ -6,11 +6,17 @@ class TestDeepSeek extends "res://game/npc/dialogue/deepseek.gd":
 	var prompt: Dictionary
 	var memory: String
 	var problem := ""
+	var requests: Array[Dictionary] = []
+	var fail_speaker := ""
 
 	func ask(messages: Array) -> void:
 		last_messages = messages
 		prompt = JSON.parse_string(messages.back().content)
 		memory = JSON.stringify(prompt.memory)
+		requests.append({"context":messages[0].content,"memory":memory})
+		if not fail_speaker.is_empty() and messages[0].content.contains("角色："+fail_speaker+"。"):
+			answered.emit("","第二个角色断线")
+			return
 		if not problem.is_empty():
 			answered.emit("",problem)
 			return
@@ -189,6 +195,49 @@ func run() -> void:
 			and transport.memory.contains("今天想尝点什么？"),
 			"Retry duplicated speech or lost this NPC's earlier reply"):
 		return
+	transport.requests.clear()
+	dialogue._submit("附近有谁？")
+	if not check(transport.requests.size()==1 and dialogue.title.text=="切夫",
+			"An ordinary private turn provoked an interruption"):
+		return
+	transport.requests.clear()
+	dialogue._submit("现在能玩游戏吗？")
+	if not check(transport.requests.size()==2 and dialogue.title.text=="切夫、纳皮"
+			and dialogue.reply.text.contains("切夫：") and dialogue.reply.text.contains("纳皮：")
+			and transport.requests[1].context.contains("角色：纳皮。")
+			and transport.requests[1].memory.contains('"actor":"切夫"')
+			and not transport.requests[0].memory.contains("这是我们的秘密")
+			and not transport.requests[1].memory.contains("这是我们的秘密")
+			and world.history.entries.back().known_by.has("chef"),
+			"The relevant bystander failed to join or received earlier private speech"):
+		return
+	transport.requests.clear()
+	dialogue._submit("那怎么玩游戏？")
+	if not check(transport.requests.size()==1,"The same topic repeatedly provoked unsolicited replies"):
+		return
+	transport.requests.clear()
+	var before_group: int = world.history.entries.size()
+	transport.fail_speaker = "纳皮"
+	# Select the closest guest on this explicit group request.
+	dialogue.last_guest = ""
+	dialogue._submit("你们觉得呢？")
+	if not check(transport.requests.size()==2 and dialogue.status.text=="第二个角色断线"
+			and world.history.entries.size()==before_group+2 and dialogue.reply.text.contains("切夫："),
+			"Failure of the second speaker lost the first reply or duplicated the turn"):
+		return
+	transport.fail_speaker = ""
+	dialogue._submit("")
+	if not check(transport.requests.size()==3 and world.history.entries.size()==before_group+3
+			and world.history.entries.back().actor=="nappy"
+			and not world.history.entries.back().known_by.has("hoggy"),
+			"Group retry replayed the first speaker or included a neighbor behind a wall"):
+		return
+	transport.requests.clear()
+	dialogue._submit("纳皮，你呢？")
+	if not check(transport.requests.size()==1 and dialogue.title.text=="纳皮"
+			and world.history.entries.back().known_by==PackedStringArray(["nappy","player"]),
+			"Directly addressing a nearby character did not switch to a private reply"):
+		return
 	dialogue.close()
 	if not check(not paused and not dialogue.overlay.visible,"Closing dialogue did not restore gameplay"):
 		return
@@ -217,7 +266,7 @@ func run() -> void:
 	world._change_area(80,Vector3.ZERO)
 	if not check(not is_instance_valid(chef) and npc.active.is_empty() and not paused,"NPCs leaked between locations"):
 		return
-	if not check(world.history.memory_for("chef","").any(func(event): return event.content=="这是我们的秘密"),
+	if not check(world.history.memory_for("chef","我们的秘密").any(func(event): return event.content=="这是我们的秘密"),
 			"NPC knowledge was lost on a map change"):
 		return
 	world.free()
