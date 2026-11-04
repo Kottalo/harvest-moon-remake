@@ -39,6 +39,12 @@ func run() -> void:
 	for name in data.actors:
 		if not await see_villager(world,name,data.actors[name],data.routes):
 			return
+	var dialogue = npc.dialogue
+	dialogue.client.free()
+	var transport := TestDeepSeek.new()
+	dialogue.client = transport
+	dialogue.add_child(transport)
+	transport.answered.connect(dialogue._on_answer)
 
 	clock.season = 0
 	clock.weekday = 1
@@ -50,6 +56,17 @@ func run() -> void:
 	npc.update(0.0)
 	if not check(npc.active.has("jeff"),"Jeff did not enter the shop at 08:00"):
 		return
+	var jeff = npc.active.jeff
+	for tick in 40:
+		if jeff.placed:
+			break
+		await physics_frame
+	dialogue.begin(jeff)
+	if not check(dialogue.overlay.visible and transport.last_messages[0].content.contains("你在杂货店")
+			and transport.last_messages[0].content.contains("你在这里的职责是经营杂货店"),
+			"Jeff did not receive his current shop and duty"):
+		return
+	dialogue.close()
 	clock.minute = 1080
 	npc.update(0.0)
 	if not check(not npc.active.has("jeff"),"Jeff stayed in the shop after leaving"):
@@ -68,9 +85,19 @@ func run() -> void:
 		await physics_frame
 		if basil.walking:
 			walk_frames[basil.sprite.texture] = true
+			if basil.global_position.distance_to(start)>0.3 and walk_frames.size()>3:
+				break
 	if not check(basil.placed and basil.global_position.distance_to(start)>0.3 and walk_frames.size()>3,
 			"Basil did not walk and animate on his source morning route"):
 		return
+	dialogue.begin(basil)
+	dialogue._submit("你在哪儿？刚才在做什么？")
+	if not check(dialogue.overlay.visible and not basil.walking
+			and transport.last_messages[0].content.contains("你在图书馆街区。打招呼前，你正沿这里的路线走动")
+			and not transport.last_messages[0].content.contains("你在这里的职责"),
+			"Stopping to greet lost Basil's actual place or walking activity"):
+		return
+	dialogue.close()
 
 	clock.minute = 360
 	world._change_area(204,Vector3(-100,0,-100))
@@ -90,17 +117,11 @@ func run() -> void:
 				"Missing source helper appearance or shadow: "+name):
 			return
 	var chef = npc.active.chef
-	var dialogue = npc.dialogue
 	if not check(dialogue.profiles.size()==39,"Missing character profiles"):
 		return
 	for name in data.actors.keys()+data.helpers.keys():
 		if not check(not str(dialogue.profiles.get(name,"")).is_empty(),"Missing character profile: "+name):
 			return
-	dialogue.client.free()
-	var transport := TestDeepSeek.new()
-	dialogue.client = transport
-	dialogue.add_child(transport)
-	transport.answered.connect(dialogue._on_answer)
 	world.player.global_position = chef.global_position+Vector3(0.33,0,0)
 	world.player.facing = 1
 	world.record_history("action","player","捡到了一枚蓝色贝壳",["chef","gray"])
@@ -115,6 +136,7 @@ func run() -> void:
 			"Facing the helper and pressing interact did not open a paused conversation"):
 		return
 	if not check(dialogue.reply.text=="今天想尝点什么？" and transport.last_messages[0].content.contains("料理")
+			and transport.last_messages[0].content.contains("你在小矮人之家。打招呼前，你在原地停留")
 			and transport.memory.contains("放下了树枝")
 			and world.history.entries.back().actor=="chef",
 			"NPC reply or persona was missing"):
@@ -138,7 +160,9 @@ func run() -> void:
 	dialogue.close()
 	if not check(not paused and not dialogue.overlay.visible,"Closing dialogue did not restore gameplay"):
 		return
-	dialogue.begin("gray","格雷")
+	if not await see_villager(world,"gray",data.actors.gray,data.routes):
+		return
+	dialogue.begin(npc.active.gray)
 	if not check(transport.last_messages[0].content.contains("赛巴拉")
 			and not transport.memory.contains("这是我们的秘密")
 			and not transport.memory.contains("蓝色贝壳"),

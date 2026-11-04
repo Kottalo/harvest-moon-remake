@@ -159,8 +159,7 @@ func greet() -> void:
 		return
 	var actor = _nearby()
 	if actor != null:
-		actor.greet(world.player.global_position)
-		dialogue.begin(str(actor.name),actor.display_name)
+		dialogue.begin(actor)
 
 
 func prompt() -> String:

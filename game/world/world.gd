@@ -42,6 +42,12 @@ func area_to_world(area: int, point: Vector3) -> Vector3:
 func world_to_area(area: int, point: Vector3) -> Vector3:
 	return point - area_to_world(area, Vector3.ZERO)
 
+func area_at(point: Vector3) -> int:
+	# The two coast segments stay loaded and share a world-space boundary.
+	if current_area in [52,56]:
+		return 52 if point.x < 5.0 else 56
+	return current_area
+
 func _enter_tree() -> void:
 	print("BOOT_STAGE: world entered")
 
@@ -190,9 +196,7 @@ func _refresh_hud() -> void:
 func _check_exits(_delta: float) -> void:
 	nearby_exit = {}
 	nearby_exit_locked = false
-	if current_area in [52, 56]:
-		# The two coast segments stay loaded. Crossing only changes the region label.
-		current_area = 52 if player.position.x < 5.0 else 56
+	current_area = area_at(player.global_position)
 	if not Input.is_action_pressed("interact"):
 		awaiting_interact_release = false
 	var local := world_to_area(current_area, player.position)
