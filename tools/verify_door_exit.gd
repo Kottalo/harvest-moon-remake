@@ -105,6 +105,10 @@ func run() -> void:
 	world._change_area(180,Vector3(-1.3,0.015,-1.254))
 	world.player.facing = 1
 	var indoor: Dictionary = world.world["180"].exits[0]
+	# This fixture isolates the re-entry geometry of the private stair door.
+	# Its ordinary lock is exercised by verify_door_access.gd.
+	var source_event: int = indoor.event
+	indoor.event = 99
 	var indoor_panel: Node3D = world.doors.open(world.get_node("Location"),indoor.door,1,true)
 	world.doors.guard_arrival(indoor_panel,world.player,Vector3.RIGHT)
 	key(KEY_LEFT,true)
@@ -115,6 +119,7 @@ func run() -> void:
 	await frames(2)
 	key(KEY_E,false)
 	if not require_ok(world.transitioning and world.player.door_passage,"Standing at an open indoor door could not re-enter via actual E"): return
+	indoor.event = source_event
 	print("DOOR_EXIT_RETURN_OK: stationary E re-enters an open door at the native walkability boundary")
 	# A stationary player must keep the door open without disabling physics.
 	world._change_area(44,Vector3(1.303,0.015,1.826))

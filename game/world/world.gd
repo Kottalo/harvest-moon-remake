@@ -1,5 +1,6 @@
 extends Node3D
 ## Owns location loading, original exits and navigation prompts. Player/camera logic is separate.
+const DoorAccess := preload("res://game/world/door_access.gd")
 @onready var player = $Player
 @onready var camera = $WorldCamera
 var hud: Label
@@ -9,6 +10,7 @@ var overview := false
 var awaiting_interact_release := false
 var transitioning := false
 var nearby_exit: Dictionary = {}
+var nearby_exit_locked := false
 var doors
 var transition_effect
 var loose_items
@@ -160,7 +162,8 @@ func _refresh_hud() -> void:
 		else:
 			text += " · E / Space 放下或丢弃 · Shift+Space 投掷"
 	if not nearby_exit.is_empty():
-		text += "\nE 进入 " + str(world[str(int(nearby_exit.target))].name)
+		var destination: String = world[str(int(nearby_exit.target))].name
+		text += "\n" + destination + " · 门锁着" if nearby_exit_locked else "\nE 进入 " + destination
 	elif day_cycle != null and day_cycle.nearby_bed():
 		text += "\nE 床边休息"
 	elif npcs != null:
@@ -172,6 +175,7 @@ func _refresh_hud() -> void:
 
 func _check_exits(_delta: float) -> void:
 	nearby_exit = {}
+	nearby_exit_locked = false
 	if current_area in [52, 56]:
 		# The two coast segments stay loaded. Crossing only changes the region label.
 		current_area = 52 if player.position.x < 5.0 else 56
@@ -208,6 +212,10 @@ func _check_exits(_delta: float) -> void:
 		if exit.requires_facing and int(exit.facing) in [0, 1, 2, 3] and int(exit.facing) != player.facing:
 			continue
 		nearby_exit = exit
+		nearby_exit_locked = DoorAccess.is_locked(int(exit.event),day_cycle.minute,day_cycle.season,
+			day_cycle.day,day_cycle.weekday,npcs.scheduled_areas)
+		if nearby_exit_locked:
+			break
 		if action and (awaiting_interact_release or not Input.is_action_just_pressed("interact")):
 			break
 		transitioning = true
@@ -297,6 +305,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	awaiting_interact_release = Input.is_action_pressed("interact")
 	transitioning = during_transition
 	nearby_exit = {}
+	nearby_exit_locked = false
 	loose_items.set_area(area)
 	farm_field.bind_location()
 	mine_field.bind_location()

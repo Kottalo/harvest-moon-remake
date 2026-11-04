@@ -88,8 +88,10 @@ func _run() -> void:
 	root.add_child(threshold_view)
 	if not await _verify_thresholds(threshold_view,world): return
 	threshold_view.free()
-	for route in [[0,0],[0,3],[40,1],[180,0],[204,0],[168,0],[44,0]]:
+	for route in [[0,0],[0,3],[40,1],[40,0],[48,0],[168,0],[44,0]]:
 		var area: int = route[0]
+		world.day_cycle.minute = 660
+		world.day_cycle.weekday = 2 if area==168 else 1
 		var exit: Dictionary
 		for candidate in world.world[str(area)].exits:
 			if int(candidate.index)==route[1]: exit = candidate

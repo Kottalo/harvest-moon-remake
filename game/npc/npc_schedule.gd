@@ -23,6 +23,7 @@ var world
 var library
 var location: Node3D
 var active := {}
+var scheduled_areas := {}
 var clock_key := Vector4i(-1,-1,-1,-1)
 var greeted
 var greet_remaining := 0.0
@@ -53,10 +54,12 @@ func update(delta: float) -> void:
 		var record: Dictionary = library.catalogue.actors[name]
 		var variant := int(record.days[day_index])
 		var step: Array = _current_step(record.schedules[variant],minute) if variant>=0 else []
-		if step.is_empty() or int(step[1]) not in areas:
+		var scheduled_area := -1 if step.is_empty() else int(step[1])
+		scheduled_areas[name] = scheduled_area
+		if scheduled_area not in areas:
 			_remove(name)
 			continue
-		var area := str(int(step[1]))
+		var area := str(scheduled_area)
 		var row := str(int(step[2]))
 		var itinerary: Array = library.catalogue.routes[area][row]
 		if itinerary[0].is_empty():
