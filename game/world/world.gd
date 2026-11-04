@@ -62,6 +62,7 @@ func _ready() -> void:
 	canvas.add_child(hud)
 	doors = load("res://game/world/source_doors.gd").new()
 	add_child(doors)
+	doors.prepare(get_node("Location"),world["0"].exits)
 	transition_effect = load("res://game/world/location_transition.gd").new()
 	add_child(transition_effect)
 	loose_items = load("res://game/items/loose_items.gd").new()
@@ -185,6 +186,8 @@ func _check_exits(_delta: float) -> void:
 		var inside := bounds.has_point(point)
 		if exit.has("door"):
 			inside = point.x>bounds.position.x and point.x<bounds.end.x and point.y>bounds.position.y and point.y<bounds.end.y
+			if not inside and bounds.grow(0.25).has_point(point):
+				inside = doors.at_threshold(get_node("Location"),int(exit.index),point)
 			if not inside:
 				# A native capsule can stop a few centimetres before a narrow indoor
 				# door zone that the original 48-unit point probe could enter.
@@ -275,6 +278,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	remove_child(previous)
 	previous.free()
 	var scene := packed.instantiate()
+	doors.prepare(scene,world[str(area)].exits)
 	_wireframe_colliders(scene)
 	scene.name = "Location"
 	add_child(scene)

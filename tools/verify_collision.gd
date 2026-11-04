@@ -135,11 +135,11 @@ func _run() -> void:
 	var room_wall: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, 0), "move_right", Engine.physics_ticks_per_second * 2, true)
 	if not _require(room_wall.x < 2.01 and world.player.is_on_floor(), "Player crossed the original room ground boundary"):
 		return
-	# Reported hospital door: walking stops outside; the action key still opens the exit.
+	# The hospital leaf and its baked wall both clear the doorway; E still enters.
 	for running in [false, true]:
 		world._change_area(40, Vector3(2.4, 0.05, -0.28))
 		var doorstep: Vector3 = await _walk(world.player, Vector3(2.4, 0.05, -0.28), "move_up", Engine.physics_ticks_per_second, running)
-		if not _require(doorstep.z > -0.74 and doorstep.z < -0.6, "Player crossed the closed hospital door: " + str(doorstep)):
+		if not _require(doorstep.z < -0.78 and doorstep.z > -0.85 and absf(doorstep.y-0.02)<0.005, "Player could not cross the closed hospital leaf on a flat sill: " + str(doorstep)):
 			return
 		world.set_physics_process(true)
 		Input.action_press("interact")

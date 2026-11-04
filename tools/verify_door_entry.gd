@@ -23,6 +23,55 @@ func _require(ok: bool,message: String) -> bool:
 		quit(1)
 	return ok
 
+func _verify_thresholds(viewport: Viewport, world) -> bool:
+	var checked := 0
+	for info: Dictionary in world.world.values():
+		var exits: Array = info.exits.filter(func(exit: Dictionary): return exit.has("door"))
+		if exits.is_empty():
+			continue
+		var location: Node3D = load(info.scene).instantiate()
+		world.doors.prepare(location,exits)
+		viewport.add_child(location)
+		await _frames(2)
+		var space := location.get_world_3d().direct_space_state
+		for exit: Dictionary in exits:
+			var threshold: StaticBody3D = location.get_node("DoorThreshold_%02d" % int(exit.index))
+			var band: Rect2 = threshold.get_meta("entry_band")
+			var into: Vector3 = DIRECTIONS[int(exit.facing)]
+			var across := Vector3(into.z,0,-into.x)
+			var shape: ConcavePolygonShape3D = threshold.get_child(0).shape
+			var faces := shape.get_faces()
+			var height := faces[0].y
+			var centre := Vector3(band.get_center().x,height,band.get_center().y)-into*0.0325
+			for leaf: int in [int(exit.door.model),int(exit.door.twin)]:
+				if leaf < 0:
+					continue
+				var panel: Node3D = location.get_node("ZoneModel_%02d" % leaf)
+				if not _require(panel.find_children("*","CollisionObject3D",true,false).is_empty(),
+						"Door leaf retains collision: "+str([info.slug,leaf])):
+					return false
+			for side in [-0.12,0.0,0.12]:
+				var lane: Vector3 = centre + across*side
+				for step in [-0.10,0.0,0.10]:
+					var point: Vector3 = lane + into*step
+					for mask in [2,4,8]:
+						var ray := PhysicsRayQueryParameters3D.create(point+Vector3.UP*0.07,point-Vector3.UP*0.12,mask)
+						var hit := space.intersect_ray(ray)
+						if not _require(not hit.is_empty() and hit.position.y>=height-0.001,
+								"Door threshold has no flat support: "+str([info.slug,exit.index,side,step,mask])):
+							return false
+				var chest := lane + Vector3.UP*0.15
+				var sweep := PhysicsRayQueryParameters3D.create(chest-into*0.025,chest+into*0.025,3)
+				var obstruction := space.intersect_ray(sweep)
+				if not _require(obstruction.is_empty(),
+						"Door has a baked wall in the aperture: "+str([info.slug,exit.index,side,obstruction])):
+					return false
+			checked += 1
+		location.free()
+	if not _require(checked==22,"Some catalogued doors were not checked"): return false
+	print("DOOR_THRESHOLD_OK: ",checked," doors; leaf collision removed, aperture clear and sill supported on all three layers")
+	return true
+
 func _run() -> void:
 	Engine.max_fps = 0
 	if OS.get_cmdline_user_args().has("--120hz"): Engine.physics_ticks_per_second = 120
@@ -34,6 +83,11 @@ func _run() -> void:
 	root.add_child(viewport)
 	var world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
+	var threshold_view := SubViewport.new()
+	threshold_view.own_world_3d = true
+	root.add_child(threshold_view)
+	if not await _verify_thresholds(threshold_view,world): return
+	threshold_view.free()
 	for route in [[0,0],[0,3],[40,1],[180,0],[204,0],[168,0],[44,0]]:
 		var area: int = route[0]
 		var exit: Dictionary
