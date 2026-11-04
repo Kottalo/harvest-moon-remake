@@ -11,6 +11,7 @@ const PAUSE_SECONDS := 0.7
 @export_file("*.json") var animation_path: String
 @onready var sprite: Sprite3D = $Sprite3D
 @onready var footprint: CollisionShape3D = $Footprint
+@onready var ground_shadow = $GroundShadow
 
 var world
 var grid := Grid.new()
@@ -79,7 +80,9 @@ func _physics_process(delta: float) -> void:
 	var horizontal := Vector2(difference.x,difference.z)
 	var direction := Vector2i(signf(horizontal.x),0) if absf(horizontal.x) > absf(horizontal.y) else Vector2i(0,signf(horizontal.y))
 	var next_facing := Grid.DIRECTIONS.find(direction)
-	if move_and_collide(difference.limit_length(WALK_SPEED*delta)) != null:
+	var step := difference.limit_length(WALK_SPEED*delta)
+	var clearance: float = ground_shadow.motion_fraction(global_position,step)
+	if move_and_collide(step*clearance) != null or clearance < 1.0:
 		_retry()
 		return
 	if next_facing >= 0:

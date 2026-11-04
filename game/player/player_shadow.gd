@@ -1,9 +1,7 @@
-extends Sprite3D
-## Original UI range 24, frame 0; its visible centre follows the logical foot point.
-@onready var player: CharacterBody3D = get_parent()
-func _ready() -> void:
-	material_override = material_override.duplicate()
+extends "res://game/characters/ground_shadow.gd"
+## Player-only support sampling for ramps, hops, and the bed action.
 func _physics_process(_delta: float) -> void:
+	var player := actor
 	var ground := player.global_position
 	var grounded: bool = player.is_on_floor() and not player.hop.active and not player.actions.cinematic
 	if grounded:
@@ -20,7 +18,5 @@ func _physics_process(_delta: float) -> void:
 			return
 		ground.y = hit.position.y
 	show()
-	global_position = ground
-	# The visible stair tread can be above its smooth physical ramp. Match the
-	# body's sorting anchor even though the shadow picture follows the visible floor.
-	material_override.set_shader_parameter("sort_height",player.global_position.y-ground.y if grounded else 0.0)
+	# The visible stair tread can be above its smooth physical ramp.
+	place_on_ground(ground,player.global_position.y-ground.y if grounded else 0.0)

@@ -57,6 +57,7 @@ func try_start(motion_direction: Vector3, delta: float) -> bool:
 		travel = maxf(travel,(shape.global_position-capsule.global_position).dot(motion_direction)+extent+player.footprint.radius+0.004)
 		row.append(other)
 	if travel>0.8: return false
+	if player.get_node("GroundShadow").motion_fraction(player.global_position,motion_direction*travel)<1.0: return false
 	var landing := player.global_position+motion_direction*travel
 	var floor_query := PhysicsRayQueryParameters3D.create(landing+Vector3.UP*0.2,landing-Vector3.UP*0.2,8)
 	var floor_hit := space.intersect_ray(floor_query)
@@ -101,7 +102,10 @@ func try_start(motion_direction: Vector3, delta: float) -> bool:
 
 func advance(delta: float) -> void:
 	var horizontal_time := minf(delta,maxf(DURATION-elapsed,0))
-	player.velocity = direction*distance/DURATION*horizontal_time/delta
+	var travel := direction*distance/DURATION*horizontal_time
+	var foot := Vector3(player.global_position.x,ground_y,player.global_position.z)
+	var clearance: float = player.get_node("GroundShadow").motion_fraction(foot,travel)
+	player.velocity = travel*clearance/delta
 	player.velocity.y = RISE_SPEED-GRAVITY*(elapsed+delta*0.5)
 	player.move_and_slide()
 	elapsed += delta

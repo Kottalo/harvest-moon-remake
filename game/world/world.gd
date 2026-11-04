@@ -105,6 +105,7 @@ func _physics_process(delta: float) -> void:
 		player.position = area_to_world(current_area, Vector3(spawn[0], spawn[1] + 0.05, spawn[2]))
 		player.velocity = Vector3.ZERO
 		player.reset_physics_interpolation()
+		_update_camera()
 	if player.actions.busy():
 		return
 	_check_exits(delta)
@@ -113,7 +114,7 @@ func _process(delta: float) -> void:
 	# Finish the small action warmup before starting the neighbouring map queue.
 	if player.actions.poll_hop_atlases():
 		location_loader.poll()
-	_update_camera(true)
+	_update_camera(true,delta)
 	hud_elapsed += delta
 	if hud_elapsed >= 0.1:
 		hud_elapsed = 0
@@ -123,8 +124,8 @@ func _configure_camera_limits() -> void:
 	var flags: int = day_cycle.catalogue.areas[str(current_area)].source_flags
 	camera.set_location(get_node("Location"),flags&0x1800==0)
 
-func _update_camera(interpolate := false) -> void:
-	camera.follow(player, overview, interpolate)
+func _update_camera(interpolate := false, delta := 0.0) -> void:
+	camera.follow(player, overview, interpolate, delta)
 
 func _set_overview() -> void:
 	camera.show_overview(get_node("Location"))

@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/characters/ground_shadow.gd" id="1"]
+[ext_resource type="Texture2D" path="res://game/player/player_shadow.tres" id="2"]
+[ext_resource type="Shader" path="res://game/player/player_shadow.gdshader" id="3"]
+
+[sub_resource type="ShaderMaterial" id="ShadowMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("3")
+shader_parameter/albedo_texture = ExtResource("2")
+
+[node name="GroundShadow" type="Sprite3D"]
+script = ExtResource("1")
+texture = ExtResource("2")
+material_override = SubResource("ShadowMaterial")
+offset = Vector2(-1, 47.5)
+pixel_size = 0.009827848
+texture_filter = 1
+cast_shadow = 0

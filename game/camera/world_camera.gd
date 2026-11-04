@@ -4,10 +4,13 @@ const HORIZONTAL_DISTANCE := 9000.0 / 1000.0
 const HEIGHT := 4500.0 / 1000.0
 const DISTANCE_SCALE := 1.3
 const EDGE_PADDING := 0.05
+const FOLLOW_RESPONSE_SECONDS := 0.035
+const FOLLOW_SETTLE_DISTANCE := 0.00005
 const YAW := -512.0 * TAU / 4096.0
 const PROJECTION_DISTANCE := 1000.0
 var eye_offset := Vector3(-sin(YAW) * HORIZONTAL_DISTANCE, HEIGHT, cos(YAW) * HORIZONTAL_DISTANCE) * DISTANCE_SCALE
 var _settled_focus := Vector3.INF
+var _render_focus := Vector3.INF
 var _coverage := PackedVector2Array()
 var _limits := PackedVector2Array()
 var _screen_bounds := Rect2()
@@ -20,7 +23,6 @@ func set_location(location: Node3D, outdoors: bool) -> void:
 	_half_view = Vector2.ZERO
 	_viewport_size = Vector2.ZERO
 	reset_gameplay()
-	_settled_focus = Vector3.INF
 	if not outdoors: return
 	basis = Basis.looking_at(-eye_offset)
 	var points := PackedVector2Array()
@@ -69,6 +71,7 @@ func limited_focus(focus: Vector3) -> Vector3:
 		reset_gameplay()
 	var half := Vector2(size*viewport.x/viewport.y,size)*0.5
 	if not half.is_equal_approx(_half_view):
+		_render_focus = Vector3.INF
 		_update_limits(half)
 		# A very wide viewport or narrow location may have no valid camera
 		# centre at the requested zoom. Tighten only on that projection change.
@@ -100,9 +103,11 @@ func _ready() -> void:
 	reset_gameplay()
 
 func reset_gameplay() -> void:
+	_render_focus = Vector3.INF
+	_settled_focus = Vector3.INF
 	set_orthogonal(sqrt(HORIZONTAL_DISTANCE*HORIZONTAL_DISTANCE+HEIGHT*HEIGHT)*DISTANCE_SCALE*240.0/PROJECTION_DISTANCE, 0.05, 200.0)
 
-func follow(player: CharacterBody3D, overview: bool, interpolate := false) -> void:
+func follow(player: CharacterBody3D, overview: bool, interpolate := false, delta := 0.0) -> void:
 	if not overview:
 		var focus := player.get_global_transform_interpolated().origin if interpolate else player.global_position
 		var actions = player.get("actions")
@@ -123,7 +128,16 @@ func follow(player: CharacterBody3D, overview: bool, interpolate := false) -> vo
 		var direction_basis := Basis.looking_at(-eye_offset)
 		if basis != direction_basis:
 			basis = direction_basis
-		var target := limited_focus(focus) + eye_offset
+		var desired := limited_focus(focus)
+		if interpolate and delta > 0.0 and _render_focus.is_finite():
+			# Both centres fit the same convex map limits, so the blend fits too.
+			var weight := 1.0 - exp(-delta / FOLLOW_RESPONSE_SECONDS)
+			_render_focus = _render_focus.lerp(desired,weight)
+			if _render_focus.distance_squared_to(desired) <= FOLLOW_SETTLE_DISTANCE * FOLLOW_SETTLE_DISTANCE:
+				_render_focus = desired
+		else:
+			_render_focus = desired
+		var target := _render_focus + eye_offset
 		if position != target:
 			position = target
 

@@ -21,6 +21,7 @@ var space: PhysicsDirectSpaceState3D
 var capsule_query := PhysicsShapeQueryParameters3D.new()
 var capsule_lift: float
 var reference_y: float
+var ground_shadow
 
 
 static func cell_at(point: Vector3) -> Vector2i:
@@ -36,6 +37,7 @@ static func center_of(cell: Vector2i) -> Vector2:
 func begin(state: PhysicsDirectSpaceState3D, bounds: Rect2i, body: CharacterBody3D,
 		shape: CapsuleShape3D, center_y: float, floor_y: float) -> void:
 	space = state
+	ground_shadow = body.get_node_or_null("GroundShadow")
 	region = bounds
 	reference_y = floor_y
 	scanned = 0
@@ -81,7 +83,7 @@ func _ground(horizontal: Vector2) -> Vector3:
 
 func _add_cell(cell: Vector2i) -> void:
 	var point := _ground(center_of(cell))
-	if not point.is_finite():
+	if not point.is_finite() or (ground_shadow != null and ground_shadow.occupied(point)):
 		return
 	capsule_query.motion = Vector3.ZERO
 	capsule_query.transform.origin = point + Vector3.UP*capsule_lift
@@ -98,6 +100,8 @@ func _add_cell(cell: Vector2i) -> void:
 
 
 func _edge_clear(from: Vector3, to: Vector3) -> bool:
+	if ground_shadow != null and ground_shadow.motion_fraction(from,to-from) < 1.0:
+		return false
 	var middle := _ground(Vector2((from.x + to.x)*0.5,(from.z + to.z)*0.5))
 	if not middle.is_finite():
 		return false

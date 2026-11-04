@@ -47,7 +47,10 @@ func _travel(target: float, key: int, running: bool) -> bool:
 		# process_frame is emitted before the camera's _process. At 120 Hz / 60 FPS,
 		# its next render can also include the previous sample's pending physics ticks.
 		var camera_limit := frame_limit * 2.0 + 0.005
-		if not _require(absf(movement.x) <= frame_limit and absf(movement.y) <= frame_limit and camera_step <= camera_limit and offset_error <= frame_limit and world.player.is_on_floor(), "Coast crossing teleported, lost the floor, or jumped the camera: " + str([previous, point, world.player.is_on_floor(), camera_step, offset_error])):
+		# The eased camera trails continuous movement briefly. Keep the same
+		# per-frame jump limit, and budget that trail separately.
+		var follow_limit: float = frame_limit + speed * world.camera.FOLLOW_RESPONSE_SECONDS * 1.6
+		if not _require(absf(movement.x) <= frame_limit and absf(movement.y) <= frame_limit and camera_step <= camera_limit and offset_error <= follow_limit and world.player.is_on_floor(), "Coast crossing teleported, lost the floor, or jumped the camera: " + str([previous, point, world.player.is_on_floor(), camera_step, offset_error])):
 			return false
 		if (key == KEY_LEFT and point.x <= target) or (key == KEY_RIGHT and point.x >= target):
 			_key(key, false)

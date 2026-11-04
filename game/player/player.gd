@@ -82,7 +82,11 @@ func _physics_process(delta: float) -> void:
 		velocity.y = (ground.position.y+0.001-global_position.y)/delta if not ground.is_empty() and ground.normal.y>=cos(floor_max_angle) else 0.0
 	else:
 		velocity.y -= 14 * delta
-		_constrain_to_ground(Vector3(velocity.x, 0, velocity.z) * delta)
+		var horizontal := Vector3(velocity.x,0,velocity.z) * delta
+		_constrain_to_ground(horizontal)
+		var clearance: float = $GroundShadow.motion_fraction(global_position,horizontal)
+		velocity.x *= clearance
+		velocity.z *= clearance
 	move_and_slide()
 	# Align the visible feet to the support plane, not the capsule's rounded bottom.
 	sprite.position.y = -footprint.radius * (1.0 / get_floor_normal().y - 1.0) if is_on_floor() else 0.0

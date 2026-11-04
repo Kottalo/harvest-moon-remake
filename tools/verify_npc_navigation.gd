@@ -83,6 +83,8 @@ func _run() -> void:
 			"NPC did not replan and finish walking around the new obstacle"):
 		return
 	blocker.free()
+	if not await _verify_shadow_clearance(world.player,npc):
+		return
 	world._change_area(80,Vector3.ZERO)
 	if not _require(not is_instance_valid(npc) and world.get_node_or_null("Location/Thomas") == null,
 			"Farm NPC leaked into an interior"):
@@ -91,8 +93,56 @@ func _run() -> void:
 	if not _require(world.get_node_or_null("Location/Thomas") != null,
 			"Farm NPC did not return on the next visit"):
 		return
-	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, native debris detour, dynamic replan, walking animation and location lifecycle")
+	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, native debris detour, dynamic replan, walking animation, mutual shadow clearance and location lifecycle")
 	quit()
+
+
+func _verify_shadow_clearance(player: CharacterBody3D, npc: CharacterBody3D) -> bool:
+	var player_shadow = player.get_node("GroundShadow")
+	var npc_shadow = npc.get_node("GroundShadow")
+	if not _require(player_shadow.visible and npc_shadow.visible and player_shadow.texture == npc_shadow.texture
+			and player_shadow.material_override != npc_shadow.material_override,"Characters did not share the source ground shadow correctly"):
+		return false
+	var from: Vector3 = npc.grid._ground(Vector2(-1.8,-2.5))
+	var to: Vector3 = npc.grid._ground(Vector2(-1.2,-2.5))
+	if not _require(from.is_finite() and to.is_finite(),"Shadow clearance fixture needs open farm ground"):
+		return false
+	npc.set_physics_process(false)
+	player.global_position = from + Vector3.UP*0.001
+	npc.global_position = to
+	player.reset_physics_interpolation()
+	npc.reset_physics_interpolation()
+	var spacing: float = player_shadow.footprint_radius() + npc_shadow.footprint_radius() + player_shadow.CONTACT_GAP
+	for tick in 5:
+		await physics_frame
+	Input.action_press("move_right")
+	for tick in Engine.physics_ticks_per_second:
+		await physics_frame
+	Input.action_release("move_right")
+	var gap := npc.global_position.x - player.global_position.x
+	if not _require(absf(gap-spacing)<0.001 and player_shadow.global_position.distance_to(player.global_position)<0.002,
+			"Player did not stop at Thomas's shadow: "+str(gap)):
+		return false
+	Input.action_press("move_left")
+	for tick in Engine.physics_ticks_per_second/2:
+		await physics_frame
+	Input.action_release("move_left")
+	if not _require(player.global_position.x < from.x,"Player could not leave shadow contact"):
+		return false
+	player.set_physics_process(false)
+	player.global_position = from
+	var destination := Vector2i(100,100)
+	npc.grid.positions[destination] = from
+	npc.route.assign([destination])
+	npc.building = false
+	npc.replan = false
+	npc.pause_remaining = 0.0
+	npc.set_physics_process(true)
+	for tick in Engine.physics_ticks_per_second:
+		await physics_frame
+	gap = npc.global_position.x - player.global_position.x
+	return _require(absf(gap-spacing)<0.001 and npc_shadow.global_position.is_equal_approx(npc.global_position),
+			"Thomas did not stop at the player's shadow: "+str(gap))
 
 
 func _obstacle(parent: Node3D, point: Vector3, size: Vector3) -> StaticBody3D:
