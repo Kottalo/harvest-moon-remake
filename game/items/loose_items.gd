@@ -1,5 +1,6 @@
 extends Node3D
 ## Native loose-item records; initial debris positions come from title_layout0_cells.
+const HISTORY_NAMES := {58:"石头",62:"树枝",64:"杂草"}
 var world
 var catalogue: Dictionary
 var records := {}
@@ -232,6 +233,7 @@ func interact() -> void:
 	var record := _target()
 	if not record.is_empty() and actions.start_pickup(record.id):
 		_remove(record)
+		world.record_player_action("拿起了%s" % HISTORY_NAMES[int(record.id)])
 
 func _remove(record: Dictionary) -> void:
 	if not record.active:
@@ -377,6 +379,7 @@ func release_item(item: int, thrown: bool) -> void:
 		field_cells[placement.cell] = item
 		_add_record(record)
 	placement = {}
+	world.record_player_action(("扔出了%s" if thrown else "放下了%s") % HISTORY_NAMES[item])
 
 func use_tool(tool: int, _charge: int) -> void:
 	var record := _target()
@@ -387,6 +390,7 @@ func use_tool(tool: int, _charge: int) -> void:
 		kind = ["sickle","hoe","axe","hammer","watering_can"][(tool-1)/5 as int]
 	if kind == catalogue.pictures[str(record.id)].tool:
 		_remove(record)
+		world.record_player_action("清理了%s" % HISTORY_NAMES[int(record.id)])
 
 func _physics_process(delta: float) -> void:
 	if world == null or world.transitioning:

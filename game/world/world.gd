@@ -1,6 +1,7 @@
 extends Node3D
 ## Owns location loading, original exits and navigation prompts. Player/camera logic is separate.
 const DoorAccess := preload("res://game/world/door_access.gd")
+const WorldHistory := preload("res://game/world/world_history.gd")
 @onready var player = $Player
 @onready var camera = $WorldCamera
 var hud: Label
@@ -22,6 +23,16 @@ var farm_field
 var mine_field
 var tool_picker
 var npcs
+var history := WorldHistory.new()
+
+func record_history(kind: String, actor: String, content: String, witnesses: PackedStringArray) -> int:
+	var minute: int = day_cycle.minute
+	var date := "第%d年%s季第%d天 %02d:%02d" % [
+		day_cycle.year+1,["春","夏","秋","冬"][day_cycle.season],day_cycle.day+1,minute/60,minute%60]
+	return history.record(kind,actor,content,witnesses,world[str(current_area)].name,date)
+
+func record_player_action(content: String) -> void:
+	record_history("action","player",content,npcs.witnesses() if npcs != null else [])
 
 func area_to_world(area: int, point: Vector3) -> Vector3:
 	if area == 56:
@@ -250,6 +261,7 @@ func _begin_transition(exit: Dictionary) -> void:
 		await get_tree().process_frame
 		if token != transition_token:
 			return
+	record_player_action("前往%s" % world[str(int(exit.target))].name)
 	_change_area(int(exit.target),Vector3(exit.entry[0],exit.entry[1],exit.entry[2]),true)
 	var arrival_panel: Node3D
 	for reverse in world[str(current_area)].exits:

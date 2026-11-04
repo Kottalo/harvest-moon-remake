@@ -16,6 +16,7 @@ var step := 0
 var step_limit := -1
 var elapsed := 0.0
 var owns_lock := false
+var recorded_till := false
 
 func setup(owner_world) -> void:
 	world = owner_world
@@ -72,6 +73,7 @@ func use_tool(tool: int, charge: int) -> void:
 	step = 0
 	step_limit = int(catalogue.step_limits[level])
 	elapsed = 0
+	recorded_till = false
 	owns_lock = not world.player.input_locked
 	if owns_lock:
 		world.player.input_locked = true
@@ -99,7 +101,11 @@ func _till(cell: Vector2i) -> bool:
 	var index := cell_index(cell)
 	if index < 0 or crops.plants.has(index) or not plot_clear(cell):
 		return false
+	var changed := states[index]==SOIL
 	set_soil(index,WATERED if states[index]==WATERED else TILLED)
+	if changed and not recorded_till:
+		recorded_till = true
+		world.record_player_action("在农场锄地")
 	return true
 
 func plot_clear(cell: Vector2i) -> bool:

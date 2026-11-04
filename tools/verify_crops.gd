@@ -114,7 +114,12 @@ func _run() -> void:
 		return
 	if not _require(crops.message == "已播种 · 1 格","Sowing did not report the changed plot count"):
 		return
+	var before_repeat: int = world.history.entries.size()
+	if not _require(world.history.entries.back().content=="播种了1格芜菁","Successful sowing did not enter world history"):
+		return
 	if not _tool(34) or not _require(crops.plants.size()==1 and crops.message == "周围没有可播种的空耕地","Repeated sowing failed to report no eligible plots"):
+		return
+	if not _require(world.history.entries.size()==before_repeat,"Failed sowing entered world history"):
 		return
 	_dawn()
 	if not _require(crops.plants[target].days == 0,"Dry seed grew"):
@@ -133,6 +138,10 @@ func _run() -> void:
 		return
 	actions.interact_requested.emit()
 	if not _finish() or not _require(actions.carried_id == 65 and not crops.plants.has(target) and not crops.colliders.has(target),"Harvest did not pick up ripe turnip"):
+		return
+	if not _require(world.history.entries.back().content=="收获了芜菁"
+			and world.history.entries[before_repeat-1].content=="播种了1格芜菁",
+			"Harvest was missing from history or a day change lost the earlier sowing"):
 		return
 	actions.interact_requested.emit()
 	if not _require(actions.carried_id == 0 and crops.harvest.get(65,0) == 1,"Harvest pouch did not receive crop"):

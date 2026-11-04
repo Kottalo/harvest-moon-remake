@@ -86,6 +86,7 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 			plants[index] = {"id":plant_id,"stage":0,"days":0,"skip":false}
 			planted += 1
 		if planted > 0:
+			world.record_player_action("播种了%d格%s" % [planted,data.seeds[str(seed)].name])
 			message = "已播种 · %d 格" % planted
 			var crop: Dictionary = data.crops[str(376 if seed == 51 else seed)]
 			if crop.season != world.day_cycle.season and crop.season != 4:
@@ -97,12 +98,16 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 		var offsets: Array = data.water[charge][facing]
 		var count := mini(mini(offsets.size(),int(data.water_steps[charge])),water_remaining)
 		water_remaining -= count
+		var watered := 0
 		for i in count:
 			var offset: Array = offsets[i]
 			var cell := origin + Vector2i(offset[0],offset[1])
 			var index: int = field.cell_index(cell)
 			if index >= 0 and field.states[index] == field.TILLED and (plants.has(index) or field.plot_clear(cell)):
 				field.states[index] = field.WATERED
+				watered += 1
+		if watered > 0:
+			world.record_player_action("给%d格耕地浇了水" % watered)
 		refresh_plots(false)
 	elif tool >= 1 and tool <= 5:
 		for offset: Array in data.cut[charge][facing]:
@@ -179,6 +184,7 @@ func pick_crop() -> void:
 	if actions.start_pickup(item):
 		after_harvest(index,crop)
 		refresh_plots()
+		world.record_player_action("收获了%s" % data.seeds.get(str(plant.id),{"name":"作物"}).name)
 
 
 func after_harvest(index: int, crop: Dictionary) -> void:

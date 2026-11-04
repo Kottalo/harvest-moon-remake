@@ -132,6 +132,26 @@ func _nearby():
 	return best
 
 
+func witnesses() -> PackedStringArray:
+	var result := PackedStringArray()
+	var player: CharacterBody3D = world.player
+	var space := player.get_world_3d().direct_space_state
+	var eye := Vector3.UP*0.35
+	for id in active:
+		var actor = active[id]
+		if not actor.placed or scheduled_areas.get(id,world.current_area) != world.current_area:
+			continue
+		var offset: Vector3 = actor.global_position-player.global_position
+		if absf(offset.y)>0.4 or offset.length_squared()>4.0:
+			continue
+		var query := PhysicsRayQueryParameters3D.create(
+			player.global_position+eye,actor.global_position+eye,
+			player.collision_mask,[player.get_rid(),actor.get_rid()])
+		if space.intersect_ray(query).is_empty():
+			result.append(id)
+	return result
+
+
 func greet() -> void:
 	if world.transitioning or world.day_cycle.menu_open or world.player.actions.busy() or world.player.actions.carried_id!=0:
 		return

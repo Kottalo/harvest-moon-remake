@@ -3,10 +3,14 @@ extends SceneTree
 
 class TestDeepSeek extends "res://game/npc/dialogue/deepseek.gd":
 	var last_messages: Array
+	var prompt: Dictionary
+	var memory: String
 	var problem := ""
 
 	func ask(messages: Array) -> void:
 		last_messages = messages
+		prompt = JSON.parse_string(messages.back().content)
+		memory = JSON.stringify(prompt.memory)
 		answered.emit("今天想尝点什么？" if problem.is_empty() else "",problem)
 
 
@@ -99,32 +103,59 @@ func run() -> void:
 	transport.answered.connect(dialogue._on_answer)
 	world.player.global_position = chef.global_position+Vector3(0.33,0,0)
 	world.player.facing = 1
+	world.record_history("action","player","捡到了一枚蓝色贝壳",["chef","gray"])
+	for tick in 9:
+		world.record_history("action","player","扫了地",["gray"])
+	world.record_player_action("放下了树枝")
+	if not check(world.history.entries.back().known_by.has("chef"),
+			"The nearby NPC did not witness the action"):
+		return
 	world.player.actions.interact_requested.emit()
 	if not check(dialogue.overlay.visible and paused and dialogue.npc_id=="chef" and chef.facing==3,
 			"Facing the helper and pressing interact did not open a paused conversation"):
 		return
-	if not check(dialogue.reply.text=="今天想尝点什么？" and transport.last_messages[0].content.contains("料理"),
+	if not check(dialogue.reply.text=="今天想尝点什么？" and transport.last_messages[0].content.contains("料理")
+			and transport.memory.contains("放下了树枝")
+			and world.history.entries.back().actor=="chef",
 			"NPC reply or persona was missing"):
 		return
 	transport.problem = "连接失败"
-	dialogue._submit("你喜欢吃什么？")
-	if not check(dialogue.status.text==transport.problem and dialogue.entry.editable and dialogue.history["chef"].size()==2,
+	var before_speech: int = world.history.entries.size()
+	dialogue._submit("这是我们的秘密")
+	if not check(dialogue.status.text==transport.problem and dialogue.entry.editable
+			and world.history.entries.size()==before_speech+1
+			and world.history.entries.back().known_by==PackedStringArray(["player","chef"]),
 			"A failed reply was stored as NPC speech or prevented recovery"):
 		return
 	transport.problem = ""
 	dialogue._submit("")
-	if not check(transport.last_messages.size()==4 and transport.last_messages.back().content=="你喜欢吃什么？",
-			"Follow-up did not retain this actor's conversation"):
+	if not check(world.history.entries.size()==before_speech+2
+			and transport.prompt.message=="这是我们的秘密"
+			and not transport.memory.contains("这是我们的秘密")
+			and transport.memory.contains("今天想尝点什么？"),
+			"Retry duplicated speech or lost this NPC's earlier reply"):
 		return
 	dialogue.close()
 	if not check(not paused and not dialogue.overlay.visible,"Closing dialogue did not restore gameplay"):
 		return
 	dialogue.begin("gray","格雷")
-	if not check(transport.last_messages.size()==2 and transport.last_messages[0].content.contains("赛巴拉"),
+	if not check(transport.last_messages[0].content.contains("赛巴拉")
+			and not transport.memory.contains("这是我们的秘密")
+			and not transport.memory.contains("蓝色贝壳"),
 			"Another actor received the wrong persona or conversation history"):
+		return
+	dialogue._submit("蓝色贝壳和我们的秘密是什么？")
+	if not check(transport.memory.contains("蓝色贝壳")
+			and not transport.memory.contains("这是我们的秘密")
+			and not transport.memory.contains("known_by")
+			and transport.prompt.memory.size()<=11,
+			"Topic recall failed to find old known events or exposed private history"):
 		return
 	world._change_area(80,Vector3.ZERO)
 	if not check(not is_instance_valid(chef) and npc.active.is_empty() and not paused,"NPCs leaked between locations"):
+		return
+	if not check(world.history.memory_for("chef","").any(func(event): return event.content=="这是我们的秘密"),
+			"NPC knowledge was lost on a map change"):
 		return
 	world.free()
 	print("NPC_ROSTER_OK: 32 villagers and 7 helpers placed, original shop hours, persona dialogue and history isolation and clean area lifecycle")
