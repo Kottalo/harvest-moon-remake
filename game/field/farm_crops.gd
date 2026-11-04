@@ -25,7 +25,6 @@ func setup(owner_field) -> void:
 	var actions = world.player.actions
 	actions.seed_catalogue = data.seeds
 	actions.crop_picture_provider = picture
-	actions.interact_requested.connect(pick_crop)
 	world.day_cycle.day_started.connect(next_day)
 	crop_body.name = "CropObstructions"
 	crop_body.collision_mask = 0

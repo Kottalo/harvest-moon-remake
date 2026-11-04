@@ -343,6 +343,31 @@ def scene_exits(data, count):
     return result
 
 
+def scene_notices(data):
+    """Active front-probe zones that call menu_request_open(2, param)."""
+    result = []
+    for index in range(50):
+        offset = 16 + index * 44
+        flags, kind, message, _, facing = struct.unpack_from('<HHhHh', data, offset)
+        if not flags & 0x4000 or kind not in (16, 30):
+            continue
+        low = struct.unpack_from('<3h', data, offset + 14)
+        high = struct.unpack_from('<3h', data, offset + 20)
+        bounds = (low[0], -high[1], -high[2], high[0], -low[1], -low[2])
+        result.append([message, facing, *(coordinate / 1000 for coordinate in bounds)])
+    return result
+
+
+def write_notices(headers, areas):
+    path = ROOT / 'game/world/object_notices.json'
+    notices = json.loads(path.read_text(encoding='utf-8'))
+    zones = {str(area): rows for area in sorted(areas) if (rows := scene_notices(headers[area]))}
+    assert all(str(row[0]) in notices['messages'] for rows in zones.values() for row in rows), 'Missing notice translation'
+    notices['zones'] = zones
+    path.write_text(json.dumps(notices, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    print(f"NOTICES_OK: {sum(map(len, zones.values()))} original front-probe zones")
+
+
 def import_world(disc, offsets, out):
     count = (len(offsets) - 1) // 4
     # Follow the actual default spring exits, rather than importing seasonal duplicates.
@@ -384,6 +409,7 @@ def import_world(disc, offsets, out):
                 world[str(exit['target'])]['spawn'] = exit['entry']
     assert all(str(exit['target']) in world for info in world.values() for exit in info['exits'])
     (ROOT / 'game/world/location_catalog.json').write_text(json.dumps(world, ensure_ascii=False, indent=2), encoding='utf-8')
+    write_notices(headers, connected)
     return reports
 
 
@@ -527,6 +553,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('disc', nargs='?', type=Path)
     parser.add_argument('--check', action='store_true')
+    parser.add_argument('--notices-only', action='store_true')
     args = parser.parse_args()
     self_check()
     if args.check and not args.disc:
@@ -535,6 +562,11 @@ def main():
     disc = Disc(args.disc)
     table = (ROOT / 'reference/hmbtn-decomp/src/overlay/common/farm_section_table.h').read_text()
     offsets = [int(v, 16) for v in re.findall(r'0x[0-9a-fA-F]+', table.split('= {', 1)[1])]
+    if args.notices_only:
+        catalogue = json.loads((ROOT / 'game/world/location_catalog.json').read_text(encoding='utf-8'))
+        headers = {int(area): disc.asset(offsets[int(area) * 4], 0xbdc) for area in catalogue}
+        write_notices(headers, headers)
+        return
     out = ROOT / 'game/locations'
     areas = import_world(disc, offsets, out)
     report = dict(areas=areas, area_count=len(areas))

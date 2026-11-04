@@ -26,23 +26,25 @@ const PRIVATE_ROOMS := [7,10,12,16,17,20,26,28,29,30,37,40,41,48]
 const CLOSED_DATES := [[0,7,17,21],[0,6,11,19,23],[2,8,20],[9,23]]
 
 
-static func is_locked(event_id: int, minute: int, season: int, day: int, weekday: int,
-		scheduled_areas: Dictionary) -> bool:
+static func refusal(event_id: int, minute: int, season: int, day: int, weekday: int,
+		scheduled_areas: Dictionary) -> String:
 	if event_id in PRIVATE_ROOMS:
-		return true
+		return "门锁着。这里是私人房间。"
 	if not ACCESS.has(event_id):
-		return false
+		return ""
 	var hours: Array = ACCESS[event_id]
 	if day in CLOSED_DATES[season]:
 		# The source day-item exceptions allow these rules through on these dates.
 		if (event_id==34 and season==0 and day==0) or (event_id==31 and season==2 and day==2):
 			hours = EVENING_HOURS
 		else:
-			return true
+			return "门锁着。今天不开放。"
 	elif event_id==34 and season==2 and day==4:
 		hours = INN_FALL_5
 	elif event_id==6 and weekday==0:
 		hours = POULTRY_SUNDAY
 	if minute < int(hours[0])*60 or minute >= int(hours[1])*60:
-		return true
-	return hours.size()>2 and int(scheduled_areas.get(hours[2],-1)) != int(hours[3])
+		return "门锁着。现在不在开放时间内。"
+	if hours.size()>2 and int(scheduled_areas.get(hours[2],-1)) != int(hours[3]):
+		return "门锁着。现在无人接待。"
+	return ""

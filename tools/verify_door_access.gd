@@ -28,20 +28,20 @@ func at_door(world, area: int, event_id: int, minute: int, weekday: int, season 
 	return exit
 
 
-func enter_key(pressed: bool) -> void:
+func enter_key(pressed: bool, code := KEY_E) -> void:
 	var event := InputEventKey.new()
-	event.physical_keycode = KEY_E
-	event.keycode = KEY_E
+	event.physical_keycode = code
+	event.keycode = code
 	event.pressed = pressed
 	Input.parse_input_event(event)
 	Input.flush_buffered_events()
 
 
-func press_enter() -> void:
-	enter_key(true)
+func press_enter(code := KEY_E) -> void:
+	enter_key(true,code)
 	for tick in 2:
 		await physics_frame
-	enter_key(false)
+	enter_key(false,code)
 	await physics_frame
 
 
@@ -72,6 +72,7 @@ func run() -> void:
 	var world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
 	world.set_physics_process(false)
+	var dialogue = world.npcs.dialogue
 	# Monday's initial-affection hours, Tuesday's absence, and a source calendar date.
 	for case in [[40,25,539,1,0,1,true],[40,25,540,1,0,1,false],
 			[40,25,1079,1,0,1,false],[40,25,1080,1,0,1,true],
@@ -95,6 +96,7 @@ func run() -> void:
 	world.set_physics_process(true)
 	await press_enter()
 	if not require_ok(world.current_area==36 and world.nearby_exit_locked and not world.transitioning
+			and dialogue.notice_open and dialogue.reply.text.contains("无人接待")
 			and distance>=world.player.footprint.radius and distance<0.13,
 			"Player ran through the locked library stop or could not reach its prompt: "+str(distance)):
 		return
@@ -108,7 +110,12 @@ func run() -> void:
 	await press_enter()
 	world._refresh_hud()
 	if not require_ok(not world.transitioning and world.doors.doors.is_empty()
-			and world.hud.text.contains("门锁着"),"Locked supermarket accepted E or failed to show refusal"):
+			and world.hud.text.contains("门锁着") and dialogue.notice_open and not dialogue.entry.visible
+			and dialogue.reply.text.contains("开放时间"),"Locked supermarket accepted E or failed to show refusal"):
+		return
+	await press_enter()
+	if not require_ok(not dialogue.overlay.visible and not paused and not world.transitioning,
+			"Closing a locked-door notice triggered another interaction"):
 		return
 	# Change the clock while standing at the same door.
 	world.day_cycle.minute = 540
@@ -155,6 +162,35 @@ func run() -> void:
 			break
 	if not require_ok(world.current_area==128 and not world.transitioning,"Yodel Ranch entry did not finish"):
 		return
+	# Read the actual shop sign from its source probe zone, with physical E.
+	world._change_area(40,Vector3(-2.049,0,-0.175))
+	world.player.facing = 1
+	await physics_frame
+	await press_enter()
+	if not require_ok(not dialogue.overlay.visible,"The shop sign opened when facing away"):
+		return
+	world.player.facing = 3
+	world._refresh_hud()
+	if not require_ok(world.hud.text.contains("E 查看 杂货店"),"Nearby sign did not show its interaction hint"):
+		return
+	await press_enter()
+	if not require_ok(dialogue.notice_open and paused and dialogue.title.text=="杂货店"
+			and dialogue.reply.text.contains("周二和周日休息") and dialogue.npc_id.is_empty(),
+			"Physical E did not show the sign's local text"):
+		return
+	await press_enter(KEY_ESCAPE)
+	if not require_ok(not dialogue.overlay.visible and not paused,"Escape did not dismiss the notice"):
+		return
+	world._change_area(92,Vector3(-0.976,0,0.2))
+	world.player.facing = 1
+	await physics_frame
+	await press_enter()
+	if not require_ok(dialogue.notice_open and dialogue.title.text=="马厩告示"
+			and dialogue.reply.text.contains("刷毛"),"An indoor object did not use its own source notice"):
+		return
+	await press_enter(KEY_ENTER)
+	if not require_ok(not dialogue.overlay.visible and not paused,"Enter did not dismiss the indoor notice"):
+		return
 	world.free()
-	print("DOOR_ACCESS_OK: source times, resident days off, date exceptions, private rooms, E refusal and after-hours exit")
+	print("DOOR_ACCESS_OK: source locks, actual entry and exit, E refusal, outdoor signs and indoor notices")
 	quit()

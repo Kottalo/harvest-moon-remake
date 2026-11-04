@@ -6,6 +6,7 @@ const WorldHistory := preload("res://game/world/world_history.gd")
 @onready var camera = $WorldCamera
 var hud: Label
 var world: Dictionary
+var object_notices: Dictionary
 var current_area := 0
 var overview := false
 var awaiting_interact_release := false
@@ -63,6 +64,7 @@ func _ready() -> void:
 		get_viewport().scaling_3d_scale = minf(get_viewport().scaling_3d_scale,0.70)
 	_wireframe_colliders(get_node("Location"))
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
+	object_notices = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/object_notices.json"))
 	location_loader = load("res://game/world/location_loader.gd").new()
 	location_loader.catalogue = world
 	location_loader.warm(0)
@@ -95,7 +97,6 @@ func _ready() -> void:
 	add_child(day_cycle)
 	day_cycle.setup(self)
 	day_cycle.sleep_requested.connect(_sleep_until_morning)
-	player.actions.interact_requested.connect(day_cycle.interact)
 	farm_field = load("res://game/field/farm_field.gd").new()
 	farm_field.name = "FarmField"
 	add_child(farm_field)
@@ -118,7 +119,7 @@ func _ready() -> void:
 	npcs.add_child(npcs.dialogue)
 	npcs.dialogue.setup(self,ui_font)
 	npcs.enter_location(get_node("Location"))
-	player.actions.interact_requested.connect(npcs.greet)
+	player.actions.interact_requested.connect(_interact)
 	print("WORLD_READY: ", world.size(), " native locations")
 
 func _wireframe_colliders(location: Node3D) -> void:
@@ -183,15 +184,37 @@ func _refresh_hud() -> void:
 			text += " · E / Space 放下或丢弃 · Shift+Space 投掷"
 	if not nearby_exit.is_empty():
 		var destination: String = world[str(int(nearby_exit.target))].name
-		text += "\n" + destination + " · 门锁着" if nearby_exit_locked else "\nE 进入 " + destination
+		text += "\nE 查看 " + destination + " · 门锁着" if nearby_exit_locked else "\nE 进入 " + destination
 	elif day_cycle != null and day_cycle.nearby_bed():
 		text += "\nE 床边休息"
 	elif npcs != null:
-		var prompt: String = npcs.prompt()
+		var notice := _notice_ahead()
+		var prompt: String = "E 查看 " + notice[0] if not notice.is_empty() else npcs.prompt()
 		if not prompt.is_empty():
 			text += "\n" + prompt
 	if hud.text != text:
 		hud.text = text
+
+func _notice_ahead() -> Array:
+	if player.actions.carried_id != 0:
+		return []
+	var direction: Vector3 = player.actions.DIRECTIONS[player.facing]
+	var probe := world_to_area(current_area,player.global_position)+direction*0.224
+	for zone: Array in object_notices.zones.get(str(current_area),[]):
+		if int(zone[1])!=5 and int(zone[1])!=player.facing:
+			continue
+		# farm_zone_at_probe uses strict horizontal bounds and vertical slack.
+		if zone[2]<probe.x and probe.x<zone[5] and zone[3]-0.120<probe.y and probe.y<zone[6]+0.128 and zone[4]<probe.z and probe.z<zone[7]:
+			return object_notices.messages[str(int(zone[0]))]
+	return []
+
+func _interact() -> void:
+	if awaiting_interact_release or npcs.dialogue.overlay.visible:
+		return
+	loose_items.interact()
+	day_cycle.interact()
+	farm_field.crops.pick_crop()
+	npcs.greet()
 
 func _check_exits(_delta: float) -> void:
 	nearby_exit = {}
@@ -199,6 +222,7 @@ func _check_exits(_delta: float) -> void:
 	current_area = area_at(player.global_position)
 	if not Input.is_action_pressed("interact"):
 		awaiting_interact_release = false
+	var pressed := not awaiting_interact_release and Input.is_action_just_pressed("interact")
 	var local := world_to_area(current_area, player.position)
 	var point := Vector2(local.x, local.z)
 	var ahead: Vector2 = point + [Vector2(0, 1), Vector2(-1, 0), Vector2(0, -1), Vector2(1, 0)][player.facing] * 0.224
@@ -230,15 +254,22 @@ func _check_exits(_delta: float) -> void:
 		if exit.requires_facing and int(exit.facing) in [0, 1, 2, 3] and int(exit.facing) != player.facing:
 			continue
 		nearby_exit = exit
-		nearby_exit_locked = DoorAccess.is_locked(int(exit.event),day_cycle.minute,day_cycle.season,
+		var refusal := DoorAccess.refusal(int(exit.event),day_cycle.minute,day_cycle.season,
 			day_cycle.day,day_cycle.weekday,npcs.scheduled_areas)
+		nearby_exit_locked = not refusal.is_empty()
 		if nearby_exit_locked:
+			if pressed:
+				npcs.dialogue.show_notice(world[str(int(exit.target))].name,refusal)
 			break
-		if action and (awaiting_interact_release or not Input.is_action_just_pressed("interact")):
+		if action and not pressed:
 			break
 		transitioning = true
 		_begin_transition.call_deferred(exit.duplicate(true))
 		break
+	if pressed and nearby_exit.is_empty() and not day_cycle.nearby_bed():
+		var notice := _notice_ahead()
+		if not notice.is_empty():
+			npcs.dialogue.show_notice(notice[0],notice[1])
 
 func _begin_transition(exit: Dictionary) -> void:
 	var token := transition_token

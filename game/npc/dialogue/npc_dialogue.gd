@@ -67,6 +67,7 @@ var pending_text := ""
 var pending_record := -1
 var pending := false
 var was_paused := false
+var notice_open := false
 var overlay: Control
 var frame: Control
 var title: Label
@@ -200,11 +201,28 @@ func begin(actor) -> void:
 			neighbor.greet(world.player.global_position)
 	actor.greet(world.player.global_position)
 	entry.text = ""
+	entry.show()
+	send.show()
+	_open()
+	pending_text = "玩家走到你面前打招呼。请根据此刻的场景自然回应。"
+	_ask()
+
+func show_notice(heading: String, text: String) -> void:
+	if overlay.visible:
+		return
+	notice_open = true
+	title.text = heading
+	reply.text = text
+	reply_scroll.scroll_vertical = 0
+	status.text = "E / Enter / Esc 关闭"
+	entry.hide()
+	send.hide()
+	_open()
+
+func _open() -> void:
 	overlay.show()
 	was_paused = get_tree().paused
 	get_tree().paused = true
-	pending_text = "玩家走到你面前打招呼。请根据此刻的场景自然回应。"
-	_ask()
 
 func _scene_context(actor) -> String:
 	var clock = world.day_cycle
@@ -228,6 +246,9 @@ func _scene_context(actor) -> String:
 func close() -> void:
 	if not overlay.visible:
 		return
+	if notice_open and Input.is_action_pressed("interact"):
+		world.awaiting_interact_release = true
+	notice_open = false
 	client.cancel_request()
 	pending = false
 	pending_text = ""
@@ -248,16 +269,16 @@ func _exit_tree() -> void:
 		get_tree().paused = was_paused
 
 func _input(event: InputEvent) -> void:
-	if not is_instance_valid(overlay) or not overlay.visible or not event is InputEventKey or not event.pressed:
+	if not is_instance_valid(overlay) or not overlay.visible or not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if event.keycode == KEY_ESCAPE:
+	if event.keycode == KEY_ESCAPE or (notice_open and event.is_action_pressed("interact")):
 		get_viewport().set_input_as_handled()
 		close()
 	elif event.keycode == KEY_F1:
 		get_viewport().set_input_as_handled()
 
 func _submit(value: String) -> void:
-	if pending or not overlay.visible:
+	if pending or notice_open or not overlay.visible:
 		return
 	var text := value.strip_edges()
 	if text.is_empty():
