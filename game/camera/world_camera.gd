@@ -120,8 +120,12 @@ func follow(player: CharacterBody3D, overview: bool, interpolate := false) -> vo
 			_settled_focus = Vector3.INF
 		# Constant angle: subtracting large world coordinates in look_at introduced
 		# additional tiny rotations, which also changed billboard orientations.
-		basis = Basis.looking_at(-eye_offset)
-		position = limited_focus(focus) + eye_offset
+		var direction_basis := Basis.looking_at(-eye_offset)
+		if basis != direction_basis:
+			basis = direction_basis
+		var target := limited_focus(focus) + eye_offset
+		if position != target:
+			position = target
 
 func show_overview(location: Node3D) -> void:
 	var bounds: AABB
