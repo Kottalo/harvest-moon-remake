@@ -1,6 +1,7 @@
 extends Node
 ## Source clock.c/calendar and weather.c drift; independent of rendering FPS.
 signal sleep_requested(automatic: bool)
+signal day_started(previous_season: int)
 var catalogue: Dictionary
 var world
 var year := 0
@@ -101,6 +102,7 @@ func advance(delta: float, paused: bool) -> void:
 func _tick_minute() -> void:
 	minute = (minute+1)%1440
 	if minute == 360:
+		var previous_season := season
 		day += 1
 		weekday = (weekday+1)%7
 		if day >= 30:
@@ -109,6 +111,7 @@ func _tick_minute() -> void:
 		if season >= 4:
 			season = 0
 			year = mini(year+1,98)
+		day_started.emit(previous_season)
 	var next := time_period()
 	if next != period:
 		period = next

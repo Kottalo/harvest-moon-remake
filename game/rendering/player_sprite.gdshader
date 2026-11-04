@@ -2,6 +2,7 @@ shader_type spatial;
 render_mode unshaded, cull_disabled;
 
 uniform sampler2D albedo_texture : source_color, filter_linear, repeat_disable;
+uniform vec4 albedo_texture_region = vec4(0.0,0.0,1.0,1.0);
 uniform float sort_bias = 0.0;
 uniform vec3 draw_offset = vec3(0.0);
 varying flat float source_depth;
@@ -21,7 +22,7 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 pixel = texture(albedo_texture, UV);
+	vec4 pixel = texture(albedo_texture, albedo_texture_region.xy + UV*albedo_texture_region.zw);
 	if (pixel.a < 0.5) {
 		discard;
 	}

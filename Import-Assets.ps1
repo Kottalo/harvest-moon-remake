@@ -14,6 +14,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Shadow/mine conversion failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Day cycle conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\import_original_sprites.py') $Disc
 if ($LASTEXITCODE -ne 0) { throw 'Original NPC, animal and item conversion failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\import_crops.py') $Disc
+if ($LASTEXITCODE -ne 0) { throw 'Crop conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\texture_dedup.py') apply
 if ($LASTEXITCODE -ne 0) { throw 'Texture consolidation failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\pack_textures.py') build
@@ -36,6 +38,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Native atlas binding failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Atlas source cleanup failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_runtime.gd
 if ($LASTEXITCODE -ne 0) { throw 'Native runtime check failed' }
+& $godotExe --headless --path $PSScriptRoot --script tools/verify_crops.gd
+if ($LASTEXITCODE -ne 0) { throw 'Crop lifecycle check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_actions.gd
 if ($LASTEXITCODE -ne 0) { throw 'Source action check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_item_collision.gd

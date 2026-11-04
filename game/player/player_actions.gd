@@ -16,6 +16,10 @@ var elapsed := 0.0
 var charge_ticks := 0.0
 var equipped := 6
 var upgrade := 0
+var selected_seed := 34
+var seed_catalogue := {}
+var crop_produce := {}
+var crop_picture_provider: Callable
 var carried_id := 0
 var pending_item := 0
 var held_sprite: Sprite3D
@@ -43,6 +47,8 @@ func busy() -> bool:
 	return not state.is_empty()
 
 func tool_name() -> String:
+	if equipped == 34 and seed_catalogue.has(str(selected_seed)):
+		return seed_catalogue[str(selected_seed)].name + "种子"
 	var index := TOOL_IDS.find(equipped)
 	return TOOL_NAMES[index] + (" · " + LEVEL_NAMES[upgrade] if equipped <= 25 else "")
 
@@ -60,8 +66,11 @@ func poll_input() -> void:
 		# player_check_tool_slots: show animation 0x47 for ten source ticks.
 		play("base",71,"show_tool",player.facing)
 		return
-	if Input.is_action_just_pressed("tool_level") and equipped <= 25:
-		upgrade = (upgrade + 1) % 5
+	if Input.is_action_just_pressed("tool_level"):
+		if equipped <= 25:
+			upgrade = (upgrade + 1) % 5
+		elif equipped == 34 and not seed_catalogue.is_empty():
+			selected_seed = 34 + (selected_seed - 33) % seed_catalogue.size()
 	if Input.is_action_just_pressed("use_tool"):
 		if carried_id != 0:
 			if Input.is_action_pressed("run"):
@@ -98,7 +107,8 @@ func start_tool() -> bool:
 	elif equipped in [31,32]:
 		play("potion",player.facing,"animal_tool")
 	else:
-		play("seeds",1,"seed") # ItemInfo[ITEM_TURNIP_SEEDS].plantAnimation
+		var seed: Dictionary = seed_catalogue.get(str(selected_seed), {})
+		play("seeds",int(seed.get("animation",1)),"seed")
 	return true
 
 func release_tool() -> void:
@@ -108,14 +118,14 @@ func release_tool() -> void:
 	play("tool_%d" % upgrade,72 + ((equipped-1)/5 as int)*20 + player.facing*5 + level,"swing",level+1)
 
 func start_pickup(item: int) -> bool:
-	if busy() or carried_id != 0 or player.input_locked or not items.has(str(item)):
+	if busy() or carried_id != 0 or player.input_locked or (not items.has(str(item)) and not crop_produce.has(item)):
 		return false
 	pending_item = item
 	play("base",11+player.facing,"pickup")
 	return true
 
 func start_drop(thrown := false) -> bool:
-	if busy() or carried_id == 0 or player.input_locked:
+	if busy() or carried_id == 0 or player.input_locked or crop_produce.has(carried_id):
 		return false
 	play("base",23+player.facing,"throw" if thrown else "drop")
 	return true
@@ -229,7 +239,12 @@ func update_held(running: bool) -> void:
 	held_sprite.visible = item != 0
 	if item == 0:
 		return
-	held_sprite.texture = _texture(data.tool_pictures[str(item)] if showing else items[str(item)].texture)
+	if showing and equipped == 34 and selected_seed != 34 and seed_catalogue.has(str(selected_seed)):
+		held_sprite.texture = crop_picture_provider.call(seed_catalogue[str(selected_seed)].icon)
+	elif not showing and crop_produce.has(item):
+		held_sprite.texture = crop_produce[item]
+	else:
+		held_sprite.texture = _texture(data.tool_pictures[str(item)] if showing else items[str(item)].texture)
 	held_sprite.material_override.set_shader_parameter("albedo_texture",held_sprite.texture)
 	var group := 0 if showing or pending_item != 0 or state in ["drop","throw"] else (2 if running else 1)
 	var offset: Array = data.item_offsets[0 if showing else group*4+player.facing]

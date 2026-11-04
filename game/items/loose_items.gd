@@ -9,6 +9,7 @@ var flights := []
 var ticks := 0.0
 var field_cells: Array
 var placement := {}
+var occupied_crop_cells := {}
 var batches := {}
 var meshes := {}
 var prefab_scenes := {58:preload("res://game/items/prefabs/stone.tscn"),62:preload("res://game/items/prefabs/branch.tscn"),64:preload("res://game/items/prefabs/weeds.tscn")}
@@ -221,6 +222,8 @@ func interact() -> void:
 		return
 	var actions = world.player.actions
 	if actions.carried_id != 0:
+		if not catalogue.pictures.has(str(actions.carried_id)):
+			return
 		placement = _placement(actions.carried_id)
 		if placement.get("blocked",false):
 			return
@@ -296,6 +299,8 @@ func _placement(item: int) -> Dictionary:
 	var space := get_world_3d().direct_space_state
 	var field := Rect2(Vector2(-4.4,-1.6),Vector2(45,25)*VISUAL_CELL_SIZE)
 	for cell in candidates:
+		if occupied_crop_cells.has(cell.y*45+cell.x):
+			continue
 		var centre := _placement_cell_center(cell)
 		if (centre-feet).dot(direction)<=0:
 			continue

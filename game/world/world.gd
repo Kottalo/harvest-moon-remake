@@ -122,10 +122,19 @@ func _set_overview() -> void:
 func _refresh_hud() -> void:
 	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · E 交互 · Space/X 工具 · Q 换工具 · R 等级 · Tab 全景"
 	text += "\n" + player.actions.tool_name()
+	if player.actions.equipped == 34:
+		text += " · R 选种"
+	elif player.actions.equipped == 21:
+		text += " · 水量 %d · G 补水" % farm_field.crops.water_remaining
+	if not farm_field.crops.message.is_empty():
+		text += " · " + farm_field.crops.message
 	if player.actions.state == "charge":
 		text += " · 蓄力 " + str(mini(int(player.actions.charge_ticks/20),player.actions.upgrade))
 	if player.actions.carried_id != 0:
-		text += " · E / Space 放下或丢弃 · Shift+Space 投掷"
+		if player.actions.crop_produce.has(player.actions.carried_id):
+			text += " · E 收入收成袋"
+		else:
+			text += " · E / Space 放下或丢弃 · Shift+Space 投掷"
 	if not nearby_exit.is_empty():
 		text += "\nE 进入 " + str(world[str(int(nearby_exit.target))].name)
 	elif day_cycle != null and day_cycle.nearby_bed():
@@ -282,6 +291,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _sleep_until_morning(automatic: bool) -> void:
 	if transitioning:
 		return
+	var actions = player.actions
+	if automatic and actions.state == "pickup" and actions.crop_produce.has(actions.pending_item):
+		actions._finish()
 	transitioning = true
 	player.input_locked = true
 	player.scripted_walk_time = 0
