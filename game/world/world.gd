@@ -37,6 +37,9 @@ func _ready() -> void:
 			and DisplayServer.window_get_vsync_mode() == DisplayServer.VSYNC_ENABLED:
 		# VSync already meets the cap on this display. Avoid a second sleep timer.
 		Engine.max_fps = 0
+	if Engine.is_embedded_in_editor():
+		# The editor and preview share one GPU. Keep the standalone render scale.
+		get_viewport().scaling_3d_scale = minf(get_viewport().scaling_3d_scale,0.70)
 	_wireframe_colliders(get_node("Location"))
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
 	location_loader = load("res://game/world/location_loader.gd").new()

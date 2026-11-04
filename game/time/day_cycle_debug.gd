@@ -100,6 +100,8 @@ func _process(_delta: float) -> void:
 		"frames":frame_times.size(),"p95_ms":p95,"late_frames":late_frames,"worst":worst_frame,
 		"fps_cap":Engine.max_fps,"refresh_hz":DisplayServer.screen_get_refresh_rate(),
 		"vsync":DisplayServer.window_get_vsync_mode(),
+		"embedded":Engine.is_embedded_in_editor(),
+		"render_scale":clock.world.get_viewport().scaling_3d_scale,
 	}
 	var file := FileAccess.open("user://camera-pacing-last.json",FileAccess.WRITE)
 	if file != null:
