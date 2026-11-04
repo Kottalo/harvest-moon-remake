@@ -36,10 +36,6 @@ if ($LASTEXITCODE -ne 0) { throw 'Native scene baking failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Native atlas binding failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\pack_textures.py') finish
 if ($LASTEXITCODE -ne 0) { throw 'Atlas source cleanup failed' }
-& $godotExe --headless --path $PSScriptRoot --script tools/export_camera_coverage.gd
-if ($LASTEXITCODE -ne 0) { throw 'Outdoor camera geometry export failed' }
-& $Python (Join-Path $PSScriptRoot 'tools\bake_camera_coverage.py')
-if ($LASTEXITCODE -ne 0) { throw 'Outdoor camera coverage bake failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_runtime.gd
 if ($LASTEXITCODE -ne 0) { throw 'Native runtime check failed' }
 & $godotExe --headless --path $PSScriptRoot --script tools/verify_crops.gd

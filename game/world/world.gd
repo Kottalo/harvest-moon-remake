@@ -135,7 +135,7 @@ func _process(delta: float) -> void:
 
 func _configure_camera_limits() -> void:
 	var flags: int = day_cycle.catalogue.areas[str(current_area)].source_flags
-	camera.set_location(get_node("Location"),flags&0x1800==0,current_area)
+	camera.set_location(get_node("Location"),flags&0x1800==0)
 
 func _update_camera(interpolate := false, delta := 0.0) -> void:
 	camera.follow(player, overview, interpolate, delta)
