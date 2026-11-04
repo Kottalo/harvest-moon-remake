@@ -34,11 +34,11 @@ func _run() -> void:
 	farm.player.position = Vector3(0,0.05,-2.0)
 	farm.player.velocity = Vector3.ZERO
 	farm.player.reset_physics_interpolation()
-	await _frames(12)
+	await _frames(24) # Let render follow settle after the fixture teleport.
 	var start: Vector3 = farm.player.position
 	var camera_delta: Vector3 = farm.camera.eye_offset
 	if not _require((farm.camera.position-farm.camera.limited_focus(start)-camera_delta).length()<0.005,"Camera lost its limited player focus"): return
-	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 11.7) < 0.00001 and absf(camera_delta.y - 5.85) < 0.00001 and absf(camera_delta.length() - sqrt(171.1125)) < 0.00001, "Requested 1.3x camera calibration was not applied"):
+	if not _require(absf(Vector2(camera_delta.x, camera_delta.z).length() - 9.0) < 0.00001 and absf(camera_delta.y - 4.5) < 0.00001 and absf(camera_delta.length() - sqrt(101.25)) < 0.00001, "Original 1x camera calibration was not applied"):
 		return
 	# Character/world scale stays fixed for distance and orthographic zoom.
 	var sprite: Sprite3D = farm.player.get_node("Sprite3D")
@@ -81,7 +81,7 @@ func _run() -> void:
 	# Orthographic gameplay: equal world lengths project equally at every depth.
 	farm.player.position = start
 	farm._update_camera()
-	if not _require(farm.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and is_equal_approx(farm.camera.size,sqrt(171.1125)*0.24),"Gameplay camera must stay orthographic at the previous centre-plane framing"): return
+	if not _require(farm.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and is_equal_approx(farm.camera.size,sqrt(101.25)*0.24),"Gameplay camera must stay orthographic at the original centre-plane framing"): return
 	var size: Vector2 = root.get_visible_rect().size
 	for depth in [-3.0,0.0,3.0]:
 		var centre: Vector3 = start+farm.camera.global_basis.z*depth
@@ -90,7 +90,7 @@ func _run() -> void:
 		if not _require(absf(a.distance_to(b)-size.y/farm.camera.size)<0.001,"Orthographic camera has perspective size changes"): return
 	var entry0: Node3D = farm.get_node("Location/ZoneModel_00")
 	var entry1: Node3D = farm.get_node("Location/ZoneModel_01")
-	if not _require(entry0.position.is_equal_approx(Vector3(-4.78, 0, -4.28)) and entry1.position.is_equal_approx(Vector3(1.53, 0.04, -3.18)), "Original scene-object placement changed"):
+	if not _require(entry0.position.is_equal_approx(Vector3(-4.799, 0, -4.28)) and entry1.position.is_equal_approx(Vector3(1.53, 0.04, -3.18)), "Original scene-object placement changed"):
 		return
 	var distances := []
 	for mode in [0, 1, 2]:

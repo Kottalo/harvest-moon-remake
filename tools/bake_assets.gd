@@ -1,5 +1,6 @@
 extends SceneTree
 ## Run after importing PNGs: godot --headless --path . --script tools/bake_assets.gd
+const FARMHOUSE_WALL_X := -4.8
 var motion_textures := {}
 var texture_dedup: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/texture_dedup_manifest.json"))
 var packed_textures: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/texture_packer/atlas_manifest.json"))
@@ -48,6 +49,9 @@ func _bake_scene(info: Dictionary) -> void:
 		var node := Node3D.new()
 		node.name = "ZoneModel_%02d" % int(entry.index)
 		node.position = Vector3(entry.position[0], entry.position[1], entry.position[2])
+		if info.slug == "farm" and int(entry.index) == 0:
+			# Keep the hinged door a millimetre in front of the wood siding.
+			node.position.x = FARMHOUSE_WALL_X + 0.001
 		node.rotation_order = EULER_ORDER_ZXY
 		node.rotation = Vector3(entry.angle[0], entry.angle[1], entry.angle[2]) * TAU / 4096.0
 		node.set_meta("source_position", entry.source_position)
@@ -81,6 +85,29 @@ func _remove_doghouse_backplate(surfaces: Array) -> void:
 			removed += 1
 	assert(removed==2,"Expected the original two covered doghouse backplate triangles")
 	print("DOGHOUSE_BACKPLATE_OK: removed two covered coplanar triangles; wooden gable preserved")
+
+func _flatten_farmhouse_door(texture: String, vertices: PackedVector3Array) -> void:
+	# The rest of these atlas surfaces belong to other buildings or windows.
+	var trim := texture == "textures/farm_atlas_12.png"
+	var backing := texture == "textures/farm_atlas_24.png"
+	var reveal := texture == "textures/farm_atlas_28.png"
+	if not (trim or backing or reveal):
+		return
+	var doorway := AABB(Vector3(-5.201,-0.001,-4.321),Vector3(0.422,0.642,0.482))
+	for i in range(0,vertices.size(),3):
+		if not doorway.has_point(vertices[i]) or not doorway.has_point(vertices[i+1]) or not doorway.has_point(vertices[i+2]):
+			continue
+		if maxf(vertices[i].y,maxf(vertices[i+1].y,vertices[i+2].y)) < 0.1:
+			continue
+		for corner in range(i,i+3):
+			var point := vertices[corner]
+			# Preserve the original dark opening for the open-door animation.
+			# Its backing and the very short reveal sit behind the closed leaf.
+			point.x = FARMHOUSE_WALL_X
+			if backing or (reveal and vertices[corner].x < -4.81):
+				point.x -= 0.004
+			vertices[corner] = point
+
 
 func _ramp_planes(ramp: Dictionary) -> Array:
 	var low := _ramp_point(ramp, [minf(ramp["from"][0], ramp.to[0]), minf(ramp["from"][1], ramp.to[1]) - 0.001], ramp.cross[0])
@@ -186,6 +213,8 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 							walkable_faces.append_array(face)
 		if not surface.visible:
 			continue # Keep collision above; omit neutral additive-black drawing below.
+		if parent == farm and farm.get_meta("area_id") == 0:
+			_flatten_farmhouse_door(surface.texture,vertices)
 		for i in range(0, surface.uv.size(), 2):
 			uv.append(Vector2(surface.uv[i], surface.uv[i + 1]))
 		if texture_base.ends_with("/mother_hill_summit/") and surface.texture.get_file() in ["mother_hill_summit_atlas_09.png", "mother_hill_summit_atlas_03_blend.png"]:

@@ -2,13 +2,12 @@ extends Camera3D
 ## Orthographic gameplay at the existing angle and centre-plane framing.
 const HORIZONTAL_DISTANCE := 9000.0 / 1000.0
 const HEIGHT := 4500.0 / 1000.0
-const DISTANCE_SCALE := 1.3
 const EDGE_PADDING := 0.05
 const FOLLOW_RESPONSE_SECONDS := 0.035
 const FOLLOW_SETTLE_DISTANCE := 0.00005
 const YAW := -512.0 * TAU / 4096.0
 const PROJECTION_DISTANCE := 1000.0
-var eye_offset := Vector3(-sin(YAW) * HORIZONTAL_DISTANCE, HEIGHT, cos(YAW) * HORIZONTAL_DISTANCE) * DISTANCE_SCALE
+var eye_offset := Vector3(-sin(YAW) * HORIZONTAL_DISTANCE, HEIGHT, cos(YAW) * HORIZONTAL_DISTANCE)
 var _settled_focus := Vector3.INF
 var _render_focus := Vector3.INF
 var _coverage := PackedVector2Array()
@@ -105,7 +104,7 @@ func _ready() -> void:
 func reset_gameplay() -> void:
 	_render_focus = Vector3.INF
 	_settled_focus = Vector3.INF
-	set_orthogonal(sqrt(HORIZONTAL_DISTANCE*HORIZONTAL_DISTANCE+HEIGHT*HEIGHT)*DISTANCE_SCALE*240.0/PROJECTION_DISTANCE, 0.05, 200.0)
+	set_orthogonal(sqrt(HORIZONTAL_DISTANCE*HORIZONTAL_DISTANCE+HEIGHT*HEIGHT)*240.0/PROJECTION_DISTANCE, 0.05, 200.0)
 
 func follow(player: CharacterBody3D, overview: bool, interpolate := false, delta := 0.0) -> void:
 	if not overview:
