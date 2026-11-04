@@ -3,6 +3,7 @@ extends Camera3D
 const HORIZONTAL_DISTANCE := 9000.0 / 1000.0
 const HEIGHT := 4500.0 / 1000.0
 const EDGE_PADDING := 0.05
+const FARM_TRIAL_PADDING := 0.45
 const FOLLOW_RESPONSE_SECONDS := 0.035
 const FOLLOW_SETTLE_DISTANCE := 0.00005
 const YAW := -512.0 * TAU / 4096.0
@@ -15,6 +16,7 @@ var _limits := PackedVector2Array()
 var _screen_bounds := Rect2()
 var _half_view := Vector2.ZERO
 var _viewport_size := Vector2.ZERO
+var _edge_padding := EDGE_PADDING
 
 func set_location(location: Node3D, outdoors: bool) -> void:
 	_coverage.clear()
@@ -36,6 +38,10 @@ func set_location(location: Node3D, outdoors: bool) -> void:
 	_screen_bounds = Rect2(_coverage[0],Vector2.ZERO)
 	for point in _coverage: _screen_bounds = _screen_bounds.expand(point)
 
+func set_farm_edge_trial(enabled: bool) -> void:
+	_edge_padding = FARM_TRIAL_PADDING if enabled else EDGE_PADDING
+	_half_view = Vector2.ZERO
+
 func _project(point: Vector3) -> Vector2:
 	return Vector2(point.dot(basis.x),point.dot(basis.y))
 
@@ -49,7 +55,7 @@ func _update_limits(half: Vector2) -> void:
 		var edge := _coverage[(i+1)%_coverage.size()]-point
 		var inward := Vector2(-edge.y,edge.x).normalized()
 		if inward.dot(centre-point)<0: inward = -inward
-		var boundary := inward.dot(point)+inward.abs().dot(half)+EDGE_PADDING
+		var boundary := inward.dot(point)+inward.abs().dot(half)+_edge_padding
 		var clipped := PackedVector2Array()
 		for j in _limits.size():
 			var a := _limits[j]

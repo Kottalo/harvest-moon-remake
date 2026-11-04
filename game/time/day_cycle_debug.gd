@@ -6,6 +6,7 @@ var selector: OptionButton
 var close_button: Button
 var was_paused := false
 var timing_button: Button
+var farm_camera_trial: CheckButton
 var timing_until := 0
 var previous_frame := 0
 var frame_times := PackedFloat32Array()
@@ -54,6 +55,11 @@ func setup(owner_clock) -> void:
 		timing_button.text = "采样画面卡顿（30 秒）"
 		timing_button.pressed.connect(_start_timing)
 		rows.add_child(timing_button)
+		farm_camera_trial = CheckButton.new()
+		farm_camera_trial.text = "农场镜头限位试用"
+		farm_camera_trial.tooltip_text = "开启后，镜头在农场边缘提前停住。关掉即可对照。"
+		farm_camera_trial.toggled.connect(clock.world.set_farm_camera_trial)
+		rows.add_child(farm_camera_trial)
 	close_button = Button.new()
 	close_button.text = "继续游戏（F1）"
 	close_button.focus_mode = Control.FOCUS_NONE # Keyboard closing uses F1, never a gameplay accept key.
@@ -121,6 +127,9 @@ func set_open(open: bool) -> void:
 		was_paused = get_tree().paused
 		get_tree().paused = true
 		selector.select(clock.debug_period+1)
+		if farm_camera_trial != null:
+			farm_camera_trial.disabled = clock.world.current_area != 0
+			farm_camera_trial.set_pressed_no_signal(clock.world.farm_camera_trial)
 	else:
 		selector.get_popup().hide()
 		get_tree().paused = was_paused

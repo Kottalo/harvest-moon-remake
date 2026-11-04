@@ -59,6 +59,34 @@ func run() -> void:
 				var point: Vector3 = camera.basis.x*centre.x+camera.basis.y*centre.y
 				if not require_ok(covered_corners(camera,camera.limited_focus(point)),"Viewport escaped the map envelope: "+str([id,viewport])): return
 		print("CAMERA_LOCATION_OK: ",id," ",info.slug," outdoors=",outdoors)
+	# Trial is explicit, farm-only, and locks the outward component at a fixed edge.
+	world._change_area(0,Vector3(-4.55,0,9.5))
+	root.size = Vector2i(1152,720)
+	var trial_foot := Vector3(-4.55,0,9.5)
+	var normal_focus: Vector3 = camera.limited_focus(trial_foot)
+	world.set_farm_camera_trial(true)
+	var trial_focus: Vector3 = camera.limited_focus(trial_foot)
+	if not require_ok(is_equal_approx(camera.size,original_size) and trial_focus.distance_to(normal_focus)>0.1,
+			"Opt-in farm edge did not stop earlier at the original scale"): return
+	var boundary: PackedVector2Array = camera._limits
+	var edge := boundary[1]-boundary[0]
+	var outward := Vector2(edge.y,-edge.x).normalized()
+	var middle := (boundary[0]+boundary[1])*0.5
+	var centre := Vector2.ZERO
+	for vertex in boundary: centre += vertex/boundary.size()
+	if outward.dot(centre-middle)>0: outward = -outward
+	for extra in [0.1,0.6]:
+		var probe: Vector2 = middle+outward*extra
+		var desired: Vector3 = camera.basis.x*probe.x+camera.basis.y*probe.y
+		var clamped: Vector2 = camera._project(camera.limited_focus(desired))
+		if not require_ok(clamped.distance_to(middle)<0.001,"Trial continued past its fixed edge"): return
+	world._change_area(52,Vector3(0,0,0))
+	if not require_ok(camera._edge_padding==camera.EDGE_PADDING,"Farm trial affected town square"): return
+	world._change_area(0,trial_foot)
+	if not require_ok(camera._edge_padding==camera.FARM_TRIAL_PADDING,"Farm trial did not resume on return"): return
+	world.set_farm_camera_trial(false)
+	if not require_ok(camera.limited_focus(trial_foot).is_equal_approx(normal_focus),"Turning off the trial did not restore normal limits"): return
+	print("FARM_FIXED_EDGE_TRIAL_OK: opt-in, original distance, stops at the fixed edge, farm only, reversible")
 	# Square plane: test all edges using an independent known geometry boundary.
 	var location := Node3D.new();root.add_child(location)
 	var geometry := MeshInstance3D.new();var plane := PlaneMesh.new();plane.size=Vector2(20,20);geometry.mesh=plane;location.add_child(geometry)
