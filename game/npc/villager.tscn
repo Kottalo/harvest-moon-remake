@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" path="res://game/npc/patrol_npc.gd" id="1"]
+[ext_resource type="Script" path="res://game/npc/villager.gd" id="1"]
 [ext_resource type="Shader" path="res://game/rendering/player_sprite.gdshader" id="2"]
 [ext_resource type="PackedScene" path="res://game/characters/ground_shadow.tscn" id="3"]
 
@@ -12,13 +12,10 @@ height = 0.24
 resource_local_to_scene = true
 shader = ExtResource("2")
 
-[node name="Thomas" type="CharacterBody3D"]
+[node name="Villager" type="CharacterBody3D"]
 collision_layer = 0
 collision_mask = 1
 script = ExtResource("1")
-search_region = Rect2i(7, -7, 24, 12)
-patrol = Array[Vector2i]([Vector2i(18, 0), Vector2i(12, 0), Vector2i(24, -3)])
-animation_path = "res://game/npc/thomas_walk.json"
 
 [node name="Footprint" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.12, 0)

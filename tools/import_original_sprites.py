@@ -324,17 +324,6 @@ def extract_makers(disc, library, work):
 
 
 
-def thomas_walk_catalogue(catalogue):
-    # Keep the first NPC's runtime catalogue small. The source library is loaded offline.
-    packs = catalogue["npc"]["mayor_thomas"]["packs"]
-    ranges = (packs[6] if 6 in packs else packs["6"])[:5]
-    assert [len(sequence) for sequence in ranges] == [4, 8, 8, 8, 8]
-    images = {frame["image"]: catalogue["images"][frame["image"]]
-              for sequence in ranges for frame in sequence}
-    return dict(ranges=ranges, images=images, canvas=catalogue["canvas"],
-                origin=catalogue["origin"], pages=catalogue["pages"])
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("disc", type=Path)
@@ -370,14 +359,10 @@ def main():
         catalogue["item_models"] = {name: f"res://game/original_sprites/models/{name}.tscn" for name in models}
         output = json.dumps(catalogue, separators=(",", ":")) + "\n"
         model_output = json.dumps(models, separators=(",", ":")) + "\n"
-        thomas = ROOT / "game/npc/thomas_walk.json"
-        thomas_output = json.dumps(thomas_walk_catalogue(catalogue), separators=(",", ":")) + "\n"
         if not args.check:
             (destination / "models").mkdir(parents=True, exist_ok=True)
             (destination / "catalogue.json").write_text(output, encoding="utf-8")
             (destination / "models/makers.json").write_text(model_output, encoding="utf-8")
-            thomas.write_text(thomas_output, encoding="utf-8")
-        assert thomas.read_text(encoding="utf-8") == thomas_output
         assert (destination / "models/makers.json").read_text(encoding="utf-8") == model_output
         assert (destination / "catalogue.json").read_text(encoding="utf-8") == output
         for page in pages:

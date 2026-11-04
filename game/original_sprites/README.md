@@ -24,8 +24,10 @@ The only named item-range IDs without a bound picture are action codes
 sprite for those codes, so they are recorded under `nonvisual_action_ids`.
 Dialogue portraits are outside this world-sprite catalogue.
 
-These assets are available on demand. Map placement, schedules, dialogue,
-livestock gameplay and inventory behavior are separate systems.
+Ordinary village schedules use the subset baked by
+`python tools/import_npc_schedules.py <USA disc>`. It reads this catalogue's
+ANI frames and packed atlas entries together with the disc's route tables.
+The Godot game loads the baked data directly.
 
 Regenerate offline with `python tools/import_original_sprites.py <USA disc>`,
 or add `--check` to compare the generated catalogue and atlases to the

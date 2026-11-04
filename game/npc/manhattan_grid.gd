@@ -20,7 +20,7 @@ var scanned := 0
 var space: PhysicsDirectSpaceState3D
 var capsule_query := PhysicsShapeQueryParameters3D.new()
 var capsule_lift: float
-var reference_y: float
+var floor_bounds := Vector2.ZERO
 var ground_shadow
 
 
@@ -35,11 +35,13 @@ static func center_of(cell: Vector2i) -> Vector2:
 
 
 func begin(state: PhysicsDirectSpaceState3D, bounds: Rect2i, body: CharacterBody3D,
-		shape: CapsuleShape3D, center_y: float, floor_y: float) -> void:
+		shape: CapsuleShape3D, center_y: float, floor_y: float, goal_y := INF) -> void:
 	space = state
 	ground_shadow = body.get_node_or_null("GroundShadow")
 	region = bounds
-	reference_y = floor_y
+	if not is_finite(goal_y):
+		goal_y = floor_y
+	floor_bounds = Vector2(minf(floor_y,goal_y),maxf(floor_y,goal_y))
 	scanned = 0
 	graph.clear()
 	positions.clear()
@@ -66,15 +68,28 @@ func path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 	return result
 
 
+func nearby_cells(point: Vector3, radius: int) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	var centre := cell_at(point)
+	for x in range(centre.x-radius,centre.x+radius+1):
+		for z in range(centre.y-radius,centre.y+radius+1):
+			var cell := Vector2i(x,z)
+			if positions.has(cell):
+				result.append(cell)
+	result.sort_custom(func(a: Vector2i,b: Vector2i):
+		return point.distance_squared_to(positions[a])<point.distance_squared_to(positions[b]))
+	return result
+
+
 func _id(cell: Vector2i) -> int:
 	var local := cell - region.position
 	return local.y * region.size.x + local.x
 
 
 func _ground(horizontal: Vector2) -> Vector3:
-	var point := Vector3(horizontal.x,reference_y,horizontal.y)
-	var ray := PhysicsRayQueryParameters3D.create(point + Vector3.UP*PROBE_HEIGHT,
-		point - Vector3.UP*PROBE_HEIGHT,8)
+	var ray := PhysicsRayQueryParameters3D.create(
+		Vector3(horizontal.x,floor_bounds.y+PROBE_HEIGHT,horizontal.y),
+		Vector3(horizontal.x,floor_bounds.x-PROBE_HEIGHT,horizontal.y),8)
 	var hit := space.intersect_ray(ray)
 	if hit.is_empty() or hit.normal.y < cos(MAX_FLOOR_ANGLE):
 		return Vector3.INF

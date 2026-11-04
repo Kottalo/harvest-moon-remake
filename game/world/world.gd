@@ -19,6 +19,7 @@ var location_loader
 var farm_field
 var mine_field
 var tool_picker
+var npcs
 
 func area_to_world(area: int, point: Vector3) -> Vector3:
 	if area == 56:
@@ -90,15 +91,13 @@ func _ready() -> void:
 	_refresh_hud()
 	_configure_camera_limits()
 	_update_camera()
-	_spawn_location_actors()
+	npcs = preload("res://game/npc/npc_schedule.gd").new()
+	npcs.name = "NpcSchedule"
+	add_child(npcs)
+	npcs.world = self
+	npcs.enter_location(get_node("Location"))
+	player.actions.interact_requested.connect(npcs.greet)
 	print("WORLD_READY: ", world.size(), " native locations")
-
-
-func _spawn_location_actors() -> void:
-	if current_area == 0:
-		var actor = preload("res://game/npc/thomas.tscn").instantiate()
-		actor.world = self
-		get_node("Location").add_child(actor)
 
 func _wireframe_colliders(location: Node3D) -> void:
 	if OS.is_debug_build() and get_tree().debug_collisions_hint:
@@ -111,6 +110,7 @@ func _physics_process(delta: float) -> void:
 	if transitioning:
 		return
 	day_cycle.advance(delta,overview)
+	npcs.update(delta)
 	if transitioning or day_cycle.menu_open:
 		return
 	if player.position.y < -10:
@@ -163,6 +163,10 @@ func _refresh_hud() -> void:
 		text += "\nE 进入 " + str(world[str(int(nearby_exit.target))].name)
 	elif day_cycle != null and day_cycle.nearby_bed():
 		text += "\nE 床边休息"
+	elif npcs != null:
+		var prompt: String = npcs.prompt()
+		if not prompt.is_empty():
+			text += "\n" + prompt
 	if hud.text != text:
 		hud.text = text
 
@@ -301,8 +305,8 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	if overview:
 		_set_overview()
 	_update_camera()
+	npcs.enter_location(scene)
 	_refresh_hud()
-	_spawn_location_actors()
 	print("AREA_READY: ", area, " ", world[str(area)].name)
 
 func _unhandled_key_input(event: InputEvent) -> void:

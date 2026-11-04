@@ -18,7 +18,17 @@ func _run() -> void:
 		Engine.physics_ticks_per_second = 120
 	var world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
-	var npc = world.get_node("Location/Thomas")
+	var start := Vector2i(18,0)
+	var goal := Vector2i(12,0)
+	var npc = load("res://game/npc/villager.tscn").instantiate()
+	npc.world = world
+	npc.art = world.npcs.library
+	npc.poses = npc.art.catalogue.actors.mayor_thomas.art["6"]
+	npc.speed = 0.82
+	var from := Grid.center_of(start)
+	var to := Grid.center_of(goal)
+	npc.set_itinerary([[Vector3(from.x,0,from.y),0,0.0],[Vector3(to.x,0,to.y),0,0.0]],-1)
+	world.get_node("Location").add_child(npc)
 	for column in range(-1,3):
 		for row in range(-1,3):
 			var soil := Grid.SOIL_EDGE + Vector2(column,row)*Grid.SOIL_SIZE
@@ -31,12 +41,10 @@ func _run() -> void:
 						return
 	for tick in 100:
 		await physics_frame
-		if npc.active:
+		if not npc.path.is_empty():
 			break
-	if not _require(npc.active and npc.sprite.visible and npc.sprite.texture != null,"Thomas did not appear with the source sprite"):
+	if not _require(npc.placed and npc.sprite.visible and npc.sprite.texture != null,"Thomas did not appear with the source sprite"):
 		return
-	var start: Vector2i = npc.patrol[0]
-	var goal: Vector2i = npc.patrol[1]
 	var path: Array[Vector2i] = npc.grid.path(start,goal)
 	if not _require(path.size() == (goal-start).abs().x + 3 and path[0] == start and path[-1] == goal,
 			"Expected a route around the original debris: "+str(path)):
@@ -53,12 +61,12 @@ func _run() -> void:
 	# A thin wall can block an edge even when both cell centres fit the capsule.
 	var a: Vector2i = path[1]
 	var b: Vector2i = path[2]
-	var from: Vector3 = npc.grid.positions[a]
-	var to: Vector3 = npc.grid.positions[b]
+	var a_point: Vector3 = npc.grid.positions[a]
+	var b_point: Vector3 = npc.grid.positions[b]
 	var thin := Vector3(0.02,0.5,0.16) if a.x != b.x else Vector3(0.16,0.5,0.02)
-	var wall := _obstacle(world,(from + to)*0.5,thin)
+	var wall := _obstacle(world,(a_point + b_point)*0.5,thin)
 	var probe := Grid.new()
-	probe.begin(world.get_world_3d().direct_space_state,npc.search_region,npc,npc.footprint.shape,
+	probe.begin(world.get_world_3d().direct_space_state,npc.grid.region,npc,npc.footprint.shape,
 		npc.footprint.position.y,0.0)
 	probe.build_step(1000)
 	if not _require(probe.positions.has(a) and probe.positions.has(b) and probe.path(a,b).size() != 2,
@@ -77,21 +85,22 @@ func _run() -> void:
 			replanned = true
 		if npc.walking:
 			frames[npc.sprite.texture] = true
-		if npc.cell == goal and npc.goal_index == 2:
+		if npc.last_cell == goal and npc.waypoint == 2:
 			break
-	if not _require(replanned and npc.cell == goal and frames.size() > 4,
+	if not _require(replanned and npc.last_cell == goal and frames.size() > 4,
 			"NPC did not replan and finish walking around the new obstacle"):
 		return
 	blocker.free()
 	if not await _verify_shadow_clearance(world.player,npc):
 		return
-	world._change_area(80,Vector3.ZERO)
-	if not _require(not is_instance_valid(npc) and world.get_node_or_null("Location/Thomas") == null,
-			"Farm NPC leaked into an interior"):
+	world._change_area(176,Vector3.ZERO)
+	if not _require(not is_instance_valid(npc) and world.npcs.active.has("mayor_thomas"),
+			"Old actor survived a map change or Thomas did not load at home"):
 		return
+	var thomas = world.npcs.active["mayor_thomas"]
 	world._change_area(0,Vector3.ZERO)
-	if not _require(world.get_node_or_null("Location/Thomas") != null,
-			"Farm NPC did not return on the next visit"):
+	if not _require(not is_instance_valid(thomas) and not world.npcs.active.has("mayor_thomas"),
+			"Thomas was in two areas at the same time"):
 		return
 	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, native debris detour, dynamic replan, walking animation, mutual shadow clearance and location lifecycle")
 	quit()
@@ -133,10 +142,11 @@ func _verify_shadow_clearance(player: CharacterBody3D, npc: CharacterBody3D) -> 
 	player.global_position = from
 	var destination := Vector2i(100,100)
 	npc.grid.positions[destination] = from
-	npc.route.assign([destination])
+	npc.itinerary = [[from,0,0.0]]
+	npc.waypoint = 0
+	npc.path.assign([destination])
 	npc.building = false
-	npc.replan = false
-	npc.pause_remaining = 0.0
+	npc.wait = 0.0
 	npc.set_physics_process(true)
 	for tick in Engine.physics_ticks_per_second:
 		await physics_frame
