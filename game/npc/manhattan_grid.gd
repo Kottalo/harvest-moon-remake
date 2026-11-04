@@ -1,0 +1,117 @@
+extends RefCounted
+## Four-connected A* over the native ground and solid collision layers.
+const SOIL_EDGE := Vector2(-4.4,-1.6)
+const SOIL_SIZE := 0.4
+const CELL_SIZE := SOIL_SIZE / 2.0
+const DIRECTIONS := [Vector2i.DOWN,Vector2i.LEFT,Vector2i.UP,Vector2i.RIGHT]
+const MAX_FLOOR_ANGLE := PI / 3.0
+const PROBE_HEIGHT := 0.75
+const CLEARANCE := 0.004
+
+class ManhattanAStar extends AStar2D:
+	func _estimate_cost(from_id: int, to_id: int) -> float:
+		var difference := (get_point_position(from_id) - get_point_position(to_id)).abs()
+		return difference.x + difference.y
+
+var graph := ManhattanAStar.new()
+var positions := {}
+var region: Rect2i
+var scanned := 0
+var space: PhysicsDirectSpaceState3D
+var capsule_query := PhysicsShapeQueryParameters3D.new()
+var capsule_lift: float
+var reference_y: float
+
+
+static func cell_at(point: Vector3) -> Vector2i:
+	var relative := (Vector2(point.x,point.z) - SOIL_EDGE) / CELL_SIZE
+	# Tolerate float error at exact grid boundaries, including negative cells.
+	return Vector2i((relative + Vector2.ONE*0.00001).floor())
+
+
+static func center_of(cell: Vector2i) -> Vector2:
+	return SOIL_EDGE + (Vector2(cell) + Vector2(0.5,0.5)) * CELL_SIZE
+
+
+func begin(state: PhysicsDirectSpaceState3D, bounds: Rect2i, body: CharacterBody3D,
+		shape: CapsuleShape3D, center_y: float, floor_y: float) -> void:
+	space = state
+	region = bounds
+	reference_y = floor_y
+	scanned = 0
+	graph.clear()
+	positions.clear()
+	capsule_query.shape = shape
+	capsule_query.collision_mask = body.collision_mask
+	capsule_query.exclude = [body.get_rid()]
+	capsule_lift = center_y + CLEARANCE
+
+
+func build_step(budget: int) -> bool:
+	var total := region.size.x * region.size.y
+	for index in range(scanned,mini(scanned + budget,total)):
+		_add_cell(region.position + Vector2i(index % region.size.x,floori(float(index) / region.size.x)))
+	scanned = mini(scanned + budget,total)
+	return scanned == total
+
+
+func path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	if not positions.has(start) or not positions.has(goal):
+		return result
+	for point in graph.get_point_path(_id(start),_id(goal)):
+		result.append(Vector2i(point))
+	return result
+
+
+func _id(cell: Vector2i) -> int:
+	var local := cell - region.position
+	return local.y * region.size.x + local.x
+
+
+func _ground(horizontal: Vector2) -> Vector3:
+	var point := Vector3(horizontal.x,reference_y,horizontal.y)
+	var ray := PhysicsRayQueryParameters3D.create(point + Vector3.UP*PROBE_HEIGHT,
+		point - Vector3.UP*PROBE_HEIGHT,8)
+	var hit := space.intersect_ray(ray)
+	if hit.is_empty() or hit.normal.y < cos(MAX_FLOOR_ANGLE):
+		return Vector3.INF
+	return hit.position
+
+
+func _add_cell(cell: Vector2i) -> void:
+	var point := _ground(center_of(cell))
+	if not point.is_finite():
+		return
+	capsule_query.motion = Vector3.ZERO
+	capsule_query.transform.origin = point + Vector3.UP*capsule_lift
+	if not space.intersect_shape(capsule_query,1).is_empty():
+		return
+	positions[cell] = point
+	var id := _id(cell)
+	graph.add_point(id,Vector2(cell))
+	# Row-major order means only these two neighbours have already been sampled.
+	for direction in [Vector2i.LEFT,Vector2i.UP]:
+		var neighbour: Vector2i = cell + direction
+		if positions.has(neighbour) and _edge_clear(point,positions[neighbour]):
+			graph.connect_points(id,_id(neighbour))
+
+
+func _edge_clear(from: Vector3, to: Vector3) -> bool:
+	var middle := _ground(Vector2((from.x + to.x)*0.5,(from.z + to.z)*0.5))
+	if not middle.is_finite():
+		return false
+	var max_rise := tan(MAX_FLOOR_ANGLE) * CELL_SIZE * 0.5
+	if absf(from.y - middle.y) > max_rise or absf(middle.y - to.y) > max_rise:
+		return false
+	return _sweep_clear(from,middle) and _sweep_clear(middle,to)
+
+
+func _sweep_clear(from: Vector3, to: Vector3) -> bool:
+	capsule_query.motion = Vector3.ZERO
+	capsule_query.transform.origin = from + Vector3.UP*capsule_lift
+	if not space.intersect_shape(capsule_query,1).is_empty():
+		return false
+	capsule_query.motion = to - from
+	var result := space.cast_motion(capsule_query)
+	return result.size() == 2 and result[0] >= 1.0

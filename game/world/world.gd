@@ -77,7 +77,15 @@ func _ready() -> void:
 	_refresh_hud()
 	_configure_camera_limits()
 	_update_camera()
+	_spawn_location_actors()
 	print("WORLD_READY: ", world.size(), " native locations")
+
+
+func _spawn_location_actors() -> void:
+	if current_area == 0:
+		var actor = preload("res://game/npc/thomas.tscn").instantiate()
+		actor.world = self
+		get_node("Location").add_child(actor)
 
 func _wireframe_colliders(location: Node3D) -> void:
 	if OS.is_debug_build() and get_tree().debug_collisions_hint:
@@ -275,6 +283,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 		_set_overview()
 	_update_camera()
 	_refresh_hud()
+	_spawn_location_actors()
 	print("AREA_READY: ", area, " ", world[str(area)].name)
 
 func _unhandled_key_input(event: InputEvent) -> void:
