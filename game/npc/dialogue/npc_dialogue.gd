@@ -62,6 +62,7 @@ func setup(owner_world, font: Font) -> void:
 	profiles = JSON.parse_string(FileAccess.get_file_as_string(PERSONAS))
 	client = DeepSeek.new()
 	add_child(client)
+	client.partial.connect(_on_partial)
 	client.answered.connect(_on_answer)
 
 	overlay = Control.new()
@@ -220,6 +221,7 @@ func _submit(value: String) -> void:
 func _ask(text: String, spoken := true) -> void:
 	pending_text = text
 	pending = true
+	reply.text = ""
 	entry.editable = false
 	send.disabled = true
 	send.text = "发送"
@@ -230,6 +232,11 @@ func _ask(text: String, spoken := true) -> void:
 	var messages := [{"role":"system","content":SYSTEM+"\n"+context},
 		{"role":"user","content":JSON.stringify({"message":text,"memory":memory})}]
 	client.ask(messages)
+
+func _on_partial(text: String) -> void:
+	if overlay.visible and pending and not text.is_empty():
+		reply.text = text
+		status.text = ""
 
 func _on_answer(text: String, problem: String) -> void:
 	if not overlay.visible or not pending:

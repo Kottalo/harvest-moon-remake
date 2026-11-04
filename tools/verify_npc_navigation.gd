@@ -112,7 +112,7 @@ func _verify_shadow_clearance(player: CharacterBody3D, npc: CharacterBody3D) -> 
 	if not _require(player_shadow.visible and npc_shadow.visible and player_shadow.texture == npc_shadow.texture
 			and player_shadow.material_override != npc_shadow.material_override,"Characters did not share the source ground shadow correctly"):
 		return false
-	var from: Vector3 = npc.grid._ground(Vector2(-1.8,-2.5))
+	var from: Vector3 = npc.grid._ground(Vector2(-1.9,-2.5))
 	var to: Vector3 = npc.grid._ground(Vector2(-1.2,-2.5))
 	if not _require(from.is_finite() and to.is_finite(),"Shadow clearance fixture needs open farm ground"):
 		return false
@@ -151,8 +151,22 @@ func _verify_shadow_clearance(player: CharacterBody3D, npc: CharacterBody3D) -> 
 	for tick in Engine.physics_ticks_per_second:
 		await physics_frame
 	gap = npc.global_position.x - player.global_position.x
-	return _require(absf(gap-spacing)<0.001 and npc_shadow.global_position.is_equal_approx(npc.global_position),
-			"Thomas did not stop at the player's shadow: "+str(gap))
+	if not _require(absf(gap-spacing)<0.001 and npc_shadow.global_position.is_equal_approx(npc.global_position),
+			"Thomas did not stop at the player's shadow: "+str(gap)):
+		return false
+	for tick in 3*Engine.physics_ticks_per_second:
+		await physics_frame
+	if not _require(npc.waypoint==0,"Thomas discarded his destination while the player blocked it"):
+		return false
+	var blocked_at := npc.global_position
+	player.global_position += Vector3.BACK*2
+	for tick in 5*Engine.physics_ticks_per_second:
+		await physics_frame
+		if npc.waypoint==1:
+			break
+	return _require(npc.waypoint==1 and npc.global_position.distance_to(from)<=Grid.CELL_SIZE*sqrt(2.0)+0.002
+			and npc.global_position.distance_to(blocked_at)>0.15,
+			"Thomas did not resume his route: "+str([npc.global_position,from,npc.waypoint]))
 
 
 func _obstacle(parent: Node3D, point: Vector3, size: Vector3) -> StaticBody3D:

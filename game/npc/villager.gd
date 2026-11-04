@@ -112,6 +112,7 @@ func _physics_process(delta: float) -> void:
 	if move_and_collide(step*clearance) != null or clearance < 1.0:
 		path.clear()
 		grid.positions.clear()
+		attempts = mini(attempts+1,2)
 		wait = RETRY_SECONDS
 		_idle()
 		return
@@ -155,25 +156,33 @@ func _finish_path(point: Vector3) -> void:
 		return
 	if _find_path(point):
 		return
-	attempts += 1
+	attempts = mini(attempts+1,2)
 	wait = RETRY_SECONDS
 	_idle()
-	if attempts >= 2:
-		_arrive()
 
 
 func _find_path(point: Vector3) -> bool:
 	var starts := grid.nearby_cells(global_position,1)
-	if starts.is_empty():
+	if ground_shadow.occupied(point):
 		return false
-	var start := starts[0]
-	if grid.positions.has(last_cell) and global_position.distance_to(grid.positions[last_cell])<=Grid.CELL_SIZE+0.002:
-		start = last_cell
-	for goal in grid.nearby_cells(point,2):
-		path = grid.path(start,goal)
-		if not path.is_empty():
-			attempts = 0
-			return true
+	var goal_cell := Grid.cell_at(point)
+	var goals: Array[Vector2i] = []
+	if grid.positions.has(goal_cell):
+		goals.append(goal_cell)
+	else:
+		goals = grid.nearby_cells(point,2)
+	var reachable: Array[Vector2i] = []
+	for start in starts:
+		var step: Vector3 = grid.positions[start]-global_position
+		if step.length_squared()>0.0000001 and (ground_shadow.motion_fraction(global_position,step)<1.0
+				or test_move(global_transform,step)):
+			continue
+		reachable.append(start)
+	for goal in goals:
+		for start in reachable:
+			path = grid.path(start,goal)
+			if not path.is_empty():
+				return true
 	return false
 
 

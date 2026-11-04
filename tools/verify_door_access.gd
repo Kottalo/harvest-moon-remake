@@ -45,10 +45,10 @@ func press_enter() -> void:
 	await physics_frame
 
 
-func run_to_stop(world, exit: Dictionary) -> float:
+func run_to_stop(world, exit: Dictionary, distance := 0.42) -> float:
 	var stop: StaticBody3D = world.get_node("Location/DoorStop_%02d" % int(exit.index))
 	var inward: Vector3 = stop.get_meta("inward")
-	var approach := stop.global_position-inward*0.42
+	var approach := stop.global_position-inward*distance
 	await physics_frame
 	var ray := PhysicsRayQueryParameters3D.create(approach+Vector3.UP,approach-Vector3.UP,2)
 	var hit: Dictionary = world.get_world_3d().direct_space_state.intersect_ray(ray)
@@ -139,6 +139,21 @@ func run() -> void:
 		if world.current_area==40 and not world.transitioning:
 			break
 	if not require_ok(world.current_area==40 and not world.transitioning,"After-hours exit never completed"):
+		return
+	world.set_physics_process(false)
+	var ranch_exit := at_door(world,24,6,660,0)
+	if not require_ok(await run_to_stop(world,ranch_exit,0.85)<0.13,
+			"Yodel Ranch's porch steps prevented reaching the closed door"):
+		return
+	world.set_physics_process(true)
+	await press_enter()
+	if not require_ok(world.transitioning and not world.nearby_exit_locked,"E did not open the reachable Yodel Ranch door"):
+		return
+	for tick in 250:
+		await physics_frame
+		if not world.transitioning:
+			break
+	if not require_ok(world.current_area==128 and not world.transitioning,"Yodel Ranch entry did not finish"):
 		return
 	world.free()
 	print("DOOR_ACCESS_OK: source times, resident days off, date exceptions, private rooms, E refusal and after-hours exit")

@@ -11,7 +11,14 @@ class TestDeepSeek extends "res://game/npc/dialogue/deepseek.gd":
 		last_messages = messages
 		prompt = JSON.parse_string(messages.back().content)
 		memory = JSON.stringify(prompt.memory)
-		answered.emit("今天想尝点什么？" if problem.is_empty() else "",problem)
+		if not problem.is_empty():
+			answered.emit("",problem)
+			return
+		var event := 'data: {"choices":[{"delta":{"content":"今天想"}}]}\r\n\r\n'.to_utf8_buffer()
+		var split := event.find(0xe4)+1
+		_receive(event.slice(0,split))
+		_receive(event.slice(split))
+		_receive('data: {"choices":[{"delta":{"content":"尝点什么？"}}]}\n\ndata: [DONE]\n\n'.to_utf8_buffer())
 
 
 func _initialize() -> void:
@@ -44,6 +51,7 @@ func run() -> void:
 	var transport := TestDeepSeek.new()
 	dialogue.client = transport
 	dialogue.add_child(transport)
+	transport.partial.connect(dialogue._on_partial)
 	transport.answered.connect(dialogue._on_answer)
 
 	clock.season = 0
@@ -145,11 +153,16 @@ func run() -> void:
 	if not check(world.history.entries.back().known_by.has("chef"),
 			"The nearby NPC did not witness the action"):
 		return
+	var before_greeting: int = world.history.entries.size()
+	var snapshots: Array[String] = []
+	transport.partial.connect(func(_text: String):
+		snapshots.append(dialogue.reply.text if world.history.entries.size()==before_greeting else "saved too early"))
 	world.player.actions.interact_requested.emit()
 	if not check(dialogue.overlay.visible and paused and dialogue.npc_id=="chef" and chef.facing==3,
 			"Facing the helper and pressing interact did not open a paused conversation"):
 		return
 	if not check(dialogue.reply.text=="今天想尝点什么？" and transport.last_messages[0].content.contains("料理")
+			and snapshots==["今天想","今天想尝点什么？"]
 			and transport.last_messages[0].content.contains("你在小矮人之家。打招呼前，你在原地停留")
 			and transport.memory.contains("放下了树枝")
 			and world.history.entries.back().actor=="chef",

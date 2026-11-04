@@ -1,0 +1,9 @@
+[
+  {
+    "name": "ranch_house_entry",
+    "axis": "z",
+    "from": [-1.14, 0],
+    "to": [-1.45, 0.2],
+    "cross": [1.6, 2.0]
+  }
+]
