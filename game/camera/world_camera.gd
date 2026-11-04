@@ -15,8 +15,12 @@ var _limits := PackedVector2Array()
 var _screen_bounds := Rect2()
 var _half_view := Vector2.ZERO
 var _viewport_size := Vector2.ZERO
+var _opaque := preload("res://game/camera/opaque_coverage.gd").new()
+var _subject_centres := Rect2()
+var _opaque_follow := false
 
-func set_location(location: Node3D, outdoors: bool) -> void:
+func set_location(location: Node3D, outdoors: bool, area := -1) -> void:
+	_opaque.set_area(area if outdoors else -1)
 	_coverage.clear()
 	_limits.clear()
 	_half_view = Vector2.ZERO
@@ -61,7 +65,9 @@ func _update_limits(half: Vector2) -> void:
 		_limits = clipped
 		if _limits.is_empty(): break
 
-func limited_focus(focus: Vector3) -> Vector3:
+func limited_focus(focus: Vector3, keep_subject := false) -> Vector3:
+	_opaque_follow = false
+	_subject_centres = Rect2()
 	if _coverage.is_empty(): return focus
 	var viewport := get_viewport().get_visible_rect().size
 	if viewport.y<=0: return focus
@@ -72,14 +78,25 @@ func limited_focus(focus: Vector3) -> Vector3:
 	if not half.is_equal_approx(_half_view):
 		_render_focus = Vector3.INF
 		_update_limits(half)
+		var opaque_fit: bool = _opaque.fit(half+Vector2.ONE*EDGE_PADDING)
 		# A very wide viewport or narrow location may have no valid camera
 		# centre at the requested zoom. Tighten only on that projection change.
 		for attempt in 80:
-			if _limits.size()>=3: break
+			if _limits.size()>=3 and opaque_fit: break
 			size *= 0.95
 			half = Vector2(size*viewport.x/viewport.y,size)*0.5
 			_update_limits(half)
+			opaque_fit = _opaque.fit(half+Vector2.ONE*EDGE_PADDING)
 	var anchor := _project(focus)
+	if keep_subject:
+		var subject := anchor+_project(Vector3.UP*0.16)
+		var inner_half := _half_view-Vector2.ONE*0.025
+		_subject_centres = Rect2(subject-inner_half,inner_half*2)
+	if _opaque.enabled():
+		var covered: Vector2 = _opaque.nearest(anchor,_subject_centres)
+		if covered.is_finite():
+			_opaque_follow = true
+			return _with_projection(focus,anchor,covered)
 	var target := anchor
 	if _limits.size()>=3:
 		if not Geometry2D.is_point_in_polygon(anchor,_limits):
@@ -94,7 +111,13 @@ func limited_focus(focus: Vector3) -> Vector3:
 			var low := _screen_bounds.position[axis]+half[axis]
 			var high := _screen_bounds.end[axis]-half[axis]
 			target[axis] = clampf(anchor[axis],low,high) if low<=high else _screen_bounds.get_center()[axis]
-	return focus+basis.x*(target.x-anchor.x)+basis.y*(target.y-anchor.y)
+	# At a narrow point the backdrop and the avatar may not both fit.
+	if _subject_centres.has_area() and not _subject_centres.has_point(target):
+		target = anchor
+	return _with_projection(focus,anchor,target)
+
+func _with_projection(point: Vector3, before: Vector2, after: Vector2) -> Vector3:
+	return point+basis.x*(after.x-before.x)+basis.y*(after.y-before.y)
 
 func _ready() -> void:
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
@@ -127,11 +150,15 @@ func follow(player: CharacterBody3D, overview: bool, interpolate := false, delta
 		var direction_basis := Basis.looking_at(-eye_offset)
 		if basis != direction_basis:
 			basis = direction_basis
-		var desired := limited_focus(focus)
+		var desired := limited_focus(focus,player.visible)
 		if interpolate and delta > 0.0 and _render_focus.is_finite():
-			# Both centres fit the same convex map limits, so the blend fits too.
 			var weight := 1.0 - exp(-delta / FOLLOW_RESPONSE_SECONDS)
 			_render_focus = _render_focus.lerp(desired,weight)
+			# A straight interpolation can cross a concave edge or an opening.
+			if _opaque_follow:
+				var projected := _project(_render_focus)
+				var covered: Vector2 = _opaque.nearest(projected,_subject_centres)
+				_render_focus = _with_projection(_render_focus,projected,covered)
 			if _render_focus.distance_squared_to(desired) <= FOLLOW_SETTLE_DISTANCE * FOLLOW_SETTLE_DISTANCE:
 				_render_focus = desired
 		else:
