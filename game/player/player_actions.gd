@@ -19,6 +19,7 @@ var charge_ticks := 0.0
 var equipped := 6
 var upgrade := 0
 var selected_seed := 34
+var _sow_after_show := false
 var seed_catalogue := {}
 var crop_produce := {}
 var crop_picture_provider: Callable
@@ -101,7 +102,9 @@ func poll_input() -> void:
 	if player.input_locked:
 		return
 	if busy():
-		if state == "charge" and not Input.is_action_pressed("use_tool"):
+		if state == "show_tool" and equipped == 34 and Input.is_action_just_pressed("use_tool"):
+			_sow_after_show = true
+		elif state == "charge" and not Input.is_action_pressed("use_tool"):
 			release_tool()
 		elif state == "fishing_wait" and not Input.is_action_pressed("use_tool"):
 			play("fishing", player.facing + 4, "reel")
@@ -133,6 +136,7 @@ func play(source: String, animation: int, action: String, start := 0) -> void:
 	frame = start
 	elapsed = 0
 	state = action
+	_sow_after_show = false
 	_draw()
 
 func start_tool() -> bool:
@@ -213,7 +217,12 @@ func go_to_bed(target: Vector3) -> void:
 func advance(delta: float) -> void:
 	if state == "show_tool":
 		elapsed += delta
-		if elapsed+0.0000001 >= 10.0/30.0: _finish()
+		if elapsed+0.0000001 >= 10.0/30.0:
+			var sow := _sow_after_show
+			_sow_after_show = false
+			_finish()
+			if sow:
+				start_tool()
 		return
 	if state == "bed_hold":
 		_draw()

@@ -78,7 +78,7 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 		if crop.season != world.day_cycle.season and crop.season != 4:
 			message = "当前季节不适合播种"
 			return
-		message = ""
+		var planted := 0
 		for offset: Array in data.sow[facing]:
 			var cell := origin + Vector2i(offset[0],offset[1])
 			var index: int = field.cell_index(cell)
@@ -86,7 +86,12 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 				continue
 			var plant_id := (377 if randi_range(1,25)==1 else 376) if seed == 51 else seed
 			plants[index] = {"id":plant_id,"stage":0,"days":0,"skip":false}
-		refresh_plots()
+			planted += 1
+		if planted > 0:
+			message = "已播种 · %d 格" % planted
+			refresh_plots(false)
+		else:
+			message = "周围没有可播种的空耕地"
 	elif tool >= 21 and tool <= 25:
 		var offsets: Array = data.water[charge][facing]
 		var count := mini(mini(offsets.size(),int(data.water_steps[charge])),water_remaining)

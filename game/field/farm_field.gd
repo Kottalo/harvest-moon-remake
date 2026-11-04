@@ -56,7 +56,11 @@ func bind_location() -> void:
 	push_error("Original farm field surface was not found")
 
 func use_tool(tool: int, charge: int) -> void:
-	if world.current_area!=0 or world.transitioning or world.day_cycle.season==3:
+	if world.transitioning:
+		return
+	if world.current_area!=0 or world.day_cycle.season==3:
+		if tool == 34:
+			crops.message = "请在农场耕地播种" if world.current_area!=0 else "冬季无法在室外播种"
 		return
 	_cancel()
 	origin = cell_at(world.player.position)
