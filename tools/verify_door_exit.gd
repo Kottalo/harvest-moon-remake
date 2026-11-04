@@ -28,6 +28,7 @@ func run() -> void:
 	root.add_child(viewport)
 	world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
+	var normal_mask: int = world.player.collision_mask
 	for route in [[80,false],[96,false],[188,false],[196,false],[80,true]]:
 		var area: int = route[0]
 		var exit: Dictionary
@@ -78,7 +79,7 @@ func run() -> void:
 		var unsafe_hold := 0
 		var closed := false
 		for tick in Engine.physics_ticks_per_second*3:
-			if not require_ok(world.player.collision_mask==3 and not world.player.door_passage,"Arrival disabled normal player collision"): return
+			if not require_ok(world.player.collision_mask==normal_mask and not world.player.door_passage,"Arrival disabled normal player collision"): return
 			if not world.doors.arrival_clear(panel):
 				unsafe_hold += 1
 				if not require_ok(door.phase=="hold" and door.angle==0x420,"Door closed before capsule cleared its entire sweep"): return
@@ -95,7 +96,9 @@ func run() -> void:
 				closed = true
 				break
 			await frames(1)
-		if not require_ok(closed and not world.transitioning and not world.player.input_locked,"Egress did not clear, close and release input"): return
+		var stop: StaticBody3D = panel.get_meta("doorway_stop")
+		if not require_ok(closed and not world.transitioning and not world.player.input_locked
+				and stop.collision_layer & normal_mask != 0,"Egress did not clear, close and restore the doorway stop"): return
 		print("DOOR_EXIT_OK: ",area," -> ",exit.target," unsafe arrival ticks held=",unsafe_hold," normal capsule remains enabled, closing overlap=0")
 		if area==196 and DisplayServer.get_name()!="headless":
 			for frame in 2: await RenderingServer.frame_post_draw
@@ -132,7 +135,7 @@ func run() -> void:
 	world.doors.guard_arrival(panel,world.player,outward)
 	var door: Dictionary = world.doors.doors[panel.get_instance_id()]
 	world.doors._physics_process(2)
-	if not require_ok(not world.doors.arrival_clear(panel) and door.phase=="hold" and door.angle==0x420 and world.player.collision_mask==3,"Blocked/stationary arrival allowed closing"): return
+	if not require_ok(not world.doors.arrival_clear(panel) and door.phase=="hold" and door.angle==0x420 and world.player.collision_mask==normal_mask,"Blocked/stationary arrival allowed closing"): return
 	world.player.global_position += outward*2
 	world.doors._physics_process(0.5)
 	if not require_ok(door.phase=="closing","Clear capsule did not release the hold timer"): return

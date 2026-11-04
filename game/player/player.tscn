@@ -21,7 +21,7 @@ script = ExtResource("1")
 floor_snap_length = 0.2
 floor_constant_speed = true
 floor_max_angle = 1.0471976
-collision_mask = 3
+collision_mask = 19
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 position = Vector3(-0.03, 0.12, 0)

@@ -37,6 +37,9 @@ func _verify_thresholds(viewport: Viewport, world) -> bool:
 		for exit: Dictionary in exits:
 			var threshold: StaticBody3D = location.get_node("DoorThreshold_%02d" % int(exit.index))
 			var band: Rect2 = threshold.get_meta("entry_band")
+			var stop: StaticBody3D = location.get_node("DoorStop_%02d" % int(exit.index))
+			if not _require(world.player.collision_mask & stop.collision_layer != 0,"Player mask ignores the doorway stop"):
+				return false
 			var into: Vector3 = DIRECTIONS[int(exit.facing)]
 			var across := Vector3(into.z,0,-into.x)
 			var shape: ConcavePolygonShape3D = threshold.get_child(0).shape
@@ -52,6 +55,15 @@ func _verify_thresholds(viewport: Viewport, world) -> bool:
 					return false
 			for side in [-0.12,0.0,0.12]:
 				var lane: Vector3 = centre + across*side
+				var sweep_capsule := PhysicsShapeQueryParameters3D.new()
+				sweep_capsule.shape = world.player.footprint
+				sweep_capsule.collision_mask = stop.collision_layer
+				sweep_capsule.transform.origin = stop.global_position+across*side-into*0.35
+				sweep_capsule.transform.origin.y = height+world.player.footprint.height*0.5
+				sweep_capsule.motion = into*0.7
+				var fractions := space.cast_motion(sweep_capsule)
+				if not _require(fractions.size()==2 and fractions[0]<0.5,"Capsule crossed the closed doorway: "+str([info.slug,exit.index,side])):
+					return false
 				for step in [-0.10,0.0,0.10]:
 					var point: Vector3 = lane + into*step
 					for mask in [2,4,8]:
@@ -69,7 +81,7 @@ func _verify_thresholds(viewport: Viewport, world) -> bool:
 			checked += 1
 		location.free()
 	if not _require(checked==22,"Some catalogued doors were not checked"): return false
-	print("DOOR_THRESHOLD_OK: ",checked," doors; leaf collision removed, aperture clear and sill supported on all three layers")
+	print("DOOR_THRESHOLD_OK: ",checked," doors; fixed stops block three capsule lanes, moving leaves are clear and sills stay supported")
 	return true
 
 func _run() -> void:
@@ -83,6 +95,7 @@ func _run() -> void:
 	root.add_child(viewport)
 	var world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
+	var normal_mask: int = world.player.collision_mask
 	var threshold_view := SubViewport.new()
 	threshold_view.own_world_3d = true
 	root.add_child(threshold_view)
@@ -163,7 +176,7 @@ func _run() -> void:
 		for tick in Engine.physics_ticks_per_second*3:
 			if not world.transitioning: break
 			await _frames(1)
-		if not _require(world.current_area==int(exit.target) and not world.player.input_locked and world.player.get_collision_exceptions().is_empty() and not world.player.door_passage and world.player.collision_mask==3,"Door passage did not arrive and release input"): return
+		if not _require(world.current_area==int(exit.target) and not world.player.input_locked and world.player.get_collision_exceptions().is_empty() and not world.player.door_passage and world.player.collision_mask==normal_mask,"Door passage did not arrive and release input"): return
 	# A scene change/cancel must also restore the exact normal collision mask.
 	world._change_area(0,Vector3(-4.65,0.05,-4.03))
 	world.player.facing = 1
@@ -174,7 +187,7 @@ func _run() -> void:
 	if not _require(world.transitioning and world.player.door_passage and world.player.collision_mask==0,"Cancellation fixture did not enter a confirmed source passage"): return
 	world._change_area(80,Vector3(1.377,0,0.842))
 	await _frames(3)
-	if not _require(not world.transitioning and not world.player.input_locked and not world.player.door_passage and world.player.collision_mask==3 and world.player.scripted_walk_time==0,"Cancelling a doorway passage left ghost collision/input state"): return
+	if not _require(not world.transitioning and not world.player.input_locked and not world.player.door_passage and world.player.collision_mask==normal_mask and world.player.scripted_walk_time==0,"Cancelling a doorway passage left ghost collision/input state"): return
 	print("DOOR_CANCEL_OK: normal collision mask/input restored and old coroutine cancelled")
 	world.queue_free()
 	await process_frame

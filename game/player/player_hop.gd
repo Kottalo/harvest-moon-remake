@@ -64,7 +64,7 @@ func try_start(motion_direction: Vector3, delta: float) -> bool:
 	if floor_hit.is_empty() or floor_hit.normal.y<cos(player.floor_max_angle) or absf(floor_hit.position.y-player.global_position.y)>0.02: return false
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = capsule.shape
-	query.collision_mask = 3
+	query.collision_mask = player.collision_mask
 	query.exclude = [player.get_rid()]
 	# Collision recovery can leave the grounded body slightly below its support.
 	# Test clearance above the destination support, not inside the floor mesh.

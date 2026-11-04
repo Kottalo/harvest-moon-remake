@@ -135,11 +135,16 @@ func _run() -> void:
 	var room_wall: Vector3 = await _walk(world.player, Vector3(0.8, 0.02, 0), "move_right", Engine.physics_ticks_per_second * 2, true)
 	if not _require(room_wall.x < 2.01 and world.player.is_on_floor(), "Player crossed the original room ground boundary"):
 		return
-	# The hospital leaf and its baked wall both clear the doorway; E still enters.
+	# Hold walk/run toward the hospital door before pressing E.
+	world.day_cycle.minute = 660
 	for running in [false, true]:
 		world._change_area(40, Vector3(2.4, 0.05, -0.28))
 		var doorstep: Vector3 = await _walk(world.player, Vector3(2.4, 0.05, -0.28), "move_up", Engine.physics_ticks_per_second, running)
-		if not _require(doorstep.z < -0.78 and doorstep.z > -0.85 and absf(doorstep.y-0.02)<0.005, "Player could not cross the closed hospital leaf on a flat sill: " + str(doorstep)):
+		var stop: StaticBody3D = world.get_node("Location/DoorStop_01")
+		var capsule: CollisionShape3D = world.player.get_node("CollisionShape3D")
+		if not _require(capsule.global_position.z-stop.global_position.z>=world.player.footprint.radius
+				and world.doors.at_threshold(world.get_node("Location"),1,Vector2(doorstep.x,doorstep.z),world.player),
+				"Closed hospital doorway did not stop the player at interaction reach: "+str(doorstep)):
 			return
 		world.set_physics_process(true)
 		Input.action_press("interact")
@@ -153,6 +158,8 @@ func _run() -> void:
 		if not _require(world.current_area == 188, "Hospital collision blocked its action exit"):
 			return
 		print("HOSPITAL_DOOR_OK running=", running, " stop=", doorstep, "; E entered clinic")
+	# The remaining fixtures test the player in isolation after removing the map.
+	world.set_process(false)
 	var location: Node3D = world.get_node("Location")
 	world.remove_child(location)
 	location.free()

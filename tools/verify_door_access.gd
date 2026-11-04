@@ -45,6 +45,29 @@ func press_enter() -> void:
 	await physics_frame
 
 
+func run_to_stop(world, exit: Dictionary) -> float:
+	var stop: StaticBody3D = world.get_node("Location/DoorStop_%02d" % int(exit.index))
+	var inward: Vector3 = stop.get_meta("inward")
+	var approach := stop.global_position-inward*0.42
+	await physics_frame
+	var ray := PhysicsRayQueryParameters3D.create(approach+Vector3.UP,approach-Vector3.UP,2)
+	var hit: Dictionary = world.get_world_3d().direct_space_state.intersect_ray(ray)
+	if hit.is_empty():
+		return INF
+	world.player.global_position = hit.position+Vector3.UP*0.01
+	world.player.velocity = Vector3.ZERO
+	world.player.reset_physics_interpolation()
+	var direction: String = ["move_down","move_left","move_up","move_right"][int(exit.facing)]
+	Input.action_press(direction)
+	Input.action_press("run")
+	for tick in 55:
+		await physics_frame
+	Input.action_release(direction)
+	Input.action_release("run")
+	var capsule: CollisionShape3D = world.player.get_node("CollisionShape3D")
+	return (stop.global_position-capsule.global_position).dot(inward)
+
+
 func run() -> void:
 	var world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
@@ -66,7 +89,21 @@ func run() -> void:
 				"Door lock did not match the source rule: "+str(case)):
 			return
 
+	# Reproduce the reported locked library entrance with actual running input.
+	var library_exit := at_door(world,36,21,570,1)
+	var distance := await run_to_stop(world,library_exit)
+	world.set_physics_process(true)
+	await press_enter()
+	if not require_ok(world.current_area==36 and world.nearby_exit_locked and not world.transitioning
+			and distance>=world.player.footprint.radius and distance<0.13,
+			"Player ran through the locked library stop or could not reach its prompt: "+str(distance)):
+		return
+
 	var exit := at_door(world,40,25,539,1)
+	world.set_physics_process(false)
+	if not require_ok(await run_to_stop(world,exit)<0.13,"Shop doorway could not be reached"):
+		return
+	world.day_cycle.elapsed = 0.0
 	world.set_physics_process(true)
 	await press_enter()
 	world._refresh_hud()

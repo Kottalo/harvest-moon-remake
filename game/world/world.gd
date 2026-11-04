@@ -197,8 +197,8 @@ func _check_exits(_delta: float) -> void:
 		var inside := bounds.has_point(point)
 		if exit.has("door"):
 			inside = point.x>bounds.position.x and point.x<bounds.end.x and point.y>bounds.position.y and point.y<bounds.end.y
-			if not inside and bounds.grow(0.25).has_point(point):
-				inside = doors.at_threshold(get_node("Location"),int(exit.index),point)
+			if not inside:
+				inside = doors.at_threshold(get_node("Location"),int(exit.index),point,player)
 			if not inside:
 				# A native capsule can stop a few centimetres before a narrow indoor
 				# door zone that the original 48-unit point probe could enter.

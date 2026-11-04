@@ -2,6 +2,8 @@ extends Node
 ## doors.c: 8 turn units of acceleration, 0x420 limit, 11-tick hold, mirrored twin.
 var doors := {}
 var clock := 0.0
+const STOP_LAYER := 1 << 4 # Player-only doorway stop, outside the NPC and ground probes.
+const STOP_THICKNESS := 0.016
 const DIRECTIONS := [Vector3.BACK,Vector3.LEFT,Vector3.FORWARD,Vector3.RIGHT]
 
 
@@ -19,7 +21,9 @@ func prepare(location: Node3D, exits: Array) -> void:
 		var inward: Vector3 = DIRECTIONS[int(exit.facing)]
 		var border := inward.abs()*0.025
 		_clear_doorway_wall(location,AABB(bounds.position-border,bounds.size+border*2))
-		_add_threshold(location,bounds,inward,int(exit.index))
+		var index := int(exit.index)
+		_add_threshold(location,bounds,inward,index)
+		panel.set_meta("doorway_stop",_add_stop(location,bounds,inward,index))
 
 
 func _leaf(location: Node3D, index: int) -> Node3D:
@@ -109,12 +113,45 @@ func _add_threshold(location: Node3D, bounds: AABB, inward: Vector3, index: int)
 	location.add_child(body)
 
 
-func at_threshold(location: Node3D, index: int, point: Vector2) -> bool:
+func _add_stop(location: Node3D, bounds: AABB, inward: Vector3, index: int) -> StaticBody3D:
+	var stop := StaticBody3D.new()
+	stop.name = "DoorStop_%02d" % index
+	stop.collision_layer = STOP_LAYER
+	stop.collision_mask = 0
+	var across := Vector3(inward.z,0,-inward.x)
+	var width := bounds.size.dot(across.abs())
+	stop.position = bounds.get_center() - inward*(bounds.size.dot(inward.abs())*0.5+STOP_THICKNESS*0.5)
+	stop.set_meta("inward",inward)
+	stop.set_meta("half_width",width*0.5)
+	var box := BoxShape3D.new()
+	box.size = across.abs()*width+inward.abs()*STOP_THICKNESS+Vector3.UP*(bounds.size.y+0.16)
+	var collision := CollisionShape3D.new()
+	collision.shape = box
+	collision.debug_fill = false
+	stop.add_child(collision)
+	location.add_child(stop)
+	return stop
+
+
+func at_threshold(location: Node3D, index: int, point: Vector2, player: CharacterBody3D) -> bool:
 	var threshold := location.get_node_or_null("DoorThreshold_%02d" % index)
 	if threshold == null:
 		return false
 	var band: Rect2 = threshold.get_meta("entry_band")
-	return band.has_point(point)
+	if band.has_point(point):
+		return true
+	var stop: StaticBody3D = location.get_node_or_null("DoorStop_%02d" % index)
+	if stop == null:
+		return false
+	var capsule: CollisionShape3D = player.get_node("CollisionShape3D")
+	var offset := location.to_local(capsule.global_position)-stop.position
+	var inward: Vector3 = stop.get_meta("inward")
+	var across := Vector3(inward.z,0,-inward.x)
+	var depth := offset.dot(inward)
+	var reach: float = player.footprint.radius+STOP_THICKNESS*0.5+0.02
+	var shape: BoxShape3D = stop.get_child(0).shape
+	return depth >= -reach and depth <= 0.05 and absf(offset.dot(across)) <= float(stop.get_meta("half_width")) \
+		and absf(offset.y) <= shape.size.y*0.5
 
 
 func open(location: Node3D, metadata: Dictionary, facing: int, arriving := false) -> Node3D:
@@ -158,6 +195,9 @@ func guard_arrival(panel: Node3D, player: CharacterBody3D, outward: Vector3) -> 
 		# A full hinge-radius bound contains the complete closing arc, including twins.
 		limit = maxf(limit,leaf.global_position.dot(outward)+radius+0.02)
 	door["clearance"] = {"player":player,"outward":outward,"limit":limit}
+	var stop: StaticBody3D = panel.get_meta("doorway_stop",null)
+	if is_instance_valid(stop):
+		stop.collision_layer = 0
 
 func arrival_clear(panel: Node3D) -> bool:
 	if not is_instance_valid(panel) or not doors.has(panel.get_instance_id()): return true
@@ -197,6 +237,9 @@ func _physics_process(delta: float) -> void:
 						door.speed = 0
 				"hold":
 					if not arrival_clear(door.panel): continue
+					var stop: StaticBody3D = door.panel.get_meta("doorway_stop",null)
+					if is_instance_valid(stop) and stop.collision_layer==0:
+						stop.collision_layer = STOP_LAYER
 					door.hold -= 1
 					if door.hold <= 0:
 						door.phase = "closing"
