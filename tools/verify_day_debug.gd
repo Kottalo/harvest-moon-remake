@@ -50,10 +50,10 @@ func run() -> void:
 	if not require_ok(not debug.farm_camera_trial.button_pressed and not debug.farm_camera_trial.disabled,
 			"Farm edge trial should be available and initially off"): return
 	debug.farm_camera_trial.button_pressed = true
-	if not require_ok(world.farm_camera_trial and world.camera._edge_padding==world.camera.FARM_TRIAL_PADDING and paused,
+	if not require_ok(world.farm_camera_trial and world.camera._farm_edge_trial and paused,
 			"F1 trial checkbox did not change the current farm camera"): return
 	debug.farm_camera_trial.button_pressed = false
-	if not require_ok(not world.farm_camera_trial and world.camera._edge_padding==world.camera.EDGE_PADDING,
+	if not require_ok(not world.farm_camera_trial and not world.camera._farm_edge_trial,
 			"F1 trial checkbox did not restore the usual camera"): return
 	var minute: int = clock.minute
 	var day: int = clock.day

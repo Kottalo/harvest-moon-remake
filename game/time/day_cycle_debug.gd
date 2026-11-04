@@ -57,7 +57,7 @@ func setup(owner_clock) -> void:
 		rows.add_child(timing_button)
 		farm_camera_trial = CheckButton.new()
 		farm_camera_trial.text = "农场镜头限位试用"
-		farm_camera_trial.tooltip_text = "开启后，镜头在农场边缘提前停住。关掉即可对照。"
+		farm_camera_trial.tooltip_text = "按农场实际轮廓限制整个画面，保持原版取景距离。关掉即可对照。"
 		farm_camera_trial.toggled.connect(clock.world.set_farm_camera_trial)
 		rows.add_child(farm_camera_trial)
 	close_button = Button.new()

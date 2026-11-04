@@ -3,7 +3,12 @@ extends Camera3D
 const HORIZONTAL_DISTANCE := 9000.0 / 1000.0
 const HEIGHT := 4500.0 / 1000.0
 const EDGE_PADDING := 0.05
-const FARM_TRIAL_PADDING := 0.45
+# Inset outline measured in the gameplay projection from native farm geometry.
+# The short edges cut off the concave tips by the river and southern bank.
+const FARM_TRIAL_COVERAGE := [
+	Vector2(-15.58,-0.814), Vector2(1.719,-8.55), Vector2(3.561,-8.55),
+	Vector2(16.965,-2.556), Vector2(-1.825,5.847), Vector2(-15.58,-0.304),
+]
 const FOLLOW_RESPONSE_SECONDS := 0.035
 const FOLLOW_SETTLE_DISTANCE := 0.00005
 const YAW := -512.0 * TAU / 4096.0
@@ -16,7 +21,7 @@ var _limits := PackedVector2Array()
 var _screen_bounds := Rect2()
 var _half_view := Vector2.ZERO
 var _viewport_size := Vector2.ZERO
-var _edge_padding := EDGE_PADDING
+var _farm_edge_trial := false
 
 func set_location(location: Node3D, outdoors: bool) -> void:
 	_coverage.clear()
@@ -39,7 +44,7 @@ func set_location(location: Node3D, outdoors: bool) -> void:
 	for point in _coverage: _screen_bounds = _screen_bounds.expand(point)
 
 func set_farm_edge_trial(enabled: bool) -> void:
-	_edge_padding = FARM_TRIAL_PADDING if enabled else EDGE_PADDING
+	_farm_edge_trial = enabled
 	_half_view = Vector2.ZERO
 
 func _project(point: Vector3) -> Vector2:
@@ -47,15 +52,16 @@ func _project(point: Vector3) -> Vector2:
 
 func _update_limits(half: Vector2) -> void:
 	_half_view = half
-	_limits = _coverage.duplicate()
+	var coverage := PackedVector2Array(FARM_TRIAL_COVERAGE) if _farm_edge_trial else _coverage
+	_limits = coverage.duplicate()
 	var centre := Vector2.ZERO
-	for vertex in _coverage: centre += vertex/_coverage.size()
-	for i in _coverage.size():
-		var point := _coverage[i]
-		var edge := _coverage[(i+1)%_coverage.size()]-point
+	for vertex in coverage: centre += vertex/coverage.size()
+	for i in coverage.size():
+		var point := coverage[i]
+		var edge := coverage[(i+1)%coverage.size()]-point
 		var inward := Vector2(-edge.y,edge.x).normalized()
 		if inward.dot(centre-point)<0: inward = -inward
-		var boundary := inward.dot(point)+inward.abs().dot(half)+_edge_padding
+		var boundary := inward.dot(point)+inward.abs().dot(half)+EDGE_PADDING
 		var clipped := PackedVector2Array()
 		for j in _limits.size():
 			var a := _limits[j]

@@ -6,17 +6,17 @@ func _initialize() -> void: run.call_deferred()
 func require_ok(ok: bool, message: String) -> bool:
 	if not ok: push_error(message);quit(1)
 	return ok
-func covered_corners(camera, focus: Vector3) -> bool:
+func covered_corners(camera, focus: Vector3, coverage: PackedVector2Array) -> bool:
 	var projected: Vector2 = camera._project(focus)
 	for offset in [Vector2(-1,-1),Vector2(-1,1),Vector2(1,-1),Vector2(1,1)]:
 		var point: Vector2 = projected+offset*(camera._half_view-Vector2.ONE*0.0001)
 		# Check each half-plane directly; Godot's point-in-polygon has a wider
 		# boundary epsilon than this sub-millimetre viewport-corner check.
 		var centre := Vector2.ZERO
-		for vertex in camera._coverage: centre += vertex/camera._coverage.size()
-		for i in camera._coverage.size():
-			var a: Vector2 = camera._coverage[i]
-			var edge: Vector2 = camera._coverage[(i+1)%camera._coverage.size()]-a
+		for vertex in coverage: centre += vertex/coverage.size()
+		for i in coverage.size():
+			var a: Vector2 = coverage[i]
+			var edge: Vector2 = coverage[(i+1)%coverage.size()]-a
 			var inward := Vector2(-edge.y,edge.x).normalized()
 			if inward.dot(centre-a)<0: inward = -inward
 			if inward.dot(point-a)<-0.00001: return false
@@ -47,7 +47,7 @@ func run() -> void:
 				camera.follow(world.player,false,false)
 				if not require_ok(camera.size<=original_size+0.00001 and camera.eye_offset==original_eye and camera.projection==Camera3D.PROJECTION_ORTHOGONAL and camera.basis.is_equal_approx(Basis.looking_at(-original_eye)),"Limits zoomed farther out or changed angle/projection: "+id): return
 				if outdoors:
-					if not require_ok(camera._limits.size()>=3 and covered_corners(camera,camera.position-camera.eye_offset),"Strict camera limit exposed the native boundary: "+str([id,viewport,point])): return
+					if not require_ok(camera._limits.size()>=3 and covered_corners(camera,camera.position-camera.eye_offset,camera._coverage),"Strict camera limit exposed the native boundary: "+str([id,viewport,point])): return
 				else:
 					if not require_ok(camera.limited_focus(point)==point and (camera.position-point-original_eye).length()<0.00001,"Indoor camera was clamped: "+id): return
 				checks+=1
@@ -57,17 +57,35 @@ func run() -> void:
 				var centre := Vector2.ZERO
 				for vertex in camera._limits: centre += vertex/camera._limits.size()
 				var point: Vector3 = camera.basis.x*centre.x+camera.basis.y*centre.y
-				if not require_ok(covered_corners(camera,camera.limited_focus(point)),"Viewport escaped the map envelope: "+str([id,viewport])): return
+				if not require_ok(covered_corners(camera,camera.limited_focus(point),camera._coverage),"Viewport escaped the map envelope: "+str([id,viewport])): return
 		print("CAMERA_LOCATION_OK: ",id," ",info.slug," outdoors=",outdoors)
 	# Trial is explicit, farm-only, and locks the outward component at a fixed edge.
-	world._change_area(0,Vector3(-4.55,0,9.5))
-	root.size = Vector2i(1152,720)
-	var trial_foot := Vector3(-4.55,0,9.5)
+	# Exact player pose from the report at the watermill bridge.
+	var trial_foot := Vector3(-4.71626,0.16156,10.58229)
+	world._change_area(0,trial_foot)
+	root.size = Vector2i(1036,648)
 	var normal_focus: Vector3 = camera.limited_focus(trial_foot)
 	world.set_farm_camera_trial(true)
 	var trial_focus: Vector3 = camera.limited_focus(trial_foot)
 	if not require_ok(is_equal_approx(camera.size,original_size) and trial_focus.distance_to(normal_focus)>0.1,
 			"Opt-in farm edge did not stop earlier at the original scale"): return
+	var trial_outline := PackedVector2Array(camera.FARM_TRIAL_COVERAGE)
+	if not require_ok(not covered_corners(camera,normal_focus,trial_outline) and covered_corners(camera,trial_focus,trial_outline),
+			"Trial still exposes the bridge-side cutout"): return
+	var house := Vector3(-4.55,0,-4.0)
+	if not require_ok(camera.limited_focus(house).is_equal_approx(house),
+			"Trial unnecessarily shifted the camera near the farmhouse"): return
+	for viewport in [Vector2i(960,720),Vector2i(1280,720),Vector2i(1920,720),Vector2i(720,960)]:
+		root.size = viewport
+		camera.limited_focus(trial_foot)
+		if not require_ok(camera._limits.size()>=3 and is_equal_approx(camera.size,original_size),
+				"Farm trial could not retain original framing: "+str(viewport)): return
+		# For convex limits these extreme poses also bound every blended centre.
+		for centre in camera._limits:
+			var focus: Vector3 = camera.basis.x*centre.x+camera.basis.y*centre.y
+			if not require_ok(covered_corners(camera,focus,trial_outline),"Farm trial exposed the outline: "+str(viewport)): return
+	root.size = Vector2i(1036,648)
+	camera.limited_focus(trial_foot)
 	var boundary: PackedVector2Array = camera._limits
 	var edge := boundary[1]-boundary[0]
 	var outward := Vector2(edge.y,-edge.x).normalized()
@@ -81,9 +99,9 @@ func run() -> void:
 		var clamped: Vector2 = camera._project(camera.limited_focus(desired))
 		if not require_ok(clamped.distance_to(middle)<0.001,"Trial continued past its fixed edge"): return
 	world._change_area(52,Vector3(0,0,0))
-	if not require_ok(camera._edge_padding==camera.EDGE_PADDING,"Farm trial affected town square"): return
+	if not require_ok(not camera._farm_edge_trial,"Farm trial affected town square"): return
 	world._change_area(0,trial_foot)
-	if not require_ok(camera._edge_padding==camera.FARM_TRIAL_PADDING,"Farm trial did not resume on return"): return
+	if not require_ok(camera._farm_edge_trial,"Farm trial did not resume on return"): return
 	world.set_farm_camera_trial(false)
 	if not require_ok(camera.limited_focus(trial_foot).is_equal_approx(normal_focus),"Turning off the trial did not restore normal limits"): return
 	print("FARM_FIXED_EDGE_TRIAL_OK: opt-in, original distance, stops at the fixed edge, farm only, reversible")
@@ -95,12 +113,12 @@ func run() -> void:
 	for foot in [Vector3(0,0,0),Vector3(8,0,0),Vector3(-8,0,0),Vector3(0,0,8),Vector3(0,0,-8)]:
 		var limited: Vector3 = camera.limited_focus(foot)
 		if limited.distance_to(foot)>0.001: moved+=1
-		if not require_ok(covered_corners(camera,limited),"Square-ground edge still exposes void: "+str([foot,limited])): return
+		if not require_ok(covered_corners(camera,limited,camera._coverage),"Square-ground edge still exposes void: "+str([foot,limited])): return
 	if not require_ok(moved>=4,"Camera never stopped following at the outdoor edges"): return
 	# Too-small map: fit closer rather than relax the border or add scenery.
 	plane.size=Vector2(0.5,0.5);camera.set_location(location,true)
 	var once: Vector3 = camera.limited_focus(Vector3.ZERO)
-	if not require_ok(once.is_finite() and once==camera.limited_focus(Vector3.ZERO) and camera.size<original_size and covered_corners(camera,once),"Small map camera did not fit inside its real boundary"): return
+	if not require_ok(once.is_finite() and once==camera.limited_focus(Vector3.ZERO) and camera.size<original_size and covered_corners(camera,once,camera._coverage),"Small map camera did not fit inside its real boundary"): return
 	# Overview does not consume/rebuild the gameplay envelope and exiting restores it.
 	camera.set_location(location,true);camera.show_overview(location);camera.reset_gameplay();camera.follow(world.player,false,false)
 	if not require_ok(camera.size<=original_size and not camera._coverage.is_empty(),"Overview lost gameplay zoom or map bounds"): return
