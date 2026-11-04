@@ -32,6 +32,11 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	print("BOOT_STAGE: world setup")
+	var refresh_rate := DisplayServer.screen_get_refresh_rate()
+	if Engine.max_fps > 0 and refresh_rate > 0.0 and refresh_rate <= Engine.max_fps + 0.5 \
+			and DisplayServer.window_get_vsync_mode() == DisplayServer.VSYNC_ENABLED:
+		# VSync already meets the cap on this display. Avoid a second sleep timer.
+		Engine.max_fps = 0
 	_wireframe_colliders(get_node("Location"))
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
 	location_loader = load("res://game/world/location_loader.gd").new()
