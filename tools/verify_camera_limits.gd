@@ -29,6 +29,8 @@ func run() -> void:
 	var original_eye: Vector3 = camera.eye_offset
 	var outdoor_count := 0
 	var indoor_count := 0
+	var farm_outline := PackedVector2Array(camera.FARM_COVERAGE)
+	if not require_ok(camera._coverage == farm_outline, "Startup did not select the farm outline"): return
 	# Real geometry and source flags: all outdoors including both loaded coast segments.
 	for id in world.world:
 		var info: Dictionary = world.world[id]
@@ -59,33 +61,27 @@ func run() -> void:
 				var point: Vector3 = camera.basis.x*centre.x+camera.basis.y*centre.y
 				if not require_ok(covered_corners(camera,camera.limited_focus(point),camera._coverage),"Viewport escaped the map envelope: "+str([id,viewport])): return
 		print("CAMERA_LOCATION_OK: ",id," ",info.slug," outdoors=",outdoors)
-	# Trial is explicit, farm-only, and locks the outward component at a fixed edge.
-	# Exact player pose from the report at the watermill bridge.
-	var trial_foot := Vector3(-4.71626,0.16156,10.58229)
-	world._change_area(0,trial_foot)
+	# Player position from the latest watermill bridge report.
+	var bridge_foot := Vector3(-5.08569,0.15878,10.62352)
+	world._change_area(0,bridge_foot)
 	root.size = Vector2i(1036,648)
-	var normal_focus: Vector3 = camera.limited_focus(trial_foot)
-	world.set_farm_camera_trial(true)
-	var trial_focus: Vector3 = camera.limited_focus(trial_foot)
-	if not require_ok(is_equal_approx(camera.size,original_size) and trial_focus.distance_to(normal_focus)>0.1,
-			"Opt-in farm edge did not stop earlier at the original scale"): return
-	var trial_outline := PackedVector2Array(camera.FARM_TRIAL_COVERAGE)
-	if not require_ok(not covered_corners(camera,normal_focus,trial_outline) and covered_corners(camera,trial_focus,trial_outline),
-			"Trial still exposes the bridge-side cutout"): return
+	var bridge_focus: Vector3 = camera.limited_focus(bridge_foot)
+	if not require_ok(camera._coverage == farm_outline and covered_corners(camera,bridge_focus,farm_outline),
+			"Returning to the farm exposed the bridge-side cutout"): return
 	var house := Vector3(-4.55,0,-4.0)
 	if not require_ok(camera.limited_focus(house).is_equal_approx(house),
-			"Trial unnecessarily shifted the camera near the farmhouse"): return
+			"Farm limits unnecessarily shifted the camera near the farmhouse"): return
 	for viewport in [Vector2i(960,720),Vector2i(1280,720),Vector2i(1920,720),Vector2i(720,960)]:
 		root.size = viewport
-		camera.limited_focus(trial_foot)
+		camera.limited_focus(bridge_foot)
 		if not require_ok(camera._limits.size()>=3 and is_equal_approx(camera.size,original_size),
-				"Farm trial could not retain original framing: "+str(viewport)): return
+				"Farm limits could not retain original framing: "+str(viewport)): return
 		# For convex limits these extreme poses also bound every blended centre.
 		for centre in camera._limits:
 			var focus: Vector3 = camera.basis.x*centre.x+camera.basis.y*centre.y
-			if not require_ok(covered_corners(camera,focus,trial_outline),"Farm trial exposed the outline: "+str(viewport)): return
+			if not require_ok(covered_corners(camera,focus,farm_outline),"Farm limits exposed the outline: "+str(viewport)): return
 	root.size = Vector2i(1036,648)
-	camera.limited_focus(trial_foot)
+	camera.limited_focus(bridge_foot)
 	var boundary: PackedVector2Array = camera._limits
 	var edge := boundary[1]-boundary[0]
 	var outward := Vector2(edge.y,-edge.x).normalized()
@@ -97,14 +93,10 @@ func run() -> void:
 		var probe: Vector2 = middle+outward*extra
 		var desired: Vector3 = camera.basis.x*probe.x+camera.basis.y*probe.y
 		var clamped: Vector2 = camera._project(camera.limited_focus(desired))
-		if not require_ok(clamped.distance_to(middle)<0.001,"Trial continued past its fixed edge"): return
+		if not require_ok(clamped.distance_to(middle)<0.001,"Farm camera continued past its fixed edge"): return
 	world._change_area(52,Vector3(0,0,0))
-	if not require_ok(not camera._farm_edge_trial,"Farm trial affected town square"): return
-	world._change_area(0,trial_foot)
-	if not require_ok(camera._farm_edge_trial,"Farm trial did not resume on return"): return
-	world.set_farm_camera_trial(false)
-	if not require_ok(camera.limited_focus(trial_foot).is_equal_approx(normal_focus),"Turning off the trial did not restore normal limits"): return
-	print("FARM_FIXED_EDGE_TRIAL_OK: opt-in, original distance, stops at the fixed edge, farm only, reversible")
+	if not require_ok(camera._coverage != farm_outline,"Town square inherited the farm outline"): return
+	print("FARM_FIXED_EDGE_OK: automatic on startup and return, original distance, fixed edge, farm only")
 	# Square plane: test all edges using an independent known geometry boundary.
 	var location := Node3D.new();root.add_child(location)
 	var geometry := MeshInstance3D.new();var plane := PlaneMesh.new();plane.size=Vector2(20,20);geometry.mesh=plane;location.add_child(geometry)

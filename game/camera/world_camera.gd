@@ -5,7 +5,7 @@ const HEIGHT := 4500.0 / 1000.0
 const EDGE_PADDING := 0.05
 # Inset outline measured in the gameplay projection from native farm geometry.
 # The short edges cut off the concave tips by the river and southern bank.
-const FARM_TRIAL_COVERAGE := [
+const FARM_COVERAGE := [
 	Vector2(-15.58,-0.814), Vector2(1.719,-8.55), Vector2(3.561,-8.55),
 	Vector2(16.965,-2.556), Vector2(-1.825,5.847), Vector2(-15.58,-0.304),
 ]
@@ -21,9 +21,8 @@ var _limits := PackedVector2Array()
 var _screen_bounds := Rect2()
 var _half_view := Vector2.ZERO
 var _viewport_size := Vector2.ZERO
-var _farm_edge_trial := false
 
-func set_location(location: Node3D, outdoors: bool) -> void:
+func set_location(location: Node3D, outdoors: bool, area_id := -1) -> void:
 	_coverage.clear()
 	_limits.clear()
 	_half_view = Vector2.ZERO
@@ -31,34 +30,32 @@ func set_location(location: Node3D, outdoors: bool) -> void:
 	reset_gameplay()
 	if not outdoors: return
 	basis = Basis.looking_at(-eye_offset)
-	var points := PackedVector2Array()
-	for geometry: MeshInstance3D in location.find_children("*","MeshInstance3D",true,false):
-		if geometry.mesh==null or not geometry.is_visible_in_tree(): continue
-		for vertex in geometry.mesh.get_faces():
-			points.append(_project(geometry.global_transform*vertex))
-	if points.size()<3: return
-	# Strict camera bounds: do not relax them to recenter a border-positioned player.
-	_coverage = Geometry2D.convex_hull(points)
-	if _coverage[0].is_equal_approx(_coverage[-1]): _coverage.remove_at(_coverage.size()-1)
+	if area_id == 0:
+		_coverage = PackedVector2Array(FARM_COVERAGE)
+	else:
+		var points := PackedVector2Array()
+		for geometry: MeshInstance3D in location.find_children("*","MeshInstance3D",true,false):
+			if geometry.mesh==null or not geometry.is_visible_in_tree(): continue
+			for vertex in geometry.mesh.get_faces():
+				points.append(_project(geometry.global_transform*vertex))
+		if points.size()<3: return
+		# Strict camera bounds: do not relax them to recenter a border-positioned player.
+		_coverage = Geometry2D.convex_hull(points)
+		if _coverage[0].is_equal_approx(_coverage[-1]): _coverage.remove_at(_coverage.size()-1)
 	_screen_bounds = Rect2(_coverage[0],Vector2.ZERO)
 	for point in _coverage: _screen_bounds = _screen_bounds.expand(point)
-
-func set_farm_edge_trial(enabled: bool) -> void:
-	_farm_edge_trial = enabled
-	_half_view = Vector2.ZERO
 
 func _project(point: Vector3) -> Vector2:
 	return Vector2(point.dot(basis.x),point.dot(basis.y))
 
 func _update_limits(half: Vector2) -> void:
 	_half_view = half
-	var coverage := PackedVector2Array(FARM_TRIAL_COVERAGE) if _farm_edge_trial else _coverage
-	_limits = coverage.duplicate()
+	_limits = _coverage.duplicate()
 	var centre := Vector2.ZERO
-	for vertex in coverage: centre += vertex/coverage.size()
-	for i in coverage.size():
-		var point := coverage[i]
-		var edge := coverage[(i+1)%coverage.size()]-point
+	for vertex in _coverage: centre += vertex/_coverage.size()
+	for i in _coverage.size():
+		var point := _coverage[i]
+		var edge := _coverage[(i+1)%_coverage.size()]-point
 		var inward := Vector2(-edge.y,edge.x).normalized()
 		if inward.dot(centre-point)<0: inward = -inward
 		var boundary := inward.dot(point)+inward.abs().dot(half)+EDGE_PADDING

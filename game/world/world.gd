@@ -6,7 +6,6 @@ var hud: Label
 var world: Dictionary
 var current_area := 0
 var overview := false
-var farm_camera_trial := false
 var awaiting_interact_release := false
 var transitioning := false
 var nearby_exit: Dictionary = {}
@@ -136,13 +135,7 @@ func _process(delta: float) -> void:
 
 func _configure_camera_limits() -> void:
 	var flags: int = day_cycle.catalogue.areas[str(current_area)].source_flags
-	camera.set_farm_edge_trial(current_area==0 and farm_camera_trial)
-	camera.set_location(get_node("Location"),flags&0x1800==0)
-
-func set_farm_camera_trial(enabled: bool) -> void:
-	farm_camera_trial = enabled
-	camera.set_farm_edge_trial(current_area==0 and enabled)
-	_update_camera()
+	camera.set_location(get_node("Location"),flags&0x1800==0,current_area)
 
 func _update_camera(interpolate := false, delta := 0.0) -> void:
 	camera.follow(player, overview, interpolate, delta)
