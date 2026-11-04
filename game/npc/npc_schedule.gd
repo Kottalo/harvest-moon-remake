@@ -132,21 +132,22 @@ func _nearby():
 	return best
 
 
-func witnesses() -> PackedStringArray:
+func people_near(observer: CharacterBody3D) -> PackedStringArray:
 	var result := PackedStringArray()
-	var player: CharacterBody3D = world.player
-	var space := player.get_world_3d().direct_space_state
+	var origin := observer.global_position
+	var space := observer.get_world_3d().direct_space_state
 	var eye := Vector3.UP*0.35
 	for id in active:
 		var actor = active[id]
-		if not actor.placed or scheduled_areas.get(id,world.current_area) != world.current_area:
+		if actor == observer or not actor.placed or not actor.is_visible_in_tree():
 			continue
-		var offset: Vector3 = actor.global_position-player.global_position
+		var position: Vector3 = actor.global_position
+		var offset := position-origin
 		if absf(offset.y)>0.4 or offset.length_squared()>4.0:
 			continue
+		# Solid props, ground and closed doorway stops can block sight.
 		var query := PhysicsRayQueryParameters3D.create(
-			player.global_position+eye,actor.global_position+eye,
-			player.collision_mask,[player.get_rid(),actor.get_rid()])
+			origin+eye,position+eye,1|2|16,[observer.get_rid(),actor.get_rid()])
 		if space.intersect_ray(query).is_empty():
 			result.append(id)
 	return result

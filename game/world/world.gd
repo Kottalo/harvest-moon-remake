@@ -32,7 +32,7 @@ func record_history(kind: String, actor: String, content: String, witnesses: Pac
 	return history.record(kind,actor,content,witnesses,world[str(current_area)].name,date)
 
 func record_player_action(content: String) -> void:
-	record_history("action","player",content,npcs.witnesses() if npcs != null else [])
+	record_history("action","player",content,npcs.people_near(player) if npcs != null else [])
 
 func area_to_world(area: int, point: Vector3) -> Vector3:
 	if area == 56:

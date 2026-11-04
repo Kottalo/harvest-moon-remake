@@ -122,6 +122,20 @@ func run() -> void:
 	for name in data.actors.keys()+data.helpers.keys():
 		if not check(not str(dialogue.profiles.get(name,"")).is_empty(),"Missing character profile: "+name):
 			return
+	var origin: Vector3 = chef.global_position
+	npc.active.nappy.global_position = origin+Vector3(0,0,-0.35)
+	npc.active.hoggy.global_position = origin+Vector3(0,0,0.75)
+	npc.active.bold.global_position = origin+Vector3(0,0,3.0)
+	var wall := StaticBody3D.new()
+	var collision := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.25,1.0,0.1)
+	collision.shape = box
+	wall.add_child(collision)
+	root.add_child(wall)
+	wall.global_position = origin+Vector3(0,0.4,0.37)
+	await physics_frame
+	await physics_frame
 	world.player.global_position = chef.global_position+Vector3(0.33,0,0)
 	world.player.facing = 1
 	world.record_history("action","player","捡到了一枚蓝色贝壳",["chef","gray"])
@@ -140,6 +154,11 @@ func run() -> void:
 			and transport.memory.contains("放下了树枝")
 			and world.history.entries.back().actor=="chef",
 			"NPC reply or persona was missing"):
+		return
+	var people: String = transport.last_messages[0].content.get_slice("你附近可见的其他人：",1)
+	if not check(people.contains("纳皮") and not people.contains("霍格")
+			and not people.contains("博尔德") and not people.contains("切夫"),
+			"Dialogue did not distinguish visible neighbors from blocked, distant or self"):
 		return
 	transport.problem = "连接失败"
 	var before_speech: int = world.history.entries.size()
@@ -160,6 +179,13 @@ func run() -> void:
 	dialogue.close()
 	if not check(not paused and not dialogue.overlay.visible,"Closing dialogue did not restore gameplay"):
 		return
+	wall.free()
+	await physics_frame
+	dialogue.begin(chef)
+	if not check(transport.last_messages[0].content.get_slice("你附近可见的其他人：",1).contains("霍格"),
+			"A fresh conversation did not pick up a neighbor after the wall was removed"):
+		return
+	dialogue.close()
 	if not await see_villager(world,"gray",data.actors.gray,data.routes):
 		return
 	dialogue.begin(npc.active.gray)
