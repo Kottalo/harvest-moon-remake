@@ -20,6 +20,14 @@ func _run() -> void:
 	var farm = load("res://game/world/world.tscn").instantiate()
 	root.add_child(farm)
 	await _frames(90)
+	var actions = farm.player.actions
+	var source: Dictionary = actions.data.banks.base
+	for animation in ["10","28"]:
+		for pose: Dictionary in source.ranges[animation]:
+			if not _require(actions.textures.has(source.pages[pose.page]),
+					"First running hop would load its atlas synchronously"):
+				return
+	print("HOP_ATLAS_READY: normal and carried poses are cached before the first action")
 	if not _require(farm.player.is_on_floor(), "Player did not land on the imported farm"):
 		return
 	# Calibrate on the clear farmyard; field weeds/stones intentionally block paths.

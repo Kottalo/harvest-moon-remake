@@ -110,7 +110,9 @@ func _physics_process(delta: float) -> void:
 	_check_exits(delta)
 
 func _process(delta: float) -> void:
-	location_loader.poll()
+	# Finish the small action warmup before starting the neighbouring map queue.
+	if player.actions.poll_hop_atlases():
+		location_loader.poll()
 	_update_camera(true)
 	hud_elapsed += delta
 	if hud_elapsed >= 0.1:

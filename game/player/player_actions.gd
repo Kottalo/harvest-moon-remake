@@ -8,6 +8,8 @@ var data: Dictionary
 var items: Dictionary
 var textures := {}
 var frame_textures := {}
+var hop_atlas_paths: Array[String] = []
+var hop_atlas_request := ""
 var state := ""
 var bank := ""
 var range_id := -1
@@ -34,6 +36,12 @@ func setup(body) -> void:
 	player = body
 	data = JSON.parse_string(FileAccess.get_file_as_string("res://game/player/actions/action_catalog.json"))
 	items = JSON.parse_string(FileAccess.get_file_as_string("res://game/items/item_catalog.json")).pictures
+	var source: Dictionary = data.banks.base
+	for animation in ["10","28"]:
+		for pose: Dictionary in source.ranges[animation]:
+			var path: String = source.pages[pose.page]
+			if not hop_atlas_paths.has(path):
+				hop_atlas_paths.append(path)
 	held_sprite = Sprite3D.new()
 	held_sprite.name = "CarriedItem"
 	held_sprite.pixel_size = player.sprite.pixel_size
@@ -42,6 +50,22 @@ func setup(body) -> void:
 	held_sprite.material_override = player.sprite.material_override.duplicate()
 	held_sprite.visible = false
 	player.add_child(held_sprite)
+
+func poll_hop_atlases() -> bool:
+	# The first hop otherwise loads the full base action atlas during _draw().
+	if not hop_atlas_request.is_empty():
+		var status := ResourceLoader.load_threaded_get_status(hop_atlas_request)
+		if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return false
+		if status == ResourceLoader.THREAD_LOAD_LOADED:
+			textures[hop_atlas_request] = ResourceLoader.load_threaded_get(hop_atlas_request)
+		hop_atlas_request = ""
+	while not hop_atlas_paths.is_empty():
+		var path: String = hop_atlas_paths.pop_front()
+		if not textures.has(path) and ResourceLoader.load_threaded_request(path,"Texture2D") == OK:
+			hop_atlas_request = path
+			return false
+	return true
 
 func busy() -> bool:
 	return not state.is_empty()
