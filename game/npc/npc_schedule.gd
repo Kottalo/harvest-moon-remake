@@ -25,21 +25,18 @@ var location: Node3D
 var active := {}
 var scheduled_areas := {}
 var clock_key := Vector4i(-1,-1,-1,-1)
-var greeted
-var greet_remaining := 0.0
+var dialogue
 
 
 func enter_location(next_location: Node3D) -> void:
 	location = next_location
 	active.clear()
-	greeted = null
-	greet_remaining = 0.0
+	dialogue.close()
 	clock_key = Vector4i(-1,-1,-1,-1)
 	update(0.0)
 
 
-func update(delta: float) -> void:
-	greet_remaining = maxf(greet_remaining-delta,0.0)
+func update(_delta: float) -> void:
 	var clock = world.day_cycle
 	var key := Vector4i(clock.year,clock.season,clock.weekday,clock.minute)
 	if key == clock_key:
@@ -138,15 +135,14 @@ func _nearby():
 func greet() -> void:
 	if world.transitioning or world.day_cycle.menu_open or world.player.actions.busy() or world.player.actions.carried_id!=0:
 		return
+	if not world.nearby_exit.is_empty():
+		return
 	var actor = _nearby()
 	if actor != null:
 		actor.greet(world.player.global_position)
-		greeted = actor
-		greet_remaining = 1.2
+		dialogue.begin(str(actor.name),actor.display_name)
 
 
 func prompt() -> String:
-	if greet_remaining>0.0 and is_instance_valid(greeted) and greeted.is_inside_tree():
-		return greeted.display_name + "向你打了招呼"
 	var actor = _nearby()
-	return "E 与%s打招呼" % actor.display_name if actor != null else ""
+	return "E 与%s交谈" % actor.display_name if actor != null else ""

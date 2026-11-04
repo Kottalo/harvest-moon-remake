@@ -97,6 +97,9 @@ func _ready() -> void:
 	npcs.name = "NpcSchedule"
 	add_child(npcs)
 	npcs.world = self
+	npcs.dialogue = preload("res://game/npc/dialogue/npc_dialogue.gd").new()
+	npcs.add_child(npcs.dialogue)
+	npcs.dialogue.setup(self,ui_font)
 	npcs.enter_location(get_node("Location"))
 	player.actions.interact_requested.connect(npcs.greet)
 	print("WORLD_READY: ", world.size(), " native locations")

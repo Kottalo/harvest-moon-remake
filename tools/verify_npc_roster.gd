@@ -1,6 +1,15 @@
 extends SceneTree
 ## Exercises the original schedule catalogue through normal world entry and clock updates.
 
+class TestDeepSeek extends "res://game/npc/dialogue/deepseek.gd":
+	var last_messages: Array
+	var problem := ""
+
+	func ask(messages: Array) -> void:
+		last_messages = messages
+		answered.emit("今天想尝点什么？" if problem.is_empty() else "",problem)
+
+
 func _initialize() -> void:
 	run.call_deferred()
 
@@ -77,17 +86,48 @@ func run() -> void:
 				"Missing source helper appearance or shadow: "+name):
 			return
 	var chef = npc.active.chef
+	var dialogue = npc.dialogue
+	if not check(dialogue.profiles.size()==39,"Missing character profiles"):
+		return
+	for name in data.actors.keys()+data.helpers.keys():
+		if not check(not str(dialogue.profiles.get(name,"")).is_empty(),"Missing character profile: "+name):
+			return
+	dialogue.client.free()
+	var transport := TestDeepSeek.new()
+	dialogue.client = transport
+	dialogue.add_child(transport)
+	transport.answered.connect(dialogue._on_answer)
 	world.player.global_position = chef.global_position+Vector3(0.33,0,0)
 	world.player.facing = 1
 	world.player.actions.interact_requested.emit()
-	if not check(npc.greeted==chef and chef.facing==3 and chef.talk_wait>0.0,
-			"Facing the helper and pressing interact did not trigger a greeting"):
+	if not check(dialogue.overlay.visible and paused and dialogue.npc_id=="chef" and chef.facing==3,
+			"Facing the helper and pressing interact did not open a paused conversation"):
+		return
+	if not check(dialogue.reply.text=="今天想尝点什么？" and transport.last_messages[0].content.contains("料理"),
+			"NPC reply or persona was missing"):
+		return
+	transport.problem = "连接失败"
+	dialogue._submit("你喜欢吃什么？")
+	if not check(dialogue.status.text==transport.problem and dialogue.entry.editable and dialogue.history["chef"].size()==2,
+			"A failed reply was stored as NPC speech or prevented recovery"):
+		return
+	transport.problem = ""
+	dialogue._submit("")
+	if not check(transport.last_messages.size()==4 and transport.last_messages.back().content=="你喜欢吃什么？",
+			"Follow-up did not retain this actor's conversation"):
+		return
+	dialogue.close()
+	if not check(not paused and not dialogue.overlay.visible,"Closing dialogue did not restore gameplay"):
+		return
+	dialogue.begin("gray","格雷")
+	if not check(transport.last_messages.size()==2 and transport.last_messages[0].content.contains("赛巴拉"),
+			"Another actor received the wrong persona or conversation history"):
 		return
 	world._change_area(80,Vector3.ZERO)
-	if not check(not is_instance_valid(chef) and npc.active.is_empty(),"NPCs leaked between locations"):
+	if not check(not is_instance_valid(chef) and npc.active.is_empty() and not paused,"NPCs leaked between locations"):
 		return
 	world.free()
-	print("NPC_ROSTER_OK: 32 villagers and 7 helpers placed, original shop hours, facing greeting and clean area lifecycle")
+	print("NPC_ROSTER_OK: 32 villagers and 7 helpers placed, original shop hours, persona dialogue and history isolation and clean area lifecycle")
 	quit()
 
 
