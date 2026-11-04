@@ -49,7 +49,7 @@ func _ticks(count: int) -> void:
 		await physics_frame
 		await process_frame
 
-func _sow_from_picker(target: int) -> bool:
+func _sow_from_picker(seed: int, target: int) -> bool:
 	actions.equipped = 6
 	world.player.set_physics_process(true)
 	await _ticks(5)
@@ -59,21 +59,23 @@ func _sow_from_picker(target: int) -> bool:
 	if not _require(world.tool_picker.panel.visible and paused,"I did not open the seed picker"): return false
 	_key(KEY_TAB,true)
 	_key(KEY_TAB,false)
-	world.tool_picker.entries[34].pressed.emit()
+	world.tool_picker.entries[seed].pressed.emit()
 	await _ticks(2)
 	if not _require(actions.state == "show_tool" and not paused,"Seed picker did not equip the seed bag"): return false
 	_key(KEY_SPACE,true)
 	await _ticks(2)
 	_key(KEY_SPACE,false)
 	var poses := {}
+	var expected_animation: int = crops.data.seeds[str(seed)].animation
 	for tick in ceili(Engine.physics_ticks_per_second*1.2):
 		await _ticks(1)
 		if actions.state == "seed":
+			if not _require(actions.range_id==expected_animation,"Picker played the wrong seed animation: "+str(seed)): return false
 			poses[actions.frame] = true
 			if not _require(crops.plants.is_empty(),"Ground changed before the original sowing pose completed"): return false
 	world.player.set_physics_process(false)
 	return _require(poses.size()==3 and crops.plants.has(target) and field.pixels[target]==3,
-		"Space during the equip pose lost the sowing action or source soil update")
+		"Space during the equip pose lost the sowing action or source soil update: "+str(seed))
 
 func _dawn() -> void:
 	world.day_cycle.minute = 359
@@ -97,14 +99,18 @@ func _run() -> void:
 	await process_frame
 	var target: int = field.cell_index(ORIGIN + Vector2i.DOWN)
 	_position(ORIGIN)
-	field.set_soil(target,field.TILLED)
-	world.day_cycle.season = 1
-	if not _tool(34) or not _require(crops.plants.is_empty() and crops.message == "当前季节不适合播种","Out-of-season seed did not report why it was refused"):
+	world.player.set_physics_process(true)
+	await _ticks(5)
+	_key(KEY_SPACE,true)
+	await _ticks(2)
+	_key(KEY_SPACE,false)
+	await _ticks(Engine.physics_ticks_per_second)
+	world.player.set_physics_process(false)
+	if not _require(field.states[target]==field.TILLED and not actions.busy(),"Physical Space did not hoe the plot used for sowing"):
 		return
-	world.day_cycle.season = 0
 	if not _require(field.material.get_shader_parameter("crop_ground") is Texture2D,"The original sown soil texture is not bound"):
 		return
-	if not await _sow_from_picker(target):
+	if not await _sow_from_picker(34,target):
 		return
 	if not _require(crops.message == "已播种 · 1 格","Sowing did not report the changed plot count"):
 		return
@@ -135,18 +141,25 @@ func _run() -> void:
 	ids.append(377)
 	for plant_id in ids:
 		var seed: int = 51 if plant_id == 377 else plant_id
-		var selected: Dictionary = crops.data.seeds[str(seed)]
-		actions.selected_seed = seed
 		crops.plants.clear()
 		field.states.fill(field.SOIL)
 		field.set_soil(target,field.TILLED)
 		var crop_id: int = 376 if plant_id == 51 else plant_id
 		var row: Dictionary = crops.data.crops[str(crop_id)]
-		world.day_cycle.season = 0 if row.season == 4 else row.season
+		world.day_cycle.season = 0
 		world.day_cycle.day = 0
 		crops.water_remaining = 100
-		if not _tool(34) or not _require(crops.plants.has(target) and actions.bank == "seeds","Seed did not plant: "+str([seed,selected.animation])):
+		if not await _sow_from_picker(seed,target):
 			return
+		if int(row.season) not in [0,4]:
+			if not _require(crops.message.contains("次日会枯萎"),"No warning for a successfully planted off-season seed: "+str([seed,crops.message])):
+				return
+			_dawn()
+			if not _require(not crops.plants.has(target) and field.pixels[target]==1,"Off-season seed did not wither at dawn"):
+				return
+			world.day_cycle.season = row.season
+			if not _tool(34) or not _require(crops.plants.has(target),"Seed did not plant in its own season: "+str(seed)):
+				return
 		if seed == 51:
 			# Exercise both outcomes without relying on the 1-in-25 roll in a test.
 			crops.plants[target].id = crop_id
@@ -184,5 +197,5 @@ func _run() -> void:
 				_dawn()
 				if not _require(not crops.plants.has(target),"Season rollover left a seasonal crop alive"):
 					return
-	print("CROPS_OK: picker + Space during equip, 3 original poses, sowing result/feedback; 21 seed actions, 22 crop records, water, dry day, sleep, produce harvests, fodder, regrowth and seasons")
+	print("CROPS_OK: physical hoe, picker + Space, 21 seed tools sow in spring with all 3 source poses, off-season withers at dawn, 22 crop records, water, dry day, sleep, produce harvests, fodder, regrowth and seasons")
 	quit()

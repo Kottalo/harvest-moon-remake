@@ -74,10 +74,8 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 		return
 	if tool == 34:
 		var seed: int = actions.selected_seed
-		var crop: Dictionary = data.crops[str(376 if seed == 51 else seed)]
-		if crop.season != world.day_cycle.season and crop.season != 4:
-			message = "当前季节不适合播种"
-			return
+		# field_event_dispatch always sows eligible outdoor soil outside winter.
+		# The original checks the crop's season at dawn, after the seeds land.
 		var planted := 0
 		for offset: Array in data.sow[facing]:
 			var cell := origin + Vector2i(offset[0],offset[1])
@@ -89,6 +87,9 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 			planted += 1
 		if planted > 0:
 			message = "已播种 · %d 格" % planted
+			var crop: Dictionary = data.crops[str(376 if seed == 51 else seed)]
+			if crop.season != world.day_cycle.season and crop.season != 4:
+				message += " · 非当季，次日会枯萎"
 			refresh_plots(false)
 		else:
 			message = "周围没有可播种的空耕地"
