@@ -73,7 +73,9 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	title.add_theme_font_override("font",ToolboxStyle.font(font,700))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var close := Button.new()
+	close.name = "CloseButton"
 	close.text = "×"
+	close.focus_mode = Control.FOCUS_NONE
 	close.custom_minimum_size = Vector2(32,28)
 	_style_button(close,styles.key)
 	close.pressed.connect(_close)
@@ -87,7 +89,6 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	var equipped := _tray(top,"手持工具")
 	equipped.custom_minimum_size.x = 114
 	held_slot = _slot(equipped)
-	held_slot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var bag_tools := _tray(top,"背包工具")
 	bag_tools.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var bag_grid := _grid()
@@ -270,10 +271,22 @@ func _grid() -> GridContainer:
 func _slot(parent: Container) -> Button:
 	var button := Button.new()
 	button.custom_minimum_size = ToolboxStyle.SLOT_SIZE
+	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	button.expand_icon = true
 	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	button.add_theme_constant_override("icon_max_width",32)
-	button.add_theme_font_size_override("font_size",10)
 	_style_button(button,_padded(styles.filled,3))
+	var quantity := _label(button,"",10,ToolboxStyle.DARK_INK)
+	quantity.name = "Quantity"
+	quantity.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	quantity.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	quantity.clip_text = true
+	quantity.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	quantity.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	quantity.offset_left = 3
+	quantity.offset_top = -15
+	quantity.offset_right = -3
+	quantity.offset_bottom = -2
 	button.disabled = true
 	button.mouse_entered.connect(_show_tooltip.bind(button))
 	button.mouse_exited.connect(_hide_tooltip.bind(button))
@@ -298,7 +311,10 @@ func _set_slot(button: Button, item: int) -> void:
 	var seed: Dictionary = actions.seed_catalogue.get(str(item),{})
 	button.set_meta("item",item)
 	button.disabled = item==0 or (seed.is_empty() and not actions.owns_tool(item))
-	button.text = "" if seed.is_empty() else "×%d" % seed_count.call(item)
+	# A child label overlays the slot without changing the button's minimum size.
+	var quantity := button.get_node("Quantity") as Label
+	quantity.text = "" if seed.is_empty() else "×%d" % seed_count.call(item)
+	button.add_theme_constant_override("icon_max_width",32 if seed.is_empty() else 28)
 	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER if seed.is_empty() else VERTICAL_ALIGNMENT_TOP
 	var tool_name: String = actions.TOOL_NAMES[actions.TOOL_IDS.find(item)] if item!=0 and seed.is_empty() else seed.get("name","")
 	button.set_meta("item_name",tool_name)

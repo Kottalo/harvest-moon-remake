@@ -83,6 +83,8 @@ func run() -> void:
 	world.player.input_locked = false
 	action.carried_id = 0
 	var picker = world.tool_picker
+	world.economy.stock[54] = 9999
+	world.economy.rucksack.tools[1] = 54
 	_picker_key(viewport,KEY_I)
 	await process_frame
 	var active: Button = picker.entries[action.selected_seed]
@@ -92,6 +94,12 @@ func run() -> void:
 		if not require_ok(grid.columns==4 and grid.get_child_count()==8,"Toolbox storage did not use the source four-by-two slots"): return
 	if not require_ok(picker.held_slot.icon!=null and picker.bag_slots.filter(func(button): return button.visible).size()==2,
 			"Held tool and current rucksack slots are missing"): return
+	var close: Button = picker.title.get_parent().get_node("CloseButton")
+	if not require_ok(close.focus_mode==Control.FOCUS_NONE,"Close button can receive focus"): return
+	for slot: Button in [picker.held_slot,picker.bag_slots[0],picker.bag_slots[1]] + active.get_parent().get_children():
+		if not require_ok(slot.size.is_equal_approx(Vector2(52,52)),"Toolbox slot expanded beyond its square: "+str(slot.size)): return
+	var bag_seed: Label = picker.bag_slots[1].get_node("Quantity")
+	if not require_ok(bag_seed.text=="×9999","Backpack seed count was missing from its square slot"): return
 	if not require_ok(not world.hud.visible and not world.day_cycle.clock_label.visible,
 			"Gameplay HUD showed through the toolbox"): return
 	if not require_ok(viewport.get_visible_rect().encloses(active.get_global_rect()),
@@ -120,12 +128,7 @@ func run() -> void:
 	viewport.push_input(pointer,true)
 	await process_frame
 	if not require_ok(not picker.tooltip.visible,"Tool name stayed visible after the pointer left its slot"): return
-	for pressed in [true,false]:
-		var click := InputEventMouseButton.new()
-		click.button_index = MOUSE_BUTTON_LEFT
-		click.pressed = pressed
-		click.position = can.get_global_rect().get_center()
-		viewport.push_input(click,true)
+	_picker_click(viewport,can)
 	await frames(2)
 	if not require_ok(not paused and not picker.panel.visible and action.equipped==21
 			and action.state=="show_tool" and action.range_id==71,"Picker failed to equip the watering can with the source pose"): return
@@ -141,15 +144,17 @@ func run() -> void:
 	grass.grab_focus()
 	await process_frame
 	if not require_ok(picker.tooltip.visible and picker.tooltip_label.text==action.seed_catalogue["54"].name
-			and picker.entries[54].text.begins_with("×"),"Keyboard focus did not show the seed name separately from its count"): return
+			and grass.get_node("Quantity").text=="×9999" and grass.size.is_equal_approx(Vector2(52,52)),
+			"Storage seed count did not stay inside its square with the tooltip open"): return
 	_picker_key(viewport,KEY_Z)
 	await frames(2)
 	if not require_ok(not paused and action.equipped==34 and action.selected_seed==54
 			and action.state=="show_tool" and action.held_sprite.texture==action.tool_picture(34,54),"Picker failed to equip grass with its own seed bag"): return
 	while action.busy(): await frames(1)
 	_picker_key(viewport,KEY_I)
-	_picker_key(viewport,KEY_ESCAPE)
-	if not require_ok(not paused and not picker.panel.visible and action.selected_seed==54 and not action.busy(),"Cancel altered the selection or left the game paused"): return
+	await process_frame
+	_picker_click(viewport,close)
+	if not require_ok(not paused and not picker.panel.visible and action.selected_seed==54 and not action.busy(),"Close button altered the selection or left the game paused"): return
 	action.carried_id = 58
 	_picker_key(viewport,KEY_I)
 	if not require_ok(not paused and not picker.panel.visible,"I opened while carrying an item"): return
@@ -199,6 +204,14 @@ func run() -> void:
 	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical A selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders; modal tool and seed selection, icon crop, hover/focus tips, tabs, pause and cancellation; physical Z and source lid motion")
 	viewport.free()
 	quit()
+
+func _picker_click(viewport: Viewport, button: Button) -> void:
+	for pressed in [true,false]:
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = pressed
+		click.position = button.get_global_rect().get_center()
+		viewport.push_input(click,true)
 
 func _picker_key(viewport: Viewport, code: Key) -> void:
 	var event := InputEventKey.new()
