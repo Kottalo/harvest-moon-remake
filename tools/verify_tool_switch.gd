@@ -87,6 +87,11 @@ func run() -> void:
 	await process_frame
 	if not require_ok(paused and picker.panel.visible and picker.entries.size()==35
 			and picker.tabs.current_tab==1,"I did not open the modal on the equipped seed tab"): return
+	if not require_ok(not world.hud.visible and not world.day_cycle.clock_label.visible,
+			"Gameplay HUD showed through the toolbox"): return
+	var seed_button: Button = picker.entries[54]
+	if not require_ok(viewport.get_visible_rect().encloses(seed_button.get_global_rect()),
+			"Seed grid is clipped at the gameplay resolution"): return
 	for id in picker.entries:
 		var button: Button = picker.entries[id]
 		if not require_ok(button.icon != null and button.icon.get_width() in [16,36],"Picker icon is missing or includes its transparent source canvas: "+str(id)): return
@@ -106,10 +111,13 @@ func run() -> void:
 	await frames(2)
 	if not require_ok(not paused and not picker.panel.visible and action.equipped==21
 			and action.state=="show_tool" and action.range_id==71,"Picker failed to equip the watering can with the source pose"): return
+	if not require_ok(world.hud.visible and world.day_cycle.clock_label.visible,
+			"Closing the toolbox did not restore the gameplay HUD"): return
 	while action.busy(): await frames(1)
 	_picker_key(viewport,KEY_I)
 	_picker_key(viewport,KEY_TAB)
-	picker.entries[54].pressed.emit()
+	picker.entries[54].grab_focus()
+	_picker_key(viewport,KEY_Z)
 	await frames(2)
 	if not require_ok(not paused and action.equipped==34 and action.selected_seed==54
 			and action.state=="show_tool" and action.held_sprite.texture==action.tool_picture(34,54),"Picker failed to equip grass with its own seed bag"): return
@@ -167,3 +175,6 @@ func _picker_key(viewport: Viewport, code: Key) -> void:
 	event.physical_keycode = code
 	event.pressed = true
 	viewport.push_input(event,true)
+	var released := event.duplicate() as InputEventKey
+	released.pressed = false
+	viewport.push_input(released,true)

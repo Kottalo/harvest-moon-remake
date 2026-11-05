@@ -3,7 +3,7 @@ extends CanvasLayer
 const TOOLBOX_SIZE := Vector2(472,335)
 const SLOT_SIZE := Vector2(52,52)
 const SLOT_PITCH := 62
-const BRASS_PIN := "res://game/items/toolbox_brass_pin.svg"
+const ToolboxStyle := preload("res://game/items/toolbox_style.gd")
 const SLOT_LINKS := [
 	[9,9,9,9,9,9,2,4,4,1,1,1,0,0,5,0,0,5,2,4,4,1,1,1],
 	[10,10,14,10,10,5,0,0,0,2,2,2,1,1,5,1,1,5,0,0,0,2,2,2],
@@ -69,27 +69,22 @@ func setup(owner_economy, font: Font) -> void:
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	art.draw.connect(_draw_art)
 	frame.add_child(art)
-	_setup_styles()
-	brass_pin = _load_brass_pin()
+	styles = ToolboxStyle.materials()
+	brass_pin = ToolboxStyle.brass_pin()
 
-	var regular := SystemFont.new()
-	var families := PackedStringArray(["Noto Sans SC"])
-	if font is SystemFont:
-		families.append_array(font.font_names)
-	regular.font_names = families
-	var strong := regular.duplicate() as SystemFont
-	strong.font_weight = 700
-	_add_label("农场工具箱",Vector2(41,30),21,Color("#fff1ce"),strong)
+	var regular := ToolboxStyle.font(font)
+	var strong := ToolboxStyle.font(font,700)
+	_add_label("农场工具箱",Vector2(41,30),21,ToolboxStyle.HEADING,strong)
 	capacity_label = _add_label("",Vector2(355,38),11,Color("#422a20"),strong)
 	for caption in [["手持工具",Vector2(37,90)],["手持物品",Vector2(37,179)],
 			["工具",Vector2(195,90)],["物品",Vector2(195,179)]]:
 		_add_label(caption[0],caption[1],12,Color("#f5d3a3"),strong)
-	equipped_label = _add_label("",Vector2(99,126),11,Color("#fff0d7"),regular)
-	carried_label = _add_label("",Vector2(99,214),11,Color("#eac7a1"),regular)
+	equipped_label = _add_label("",Vector2(99,126),11,ToolboxStyle.INK,regular)
+	carried_label = _add_label("",Vector2(99,214),11,ToolboxStyle.MUTED_INK,regular)
 	for key in HELP_KEYS:
-		help_labels.append(_add_label(key[0],Vector2(key[2]+5,282),10,Color("#352419"),strong))
-		help_labels.append(_add_label(key[1],Vector2(key[2]+key[3]+5,282),10,Color("#fff0d7"),regular))
-	detail = _add_label("",Vector2(39,282),10,Color("#fff0d7"),regular)
+		help_labels.append(_add_label(key[0],Vector2(key[2]+5,282),10,ToolboxStyle.DARK_INK,strong))
+		help_labels.append(_add_label(key[1],Vector2(key[2]+key[3]+5,282),10,ToolboxStyle.INK,regular))
+	detail = _add_label("",Vector2(39,282),10,ToolboxStyle.INK,regular)
 	for label in [equipped_label,carried_label,detail]:
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -102,36 +97,6 @@ func setup(owner_economy, font: Font) -> void:
 	icons.resize(SLOT_LINKS.size())
 	_layout()
 	_refresh()
-
-func _load_brass_pin() -> Texture2D:
-	if ResourceLoader.exists(BRASS_PIN):
-		return load(BRASS_PIN)
-	var pin := Image.new()
-	if pin.load_svg_from_buffer(FileAccess.get_file_as_bytes(BRASS_PIN))==OK:
-		return ImageTexture.create_from_image(pin)
-	return null
-
-func _setup_styles() -> void:
-	_style("shell",Color("#38251b"),12)
-	_style("rim",Color.TRANSPARENT,12,Color("#c18550"),2)
-	_style("wood",Color("#9b603b"),8,Color("#75462d"),1)
-	_style("header",Color("#67402a"),6,Color("#d39760"),1)
-	_style("badge",Color("#d6a66a"),4,Color("#69462f"),1)
-	_style("tray",Color("#4c3024"),6,Color("#c99565"),1)
-	_style("filled",Color("#b78357"),5,Color("#d19d68"),1)
-	_style("empty",Color("#80543a"),5,Color("#ac7955"),1)
-	_style("focus",Color.TRANSPARENT,5,Color("#ffe1a2"),2)
-	_style("marked",Color.TRANSPARENT,4,Color("#ecac64"),2)
-	_style("help",Color("#68412b"),4)
-	_style("key",Color("#d4a471"),4)
-
-func _style(id: String, fill: Color, radius: int, edge := Color.TRANSPARENT, width := 0) -> void:
-	var style := StyleBoxFlat.new()
-	style.bg_color = fill
-	style.border_color = edge
-	style.set_corner_radius_all(radius)
-	style.set_border_width_all(width)
-	styles[id] = style
 
 func _extra_row() -> int:
 	return SLOT_PITCH if economy.rucksack.capacity==8 else 0
