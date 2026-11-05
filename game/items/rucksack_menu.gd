@@ -1,7 +1,7 @@
 extends CanvasLayer
 ## PS1 storage_swap.c positions and D-pad links, including marked-slot mode.
 const Frame := preload("res://game/rendering/source_window.gd")
-const SCALE := 2.6
+const SOURCE_SIZE := Vector2(320,240)
 const SPOTS := [
 	[57,36,[9,9,9,9,9,9,2,4,4,1,1,1,0,0,5,0,0,5,2,4,4,1,1,1]],
 	[141,20,[10,10,14,10,10,5,0,0,0,2,2,2,1,1,5,1,1,5,0,0,0,2,2,2]],
@@ -23,14 +23,24 @@ const SPOTS := [
 	[243,128,[0,0,13,0,0,4,0,0,16,0,0,9,0,0,13,0,0,13,0,0,16,0,0,9]],
 ]
 
+const MARKS_PATH := "res://game/items/rucksack_marks.png"
+const TILE := Vector2(44,36)
+const SLOT_SIZE := Vector2(32,32)
+const HELP := "方向键：移动光标\nZ：选择／交换\nC：查看物品\nX：取消／关闭"
+
 var economy
 var actions
 var panel: ColorRect
 var frame: Control
+var art: Control
 var detail: Label
-var buttons: Array[Button] = []
+var marks: Texture2D
+var icons: Array[Texture2D] = []
 var cursor := 0
 var marked := -1
+var explaining := false
+var hud_visible := false
+var clock_visible := false
 
 func setup(owner_economy, font: Font) -> void:
 	economy = owner_economy
@@ -38,48 +48,49 @@ func setup(owner_economy, font: Font) -> void:
 	layer = 40
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	panel = ColorRect.new()
-	panel.color = Color(0,0,0,0.55)
+	panel.color = Color(0,0,0,0.5)
 	add_child(panel)
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var center := CenterContainer.new()
-	panel.add_child(center)
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.resized.connect(_layout)
 	frame = Control.new()
-	frame.custom_minimum_size = Vector2(270,186)*SCALE
-	center.add_child(frame)
-	for rect: Rect2 in [Rect2(0,0,96,74),Rect2(96,0,174,74),Rect2(0,74,96,74),Rect2(96,74,174,74)]:
+	frame.size = SOURCE_SIZE
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	panel.add_child(frame)
+	for rect: Rect2 in [Rect2(25,16,96,74),Rect2(121,16,174,74),Rect2(25,90,96,74),
+			Rect2(121,90,174,74),Rect2(26,164,267,62)]:
 		var box := Frame.new()
-		box.position = rect.position*SCALE
-		box.size = rect.size*SCALE
+		box.source_pixel = 1.0
+		box.position = rect.position
+		box.size = rect.size
 		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		frame.add_child(box)
-	for caption in [["手持工具",Vector2(7,3)],["背包工具",Vector2(101,3)],["手持物品",Vector2(7,77)],["背包物品",Vector2(101,77)]]:
-		_label(caption[0],caption[1],font,16)
-	for index in SPOTS.size():
-		var cell := Button.new()
-		cell.position = Vector2(SPOTS[index][0]-25,SPOTS[index][1]-11)*SCALE
-		cell.size = Vector2(29,28)*SCALE
-		cell.add_theme_font_override("font",font)
-		cell.add_theme_constant_override("icon_max_width",46)
-		cell.expand_icon = true
-		cell.focus_entered.connect(_focus.bind(index))
-		cell.pressed.connect(_confirm.bind(index))
-		frame.add_child(cell)
-		buttons.append(cell)
-	detail = _label("",Vector2(1,151),font,19)
-	_label("方向键选择 · Z 标记／交换 · X 取消 · 空格关闭",Vector2(1,168),font,16)
-	for label in [detail,frame.get_child(frame.get_child_count()-1)]:
-		label.add_theme_color_override("font_color",Color.WHITE)
+	art = Control.new()
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	art.draw.connect(_draw_art)
+	frame.add_child(art)
+	_label("装备",Vector2(29,19),font)
+	_label("持有",Vector2(29,93),font)
+	detail = _label(HELP,Vector2(30,167),font)
+	detail.add_theme_font_size_override("font_size",10)
+	detail.add_theme_constant_override("line_spacing",-2)
 	panel.hide()
 	set_process_input(false)
+	_layout()
 
-func _label(value: String, point: Vector2, font: Font, text_size: int) -> Label:
+func _layout() -> void:
+	var amount := minf(panel.size.x/SOURCE_SIZE.x,panel.size.y/SOURCE_SIZE.y)
+	frame.scale = Vector2.ONE*amount
+	frame.position = ((panel.size-SOURCE_SIZE*amount)*0.5).floor()
+
+func _label(value: String, point: Vector2, font: Font) -> Label:
 	var label := Label.new()
-	label.position = point*SCALE
+	label.position = point
 	label.text = value
 	label.add_theme_font_override("font",font)
-	label.add_theme_font_size_override("font_size",text_size)
-	label.add_theme_color_override("font_color",Color("#223344"))
+	label.add_theme_font_size_override("font_size",11)
+	label.add_theme_color_override("font_color",Color("#202020"))
+	label.add_theme_constant_override("line_spacing",0)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame.add_child(label)
 	return label
@@ -87,34 +98,58 @@ func _label(value: String, point: Vector2, font: Font, text_size: int) -> Label:
 func open() -> void:
 	if get_tree().paused or actions.busy() or actions.player.input_locked or not actions.player.is_on_floor():
 		return
+	if marks==null:
+		marks = load(MARKS_PATH) if ResourceLoader.exists(MARKS_PATH) else ImageTexture.create_from_image(Image.load_from_file(MARKS_PATH))
 	marked = -1
 	cursor = 0
+	explaining = false
+	detail.text = HELP
+	hud_visible = economy.world.hud.visible
+	clock_visible = economy.world.day_cycle.clock_label.visible
+	economy.world.hud.hide()
+	economy.world.day_cycle.clock_label.hide()
 	panel.show()
 	get_tree().paused = true
 	set_process_input(true)
 	_refresh()
-	buttons[0].grab_focus()
+
+func _slot_visible(index: int) -> bool:
+	return index in [0,9] or ((index-1)%9)<economy.rucksack.capacity
+
+func _slot_origin(index: int) -> Vector2:
+	return Vector2(SPOTS[index][0],SPOTS[index][1])
 
 func _refresh() -> void:
-	var capacity: int = economy.rucksack.capacity
-	for index in buttons.size():
-		var cell := buttons[index]
-		cell.visible = index in [0,9] or ((index-1)%9)<capacity
-		if not cell.visible:
+	icons.resize(SPOTS.size())
+	for index in SPOTS.size():
+		if _slot_visible(index):
+			icons[index] = _icon(_item(index),index<9)
+	art.queue_redraw()
+
+func _draw_art() -> void:
+	if marks==null:
+		return
+	for index in SPOTS.size():
+		if not _slot_visible(index):
 			continue
+		var point := _slot_origin(index)
+		_draw_mark(2,point)
+		var icon := icons[index]
+		if icon!=null:
+			art.draw_texture(icon,point+((SLOT_SIZE-icon.get_size())*0.5).floor())
 		var item := _item(index)
-		cell.icon = _icon(item,index<9)
-		cell.text = ""
-		if index==marked:
-			cell.text = "✓"
-		elif item==0:
-			cell.text = "—"
-		elif actions.seed_catalogue.has(str(item)):
-			cell.text = str(economy.count(item))
-		elif cell.icon==null:
-			cell.text = str(item)
-		cell.tooltip_text = _name(item,index<9)
-	_focus(cursor)
+		if actions.seed_catalogue.has(str(item)):
+			var number: int = clampi(economy.count(item),0,99)
+			_draw_mark(13,point+Vector2(2,22))
+			if number>=10:
+				_draw_mark(3+number/10,point+Vector2(12,22))
+			_draw_mark(3+number%10,point+Vector2(22,22))
+	if marked>=0:
+		_draw_mark(0,_slot_origin(marked))
+	_draw_mark(1,_slot_origin(cursor)+Vector2(12,24))
+
+func _draw_mark(index: int, point: Vector2) -> void:
+	art.draw_texture_rect_region(marks,Rect2(point-Vector2(10,0),TILE),Rect2(Vector2(index*TILE.x,0),TILE))
 
 func _name(item: int, tool_row: bool) -> String:
 	if item==0:
@@ -129,16 +164,30 @@ func _name(item: int, tool_row: bool) -> String:
 func _icon(item: int, tool_row: bool) -> Texture2D:
 	if item==0:
 		return null
-	var picture: Texture2D
-	if tool_row:
-		picture = actions.tool_picture(34,item) if actions.seed_catalogue.has(str(item)) else actions.tool_picture(item,-1,int(economy.levels.get(item,0)))
-	else:
-		picture = actions.item_picture(item)
+	var level: int = economy.levels.get(item,0)
+	var picture: Texture2D = actions.source_item_picture(item+level)
+	if picture==null:
+		if tool_row:
+			picture = actions.tool_picture(34,item) if actions.seed_catalogue.has(str(item)) else actions.tool_picture(item,-1,level)
+		else:
+			picture = actions.item_picture(item)
 	return actions.menu_icon(picture)
 
-func _focus(index: int) -> void:
-	cursor = index
-	detail.text = "%s    背包每排 %d 格" % [_name(_item(index),index<9),economy.rucksack.capacity]
+func _explain() -> void:
+	var item := _item(cursor)
+	if item==0:
+		return
+	var lines := PackedStringArray([_name(item,cursor<9)])
+	if actions.seed_catalogue.has(str(item)):
+		lines.append("种子数量：%d" % economy.count(item))
+	elif cursor<9 and item in economy.TOOL_BASES:
+		lines.append("熟练度：%d" % int(economy.experience.get(item,0)))
+	elif cursor>=9 and economy.sell_price(item)>0:
+		lines.append("出货价格：%d G" % economy.sell_price(item))
+	lines.append("X：返回")
+	detail.text = "\n".join(lines)
+	explaining = true
+
 
 func _item(index: int) -> int:
 	if index==0:
@@ -175,33 +224,54 @@ func _confirm(index: int) -> void:
 	_refresh()
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and not explaining:
+		var point := art.get_local_mouse_position()
+		for index in SPOTS.size():
+			if _slot_visible(index) and Rect2(_slot_origin(index),SLOT_SIZE).has_point(point):
+				cursor = index
+				_confirm(index)
+				get_viewport().set_input_as_handled()
+				break
 	if not event is InputEventKey or not event.pressed:
 		return
 	var direction := [KEY_UP,KEY_DOWN,KEY_LEFT,KEY_RIGHT].find(event.physical_keycode)
 	if direction>=0:
-		var capacity: int = economy.rucksack.capacity
-		var level := [2,4,8].find(capacity)
-		var next: int = SPOTS[cursor][2][level+direction*3+(12 if marked>=0 else 0)]
-		buttons[next].grab_focus()
-		get_viewport().set_input_as_handled()
-	elif not event.echo and event.is_action_pressed("backpack"):
+		if not explaining:
+			var level := [2,4,8].find(economy.rucksack.capacity)
+			cursor = SPOTS[cursor][2][level+direction*3+(12 if marked>=0 else 0)]
+			art.queue_redraw()
+	elif event.echo:
+		return
+	elif event.is_action_pressed("backpack"):
 		_close()
-		get_viewport().set_input_as_handled()
-	elif not event.echo and event.is_action_pressed("ui_cancel"):
-		if marked>=0:
+	elif event.is_action_pressed("ui_cancel"):
+		if explaining:
+			explaining = false
+			detail.text = HELP
+		elif marked>=0:
 			marked = -1
-			_refresh()
+			art.queue_redraw()
 		else:
 			_close()
-		get_viewport().set_input_as_handled()
-	elif event.physical_keycode==KEY_F1:
-		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_accept"):
+		if not explaining:
+			_confirm(cursor)
+	elif event.is_action_pressed("use_tool"):
+		_explain()
+	elif event.physical_keycode!=KEY_F1:
+		return
+	get_viewport().set_input_as_handled()
 
 func _close() -> void:
 	panel.hide()
-	get_tree().paused = false
+	_restore_world()
 	set_process_input(false)
 
+func _restore_world() -> void:
+	economy.world.hud.visible = hud_visible
+	economy.world.day_cycle.clock_label.visible = clock_visible
+	get_tree().paused = false
+
 func _exit_tree() -> void:
-	if is_instance_valid(panel) and panel.visible:
-		get_tree().paused = false
+	if is_instance_valid(panel) and panel.visible and is_instance_valid(economy.world.hud):
+		_restore_world()

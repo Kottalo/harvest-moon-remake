@@ -343,6 +343,9 @@ func item_picture(item: int) -> Texture2D:
 		return crop_produce[item]
 	if items.has(str(item)):
 		return _texture(items[str(item)].texture)
+	return source_item_picture(item)
+
+func source_item_picture(item: int) -> Texture2D:
 	if item_art==null:
 		item_art = preload("res://game/original_sprites/sprite_library.gd").new()
 		for record: Dictionary in item_art.catalogue.items.values():

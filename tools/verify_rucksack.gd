@@ -31,6 +31,13 @@ func tap(code: Key) -> void:
 	await tick(2)
 
 func run() -> void:
+	var capture := ""
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--capture="):
+			capture = argument.trim_prefix("--capture=")
+	if not capture.is_empty():
+		if not check(DisplayServer.get_name()!="headless","Backpack screenshots require the isolated GPU runner"): return
+		root.size = Vector2i(960,720)
 	world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
 	await tick(10)
@@ -46,7 +53,18 @@ func run() -> void:
 	if not check(Input.is_action_pressed("move_right"),"Arrow does not drive movement"): return
 	key(KEY_RIGHT,false)
 	await tap(KEY_SPACE)
-	if not check(menu.panel.visible and paused and menu.buttons[1].visible and not menu.buttons[3].visible,"Space did not open the original two-slot bag"): return
+	if not check(menu.panel.visible and paused and menu._slot_visible(1) and not menu._slot_visible(3),"Space did not open the original two-slot bag"): return
+	if not check(menu.detail.text.count("\n")==3 and not world.hud.visible and not world.day_cycle.clock_label.visible,"The original help and shaded field were not shown"): return
+	if not check(menu.frame.size==Vector2(320,240) and menu.marks.get_size()==Vector2(616,36),"Original screen coordinates or sprite atlas are missing"): return
+	if not check(menu.detail.position.y+menu.detail.get_minimum_size().y<=226,"Localized help overflows the original bottom frame"): return
+	if not capture.is_empty():
+		await RenderingServer.frame_post_draw
+		var screenshot := root.get_texture().get_image()
+		if not check(screenshot!=null and screenshot.save_png(capture)==OK,"Could not save isolated backpack screenshot"): return
+	await tap(KEY_C)
+	if not check(menu.explaining and menu.detail.text.contains("锄头"),"C did not open the original item explanation panel"): return
+	await tap(KEY_X)
+	if not check(menu.panel.visible and not menu.explaining,"X did not return from item explanation"): return
 	await tap(KEY_RIGHT)
 	if not check(menu.cursor==1,"Original directional links did not select first tool slot"): return
 	await tap(KEY_Z)
@@ -57,7 +75,7 @@ func run() -> void:
 	await tap(KEY_Z)
 	if not check(actions.equipped==1 and economy.rucksack.tools[0]==6,"Z swap did not move the original held tool into the bag"): return
 	await tap(KEY_SPACE)
-	if not check(not paused and not menu.panel.visible,"Space did not close backpack"): return
+	if not check(not paused and not menu.panel.visible and world.hud.visible and world.day_cycle.clock_label.visible,"Space did not close backpack"): return
 	economy.rucksack.next_tool = 0
 	await tap(KEY_A)
 	if not check(actions.equipped==6 and actions.state=="show_tool","A did not quick-switch to the stored tool"): return
@@ -75,7 +93,7 @@ func run() -> void:
 	await tap(KEY_RIGHT)
 	await tap(KEY_Z)
 	await tap(KEY_Z)
-	if not check(actions.carried_id==124 and economy.count(66)==1 and menu.buttons[9].icon!=null,"Swap with the hand did not show the original ore icon"): return
+	if not check(actions.carried_id==124 and economy.count(66)==1 and menu.icons[9]!=null,"Swap with the hand did not show the original ore icon"): return
 	await tap(KEY_X)
 	if not check(not paused,"X did not close the unmarked menu"): return
 
