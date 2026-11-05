@@ -41,6 +41,8 @@ func _run() -> void:
 	world.player.set_physics_process(false)
 	world.set_physics_process(false)
 	var action = world.player.actions
+	for tool in action.TOOL_IDS:
+		world.economy.stock[tool] = 1
 	# This loop checks animation ranges; field results have their own real-input check.
 	action.tool_used.disconnect(world.farm_field.use_tool)
 	for kind in 5:

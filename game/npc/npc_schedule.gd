@@ -158,11 +158,19 @@ func greet() -> void:
 		return
 	if not world.nearby_exit.is_empty():
 		return
+	var counter = world.economy.counter_actor()
+	if counter!=null and world.economy.shop_interact(counter):
+		return
 	var actor = _nearby()
-	if actor != null:
+	if actor != null and not world.economy.shop_interact(actor):
 		dialogue.begin(actor)
 
 
 func prompt() -> String:
+	var counter = world.economy.counter_actor()
+	if counter!=null:
+		return "E 在柜台购物"
 	var actor = _nearby()
-	return "E 与%s交谈" % actor.display_name if actor != null else ""
+	if actor==null:
+		return ""
+	return "E 与%s%s" % [actor.display_name,"交谈" if world.economy.offer_for(str(actor.name)).is_empty() else "互动"]

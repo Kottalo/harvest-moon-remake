@@ -22,6 +22,7 @@ var hud_elapsed := 0.0
 var location_loader
 var farm_field
 var mine_field
+var economy
 var tool_picker
 var npcs
 var history := WorldHistory.new()
@@ -106,9 +107,12 @@ func _ready() -> void:
 	mine_field.name = "MineField"
 	add_child(mine_field)
 	mine_field.setup(self)
+	economy = preload("res://game/economy/farm_economy.gd").new()
+	add_child(economy)
+	economy.setup(self)
 	tool_picker = preload("res://game/player/tool_picker.gd").new()
 	add_child(tool_picker)
-	tool_picker.setup(player.actions,ui_font)
+	tool_picker.setup(player.actions,ui_font,economy.count)
 	_refresh_hud()
 	_configure_camera_limits()
 	_update_camera()
@@ -119,6 +123,7 @@ func _ready() -> void:
 	npcs.dialogue = preload("res://game/npc/dialogue/npc_dialogue.gd").new()
 	npcs.add_child(npcs.dialogue)
 	npcs.dialogue.setup(self,ui_font)
+	economy.dialogue = npcs.dialogue
 	npcs.enter_location(get_node("Location"))
 	player.actions.interact_requested.connect(_interact)
 	print("WORLD_READY: ", world.size(), " native locations")
@@ -168,8 +173,8 @@ func _set_overview() -> void:
 	camera.show_overview(get_node("Location"))
 
 func _refresh_hud() -> void:
-	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · E 交互 · Space/X 工具 · I 工具栏 · Q 快切 · R 等级/选种 · Tab 全景"
-	text += "\n" + player.actions.tool_name()
+	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · E 交互 · Space/X 工具 · I 工具栏 · Q 快切 · R 选种 · Tab 全景"
+	text += "\n%d G · " % economy.gold + player.actions.tool_name()
 	if player.actions.equipped == 34:
 		text += " · R 选种"
 	elif player.actions.equipped == 21:
@@ -186,13 +191,21 @@ func _refresh_hud() -> void:
 	if not nearby_exit.is_empty():
 		var destination: String = world[str(int(nearby_exit.target))].name
 		text += "\nE 查看 " + destination + " · 门锁着" if nearby_exit_locked else "\nE 进入 " + destination
+	elif mine_field.ladder_near():
+		text += "\nE 下到矿洞第 %d 层" % (mine_field.depth+2)
+	elif economy.shipping_near():
+		text += "\nE 出货"
 	elif day_cycle != null and day_cycle.nearby_bed():
 		text += "\nE 床边休息"
 	elif npcs != null:
 		var notice := _notice_ahead()
-		var prompt: String = "E 查看 " + notice[0] if not notice.is_empty() else npcs.prompt()
+		var prompt: String = economy.livestock.prompt()
+		if prompt.is_empty():
+			prompt = "E 查看 " + notice[0] if not notice.is_empty() else npcs.prompt()
 		if not prompt.is_empty():
 			text += "\n" + prompt
+	if not economy.message.is_empty():
+		text += "\n"+economy.message
 	if hud.text != text:
 		hud.text = text
 
@@ -210,8 +223,16 @@ func _notice_ahead() -> Array:
 	return []
 
 func _interact() -> void:
-	if awaiting_interact_release or npcs.dialogue.overlay.visible:
+	if transitioning or awaiting_interact_release or npcs.dialogue.overlay.visible:
 		return
+	if nearby_exit.is_empty():
+		if mine_field.descend():
+			return
+		if economy.shipping_near():
+			economy.show_shipping()
+			return
+		if economy.livestock.interact():
+			return
 	loose_items.interact()
 	day_cycle.interact()
 	farm_field.crops.pick_crop()
@@ -360,6 +381,8 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	loose_items.set_area(area)
 	farm_field.bind_location()
 	mine_field.bind_location()
+	economy.livestock.bind_location()
+	economy.message = ""
 	day_cycle.refresh()
 	_configure_camera_limits()
 	if overview:

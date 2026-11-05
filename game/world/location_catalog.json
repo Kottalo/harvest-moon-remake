@@ -167,7 +167,7 @@
   "24": {
     "id": 24,
     "slug": "yodel_ranch",
-    "name": "约德尔牧场",
+    "name": "养鸡场",
     "place": 47,
     "location": 48,
     "scene": "res://game/locations/yodel_ranch/yodel_ranch.scn",
@@ -276,7 +276,7 @@
   "28": {
     "id": 28,
     "slug": "poultry_farm",
-    "name": "养鸡场",
+    "name": "约德尔牧场",
     "place": 7,
     "location": 8,
     "scene": "res://game/locations/poultry_farm/poultry_farm.scn",
@@ -1721,7 +1721,7 @@
   "128": {
     "id": 128,
     "slug": "yodel_ranch_house",
-    "name": "约德尔牧场住宅",
+    "name": "养鸡场住宅",
     "place": 47,
     "location": 49,
     "scene": "res://game/locations/yodel_ranch_house/yodel_ranch_house.scn",
@@ -1782,7 +1782,7 @@
   "132": {
     "id": 132,
     "slug": "yodel_ranch_bedroom",
-    "name": "牧场住宅卧室",
+    "name": "养鸡场卧室",
     "place": 47,
     "location": 50,
     "scene": "res://game/locations/yodel_ranch_bedroom/yodel_ranch_bedroom.scn",
@@ -1821,7 +1821,7 @@
   "136": {
     "id": 136,
     "slug": "poultry_farm_house",
-    "name": "养鸡场住宅",
+    "name": "约德尔牧场住宅",
     "place": 7,
     "location": 9,
     "scene": "res://game/locations/poultry_farm_house/poultry_farm_house.scn",
@@ -1904,7 +1904,7 @@
   "140": {
     "id": 140,
     "slug": "poultry_farm_bedroom",
-    "name": "养鸡场卧室",
+    "name": "牧场住宅卧室",
     "place": 7,
     "location": 10,
     "scene": "res://game/locations/poultry_farm_bedroom/poultry_farm_bedroom.scn",
@@ -1943,7 +1943,7 @@
   "144": {
     "id": 144,
     "slug": "blacksmith_forge",
-    "name": "锻冶屋",
+    "name": "果园住宅",
     "place": 19,
     "location": 36,
     "scene": "res://game/locations/blacksmith_forge/blacksmith_forge.scn",
@@ -2004,7 +2004,7 @@
   "148": {
     "id": 148,
     "slug": "blacksmith_bedroom",
-    "name": "锻冶屋卧室",
+    "name": "果园住宅卧室",
     "place": 19,
     "location": 37,
     "scene": "res://game/locations/blacksmith_bedroom/blacksmith_bedroom.scn",
@@ -2082,7 +2082,7 @@
   "156": {
     "id": 156,
     "slug": "winery_house",
-    "name": "果园住宅",
+    "name": "锻冶屋",
     "place": 19,
     "location": 35,
     "scene": "res://game/locations/winery_house/winery_house.scn",

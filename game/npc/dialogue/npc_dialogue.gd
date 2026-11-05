@@ -5,13 +5,14 @@ const PERSONAS := "res://game/npc/dialogue/personas.json"
 # Roles at known workplaces. These describe duties, not the current animation.
 const WORKPLACE_DUTIES := {
 	"supermarket":{"jeff":"经营杂货店"},
-	"blacksmith_forge":{"saibara":"经营锻冶屋","gray":"在锻冶屋当学徒"},
+	"winery_house":{"saibara":"经营锻冶屋","gray":"在锻冶屋当学徒"},
 	"clinic":{"doctor":"在医院看诊","elli":"在医院做护理工作"},
 	"library":{"mary":"管理图书馆"},
 	"church":{"pastor_carter":"照管教堂"},
 	"inn":{"doug":"经营旅馆","ann":"帮忙打理旅馆"},
-	"poultry_farm_house":{"lillia":"经营养鸡场","rick":"帮忙打理养鸡场"},
-	"yodel_ranch":{"barley":"打理约德尔牧场"},
+	"yodel_ranch_house":{"lillia":"经营养鸡场","rick":"帮忙打理养鸡场"},
+	"poultry_farm":{"barley":"打理约德尔牧场"},
+	"blacksmith_forge":{"duke":"经营果园酒庄","manna":"在果园酒庄招呼顾客"},
 	"winery_cellar":{"duke":"打理果园酒庄","manna":"帮忙打理果园酒庄"},
 }
 const JOIN_TOPICS := {
@@ -73,12 +74,15 @@ var frame: Control
 var title: Label
 var reply: Label
 var reply_scroll: ScrollContainer
+var choices_panel: VBoxContainer
+var ui_font: Font
 var status: Label
 var entry: LineEdit
 var send: Button
 
 func setup(owner_world, font: Font) -> void:
 	world = owner_world
+	ui_font = font
 	layer = 24
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	profiles = JSON.parse_string(FileAccess.get_file_as_string(PERSONAS))
@@ -113,7 +117,12 @@ func setup(owner_world, font: Font) -> void:
 	reply = _label(font,23)
 	reply.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	reply.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	reply_scroll.add_child(reply)
+	var content := VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	reply_scroll.add_child(content)
+	content.add_child(reply)
+	choices_panel = VBoxContainer.new()
+	content.add_child(choices_panel)
 	reply.resized.connect(func(): _follow_reply.call_deferred())
 	status = _label(font,15)
 	stack.add_child(status)
@@ -219,6 +228,27 @@ func show_notice(heading: String, text: String) -> void:
 	send.hide()
 	_open()
 
+func show_choices(heading: String, text: String, choices: Array) -> void:
+	if not overlay.visible:
+		show_notice(heading,text)
+	elif not notice_open:
+		return
+	title.text = heading
+	reply.text = text
+	status.text = "方向键选择 · Enter 确认 · Esc 返回"
+	for child in choices_panel.get_children():
+		choices_panel.remove_child(child)
+		child.queue_free()
+	for choice in choices:
+		var button := Button.new()
+		_style_button(button,ui_font)
+		button.text = choice[0]
+		button.pressed.connect(choice[1])
+		choices_panel.add_child(button)
+	reply_scroll.scroll_vertical = 0
+	if choices_panel.get_child_count()>0:
+		choices_panel.get_child(0).grab_focus()
+
 func _open() -> void:
 	overlay.show()
 	was_paused = get_tree().paused
@@ -249,6 +279,9 @@ func close() -> void:
 	if notice_open and Input.is_action_pressed("interact"):
 		world.awaiting_interact_release = true
 	notice_open = false
+	for child in choices_panel.get_children():
+		choices_panel.remove_child(child)
+		child.queue_free()
 	client.cancel_request()
 	pending = false
 	pending_text = ""
@@ -271,7 +304,7 @@ func _exit_tree() -> void:
 func _input(event: InputEvent) -> void:
 	if not is_instance_valid(overlay) or not overlay.visible or not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if event.keycode == KEY_ESCAPE or (notice_open and event.is_action_pressed("interact")):
+	if event.keycode == KEY_ESCAPE or (notice_open and choices_panel.get_child_count()==0 and event.is_action_pressed("interact")):
 		get_viewport().set_input_as_handled()
 		close()
 	elif event.keycode == KEY_F1:

@@ -34,6 +34,8 @@ func run() -> void:
 	world.player.position = Vector3(0,0.05,-2)
 	await frames(10)
 	var action = world.player.actions
+	for tool in action.TOOL_IDS:
+		world.economy.stock[tool] = 1
 	action.tool_used.connect(func(_tool,_level): effects += 1)
 	var checks := 0
 	for facing in 4:

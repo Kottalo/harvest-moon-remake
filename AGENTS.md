@@ -13,6 +13,7 @@ Start in the named runtime folder. Read its linked rules for implementation and 
 | Soil, crops, mines, loose items and prefabs | `game/field/`, `game/items/` | [Field](docs/engineering/field.md) | `field` |
 | Locations, doors, signs, transitions, world history | `game/world/`, `game/locations/` | [World](docs/engineering/world.md) | `world` |
 | NPC schedules, pathfinding, personas and dialogue | `game/npc/` | [NPCs](docs/engineering/npc.md), [world history](docs/engineering/world.md) for journal changes | `npc` |
+| Shops, money, stock, upgrades, livestock and shipping | `game/economy/` | Use the USA source prices and the existing NPC dialogue frame | `economy` |
 | Clock, bedtime and time debug panel | `game/time/` | [Time](docs/engineering/time.md) | `time` |
 | Shaders, atlases and conversion | `game/rendering/`, `game/original_sprites/`, `tools/` | [Assets](docs/engineering/assets.md) | Use its importer and GPU checks |
 

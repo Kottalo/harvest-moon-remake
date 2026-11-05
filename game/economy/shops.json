@@ -1,0 +1,15 @@
+{
+  "jeff": {"area":180,"goods":[153,154,165,166,167,100,109,110,33],"seasonal_seeds":true},
+  "saibara": {"area":156,"goods":[26,27,28,319],"upgrade":true},
+  "barley": {"area":136,"goods":[104,29,30,31,32,353,357],"livestock":true},
+  "lillia": {"area":128,"goods":[105,30,265],"livestock":true},
+  "doctor": {"area":188,"goods":[155,156,157,158],"exam":true},
+  "doug": {"area":204,"goods":[168,304,305,306,307,169,170,171]},
+  "ann": {"area":204,"goods":[168,304,305,306,307,169,170,171]},
+  "kai": {"area":56,"goods":[172,309,310,311,171],"summer":true},
+  "manna": {"area":144,"goods":[159,160]},
+  "duke": {"area":144,"goods":[159,160]},
+  "gotz": {"area":212,"goods":[63]},
+  "won": {"area":204,"goods":[38,43,48,49,50,51,52,53]},
+  "greg": {"area":56,"fishing_rod":true}
+}

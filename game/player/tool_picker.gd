@@ -1,14 +1,16 @@
 extends CanvasLayer
 ## Tool and seed selection. PlayerActions owns equipment and the show animation.
 var actions
+var seed_count: Callable
 var panel: ColorRect
 var tabs: TabContainer
 var title: Label
 var entries: Dictionary = {}
 
 
-func setup(player_actions, font: Font) -> void:
+func setup(player_actions, font: Font, available_seeds: Callable) -> void:
 	actions = player_actions
+	seed_count = available_seeds
 	layer = 40
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	panel = ColorRect.new()
@@ -61,6 +63,10 @@ func open() -> void:
 	for tool: int in actions.TOOL_IDS:
 		if tool != 34:
 			entries[tool].icon = _icon(actions.tool_picture(tool))
+			entries[tool].disabled = not actions.owns_tool(tool)
+	for key: String in actions.seed_catalogue:
+		var seed := int(key)
+		entries[seed].text = "%s × %d" % [actions.seed_catalogue[key].name,seed_count.call(seed)]
 	title.text = "工具栏 · 已装备 " + actions.tool_name()
 	var using_seeds: bool = actions.equipped == 34
 	tabs.current_tab = 1 if using_seeds else 0

@@ -3,6 +3,7 @@ extends Node
 signal interact_requested
 signal item_released(item: int, thrown: bool)
 signal tool_used(tool: int, charge: int)
+signal equipment_selected(tool: int)
 var player
 var data: Dictionary
 var items: Dictionary
@@ -17,6 +18,8 @@ var frame := 0
 var elapsed := 0.0
 var charge_ticks := 0.0
 var equipped := 6
+var service_tool := 0
+var equipment_available: Callable
 var upgrade := 0
 var selected_seed := 34
 var _sow_after_show := false
@@ -80,14 +83,18 @@ func tool_name() -> String:
 func can_select_tool() -> bool:
 	return not player.input_locked and not busy() and carried_id == 0
 
+func owns_tool(tool: int) -> bool:
+	return tool!=service_tool and (not equipment_available.is_valid() or equipment_available.call(tool))
+
 func select_tool(tool: int, seed := -1) -> bool:
-	if not can_select_tool() or not TOOL_IDS.has(tool):
+	if not can_select_tool() or not TOOL_IDS.has(tool) or not owns_tool(tool):
 		return false
 	if seed != -1:
 		if tool != 34 or not seed_catalogue.has(str(seed)):
 			return false
 		selected_seed = seed
 	equipped = tool
+	equipment_selected.emit(tool)
 	# player_check_tool_slots: show animation 0x47 for ten source ticks.
 	play("base",71,"show_tool",player.facing)
 	return true
@@ -110,11 +117,13 @@ func poll_input() -> void:
 			play("fishing", player.facing + 4, "reel")
 		return
 	if Input.is_action_just_pressed("next_tool"):
-		if select_tool(TOOL_IDS[(TOOL_IDS.find(equipped) + 1) % TOOL_IDS.size()]):
-			return
+		var current := TOOL_IDS.find(equipped)
+		for offset in range(1,TOOL_IDS.size()):
+			if select_tool(TOOL_IDS[(current+offset)%TOOL_IDS.size()]):
+				return
 	if Input.is_action_just_pressed("tool_level"):
 		if equipped <= 25:
-			upgrade = (upgrade + 1) % 5
+			equipment_selected.emit(equipped)
 		elif equipped == 34 and not seed_catalogue.is_empty():
 			selected_seed = 34 + (selected_seed - 33) % seed_catalogue.size()
 	if Input.is_action_just_pressed("use_tool"):
@@ -140,7 +149,7 @@ func play(source: String, animation: int, action: String, start := 0) -> void:
 	_draw()
 
 func start_tool() -> bool:
-	if busy() or carried_id != 0 or player.input_locked:
+	if busy() or carried_id != 0 or player.input_locked or not owns_tool(equipped):
 		return false
 	if equipped <= 25:
 		charge_ticks = 1

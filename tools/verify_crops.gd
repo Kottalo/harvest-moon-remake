@@ -91,6 +91,8 @@ func _run() -> void:
 	world.player.set_physics_process(false)
 	field = world.farm_field
 	crops = field.crops
+	for seed in crops.data.seeds:
+		world.economy.stock[int(seed)] = 20
 	actions = world.player.actions
 	for record in world.loose_items.records[0]:
 		if record.active:

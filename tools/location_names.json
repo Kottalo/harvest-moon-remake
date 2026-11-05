@@ -5,11 +5,11 @@
   },
   "24": {
     "slug": "yodel_ranch",
-    "name": "约德尔牧场"
+    "name": "养鸡场"
   },
   "28": {
     "slug": "poultry_farm",
-    "name": "养鸡场"
+    "name": "约德尔牧场"
   },
   "32": {
     "slug": "town_south",
@@ -77,27 +77,27 @@
   },
   "128": {
     "slug": "yodel_ranch_house",
-    "name": "约德尔牧场住宅"
+    "name": "养鸡场住宅"
   },
   "132": {
     "slug": "yodel_ranch_bedroom",
-    "name": "牧场住宅卧室"
+    "name": "养鸡场卧室"
   },
   "136": {
     "slug": "poultry_farm_house",
-    "name": "养鸡场住宅"
+    "name": "约德尔牧场住宅"
   },
   "140": {
     "slug": "poultry_farm_bedroom",
-    "name": "养鸡场卧室"
+    "name": "牧场住宅卧室"
   },
   "144": {
     "slug": "blacksmith_forge",
-    "name": "锻冶屋"
+    "name": "果园住宅"
   },
   "148": {
     "slug": "blacksmith_bedroom",
-    "name": "锻冶屋卧室"
+    "name": "果园住宅卧室"
   },
   "152": {
     "slug": "winery_cellar",
@@ -105,7 +105,7 @@
   },
   "156": {
     "slug": "winery_house",
-    "name": "果园住宅"
+    "name": "锻冶屋"
   },
   "160": {
     "slug": "library",

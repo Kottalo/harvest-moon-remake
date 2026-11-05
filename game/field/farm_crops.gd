@@ -73,6 +73,9 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 		return
 	if tool == 34:
 		var seed: int = actions.selected_seed
+		if world.economy.count(seed)==0:
+			message = "没有这种种子。"
+			return
 		# field_event_dispatch always sows eligible outdoor soil outside winter.
 		# The original checks the crop's season at dawn, after the seeds land.
 		var planted := 0
@@ -85,6 +88,7 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 			plants[index] = {"id":plant_id,"stage":0,"days":0,"skip":false}
 			planted += 1
 		if planted > 0:
+			world.economy.take(seed)
 			world.record_player_action("播种了%d格%s" % [planted,data.seeds[str(seed)].name])
 			message = "已播种 · %d 格" % planted
 			var crop: Dictionary = data.crops[str(376 if seed == 51 else seed)]
