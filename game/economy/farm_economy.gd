@@ -185,9 +185,8 @@ func _mined(item: int) -> void:
 		var amount := sell_price(item)
 		gold += amount
 		message = "挖到 %d G" % amount
-	else:
-		if receive(item):
-			message = "挖到"+item_name(item)
+	elif world.player.actions.start_pickup(item,false):
+		message = "挖到"+item_name(item)
 
 func _has_animal(kind: String) -> bool:
 	return animals.any(func(record): return record.kind==kind)

@@ -150,7 +150,7 @@ func poll_input() -> void:
 			selected_seed = 34 + (selected_seed - 33) % seed_catalogue.size()
 	if Input.is_action_just_pressed("use_tool"):
 		if carried_id != 0:
-			if Input.is_action_pressed("run"):
+			if Input.is_action_pressed("run") or not items.has(str(carried_id)):
 				start_drop(true)
 			else:
 				interact_requested.emit()
@@ -169,8 +169,7 @@ func play(source: String, animation: int, action: String, start := 0) -> void:
 	state = action
 	_sow_after_show = false
 	_draw()
-	# player_collect_target and player_check_tool_slots both call sound_play(7).
-	if action in ["show_tool","pickup"]:
+	if action == "show_tool":
 		sound_requested.emit("show_item")
 
 func start_tool() -> bool:
@@ -200,11 +199,13 @@ func release_tool() -> void:
 	sound_requested.emit("tool_%s_%d" % [name,level])
 	play("tool_%d" % upgrade,72 + ((equipped-1)/5 as int)*20 + player.facing*5 + level,"swing",level+1)
 
-func start_pickup(item: int) -> bool:
-	if busy() or carried_id != 0 or player.input_locked or (not items.has(str(item)) and not crop_produce.has(item)):
+func start_pickup(item: int, from_ground := true) -> bool:
+	if busy() or carried_id!=0 or player.input_locked or item_picture(item)==null:
 		return false
 	pending_item = item
 	play("base",11+player.facing,"pickup")
+	if from_ground: # player_collect_target plays cue 7; mine_dig only calls player_show_item.
+		sound_requested.emit("show_item")
 	return true
 
 func start_drop(thrown := false) -> bool:
@@ -317,11 +318,12 @@ func _finish() -> void:
 		sound_requested.emit("sow")
 	elif finished == "refill":
 		sound_requested.emit("refill")
-	if finished in ["swing","animal_tool","reel","refill","seed"]:
-		tool_used.emit(equipped+upgrade if equipped<=25 else equipped,mini(int(charge_ticks/20),upgrade))
 	state = ""
 	range_id = -1
 	player.animation = -1
+	# The result of a completed swing can start the original hold-up pose.
+	if finished in ["swing","animal_tool","reel","refill","seed"]:
+		tool_used.emit(equipped+upgrade if equipped<=25 else equipped,mini(int(charge_ticks/20),upgrade))
 
 func draw_carry(direction: Vector2, running: bool, delta: float) -> void:
 	var selected: int = (19 if running else 15) + player.facing if not direction.is_zero_approx() else 27

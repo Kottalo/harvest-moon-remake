@@ -154,13 +154,14 @@ func _add_record(record: Dictionary) -> void:
 		batch.debug.visible_instance_count = batch.records.size()
 
 func _spawn(item: int, point: Vector3, solid: bool, cell_aligned := true) -> Node3D:
+	var picture: Dictionary = catalogue.pictures.get(str(item),{})
 	var node := Node3D.new()
-	node.name = catalogue.pictures[str(item)].name.to_pascal_case()
+	node.name = picture.name.to_pascal_case() if not picture.is_empty() else "ThrownItem"
 	node.position = point
 	add_child(node)
 	if not solid:
 		var sprite := Sprite3D.new()
-		sprite.texture = load(catalogue.pictures[str(item)].texture)
+		sprite.texture = world.player.actions.item_picture(item)
 		sprite.offset = Vector2(0,48)
 		sprite.pixel_size = world.player.sprite.pixel_size
 		sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -363,9 +364,6 @@ func _placement_backstep(point: Vector3, facing: Vector3, half_size: Vector2) ->
 	return distance
 
 func release_item(item: int, thrown: bool) -> void:
-	if not catalogue.pictures.has(str(item)):
-		world.economy.message = "丢弃了"+world.economy.item_name(item)
-		return
 	var direction: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
 	if thrown:
 		var node := _spawn(item,world.player.position+Vector3.UP*0.3,false)
@@ -389,7 +387,8 @@ func release_item(item: int, thrown: bool) -> void:
 		field_cells[placement.cell] = item
 		_add_record(record)
 	placement = {}
-	action_committed.emit(("扔出了%s" if thrown else "放下了%s") % HISTORY_NAMES[item])
+	var item_name: String = HISTORY_NAMES[item] if HISTORY_NAMES.has(item) else world.economy.item_name(item)
+	action_committed.emit(("扔出了%s" if thrown else "放下了%s") % item_name)
 
 func use_tool(tool: int, _charge: int) -> void:
 	var record := _target()
@@ -447,6 +446,9 @@ func _physics_process(delta: float) -> void:
 			if flight.node.position.y <= flight.ground:
 				var impact: Vector3 = flight.node.position
 				impact.y = flight.ground
-				_play_break(int(flight.item),impact)
+				if catalogue.pictures.has(str(flight.item)):
+					_play_break(int(flight.item),impact)
+				else:
+					world.economy.message = "丢弃了"+world.economy.item_name(flight.item)
 				flight.node.queue_free()
 				flights.remove_at(i)

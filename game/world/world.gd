@@ -443,7 +443,7 @@ func _sleep_until_morning(automatic: bool) -> void:
 	if transitioning:
 		return
 	var actions = player.actions
-	if automatic and actions.state == "pickup" and actions.crop_produce.has(actions.pending_item):
+	if automatic and actions.state == "pickup":
 		actions._finish()
 	transitioning = true
 	player.input_locked = true

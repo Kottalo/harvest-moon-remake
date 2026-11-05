@@ -18,6 +18,21 @@ func click(label: String) -> bool:
 			return true
 	return check(false,"Missing choice: "+label)
 
+func _frames(count: int) -> void:
+	for tick in count:
+		await physics_frame
+		await process_frame
+
+func _press(code: Key) -> void:
+	for pressed in [true,false]:
+		var event := InputEventKey.new()
+		event.physical_keycode = code
+		event.keycode = code
+		event.pressed = pressed
+		Input.parse_input_event(event)
+		Input.flush_buffered_events()
+		await _frames(2)
+
 func run() -> void:
 	world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
@@ -87,11 +102,47 @@ func run() -> void:
 	world.mine_field.ladder_marker = marker
 	if not check(world.mine_field.descend() and world.mine_field.depth==1,"Dug ladder cannot descend to the next loot table"): return
 
+	# A deterministic copper roll through the real hoe, held pose and throw controls.
+	world._change_area(234,Vector3(0.2,0.01,0.2))
+	world.mine_field.loot["234"] = {"events":[124],"weights":[[100]]}
+	player.facing = 0
+	player.actions.equipped = 6
+	player.actions.upgrade = 0
+	await _frames(4)
+	await _press(KEY_C)
+	var showed_ore := false
+	for tick in 100:
+		await _frames(1)
+		showed_ore = showed_ore or player.actions.pending_item==124
+		if player.actions.carried_id==124:
+			break
+	if not check(showed_ore and player.actions.carried_id==124 and economy.count(124)==0,
+			"Dug ore bypassed the held pose or was put in the bag"): return
+	await _press(KEY_C)
+	var flew := false
+	for tick in 100:
+		await _frames(1)
+		if not world.loose_items.flights.is_empty():
+			flew = true
+			var ore: Dictionary = world.loose_items.flights[0]
+			if not check(ore.item==124 and ore.node.get_child(0).texture==player.actions.item_picture(124),
+					"Thrown ore used the wrong picture"): return
+		elif flew:
+			break
+	if not check(flew and world.loose_items.flights.is_empty() and player.actions.carried_id==0
+			and economy.count(124)==0 and economy.message=="丢弃了铜矿石","Throw did not clear the ore at landing"): return
+	world.mine_field.exit_chance = 0
+	player.facing = 1
+	await _press(KEY_C)
+	await _frames(75)
+	if not check(player.actions.carried_id==124,"Second mined ore did not return to the hand"): return
+	await _press(KEY_Z)
+	if not check(player.actions.carried_id==0 and economy.count(124)==1,"Z did not store exactly one held ore"): return
+
 	world.day_cycle.minute = 11*60
 	world._change_area(156,Vector3.ZERO)
 	if not check(world.npcs.active.has("saibara"),"Blacksmith service is bound to the wrong original area"): return
 	economy.gold = 20000
-	economy.stock[124] = 1
 	if not check(not economy.upgrade_tool(6,1).begins_with("赛巴拉收下") and economy.gold==20000,"Untrained upgrade changed cash"): return
 	economy.experience[6] = 6000
 	if not check(economy.upgrade_tool(6,1).begins_with("赛巴拉收下") and economy.gold==19000 and economy.count(124)==0 and player.actions.service_tool==6,"Tool order did not reserve the tool and payment"): return
