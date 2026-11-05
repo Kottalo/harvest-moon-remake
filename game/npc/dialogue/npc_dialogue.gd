@@ -207,7 +207,7 @@ func show_notice(heading: String, text: String) -> void:
 	title.text = heading
 	reply.text = text
 	reply_scroll.scroll_vertical = 0
-	status.text = "Z / X 关闭"
+	status.text = ""
 	entry.hide()
 	send.hide()
 	_open()
@@ -219,7 +219,7 @@ func show_choices(heading: String, text: String, choices: Array) -> void:
 		return
 	title.text = heading
 	reply.text = text
-	status.text = "方向键选择 · Z 确认 · X 返回"
+	status.text = ""
 	for child in choices_panel.get_children():
 		choices_panel.remove_child(child)
 		child.queue_free()

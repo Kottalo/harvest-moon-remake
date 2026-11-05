@@ -8,6 +8,7 @@ var step := 0
 var frozen: Texture2D
 var skip_frame := false
 var half_step := false
+var sleep_steps := 0
 
 func _ready() -> void:
 	layer = 100
@@ -34,6 +35,16 @@ func start_out() -> void:
 	rect.material.set_shader_parameter("frozen",frozen != null)
 	rect.show()
 	_set_shade(0)
+
+func start_sleep_out(ticks: int) -> void:
+	phase = "sleep_out"
+	sleep_steps = ticks + 1 # fade_start_out stores length + 1.
+	step = 0
+	clock = 0
+	rect.material.set_shader_parameter("frozen",false)
+	rect.show()
+	_set_shade(0)
+
 
 func start_in() -> void:
 	phase = "in"
@@ -72,6 +83,12 @@ func _process(delta: float) -> void:
 				# Original subtractive blend accumulates floor(255/21)=12 per step.
 				_set_shade(minf(step*12.0/255.0,1.0))
 				if step >= 21:
+					_set_shade(1)
+					phase = "black"
+			"sleep_out":
+				step += 1
+				_set_shade(float(step * 255 / sleep_steps as int) / 255.0)
+				if step > sleep_steps:
 					_set_shade(1)
 					phase = "black"
 			"in":

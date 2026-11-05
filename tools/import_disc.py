@@ -313,6 +313,23 @@ def farm_mesh(data, vram, out, json_output=None):
         entries.append(dict(index=index, flags=flags, source_position=position,
                             position=[x / 1000, -y / 1000, -z / 1000],
                             angle=[angle[0], -angle[1], -angle[2]], surfaces=parts))
+    if out.name == 'farmhouse':
+        # scene_link_handback: two linked morphs with identical draw packets.
+        # Slot 0 moves to its first key; slot 1 starts there and moves to its first key.
+        bed = next(entry for entry in entries if entry['flags'] & 0x4080 == 0x4080)
+        slot = 0xbdc - 15 * 44 + bed['index'] * 44
+        folded = struct.unpack_from('<I', data, slot + 8)[0]
+        next_slot = slot + 44
+        flags, initial, tucked = struct.unpack_from('<III', data, next_slot)
+        assert flags & 0x408f == 0x4081 and initial == folded
+        bed['blanket_poses'] = []
+        for pose in (folded, tucked):
+            parts, _ = model_mesh(data, vram, out, 0x2000 + pose, texture_names, animations)
+            assert len(parts) == len(bed['surfaces'])
+            for source, key in zip(bed['surfaces'], parts):
+                assert len(source['vertices']) == len(key['vertices'])
+                assert all(source[field] == key[field] for field in ('texture', 'uv', 'colors', 'primitive_flags'))
+            bed['blanket_poses'].append([part['vertices'] for part in parts])
     (json_output or out / 'farm.json').write_text(json.dumps(dict(surfaces=surfaces, entries=entries), separators=(',', ':')))
     report.update(scene_entries=len(entries), coordinate_conversion='(x, -y, -z) / 1000', texture_sources=texture_names)
     return report

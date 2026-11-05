@@ -178,21 +178,14 @@ func _set_overview() -> void:
 	camera.show_overview(get_node("Location"))
 
 func _refresh_hud() -> void:
-	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nX 跑步 · Z 交互 · C 工具 · 空格 背包 · A 换工具 · I 工具箱 · Tab 全景"
+	var text := str(world[str(current_area)].name)
 	text += "\n%d G · " % economy.gold + player.actions.tool_name()
-	if player.actions.equipped == 34:
-		text += " · R 选种"
-	elif player.actions.equipped == 21:
-		text += " · 水量 %d · G 补水" % farm_field.crops.water_remaining
+	if player.actions.equipped == 21:
+		text += " · 水量 %d" % farm_field.crops.water_remaining
 	if not farm_field.crops.message.is_empty():
 		text += " · " + farm_field.crops.message
 	if player.actions.state == "charge":
 		text += " · 蓄力 " + str(mini(int(player.actions.charge_ticks/20),player.actions.upgrade))
-	if player.actions.carried_id != 0:
-		if player.actions.items.has(str(player.actions.carried_id)):
-			text += " · Z / C 放下或丢弃 · X+C 投掷"
-		else:
-			text += " · Z 收入背包 · X+C 丢弃"
 	if not nearby_exit.is_empty():
 		var destination: String = world[str(int(nearby_exit.target))].name
 		text += "\nZ 查看 " + destination + " · 门锁着" if nearby_exit_locked else "\nZ 进入 " + destination
@@ -244,6 +237,11 @@ func _interact() -> void:
 		return
 	if nearby_exit.is_empty():
 		if _toolbox_ahead():
+			# The imported FarmZoneModel carries SCENE_ENTRY_PAN on the toolbox lid.
+			for model in get_node("Location").get_children():
+				if int(model.get_meta("source_flags",0)) & 0x40:
+					tool_picker.open(model)
+					return
 			tool_picker.open()
 			return
 		if mine_field.descend():
@@ -445,11 +443,13 @@ func _sleep_until_morning(automatic: bool) -> void:
 	var token := transition_token
 	if not automatic:
 		var bed: Array = day_cycle.catalogue.bed_position
-		await player.actions.go_to_bed(Vector3(bed[0],bed[1],bed[2]))
+		var blanket := get_node_or_null("Location/ZoneModel_01/Geometry") as MeshInstance3D
+		await player.actions.go_to_bed(Vector3(bed[0],bed[1],bed[2]),blanket)
 		if token != transition_token:
 			day_cycle.sleeping = false
 			return
-	transition_effect.start_out()
+	transition_effect.start_sleep_out(45 if automatic else 30)
+
 	while transition_effect.phase != "black":
 		await get_tree().process_frame
 		if token != transition_token:

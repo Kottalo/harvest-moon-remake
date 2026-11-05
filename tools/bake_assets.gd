@@ -58,7 +58,7 @@ func _bake_scene(info: Dictionary) -> void:
 		node.set_meta("source_flags", entry.flags)
 		farm.add_child(node)
 		node.owner = farm
-		_add_mesh(farm, node, entry.surfaces, texture_base)
+		_add_mesh(farm,node,entry.surfaces,texture_base,[],entry.get("blanket_poses",[]))
 	var scene := PackedScene.new()
 	assert(scene.pack(farm) == OK)
 	assert(ResourceSaver.save(scene, info.scene) == OK)
@@ -175,12 +175,18 @@ func _add_ramps(farm: Node3D, ramps: Array) -> void:
 		body.add_child(shape)
 		shape.owner = farm
 
-func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: String, ramps: Array = []) -> void:
+func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: String,
+		ramps: Array = [], blanket_poses: Array = []) -> void:
 	var mesh := ArrayMesh.new()
+	if not blanket_poses.is_empty():
+		mesh.add_blend_shape("Folded")
+		mesh.add_blend_shape("Tucked")
+		mesh.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
 	var walkable_faces := PackedVector3Array()
 	var ground_faces := PackedVector3Array()
 	var solid_faces := PackedVector3Array()
-	for surface in surfaces:
+	for surface_index in surfaces.size():
+		var surface: Dictionary = surfaces[surface_index]
 		var vertices := PackedVector3Array()
 		var colors := PackedColorArray()
 		var sorting := PackedFloat32Array()
@@ -241,6 +247,16 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 		arrays[Mesh.ARRAY_COLOR] = colors
 		arrays[Mesh.ARRAY_TEX_UV] = uv
 		arrays[Mesh.ARRAY_CUSTOM0] = sorting
+		var blends: Array[Array] = []
+		for pose: Array in blanket_poses:
+			var points: Array = pose[surface_index]
+			var target := PackedVector3Array()
+			for i in range(0,points.size(),3):
+				target.append(Vector3(points[i],points[i+1],points[i+2]))
+			var blend := []
+			blend.resize(Mesh.ARRAY_MAX)
+			blend[Mesh.ARRAY_VERTEX] = target
+			blends.append(blend)
 		var material := ShaderMaterial.new()
 		material.resource_name = texture_base.trim_suffix("/").get_file() + "_material_%02d" % mesh.get_surface_count()
 		material.shader = load("res://game/rendering/source_surface.gdshader")
@@ -251,7 +267,7 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 		if not surface.texture.is_empty():
 			load("res://game/rendering/atlas_binding.gd").bind(material,"albedo_texture",load(_texture_path(texture_base+surface.texture)))
 		_set_motion(material, surface, texture_base)
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, blends, {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
 		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
 		if blend_mode >= 0:
 			var blended := ShaderMaterial.new()
@@ -261,7 +277,7 @@ func _add_mesh(farm: Node3D, parent: Node3D, surfaces: Array, texture_base: Stri
 			load("res://game/rendering/atlas_binding.gd").bind(blended,"albedo_texture",load(_texture_path(texture_base+surface.texture)))
 			blended.set_shader_parameter("opacity", [0.5, 1.0, 1.0, 0.25][blend_mode])
 			_set_motion(blended, surface, texture_base)
-			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, blends, {}, Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT))
 			mesh.surface_set_material(mesh.get_surface_count() - 1, blended)
 	var instance := MeshInstance3D.new()
 	instance.name = "Geometry"

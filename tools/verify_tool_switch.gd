@@ -102,6 +102,17 @@ func run() -> void:
 	await process_frame
 	var can: Button = picker.entries[21]
 	if not require_ok(viewport.get_visible_rect().encloses(can.get_global_rect()),"Tool grid is clipped at the gameplay resolution"): return
+	var pointer := InputEventMouseMotion.new()
+	pointer.position = can.get_global_rect().get_center()
+	viewport.push_input(pointer,true)
+	await process_frame
+	if not require_ok(can.text.is_empty() and picker.tooltip.visible and picker.tooltip_label.text=="水壶"
+			and viewport.get_visible_rect().encloses(picker.tooltip.get_global_rect()),"Hover did not show the tool name above its icon"): return
+	pointer = InputEventMouseMotion.new()
+	pointer.position = Vector2.ZERO
+	viewport.push_input(pointer,true)
+	await process_frame
+	if not require_ok(not picker.tooltip.visible,"Tool name stayed visible after the pointer left its slot"): return
 	for pressed in [true,false]:
 		var click := InputEventMouseButton.new()
 		click.button_index = MOUSE_BUTTON_LEFT
@@ -117,6 +128,9 @@ func run() -> void:
 	_picker_key(viewport,KEY_I)
 	_picker_key(viewport,KEY_TAB)
 	picker.entries[54].grab_focus()
+	await process_frame
+	if not require_ok(picker.tooltip.visible and picker.tooltip_label.text==action.seed_catalogue["54"].name
+			and picker.entries[54].text.begins_with("× "),"Keyboard focus did not show the seed name separately from its count"): return
 	_picker_key(viewport,KEY_Z)
 	await frames(2)
 	if not require_ok(not paused and action.equipped==34 and action.selected_seed==54
@@ -157,15 +171,21 @@ func run() -> void:
 	if not require_ok(not picker.panel.visible and not paused,"Z opened the toolbox while facing away"): return
 
 	world.player.facing = 3
+	var lid: Node3D = world.get_node("Location/ZoneModel_00")
 	key(KEY_Z,true)
-	await frames(2)
+	await frames(10)
 	key(KEY_Z,false)
-	if not require_ok(paused and picker.panel.visible and picker.title.text.begins_with("工具箱"),
-			"Physical Z at the farmhouse toolbox did not open the tool picker"): return
+	if not require_ok(paused and not picker.panel.visible and lid.rotation.z<0
+			and lid.rotation.z>picker.LID_ANGLE,"Physical Z did not start the original toolbox lid motion"): return
+	await frames(42)
+	if not require_ok(paused and picker.panel.visible and is_equal_approx(lid.rotation.z,picker.LID_ANGLE),
+			"Tool picker did not wait for the source lid angle"): return
 	_picker_key(viewport,KEY_X)
-	if not require_ok(not paused and not picker.panel.visible,"X did not close the farmhouse toolbox"): return
+	if not require_ok(paused and not picker.panel.visible,"X did not dismiss the menu before the lid closed"): return
+	await frames(44)
+	if not require_ok(not paused and is_zero_approx(lid.rotation.z),"Toolbox lid failed to close and restore gameplay"): return
 	if not require_ok(effects==0 and world.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and not debug_collisions_hint,"Switching used a tool, changed the orthographic camera or enabled colliders"): return
-	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical A selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders; modal tool and seed selection, icon crop, tabs, pause and cancellation; farmhouse toolbox via physical Z")
+	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical A selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders; modal tool and seed selection, icon crop, hover/focus tips, tabs, pause and cancellation; physical Z and source lid motion")
 	viewport.free()
 	quit()
 

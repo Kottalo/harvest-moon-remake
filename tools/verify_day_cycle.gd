@@ -3,6 +3,9 @@ extends SceneTree
 var failed := false
 var bed_arc_height := 0.0
 var bed_arrival := Vector3.ZERO
+var saw_sleeping_fade := false
+var saw_folded_blanket := false
+var saw_tucked_blanket := false
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -32,8 +35,15 @@ func _wait_wake(world) -> bool:
 		await _frames(1)
 		if world.player.actions.cinematic:
 			bed_arc_height = maxf(bed_arc_height,world.player.position.y)
+			var blanket: MeshInstance3D = world.get_node("Location/ZoneModel_01/Geometry")
+			if world.player.actions.range_id==1 and is_equal_approx(blanket.get_blend_shape_value(0),1.0):
+				saw_folded_blanket = true
 			if world.player.actions.range_id == 2:
 				bed_arrival = world.player.position
+				if is_equal_approx(blanket.get_blend_shape_value(1),1.0):
+					saw_tucked_blanket = true
+		if world.transition_effect.phase=="sleep_out" and world.player.actions.state=="bed_hold":
+			saw_sleeping_fade = true
 		if not world.transitioning and not world.day_cycle.sleeping:
 			return true
 	return false
@@ -108,11 +118,13 @@ func _run() -> void:
 	_key(KEY_Z,false)
 	if not _require(world.transitioning and clock.sleeping,"Confirming sleep did not start the real transition"): return
 	if not _require(await _wait_wake(world),"Sleep animation/fade sequence did not finish"): return
+	if not _require(saw_folded_blanket and saw_tucked_blanket,"Blanket failed to fold before the jump and settle over the sleeping pose"): return
+	if not _require(saw_sleeping_fade,"Sleeping pose was not held through the live fade"): return
 	if not _require(bed_arc_height>0.45 and Vector2(bed_arrival.x,bed_arrival.z).distance_to(Vector2(-1.35,0.96))<0.001,"Original 18-tick bedtime arc did not reach the bed"): return
 	if not _require(clock.minute==360 and clock.day==0 and clock.season==1 and clock.weekday==0 and world.current_area==80,"Sleep did not cross midnight/season and wake at 06:00"): return
 	await _frames(5)
 	if not _require(world.player.is_on_floor() and not world.player.input_locked,"Morning player was not grounded/unlocked"): return
-	print("SLEEP_OK: physical Z menu, X cancel, Z sleep; original ANI and 18-tick bed arc; spring 30 -> summer 1, 06:00, farmhouse spawn grounded")
+	print("SLEEP_OK: physical Z menu, X cancel, Z sleep; original ANI, blanket morphs, 18-tick bed arc and live fade; spring 30 -> summer 1, 06:00, farmhouse spawn grounded")
 	world._change_area(0,Vector3.ZERO)
 	clock.day = 29
 	clock.season = 3

@@ -68,14 +68,12 @@ func run() -> void:
 	await tick(2)
 	print("RUCKSACK_OPEN_CPU: ",open_usec," us")
 	if not check(menu.panel.visible and paused and menu._slot_visible(1) and not menu._slot_visible(3),"Space did not open the original two-slot bag"): return
-	if not check(menu.help_labels[0].visible and not menu.detail.visible and not world.hud.visible and not world.day_cycle.clock_label.visible,"The toolbox help and shaded field were not shown"): return
+	if not check(not menu.detail.visible and not world.hud.visible and not world.day_cycle.clock_label.visible,"Backpack opened with extra help text or the world HUD visible"): return
 	if not check(menu.frame.size==Vector2(472,335) and menu.brass_pin.get_size()==Vector2(5,5) and menu.capacity_label.text=="背包  2 格","Toolbox canvas, brass pin or capacity label differs from the reference"): return
 	if not check(menu.icon_cache.size()==cached_icons,"Opening the default bag loaded additional icons"): return
 	var scale_factor: float = menu.frame.scale.y
 	if not check(menu.detail.get_parent()==menu.panel and menu.detail.scale==Vector2.ONE
 			and menu.detail.get_theme_font_size("font_size")==roundi(10*scale_factor),"Text inherits pixel-art scaling"): return
-	var help_bottom: float = menu.frame.position.y+305*scale_factor
-	if not check(menu.help_labels[0].position.y+menu.help_labels[0].get_minimum_size().y<=help_bottom,"Localized help overflows the wooden footer"): return
 	if not check(menu._slot_origin(0)==Vector2(37,111) and menu._slot_origin(1)==Vector2(195,111)
 			and menu._slot_origin(10)==Vector2(195,199) and menu.SLOT_SIZE==Vector2(52,52),"Default inventory does not match the selected Figma geometry"): return
 	if not check(menu.styles.focus.border_color==Color("#ffe1a2") and menu.styles.focus.border_width_left==2,"The gold focus outline differs from the selected Figma design"): return
@@ -86,7 +84,7 @@ func run() -> void:
 	await tap(KEY_C)
 	if not check(menu.explaining and menu.detail.text.contains("锄头"),"C did not open the original item explanation panel"): return
 	await tap(KEY_X)
-	if not check(menu.panel.visible and not menu.explaining and menu.help_labels[0].visible,"X did not return from item explanation"): return
+	if not check(menu.panel.visible and not menu.explaining and not menu.detail.visible,"X did not return from item explanation"): return
 	await tap(KEY_RIGHT)
 	if not check(menu.cursor==1,"Original directional links did not select first tool slot"): return
 	await tap(KEY_Z)

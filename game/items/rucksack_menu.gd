@@ -25,11 +25,6 @@ const SLOT_LINKS := [
 	[0,0,13,0,0,4,0,0,16,0,0,9,0,0,13,0,0,13,0,0,16,0,0,9],
 ]
 
-const HELP_KEYS := [
-	["↑↓←→","移动",39,50], ["Z","交换",129,18],
-	["C","查看",185,18], ["X","关闭",243,18],
-]
-
 var economy
 var actions
 var panel: ColorRect
@@ -41,7 +36,6 @@ var carried_label: Label
 var detail: Label
 var brass_pin: Texture2D
 var labels: Array[Dictionary] = []
-var help_labels: Array[Label] = []
 var seed_labels: Array[Label] = []
 var styles := {}
 var icons: Array[Texture2D] = []
@@ -81,9 +75,6 @@ func setup(owner_economy, font: Font) -> void:
 		_add_label(caption[0],caption[1],12,Color("#f5d3a3"),strong)
 	equipped_label = _add_label("",Vector2(99,126),11,ToolboxStyle.INK,regular)
 	carried_label = _add_label("",Vector2(99,214),11,ToolboxStyle.MUTED_INK,regular)
-	for key in HELP_KEYS:
-		help_labels.append(_add_label(key[0],Vector2(key[2]+5,282),10,ToolboxStyle.DARK_INK,strong))
-		help_labels.append(_add_label(key[1],Vector2(key[2]+key[3]+5,282),10,ToolboxStyle.INK,regular))
 	detail = _add_label("",Vector2(39,282),10,ToolboxStyle.INK,regular)
 	for label in [equipped_label,carried_label,detail]:
 		label.clip_text = true
@@ -147,7 +138,7 @@ func open() -> void:
 		return
 	marked = -1
 	cursor = 0
-	_show_help()
+	_hide_detail()
 	hud_visible = economy.world.hud.visible
 	clock_visible = economy.world.day_cycle.clock_label.visible
 	economy.world.hud.hide()
@@ -198,10 +189,8 @@ func _draw_art() -> void:
 			art.draw_texture(brass_pin,point)
 	_draw_box("tray",Rect2(25,82,146,184+tall))
 	_draw_box("tray",Rect2(178,82,269,184+tall))
-	_draw_box("help",Rect2(25,277+tall,422,28))
-	if not explaining:
-		for key in HELP_KEYS:
-			_draw_box("key",Rect2(key[2],282+tall,key[3],16))
+	if explaining:
+		_draw_box("help",Rect2(25,277+tall,422,28))
 	for index in SLOT_LINKS.size():
 		if not _slot_visible(index):
 			continue
@@ -219,11 +208,9 @@ func _draw_art() -> void:
 func _draw_box(id: String, bounds: Rect2) -> void:
 	art.draw_style_box(styles[id],bounds)
 
-func _show_help() -> void:
+func _hide_detail() -> void:
 	explaining = false
 	detail.hide()
-	for label in help_labels:
-		label.show()
 	art.queue_redraw()
 
 
@@ -265,11 +252,8 @@ func _explain() -> void:
 		lines.append("熟练度：%d" % int(economy.experience.get(item,0)))
 	elif cursor>=9 and economy.sell_price(item)>0:
 		lines.append("出货价格：%d G" % economy.sell_price(item))
-	lines.append("X 返回")
 	detail.text = "   ·   ".join(lines)
 	detail.show()
-	for label in help_labels:
-		label.hide()
 	explaining = true
 	art.queue_redraw()
 
@@ -331,7 +315,7 @@ func _input(event: InputEvent) -> void:
 		_close()
 	elif event.is_action_pressed("ui_cancel"):
 		if explaining:
-			_show_help()
+			_hide_detail()
 		elif marked>=0:
 			marked = -1
 			art.queue_redraw()

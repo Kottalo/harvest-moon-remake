@@ -206,7 +206,10 @@ func start_drop(thrown := false) -> bool:
 	play("base",23+player.facing,"throw" if thrown else "drop")
 	return true
 
-func go_to_bed(target: Vector3) -> void:
+func go_to_bed(target: Vector3, bed: MeshInstance3D) -> void:
+	if bed != null:
+		# scene_link_handback opens the blanket in eight farm ticks.
+		bed.create_tween().tween_property(bed,"blend_shapes/Folded",1.0,8.0/30.0)
 	# player_start_result_scene / player_result_camera_step (house level 0).
 	cinematic = true
 	bed_ground_y = player.position.y
@@ -233,13 +236,17 @@ func go_to_bed(target: Vector3) -> void:
 		player.position = begin.lerp(target,tick/17.0)
 		player.position.y = height
 	play("sleep",2,"bed_pose")
+	if is_instance_valid(bed):
+		var blanket := bed.create_tween().set_parallel()
+		blanket.tween_property(bed,"blend_shapes/Folded",0.0,12.0/30.0)
+		blanket.tween_property(bed,"blend_shapes/Tucked",1.0,12.0/30.0)
 	var wait := 0.0
 	while wait<0.5:
 		await get_tree().physics_frame
 		if not cinematic: return
 		wait += get_physics_process_delta_time()
-	play("sleep",3,"bedtime")
-	while busy():
+	play("sleep",3,"bed_pose")
+	while state != "bed_hold":
 		await get_tree().physics_frame
 		if not cinematic: return
 

@@ -1,6 +1,9 @@
 extends CanvasLayer
 ## Farmhouse tool and seed selection. PlayerActions owns equipment and the show animation.
 const ToolboxStyle := preload("res://game/items/toolbox_style.gd")
+# scene_camera_transition turns the lid 0x20 per farm tick, up to 0x280.
+const LID_ANGLE := -0x280 * TAU / 4096.0
+const LID_TIME := 20.0 / 30.0
 
 var actions
 var seed_count: Callable
@@ -10,11 +13,15 @@ var clock_label: Label
 var panel: ColorRect
 var tabs: TabContainer
 var title: Label
-var equipment: Label
+var tooltip: PanelContainer
+var tooltip_label: Label
+var tooltip_slot: Button
 var entries: Dictionary = {}
 var styles: Dictionary
 var hud_visible := false
 var clock_visible := false
+var owns_pause := false
+var lid: Node3D
 
 
 func setup(player_actions, font: Font, available_seeds: Callable, select_tool: Callable,
@@ -57,9 +64,12 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	title = _label(heading,"工具箱",25,ToolboxStyle.HEADING)
 	title.add_theme_font_override("font",ToolboxStyle.font(font,700))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var tag := _wood_panel(heading,"装备铭牌",styles.badge,8)
-	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	equipment = _label(tag,"",14,ToolboxStyle.DARK_INK)
+	var close := Button.new()
+	close.text = "×"
+	close.custom_minimum_size = Vector2(32,28)
+	_style_button(close,styles.key)
+	close.pressed.connect(_close)
+	heading.add_child(close)
 	_add_pin(heading,brass)
 
 	tabs = TabContainer.new()
@@ -74,23 +84,13 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	tabs.add_theme_constant_override("h_separation",5)
 	rows.add_child(tabs)
 
-	var footer := _wood_panel(rows,"操作说明",styles.help,7)
-	var keys := HBoxContainer.new()
-	keys.add_theme_constant_override("separation",8)
-	footer.add_child(keys)
-	for shortcut in [["↑↓←→","选择"],["Z","装备"],["Tab","换页"]]:
-		_label(_wood_panel(keys,"键帽",styles.key,4),shortcut[0],11,ToolboxStyle.DARK_INK)
-		var instruction := _label(keys,shortcut[1],12,ToolboxStyle.INK)
-		instruction.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	keys.add_child(spacer)
-	var close := Button.new()
-	close.text = "X  关闭"
-	close.custom_minimum_size = Vector2(88,25)
-	_style_button(close,styles.key)
-	close.pressed.connect(_close)
-	keys.add_child(close)
+	tooltip = _wood_panel(panel,"物品提示",styles.badge,8)
+	tooltip.theme = wood.theme
+	tooltip.z_index = 1
+	tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tooltip_label = _label(tooltip,"",14,ToolboxStyle.DARK_INK)
+	tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tooltip.hide()
 
 	panel.hide()
 	set_process_input(false)
@@ -144,7 +144,7 @@ func _style_button(button: Button, normal: StyleBoxFlat) -> void:
 	button.add_theme_color_override("icon_disabled_color",Color(1,1,1,0.46))
 
 
-func open() -> void:
+func open(toolbox_lid: Node3D = null) -> void:
 	if get_tree().paused or not actions.can_select_tool():
 		return
 	if entries.is_empty():
@@ -163,18 +163,30 @@ func open() -> void:
 			button.disabled = not actions.owns_tool(tool)
 	for key: String in actions.seed_catalogue:
 		var seed := int(key)
-		entries[seed].text = "%s × %d" % [actions.seed_catalogue[key].name,seed_count.call(seed)]
-	equipment.text = "已装备  " + actions.tool_name()
+		entries[seed].text = "× %d" % seed_count.call(seed)
 	var using_seeds: bool = actions.equipped == 34
 	tabs.current_tab = 1 if using_seeds else 0
 	hud_visible = gameplay_hud.visible
 	clock_visible = clock_label.visible
 	gameplay_hud.hide()
 	clock_label.hide()
-	panel.show()
 	get_tree().paused = true
+	owns_pause = true
 	set_process_input(true)
+	lid = toolbox_lid
+	if is_instance_valid(lid):
+		await _move_lid(LID_ANGLE)
+		if not is_instance_valid(lid):
+			_restore_world()
+			return
+	panel.show()
 	_focus_tab(actions.selected_seed if using_seeds else actions.equipped)
+
+
+func _move_lid(angle: float) -> void:
+	var motion := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	motion.tween_property(lid,"rotation:z",angle,LID_TIME)
+	await motion.finished
 
 
 func _add_tab(label: String) -> GridContainer:
@@ -189,19 +201,45 @@ func _add_tab(label: String) -> GridContainer:
 
 func _add_entry(grid: GridContainer, label: String, tool: int, seed := -1) -> void:
 	var button := Button.new()
-	button.text = label
 	button.custom_minimum_size = Vector2(120,62)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 	button.add_theme_constant_override("icon_max_width",30)
 	button.add_theme_font_size_override("font_size",13)
 	_style_button(button,_padded(styles.filled,5))
 	if seed != -1:
+		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		button.icon = actions.menu_icon(actions.tool_picture(tool,seed))
+	button.mouse_entered.connect(_show_tooltip.bind(button,label))
+	button.mouse_exited.connect(_hide_tooltip.bind(button))
+	button.focus_entered.connect(_show_tooltip.bind(button,label))
+	button.focus_exited.connect(_hide_tooltip.bind(button))
 	button.pressed.connect(_select.bind(tool,seed))
 	grid.add_child(button)
 	entries[seed if seed != -1 else tool] = button
+
+
+func _show_tooltip(slot: Button, item_name: String) -> void:
+	tooltip_slot = slot
+	_place_tooltip.call_deferred(slot,item_name)
+
+
+func _place_tooltip(slot: Button, item_name: String) -> void:
+	if tooltip_slot != slot or not slot.is_visible_in_tree():
+		return
+	tooltip_label.text = item_name
+	var tip_size := tooltip.get_combined_minimum_size()
+	tooltip.size = tip_size
+	var rect := slot.get_global_rect()
+	var x := clampf(rect.get_center().x - tip_size.x / 2.0,0.0,maxf(0.0,panel.size.x - tip_size.x))
+	tooltip.position = Vector2(x,maxf(0.0,rect.position.y - tip_size.y - 4.0))
+	tooltip.show()
+
+
+func _hide_tooltip(slot: Button) -> void:
+	if tooltip_slot == slot:
+		tooltip_slot = null
+		tooltip.hide()
 
 
 func _select(tool: int, seed: int) -> void:
@@ -223,6 +261,9 @@ func _focus_tab(preferred := 0) -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
+		if not panel.visible:
+			get_viewport().set_input_as_handled()
+			return
 		match event.physical_keycode:
 			KEY_I, KEY_X, KEY_ESCAPE:
 				get_viewport().set_input_as_handled()
@@ -237,12 +278,19 @@ func _input(event: InputEvent) -> void:
 
 func _close() -> void:
 	if panel.visible:
+		_hide_tooltip(tooltip_slot)
 		panel.hide()
+		if is_instance_valid(lid):
+			await _move_lid(0.0)
 		_restore_world()
-		set_process_input(false)
 
 
 func _restore_world() -> void:
+	owns_pause = false
+	set_process_input(false)
+	if is_instance_valid(lid):
+		lid.rotation.z = 0.0
+	lid = null
 	if is_instance_valid(gameplay_hud):
 		gameplay_hud.visible = hud_visible
 	if is_instance_valid(clock_label):
@@ -251,5 +299,5 @@ func _restore_world() -> void:
 
 
 func _exit_tree() -> void:
-	if is_instance_valid(panel) and panel.visible:
+	if owns_pause:
 		_restore_world()
