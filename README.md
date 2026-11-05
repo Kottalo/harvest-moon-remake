@@ -48,35 +48,16 @@ git -C harvest-moon-remake lfs pull
 
 如果 Godot 大量提示 PNG/场景加载失败，先运行 `python tools/check_structure.py`。它会检查是否残留 LFS 指针；在工程目录执行 `git lfs pull` 和 `git lfs checkout` 恢复真实素材，再让编辑器重新扫描、导入。迁移 LFS 历史后也应执行此检查，不能只以 `git status` 干净判断素材可用。
 
-## 目录
+## 开发与验证
 
-- `game/player/`：角色场景、输入、移动、动画、共享角色素材。
-- `game/camera/`：原版镜头投影、跟随和检查全景。
-- `game/world/`：主场景、地点目录、出入口切换。
-- `game/items/`：散落物原生图像、农场初始布局和会话内交互记录。
-- `game/time/`：原版时钟、日历、昼夜色调和床边睡眠菜单。
-- `game/locations/<名称>/`：每个地点的原生场景、贴图图集和材质；例如 `farmhouse`、`library`、`clinic`。
-- `tools/`：离线提取、转换及检查；`tools/generated/` 是可重新生成的中间文件，不提交。
-- `reference/hmbtn-decomp/`：原版反编译源码，固定版本的只读 Git submodule。
-- `addons/`：第三方 Godot AI MCP 插件。
-- `verification/`：检查记录。
+[AGENTS.md](AGENTS.md) 按模块列出代码入口、规则和检查组。需要追查实现历史或原版数据时，再查 [PORTING.md](PORTING.md) 和 [CHECKPOINT.md](CHECKPOINT.md)。
 
-`AGENTS.md` 定义目录职责和模块边界，`python tools/check_structure.py` 检查归属、命名和资源引用。旧 `scenes/`、`scripts/farm.gd` 与农场素材别名保留给现有编辑器标签页，运行入口已迁移到 `game/`，旧脚本只做跳转。
+```powershell
+python tools/check.py --list
+python tools/check.py
+python tools/check.py smoke npc
+```
 
-运行时只使用 Godot 场景、PNG 和 JSON，不读取 ROM 或执行 PS1 指令。重新转换素材才需要本机 USA 镜像、Python/Pillow 和参考源码；入口是 `Import-Assets.ps1`。当前使用 Godot AI MCP 4.3.1，编辑器保持打开时通过 MCP 刷新素材。
+默认检查目录结构、Git LFS 素材和游戏基础运行。按改动范围选检查组。离屏渲染、转换素材和 Godot AI 的操作见[验证流程](docs/engineering/workflow.md)。编辑器默认关闭碰撞可视化，需要时可显式启用 `--debug-collisions`。
 
-动作与过渡检查：`godot --headless --path . --script tools/verify_actions.gd`。后台 GPU 检查：`python tools/run_render_check.py --log <绝对日志路径>`，在独立 Windows 桌面离屏执行，不切换用户桌面或注入按键。动作预览见 `verification/source_actions_gallery.png`。
-
-昼夜／睡眠检查：`godot --headless --path . --script tools/verify_day_cycle.gd`；画面与物品批绘制对照：`python tools/run_render_check.py --script tools/render_day_cycle_check.gd --log <绝对日志路径>`。`tools/profile_world.gd` 在相同分辨率、4× MSAA、关闭帧率上限／VSync 后记录真实帧间隔，性能对照见 `verification/performance-day-cycle.json`。散落物使用三个裁切但保持原画布坐标的 MultiMesh，物理碰撞单独保留；中文和 ASCII 统一字体减少绘制切换，相邻地点通过 Godot 原生线程加载器预载。镜头跟随插值后的身体位置，重置地点时清除插值历史。
-
-这个私有 checkpoint 包含用户授权保存的项目素材，不包含 ROM；不要改为公开仓库。历史实现记录见 `PORTING.md`，当前目录及进度以本文件和 `CHECKPOINT.md` 为准。
-
-调试运行默认通过 `editor/run/main_run_args="--debug-collisions"` 开启 Godot 原生碰撞显示：包括玩家胶囊、地面物件、建筑、地面／斜坡和查询用形状。只显示已有真实形状，不添加或改变碰撞；正式导出不受编辑器启动参数影响。需关闭时清除 Project Settings → Editor → Run → Main Run Args 中的该参数。
-
-小物件调试碰撞采用无填充的高亮原生线框：石头亮粉、树枝黄、草荧光绿，便于从其他地图碰撞中辨认；两种放置模式的实际大小和位置不变。
-
-玩家调试胶囊用亮青色透视轮廓显示，直接取真实 Shape3D 的 debug mesh，避免被角色图片遮住。按用户要求半径加宽至 0.09（直径 0.18），高度 0.24、中心偏移 (0,0.12,0) 和脚底位置保持不变；只在调试构建且开启碰撞显示时创建。
-
-已补齐有门入口的两段原版自动步进：先 10、再 20 个 30 Hz 逻辑帧，然后冻结旧画面淡出。门板按原版逐帧加速、保持、回关及双门镜像转动，保留“先绘制转角再限制内部角度”的细节。开门／重复触发与真实自宅、牛棚、医院入口检查见 `tools/verify_actions.gd`、`tools/verify_door_entry.gd`。
-
-启动诊断：输出中的 BOOT_STAGE 标记依次显示世界进入、玩家初始化、世界初始化和物件就绪，之后为 WORLD_READY。邻接地图预加载在初始化完成后的普通帧逐张启动，最多一张并行。`tools/verify_startup.py --log-dir <绝对目录> --runs 20` 使用独立 Windows 桌面测试完整主场景启动，`tools/verify_startup.gd` 检查预加载队列和缓存释放。
+运行时使用项目内的 Godot 资源。重新提取素材时才需要本机 USA 镜像、参考源码和 Python/Pillow，入口是 `Import-Assets.ps1`。仓库为私有，二进制素材通过 Git LFS 管理。
