@@ -34,7 +34,7 @@ func setup(owner_world) -> void:
 		records[0].append({"id":int(item.id),"cell":int(item.cell),"position":Vector3(item.position[0],item.position[1],item.position[2]),"active":true})
 	world.player.actions.item_released.connect(release_item)
 	world.player.actions.tool_used.connect(use_tool)
-	set_area(0)
+	set_area(world.current_area)
 
 func set_area(area: int) -> void:
 	for child in get_children():

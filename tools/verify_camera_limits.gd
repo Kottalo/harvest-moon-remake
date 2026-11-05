@@ -24,13 +24,14 @@ func covered_corners(camera, focus: Vector3, coverage: PackedVector2Array) -> bo
 func run() -> void:
 	world = load("res://game/world/world.tscn").instantiate();root.add_child(world)
 	world.set_process(false);world.set_physics_process(false);world.player.set_physics_process(false)
+	world._change_area(0,Vector3.ZERO)
 	var camera = world.camera
 	var original_size: float = camera.size
 	var original_eye: Vector3 = camera.eye_offset
 	var outdoor_count := 0
 	var indoor_count := 0
 	var farm_outline := PackedVector2Array(camera.FARM_COVERAGE)
-	if not require_ok(camera._coverage == farm_outline, "Startup did not select the farm outline"): return
+	if not require_ok(camera._coverage == farm_outline, "Entering the farm did not select its outline"): return
 	# Real geometry and source flags: all outdoors including both loaded coast segments.
 	for id in world.world:
 		var info: Dictionary = world.world[id]

@@ -18,6 +18,7 @@ func _run() -> void:
 	root.add_child(viewport)
 	var world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
+	world._change_area(0,Vector3(0,0.035,0))
 	world.set_physics_process(false) # Keep clock/tint and camera position identical.
 	while world.location_loader.ready.size()<world.location_loader.wanted.size():
 		await process_frame

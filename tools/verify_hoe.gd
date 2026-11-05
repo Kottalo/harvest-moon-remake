@@ -72,6 +72,7 @@ func _run() -> void:
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(viewport)
 	viewport.add_child(world)
+	world._change_area(0,Vector3(0,0.035,0))
 	await _frames(10)
 	world.set_physics_process(false)
 	world.day_cycle.set_process(false)

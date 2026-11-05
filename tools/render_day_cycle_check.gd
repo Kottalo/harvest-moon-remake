@@ -104,6 +104,7 @@ func _run() -> void:
 	root.add_child(farm_view)
 	var farm = load("res://game/world/world.tscn").instantiate()
 	farm_view.add_child(farm)
+	farm._change_area(0,Vector3(0,0.035,0))
 	farm.set_physics_process(false)
 	farm.player.set_physics_process(false)
 	var gallery := Image.create(960,720,false,Image.FORMAT_RGBA8)

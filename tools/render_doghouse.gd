@@ -10,6 +10,7 @@ func run() -> void:
 	root.add_child(viewport)
 	var world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
+	world._change_area(0,Vector3(0,0.035,0))
 	world.set_process(false)
 	world.set_physics_process(false)
 	world.day_cycle.set_process(false)

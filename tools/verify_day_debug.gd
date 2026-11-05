@@ -36,6 +36,7 @@ func run() -> void:
 	root.add_child(viewport)
 	world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
+	world._change_area(0,Vector3(0,0.035,0))
 	await frames(8)
 	var clock = world.day_cycle
 	var debug = clock.debug_panel

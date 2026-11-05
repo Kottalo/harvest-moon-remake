@@ -52,6 +52,7 @@ func _run() -> void:
 	var world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
 	world.set_physics_process(false)
+	world._change_area(0,Vector3.ZERO)
 	var clock = world.day_cycle
 	for hz in [30,60,120]:
 		clock.minute = 360

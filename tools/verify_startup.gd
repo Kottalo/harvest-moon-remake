@@ -13,10 +13,10 @@ func run() -> void:
 	root.add_child(world)
 	var loader = world.location_loader
 	if not require_ok(loader.requested.is_empty(),"Startup issued background loads inside world._ready"): return
-	for area in [0,80]:
-		if area==80:
-			var spawn: Array = world.world["80"].spawn
-			world._change_area(80,Vector3(spawn[0],spawn[1],spawn[2]))
+	for area in [80,0]:
+		if area==0:
+			var spawn: Array = world.world["0"].spawn
+			world._change_area(0,Vector3(spawn[0],spawn[1],spawn[2]))
 		var shapes: Array[Node] = world.get_node("Location").find_children("*","CollisionShape3D",true,false)
 		if not require_ok(not shapes.is_empty(),"Map debug verification found no real collision shapes"): return
 		for shape: CollisionShape3D in shapes:

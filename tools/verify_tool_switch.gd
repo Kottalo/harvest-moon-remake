@@ -31,7 +31,7 @@ func run() -> void:
 	world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
 	world.set_physics_process(false)
-	world.player.position = Vector3(0,0.05,-2)
+	world._change_area(0,Vector3(0,0.035,-2))
 	await frames(10)
 	var action = world.player.actions
 	for tool in action.TOOL_IDS:

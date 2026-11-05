@@ -65,12 +65,14 @@ func _ready() -> void:
 	if Engine.is_embedded_in_editor():
 		# The editor and preview share one GPU. Keep the standalone render scale.
 		get_viewport().scaling_3d_scale = minf(get_viewport().scaling_3d_scale,0.70)
-	_wireframe_colliders(get_node("Location"))
+	var location := get_node("Location") as Node3D
+	current_area = int(location.get_meta("area_id"))
+	_wireframe_colliders(location)
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/location_catalog.json"))
 	object_notices = JSON.parse_string(FileAccess.get_file_as_string("res://game/world/object_notices.json"))
 	location_loader = load("res://game/world/location_loader.gd").new()
 	location_loader.catalogue = world
-	location_loader.warm(0)
+	location_loader.warm(current_area)
 	var canvas := CanvasLayer.new()
 	canvas.layer = 10
 	add_child(canvas)
@@ -87,7 +89,7 @@ func _ready() -> void:
 	canvas.add_child(hud)
 	doors = load("res://game/world/source_doors.gd").new()
 	add_child(doors)
-	doors.prepare(get_node("Location"),world["0"].exits)
+	doors.prepare(location,world[str(current_area)].exits)
 	transition_effect = load("res://game/world/location_transition.gd").new()
 	add_child(transition_effect)
 	sound = preload("res://game/audio/sound_effects.gd").new()
@@ -104,6 +106,7 @@ func _ready() -> void:
 	day_cycle.name = "DayCycle"
 	add_child(day_cycle)
 	day_cycle.setup(self)
+	_place_player(current_area,_wake_entry())
 	loose_items.clock = day_cycle
 	day_cycle.sleep_requested.connect(_sleep_until_morning)
 	farm_field = load("res://game/field/farm_field.gd").new()
@@ -135,7 +138,7 @@ func _ready() -> void:
 	npcs.add_child(npcs.dialogue)
 	npcs.dialogue.setup(self,ui_font)
 	economy.dialogue = npcs.dialogue
-	npcs.enter_location(get_node("Location"))
+	npcs.enter_location(location)
 	player.actions.interact_requested.connect(_interact)
 	print("WORLD_READY: ", world.size(), " native locations")
 
@@ -395,10 +398,8 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	add_child(scene)
 	current_area = area
 	location_loader.warm(area)
-	player.position = area_to_world(area, entry) + Vector3(0, 0.015, 0)
-	player.velocity = Vector3.ZERO
 	player.actions.cinematic = false
-	player.reset_physics_interpolation()
+	_place_player(area,entry)
 	# Source arrival coordinates already sit outside automatic return zones.
 	# Consume a held action button without disabling any destination exits.
 	awaiting_interact_release = Input.is_action_pressed("interact")
@@ -419,6 +420,15 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	npcs.enter_location(scene)
 	_refresh_hud()
 	print("AREA_READY: ", area, " ", world[str(area)].name)
+
+func _place_player(area: int, entry: Vector3) -> void:
+	player.position = area_to_world(area,entry)+Vector3.UP*0.015
+	player.velocity = Vector3.ZERO
+	player.reset_physics_interpolation()
+
+func _wake_entry() -> Vector3:
+	var wake: Array = day_cycle.catalogue.wake_position
+	return Vector3(wake[0],wake[1],wake[2])
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if transitioning or day_cycle.menu_open or day_cycle.sleeping:
@@ -467,8 +477,7 @@ func _sleep_until_morning(automatic: bool) -> void:
 	player.actions.state = ""
 	player.actions.range_id = -1
 	player.animation = -1
-	var wake: Array = day_cycle.catalogue.wake_position
-	_change_area(int(day_cycle.catalogue.wake_area),Vector3(wake[0],wake[1],wake[2]),true)
+	_change_area(int(day_cycle.catalogue.wake_area),_wake_entry(),true)
 	player.facing = 0
 	player._update_animation(Vector2.ZERO,false,0)
 	transition_effect.start_in()

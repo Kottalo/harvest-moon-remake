@@ -20,6 +20,31 @@ func _run() -> void:
 	var farm = load("res://game/world/world.tscn").instantiate()
 	root.add_child(farm)
 	await _frames(90)
+	var wake: Vector3 = farm._wake_entry()
+	var position: Vector3 = farm.player.position
+	if not _require(farm.current_area==int(farm.day_cycle.catalogue.wake_area) and farm.day_cycle.minute==360
+			and Vector2(position.x,position.z).is_equal_approx(Vector2(wake.x,wake.z))
+			and farm.player.is_on_floor() and not farm.player.input_locked,"New game did not wake up on the farmhouse floor at 06:00"): return
+	Input.action_press("move_right")
+	for tick in 90:
+		if farm.player.position.x>=1.1: break
+		await _frames(1)
+	Input.action_release("move_right")
+	Input.action_press("move_down")
+	for tick in 90:
+		if farm.player.position.z>=0.62: break
+		await _frames(1)
+	Input.action_release("move_down")
+	Input.action_press("move_right")
+	for tick in 160:
+		if farm.transitioning: break
+		await _frames(1)
+	Input.action_release("move_right")
+	for tick in 120:
+		if not farm.transitioning: break
+		await _frames(1)
+	if not _require(farm.current_area==0 and not farm.player.input_locked,"Could not walk out to the farm from the new-game spawn: "+str(farm.player.position)): return
+	print("FARMHOUSE_START_OK: wake spot at 06:00 and normal exit to the farm")
 	var actions = farm.player.actions
 	var source: Dictionary = actions.data.banks.base
 	for animation in ["10","28"]:

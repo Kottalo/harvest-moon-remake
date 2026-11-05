@@ -18,6 +18,7 @@ func _run() -> void:
 		Engine.physics_ticks_per_second = 120
 	var world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
+	world._change_area(0,Vector3(0,0.035,0))
 	var start := Vector2i(18,0)
 	var goal := Vector2i(12,0)
 	var npc = load("res://game/npc/villager.tscn").instantiate()

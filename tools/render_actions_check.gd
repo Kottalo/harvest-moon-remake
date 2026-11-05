@@ -22,6 +22,7 @@ func _run() -> void:
 	root.add_child(viewport)
 	var world = ResourceLoader.load("res://game/world/world.tscn","PackedScene",ResourceLoader.CACHE_MODE_IGNORE_DEEP).instantiate()
 	viewport.add_child(world)
+	world._change_area(0,Vector3(0,0.035,0))
 	world.set_physics_process(false)
 	world.player.set_physics_process(false)
 	for record in world.loose_items.records[0]:
