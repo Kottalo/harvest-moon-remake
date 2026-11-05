@@ -16,7 +16,7 @@
 
 ## Notices and world history
 
-- `game/world/object_notices.json` stores Chinese readings and the original active value-menu and marriage-menu probe zones. Regenerate positions with `tools/import_disc.py <disc> --notices-only`. E uses the source facing and reach. Locked doors explain their refusal in the same local notice UI; dismissing it consumes the held interaction.
+- `game/world/object_notices.json` stores Chinese readings and the original active value-menu and marriage-menu probe zones. Regenerate positions with `tools/import_disc.py <disc> --notices-only`. Z uses the source facing and reach. Active toolbox zones come from the same import and open the existing tool picker when the player faces the chest. Locked doors explain their refusal in the same local notice UI; dismissing it consumes the held interaction.
 - `game/world/world_history.gd` owns one chronological journal per run. Records distinguish actions from speech and store stable witness IDs. NPC dialogue filters by those IDs before topic recall, sends only selected records, and does not grant knowledge on retries or map changes. Private dialogue belongs to its two participants. World saves do not exist yet, so a new run starts with an empty journal.
 
 ## Coast seam

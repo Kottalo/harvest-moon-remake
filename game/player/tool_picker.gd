@@ -69,7 +69,7 @@ func open() -> void:
 	for key: String in actions.seed_catalogue:
 		var seed := int(key)
 		entries[seed].text = "%s × %d" % [actions.seed_catalogue[key].name,seed_count.call(seed)]
-	title.text = "工具栏 · 已装备 " + actions.tool_name()
+	title.text = "工具箱 · 已装备 " + actions.tool_name()
 	var using_seeds: bool = actions.equipped == 34
 	tabs.current_tab = 1 if using_seeds else 0
 	panel.show()

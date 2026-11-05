@@ -120,8 +120,44 @@ func run() -> void:
 	action.carried_id = 58
 	_picker_key(viewport,KEY_I)
 	if not require_ok(not paused and not picker.panel.visible,"I opened while carrying an item"): return
+	action.carried_id = 0
+	world._change_area(80,Vector3(0.38,0,-0.9))
+	await frames(6)
+	world.player.facing = 3
+	key(KEY_Z,true)
+	await frames(2)
+	key(KEY_Z,false)
+	await frames(2)
+	if not require_ok(not picker.panel.visible and not paused,"Z opened the farmhouse toolbox out of reach"): return
+
+	key(KEY_RIGHT,true)
+	for tick in ceili(0.8*Engine.physics_ticks_per_second):
+		await frames(1)
+		if world._toolbox_ahead():
+			break
+	key(KEY_RIGHT,false)
+	await frames(2)
+	world._refresh_hud()
+	if not require_ok(world.player.is_on_floor() and world.hud.text.contains("Z 打开工具箱"),
+			"The farmhouse toolbox prompt is unreachable through normal walking: "+str(world.player.position)): return
+
+	world.player.facing = 1
+	key(KEY_Z,true)
+	await frames(2)
+	key(KEY_Z,false)
+	await frames(2)
+	if not require_ok(not picker.panel.visible and not paused,"Z opened the toolbox while facing away"): return
+
+	world.player.facing = 3
+	key(KEY_Z,true)
+	await frames(2)
+	key(KEY_Z,false)
+	if not require_ok(paused and picker.panel.visible and picker.title.text.begins_with("工具箱"),
+			"Physical Z at the farmhouse toolbox did not open the tool picker"): return
+	_picker_key(viewport,KEY_X)
+	if not require_ok(not paused and not picker.panel.visible,"X did not close the farmhouse toolbox"): return
 	if not require_ok(effects==0 and world.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and not debug_collisions_hint,"Switching used a tool, changed the orthographic camera or enabled colliders"): return
-	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical A selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders; modal tool and seed selection, icon crop, tabs, pause and cancellation")
+	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical A selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders; modal tool and seed selection, icon crop, tabs, pause and cancellation; farmhouse toolbox via physical Z")
 	viewport.free()
 	quit()
 

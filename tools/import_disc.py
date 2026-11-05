@@ -343,13 +343,13 @@ def scene_exits(data, count):
     return result
 
 
-def scene_notices(data):
-    """Active front-probe zones that call menu_request_open(2, param)."""
+def scene_notices(data, kinds=(16, 30)):
+    """Active front-probe zones, with source facing and native bounds."""
     result = []
     for index in range(50):
         offset = 16 + index * 44
         flags, kind, message, _, facing = struct.unpack_from('<HHhHh', data, offset)
-        if not flags & 0x4000 or kind not in (16, 30):
+        if not flags & 0x4000 or kind not in kinds:
             continue
         low = struct.unpack_from('<3h', data, offset + 14)
         high = struct.unpack_from('<3h', data, offset + 20)
@@ -364,6 +364,9 @@ def write_notices(headers, areas):
     zones = {str(area): rows for area in sorted(areas) if (rows := scene_notices(headers[area]))}
     assert all(str(row[0]) in notices['messages'] for rows in zones.values() for row in rows), 'Missing notice translation'
     notices['zones'] = zones
+    # ZONE_STORAGE_6 opens the toolbox. The other storage zones are cabinet and icebox.
+    notices['toolboxes'] = {str(area): rows for area in sorted(areas)
+                            if (rows := scene_notices(headers[area], (22,)))}
     path.write_text(json.dumps(notices, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f"NOTICES_OK: {sum(map(len, zones.values()))} original front-probe zones")
 

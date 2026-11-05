@@ -199,6 +199,8 @@ func _refresh_hud() -> void:
 		text += "\nZ 下到矿洞第 %d 层" % (mine_field.depth+2)
 	elif economy.shipping_near():
 		text += "\nZ 出货"
+	elif _toolbox_ahead():
+		text += "\nZ 打开工具箱"
 	elif day_cycle != null and day_cycle.nearby_bed():
 		text += "\nZ 床边休息"
 	elif npcs != null:
@@ -216,20 +218,33 @@ func _refresh_hud() -> void:
 func _notice_ahead() -> Array:
 	if player.actions.carried_id != 0:
 		return []
+	var zone := _front_zone(object_notices.zones)
+	return [] if zone.is_empty() else object_notices.messages[str(int(zone[0]))]
+
+func _toolbox_ahead() -> bool:
+	return player.actions.can_select_tool() and not _front_zone(object_notices.toolboxes).is_empty()
+
+func _front_zone(zones: Dictionary) -> Array:
+	var rows: Array = zones.get(str(current_area),[])
+	if rows.is_empty():
+		return []
 	var direction: Vector3 = player.actions.DIRECTIONS[player.facing]
 	var probe := world_to_area(current_area,player.global_position)+direction*0.224
-	for zone: Array in object_notices.zones.get(str(current_area),[]):
+	for zone: Array in rows:
 		if int(zone[1])!=5 and int(zone[1])!=player.facing:
 			continue
 		# farm_zone_at_probe uses strict horizontal bounds and vertical slack.
 		if zone[2]<probe.x and probe.x<zone[5] and zone[3]-0.120<probe.y and probe.y<zone[6]+0.128 and zone[4]<probe.z and probe.z<zone[7]:
-			return object_notices.messages[str(int(zone[0]))]
+			return zone
 	return []
 
 func _interact() -> void:
 	if transitioning or awaiting_interact_release or npcs.dialogue.overlay.visible:
 		return
 	if nearby_exit.is_empty():
+		if _toolbox_ahead():
+			tool_picker.open()
+			return
 		if mine_field.descend():
 			return
 		if economy.shipping_near():
