@@ -15,10 +15,13 @@ func _ready() -> void:
 func cue(cue_name: String) -> void:
 	if not cues.has(cue_name):
 		var path: String = get_script().resource_path.get_base_dir().path_join(cue_name+".wav")
-		cues[cue_name] = load(path) if ResourceLoader.exists(path) else AudioStreamWAV.load_from_file(path)
+		# The source WAV is current in the editor; exported builds use the imported resource.
+		cues[cue_name] = AudioStreamWAV.load_from_file(path) if FileAccess.file_exists(path) else load(path)
 	var sample: AudioStreamWAV = cues[cue_name]
 	if sample != null and voices != null:
-		voices.play_stream(sample,0.0,-8.0)
+		# The source footstep sample already includes the low 20/127 voice volume.
+		var gain_db := 4.0 if cue_name=="step" else -8.0
+		voices.play_stream(sample,0.0,gain_db)
 
 
 func _exit_tree() -> void:

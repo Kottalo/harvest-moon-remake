@@ -13,7 +13,7 @@ from import_disc import Disc, ROOT, compose_animations
 FARM = ROOT / 'reference/hmbtn-decomp/src/overlay/11_GF_FARM'
 SOUNDS = {
     'confirm': 0, 'cancel': 1, 'refuse': 2, 'menu': 3, 'cursor': 5,
-    'jump': 6, 'show_item': 7, 'pickup': 8, 'put_down': 9, 'step': 0x48,
+    'jump': 6, 'show_item': 7, 'stow': 8, 'put_down': 9, 'step': 0x48,
     'sow': 14, 'ship': 19, 'refill': 21, 'door': 76,
     **{f'tool_{tool}_{grade}': base + grade for tool, base in
        [('sickle', 29), ('hoe', 34), ('axe', 39), ('hammer', 44), ('water', 49)]

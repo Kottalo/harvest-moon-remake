@@ -169,9 +169,9 @@ func play(source: String, animation: int, action: String, start := 0) -> void:
 	state = action
 	_sow_after_show = false
 	_draw()
-	match action:
-		"show_tool": sound_requested.emit("show_item")
-		"pickup": sound_requested.emit("pickup")
+	# player_collect_target and player_check_tool_slots both call sound_play(7).
+	if action in ["show_tool","pickup"]:
+		sound_requested.emit("show_item")
 
 func start_tool() -> bool:
 	if busy() or carried_id != 0 or player.input_locked or equipped==0 or not owns_tool(equipped):

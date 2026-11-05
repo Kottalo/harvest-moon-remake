@@ -133,6 +133,8 @@ func _run() -> void:
 		if record.active and record != stone:
 			untouched.append({"record":record,"node_id":record.node.get_instance_id()})
 	var batch_ids := {}
+	var pickup_cues: Array[String] = []
+	action.sound_requested.connect(func(cue: String): pickup_cues.append(cue))
 	for item in world.loose_items.batches:
 		var mesh: MultiMesh = world.loose_items.batches[item].mesh
 		batch_ids[item] = [mesh.get_instance_id(),mesh.instance_count]
@@ -142,6 +144,7 @@ func _run() -> void:
 	await _frames(30)
 	if not _require(action.carried_id==58 and int(world.loose_items.field_cells[stone.cell])==0x167,"Stone pickup did not free its original field cell"):
 		return
+	if not _require(pickup_cues==["show_item"],"Physical ground pickup did not play source cue 7 exactly once"): return
 	var planned: Dictionary = world.loose_items._placement(58)
 	if not _require(not planned.get("blocked",false),"Stone has no valid grid-centred placement target"):
 		return

@@ -174,6 +174,7 @@ func stow_held() -> bool:
 	if _add(item):
 		actions.carried_id = 0
 		actions.held_sprite.hide()
+		world.sound.cue("stow")
 		message = "已收入背包 · "+item_name(item)
 	else:
 		message = "背包已满。"
