@@ -186,13 +186,24 @@ func _run() -> void:
 	for saved in untouched:
 		if not _require(saved.record.active and saved.record.node.get_instance_id()==saved.node_id,"Placing one stone rebuilt an unrelated item/collider"):
 			return
+	world.player.position = placed.position-Vector3(0,0,0.224)+Vector3.UP*0.03
+	world.player.facing = 0
+	items.use_tool(16,0)
+	if not _require(not placed.active and items.breaks.size()==1 and items.breaks[0].count==4,
+			"Hammer must clear collision immediately and start the four-frame stone break"): return
+	var debris: Sprite3D = items.breaks[0].sprite
+	var first_frame := debris.frame
+	await _frames(8)
+	if not _require(debris.frame>first_frame,"Source break frames did not advance"): return
+	await _frames(20)
+	if not _require(items.breaks.is_empty(),"Finished break animation was not removed"): return
 	# Emptying a type must not destroy/reallocate its GPU batch.
 	for record in items.batches[58].records.duplicate():
 		items._remove(record)
 	if not _require(items.batches[58].mesh.visible_instance_count==0,"Empty stone batch still draws instances"):
 		return
 	var flight: Node3D = items._spawn(64,Vector3(0,2,0),false)
-	items.flights.append({"node":flight,"direction":Vector3.ZERO,"velocity":0.0,"ground":0.0})
+	items.flights.append({"node":flight,"item":64,"direction":Vector3.ZERO,"velocity":0.0,"ground":0.0})
 	items.placement = {"cell":placed.cell,"position":placed.position}
 	items.release_item(58,false)
 	if not _require(is_instance_valid(flight) and not flight.is_queued_for_deletion() and items.flights.size()==1,"Placement reset an unrelated item in flight"):

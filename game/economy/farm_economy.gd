@@ -10,7 +10,7 @@ const GOODS_NAMES := {
 	33:"青之羽毛",63:"木材",96:"秘银",97:"奥里哈钢",98:"精金",99:"番茄酱食谱",100:"篮子",104:"牧草饲料",105:"鸡饲料",
 	109:"中背包",110:"大背包",103:"力量果实",122:"金矿石",123:"银矿石",124:"铜矿石",
 	153:"饭团",154:"面包",155:"体力药",156:"高级体力药",157:"消疲劳药",158:"高级消疲劳药",
-	159:"葡萄酒",160:"葡萄汁",161:"大鱼",162:"中鱼",163:"小鱼",165:"油",166:"面粉",167:"咖喱粉",168:"套餐",
+	132:"鱼饲料",159:"葡萄酒",160:"葡萄汁",161:"大鱼",162:"中鱼",163:"小鱼",165:"油",166:"面粉",167:"咖喱粉",168:"套餐",
 	169:"山葡萄酒",170:"牛奶",171:"水",172:"刨冰",265:"鸡",304:"沙拉",305:"苹果派",
 	306:"芝士蛋糕",307:"饼干",309:"烤玉米",310:"意大利面",311:"披萨",312:"废矿石",319:"蛋黄酱机",
 	353:"小牛",357:"羊",134:"鸡蛋",139:"牛奶",145:"羊毛",
@@ -36,6 +36,7 @@ var animals: Array[Dictionary] = []
 var dialogue
 var livestock
 var fishing
+var supermarket
 var message := ""
 
 func setup(owner_world) -> void:
@@ -54,6 +55,10 @@ func setup(owner_world) -> void:
 	fishing = preload("res://game/economy/fishing.gd").new()
 	fishing.economy = self
 	add_child(fishing)
+	supermarket = preload("res://game/locations/supermarket/supermarket_goods.gd").new()
+	supermarket.name = "SupermarketGoods"
+	add_child(supermarket)
+	supermarket.setup(self)
 	world.player.actions.equipment_available = can_equip
 	world.player.actions.quick_switch = rucksack.cycle_tool.bind(world.player.actions)
 
@@ -128,6 +133,8 @@ func buy(id: String, item: int) -> String:
 		rucksack.capacity = 4 if item==109 else 8
 		if item==109:
 			rucksack_delivery = 10
+	supermarket.refresh()
+	world.sound.cue("confirm")
 	world.record_player_action("购买了"+item_name(item))
 	return "已购买%s。剩余 %d G。" % [item_name(item),gold]
 
@@ -138,7 +145,7 @@ func count(item: int) -> int:
 	return int(stock.get(item,0))+rucksack.items.count(item)
 
 func _add(item: int) -> bool:
-	if item in [26,27,28,29,30,31,32,56,57,63,100,104,105,109,110,319] or world.player.actions.seed_catalogue.has(str(item)):
+	if item in [26,27,28,29,30,31,32,56,57,63,100,104,105,109,110,132,319] or world.player.actions.seed_catalogue.has(str(item)):
 		stock[item] = int(stock.get(item,0))+1
 		return true
 	return rucksack.add_item(item)
@@ -242,6 +249,7 @@ func _new_day(_previous_season: int) -> void:
 			animal.product = true
 		animal.fed = false
 	livestock.bind_location()
+	supermarket.refresh()
 
 func _minute_changed(minute: int) -> void:
 	if minute!=17*60+58 or shipped_value==0:
@@ -282,6 +290,7 @@ func ship(item: int) -> String:
 	elif not take(item):
 		return "没有这件物品。"
 	shipped_value += price
+	world.sound.cue("ship")
 	world.record_player_action("出货了"+item_name(item))
 	return "已出货，预计收入 %d G。" % shipped_value
 
@@ -309,6 +318,18 @@ func shop_interact(actor) -> bool:
 	dialogue.show_choices(actor.display_name,"持有 %d G" % gold,options)
 	return true
 
+func show_shelf(items: Array, result := "") -> void:
+	var choices: Array = []
+	for item in items:
+		var id := int(item)
+		var purchase := func(): show_shelf(items,_purchase_from_menu("jeff",id))
+		if id not in SINGLE_PURCHASE or count(id)==0:
+			choices.append(["%s · %d G" % [item_name(id),buy_price(id)],purchase])
+	choices.append(["返回",dialogue.close])
+	var balance := "持有 %d G" % gold
+	dialogue.show_choices("杂货店",balance if result.is_empty() else result+"\n"+balance,choices)
+
+
 func _chat(actor) -> void:
 	dialogue.close()
 	dialogue.begin(actor)
@@ -323,7 +344,14 @@ func _show_goods(actor, animals_only: bool, result := "") -> void:
 	dialogue.show_choices(actor.display_name,"%s\n持有 %d G" % [result,gold],options)
 
 func _buy_choice(actor, item: int, animals_only: bool) -> void:
-	_show_goods(actor,animals_only,buy(str(actor.name),item))
+	_show_goods(actor,animals_only,_purchase_from_menu(str(actor.name),item))
+
+
+func _purchase_from_menu(seller: String, item: int) -> String:
+	var result := buy(seller,item)
+	if not result.begins_with("已购买"):
+		world.sound.cue("refuse")
+	return result
 
 func _show_upgrades(actor) -> void:
 	var options: Array = []

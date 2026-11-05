@@ -5,6 +5,10 @@ const MUTED_INK := Color("#eac7a1")
 const DARK_INK := Color("#352419")
 const HEADING := Color("#fff1ce")
 const PIN_PATH := "res://game/items/toolbox_brass_pin.svg"
+const FRAME_SIZE := Vector2(472,335)
+const SLOT_SIZE := Vector2(52,52)
+const SLOT_PITCH := 62
+const SLOT_COLUMNS := 4
 
 static func box(fill: Color, radius: int, edge := Color.TRANSPARENT, width := 0, padding := 0) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()

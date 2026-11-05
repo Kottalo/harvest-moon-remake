@@ -85,22 +85,29 @@ func run() -> void:
 	var picker = world.tool_picker
 	_picker_key(viewport,KEY_I)
 	await process_frame
-	if not require_ok(paused and picker.panel.visible and picker.entries.size()==35
-			and picker.tabs.current_tab==1,"I did not open the modal on the equipped seed tab"): return
+	var active: Button = picker.entries[action.selected_seed]
+	if not require_ok(paused and picker.panel.visible and picker.entries.size()==35 and picker.tabs.get_tab_count()==8
+			and picker.tabs.get_current_tab_control()==active.get_parent(),"I did not open the source eight-page layout on the equipped seed page"): return
+	for grid: GridContainer in picker.tabs.get_children():
+		if not require_ok(grid.columns==4 and grid.get_child_count()==8,"Toolbox storage did not use the source four-by-two slots"): return
+	if not require_ok(picker.held_slot.icon!=null and picker.bag_slots.filter(func(button): return button.visible).size()==2,
+			"Held tool and current rucksack slots are missing"): return
 	if not require_ok(not world.hud.visible and not world.day_cycle.clock_label.visible,
 			"Gameplay HUD showed through the toolbox"): return
-	var seed_button: Button = picker.entries[54]
-	if not require_ok(viewport.get_visible_rect().encloses(seed_button.get_global_rect()),
+	if not require_ok(viewport.get_visible_rect().encloses(active.get_global_rect()),
 			"Seed grid is clipped at the gameplay resolution"): return
 	for id in picker.entries:
 		var button: Button = picker.entries[id]
 		if not require_ok(button.icon != null and button.icon.get_width() in [16,36],"Picker icon is missing or includes its transparent source canvas: "+str(id)): return
 	_picker_key(viewport,KEY_F1)
 	if not require_ok(paused and picker.panel.visible and not world.day_cycle.debug_panel.panel.visible,"Picker let another pause menu open"): return
+	var previous_page: int = picker.tabs.current_tab
 	_picker_key(viewport,KEY_TAB)
-	if not require_ok(picker.tabs.current_tab==0,"Tab did not switch to tools"): return
-	await process_frame
+	if not require_ok(picker.tabs.current_tab==posmod(previous_page+1,8),"Tab did not switch to the next storage page"): return
 	var can: Button = picker.entries[21]
+	while picker.tabs.get_current_tab_control()!=can.get_parent():
+		_picker_key(viewport,KEY_TAB)
+	await process_frame
 	if not require_ok(viewport.get_visible_rect().encloses(can.get_global_rect()),"Tool grid is clipped at the gameplay resolution"): return
 	var pointer := InputEventMouseMotion.new()
 	pointer.position = can.get_global_rect().get_center()
@@ -122,15 +129,19 @@ func run() -> void:
 	await frames(2)
 	if not require_ok(not paused and not picker.panel.visible and action.equipped==21
 			and action.state=="show_tool" and action.range_id==71,"Picker failed to equip the watering can with the source pose"): return
+	if not require_ok(world.sound.voices!=null and world.sound.cues.get("show_item") is AudioStreamWAV,
+			"Tool selection did not load the original sound into the native mixer"): return
 	if not require_ok(world.hud.visible and world.day_cycle.clock_label.visible,
 			"Closing the toolbox did not restore the gameplay HUD"): return
 	while action.busy(): await frames(1)
 	_picker_key(viewport,KEY_I)
-	_picker_key(viewport,KEY_TAB)
-	picker.entries[54].grab_focus()
+	var grass: Button = picker.entries[54]
+	while picker.tabs.get_current_tab_control()!=grass.get_parent():
+		_picker_key(viewport,KEY_TAB)
+	grass.grab_focus()
 	await process_frame
 	if not require_ok(picker.tooltip.visible and picker.tooltip_label.text==action.seed_catalogue["54"].name
-			and picker.entries[54].text.begins_with("× "),"Keyboard focus did not show the seed name separately from its count"): return
+			and picker.entries[54].text.begins_with("×"),"Keyboard focus did not show the seed name separately from its count"): return
 	_picker_key(viewport,KEY_Z)
 	await frames(2)
 	if not require_ok(not paused and action.equipped==34 and action.selected_seed==54

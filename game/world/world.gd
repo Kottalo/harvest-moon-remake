@@ -11,6 +11,7 @@ var current_area := 0
 var overview := false
 var awaiting_interact_release := false
 var transitioning := false
+var sound
 var nearby_exit: Dictionary = {}
 var nearby_exit_locked := false
 var doors
@@ -89,6 +90,10 @@ func _ready() -> void:
 	doors.prepare(get_node("Location"),world["0"].exits)
 	transition_effect = load("res://game/world/location_transition.gd").new()
 	add_child(transition_effect)
+	sound = preload("res://game/audio/sound_effects.gd").new()
+	sound.name = "SoundEffects"
+	add_child(sound)
+	player.actions.sound_requested.connect(sound.cue)
 	loose_items = load("res://game/items/loose_items.gd").new()
 	loose_items.name = "LooseItems"
 	add_child(loose_items)
@@ -99,6 +104,7 @@ func _ready() -> void:
 	day_cycle.name = "DayCycle"
 	add_child(day_cycle)
 	day_cycle.setup(self)
+	loose_items.clock = day_cycle
 	day_cycle.sleep_requested.connect(_sleep_until_morning)
 	farm_field = load("res://game/field/farm_field.gd").new()
 	farm_field.name = "FarmField"
@@ -114,7 +120,7 @@ func _ready() -> void:
 	tool_picker = preload("res://game/player/tool_picker.gd").new()
 	add_child(tool_picker)
 	var select_tool := func(item: int): return economy.rucksack.choose_tool(player.actions,item)
-	tool_picker.setup(player.actions,ui_font,economy.count,select_tool,hud,day_cycle.clock_label)
+	tool_picker.setup(player.actions,ui_font,economy.count,select_tool,hud,day_cycle.clock_label,economy.rucksack,sound.cue)
 	rucksack_menu = preload("res://game/items/rucksack_menu.gd").new()
 	add_child(rucksack_menu)
 	rucksack_menu.setup(economy,ui_font)
@@ -249,7 +255,7 @@ func _interact() -> void:
 		if economy.shipping_near():
 			economy.show_shipping()
 			return
-		if economy.livestock.interact():
+		if economy.livestock.interact() or economy.supermarket.interact():
 			return
 	if economy.stow_held():
 		return
@@ -319,6 +325,7 @@ func _begin_transition(exit: Dictionary) -> void:
 	player.input_locked = true
 	if exit.has("door"):
 		doors.open(get_node("Location"),exit.door,player.facing)
+		sound.cue("door")
 		player.set_door_passage(true)
 		var direction: Vector3 = player.actions.DIRECTIONS[player.facing]
 		# player_walk_start -> facing_buttons -> player_dpad_facing reverses facing:
@@ -402,6 +409,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	farm_field.bind_location()
 	mine_field.bind_location()
 	economy.livestock.bind_location()
+	economy.supermarket.bind_location()
 	economy.message = ""
 	day_cycle.refresh()
 	_configure_camera_limits()

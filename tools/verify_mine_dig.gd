@@ -71,6 +71,8 @@ func run() -> void:
 	world = load("res://game/world/world.tscn").instantiate()
 	viewport.add_child(world)
 	world.set_physics_process(false)
+	# Random loot can fill the bag and leave an item in hand, which changes C into carry interaction.
+	world.mine_field.found.disconnect(world.economy._mined)
 	var farm_before: PackedInt32Array = world.farm_field.states.duplicate()
 	for area in [234,245]:
 		world._change_area(area,Vector3(0.2,0.01,0.2))

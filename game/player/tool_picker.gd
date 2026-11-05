@@ -4,13 +4,21 @@ const ToolboxStyle := preload("res://game/items/toolbox_style.gd")
 # scene_camera_transition turns the lid 0x20 per farm tick, up to 0x280.
 const LID_ANGLE := -0x280 * TAU / 4096.0
 const LID_TIME := 20.0 / 30.0
+const PAGE_COUNT := 8
+const PAGE_SIZE := 8
 
 var actions
+var rucksack
+var sound: Callable
+var page_label: Label
+var held_slot: Button
+var bag_slots: Array[Button] = []
 var seed_count: Callable
 var choose_tool: Callable
 var gameplay_hud: Label
 var clock_label: Label
 var panel: ColorRect
+var shell: PanelContainer
 var tabs: TabContainer
 var title: Label
 var tooltip: PanelContainer
@@ -25,8 +33,10 @@ var lid: Node3D
 
 
 func setup(player_actions, font: Font, available_seeds: Callable, select_tool: Callable,
-		hud: Label, clock: Label) -> void:
+		hud: Label, clock: Label, bag, play_sound: Callable) -> void:
 	actions = player_actions
+	rucksack = bag
+	sound = play_sound
 	seed_count = available_seeds
 	choose_tool = select_tool
 	gameplay_hud = hud
@@ -39,12 +49,10 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	panel.color = Color(0,0,0,0.55)
 	add_child(panel)
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var center := CenterContainer.new()
-	panel.add_child(center)
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	var shell := _wood_panel(center,"工具箱外框",styles.shell,12)
-	shell.custom_minimum_size.x = 740
+	shell = _wood_panel(panel,"工具箱外框",styles.shell,12)
+	shell.custom_minimum_size = ToolboxStyle.FRAME_SIZE
+	panel.resized.connect(_layout)
+	shell.minimum_size_changed.connect(_layout)
 	var shell_style := shell.get_theme_stylebox("panel") as StyleBoxFlat
 	shell_style.border_color = styles.rim.border_color
 	shell_style.set_border_width_all(2)
@@ -72,17 +80,36 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	heading.add_child(close)
 	_add_pin(heading,brass)
 
+	# item_status_draw: the held tool and rucksack are above the four-by-two storage page.
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation",10)
+	rows.add_child(top)
+	var equipped := _tray(top,"手持工具")
+	equipped.custom_minimum_size.x = 114
+	held_slot = _slot(equipped)
+	held_slot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var bag_tools := _tray(top,"背包工具")
+	bag_tools.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var bag_grid := _grid()
+	bag_tools.add_child(bag_grid)
+	for index in PAGE_SIZE:
+		bag_slots.append(_slot(bag_grid))
+	var storage := _tray(rows,"箱内工具")
+	var shelf := HBoxContainer.new()
+	# Match the start of the rucksack grid above the storage grid.
+	shelf.add_theme_constant_override("separation",28)
+	storage.add_child(shelf)
+	var pager := HBoxContainer.new()
+	pager.custom_minimum_size.x = 114
+	pager.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	shelf.add_child(pager)
+	_page_button(pager,"‹",-1)
+	page_label = _label(pager,"",14,ToolboxStyle.INK)
+	_page_button(pager,"›",1)
 	tabs = TabContainer.new()
-	tabs.add_theme_stylebox_override("panel",_padded(styles.tray,12))
-	tabs.add_theme_stylebox_override("tab_selected",_padded(styles.badge,8))
-	tabs.add_theme_stylebox_override("tab_unselected",_padded(styles.header,8))
-	tabs.add_theme_stylebox_override("tab_hovered",_padded(styles.wood,8))
-	tabs.add_theme_stylebox_override("tab_focus",styles.focus)
-	tabs.add_theme_color_override("font_selected_color",ToolboxStyle.DARK_INK)
-	tabs.add_theme_color_override("font_unselected_color",ToolboxStyle.INK)
-	tabs.add_theme_color_override("font_hovered_color",ToolboxStyle.HEADING)
-	tabs.add_theme_constant_override("h_separation",5)
-	rows.add_child(tabs)
+	tabs.tabs_visible = false
+	tabs.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
+	shelf.add_child(tabs)
 
 	tooltip = _wood_panel(panel,"物品提示",styles.badge,8)
 	tooltip.theme = wood.theme
@@ -94,6 +121,45 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 
 	panel.hide()
 	set_process_input(false)
+
+
+func _layout() -> void:
+	var bounds := shell.get_combined_minimum_size()
+	var zoom := minf(panel.size.x*0.92/bounds.x,panel.size.y*0.90/bounds.y)
+	if zoom<=0:
+		return
+	shell.size = bounds
+	shell.scale = Vector2.ONE*zoom
+	shell.position = ((panel.size-bounds*zoom)*0.5).floor()
+
+
+func _tray(parent: Control, caption: String) -> VBoxContainer:
+	var tray := _wood_panel(parent,caption,styles.tray,9)
+	var content := VBoxContainer.new()
+	tray.add_child(content)
+	_label(content,caption,14,ToolboxStyle.HEADING)
+	return content
+
+
+func _page_button(parent: Control, glyph: String, step: int) -> void:
+	var button := Button.new()
+	button.text = glyph
+	button.custom_minimum_size = Vector2(23,26)
+	button.focus_mode = Control.FOCUS_NONE
+	_style_button(button,styles.key)
+	button.pressed.connect(_change_page.bind(step))
+	parent.add_child(button)
+
+
+func _change_page(step: int) -> void:
+	tabs.current_tab = posmod(tabs.current_tab+step,PAGE_COUNT)
+	_update_page_label()
+	sound.call("cursor")
+	_focus_tab()
+
+
+func _update_page_label() -> void:
+	page_label.text = "%d / %d" % [tabs.current_tab+1,PAGE_COUNT]
 
 
 func _padded(style: StyleBoxFlat, padding: int) -> StyleBoxFlat:
@@ -148,24 +214,25 @@ func open(toolbox_lid: Node3D = null) -> void:
 	if get_tree().paused or not actions.can_select_tool():
 		return
 	if entries.is_empty():
-		var tools := _add_tab("工具")
-		for index in actions.TOOL_IDS.size():
-			var tool: int = actions.TOOL_IDS[index]
-			if tool != 34:
-				_add_entry(tools,actions.TOOL_NAMES[index],tool)
-		var seeds := _add_tab("种子")
+		var stock: Array[int] = []
+		for tool: int in actions.TOOL_IDS:
+			if tool!=34:
+				stock.append(tool)
 		for key: String in actions.seed_catalogue:
-			_add_entry(seeds,actions.seed_catalogue[key].name,34,int(key))
-	for tool: int in actions.TOOL_IDS:
-		if tool != 34:
-			var button: Button = entries[tool]
-			button.icon = actions.menu_icon(actions.tool_picture(tool))
-			button.disabled = not actions.owns_tool(tool)
-	for key: String in actions.seed_catalogue:
-		var seed := int(key)
-		entries[seed].text = "× %d" % seed_count.call(seed)
-	var using_seeds: bool = actions.equipped == 34
-	tabs.current_tab = 1 if using_seeds else 0
+			stock.append(int(key))
+		for page in PAGE_COUNT:
+			var grid := _grid()
+			tabs.add_child(grid)
+			for slot in PAGE_SIZE:
+				var index := page*PAGE_SIZE+slot
+				var button := _slot(grid)
+				if index<stock.size():
+					entries[stock[index]] = button
+	_refresh_slots()
+	var active: int = rucksack.active_tool(actions)
+	var preferred: Button = entries.get(active)
+	tabs.current_tab = preferred.get_parent().get_index() if preferred!=null else 0
+	_update_page_label()
 	hud_visible = gameplay_hud.visible
 	clock_visible = clock_label.visible
 	gameplay_hud.hide()
@@ -180,7 +247,9 @@ func open(toolbox_lid: Node3D = null) -> void:
 			_restore_world()
 			return
 	panel.show()
-	_focus_tab(actions.selected_seed if using_seeds else actions.equipped)
+	_layout()
+	sound.call("menu")
+	_focus_tab(active)
 
 
 func _move_lid(angle: float) -> void:
@@ -189,37 +258,63 @@ func _move_lid(angle: float) -> void:
 	await motion.finished
 
 
-func _add_tab(label: String) -> GridContainer:
+func _grid() -> GridContainer:
 	var grid := GridContainer.new()
-	grid.name = label
-	grid.columns = 5
-	grid.add_theme_constant_override("h_separation",8)
-	grid.add_theme_constant_override("v_separation",8)
-	tabs.add_child(grid)
+	grid.columns = ToolboxStyle.SLOT_COLUMNS
+	var spacing := ToolboxStyle.SLOT_PITCH-int(ToolboxStyle.SLOT_SIZE.x)
+	grid.add_theme_constant_override("h_separation",spacing)
+	grid.add_theme_constant_override("v_separation",spacing)
 	return grid
 
 
-func _add_entry(grid: GridContainer, label: String, tool: int, seed := -1) -> void:
+func _slot(parent: Container) -> Button:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(120,62)
-	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.custom_minimum_size = ToolboxStyle.SLOT_SIZE
 	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	button.add_theme_constant_override("icon_max_width",30)
-	button.add_theme_font_size_override("font_size",13)
-	_style_button(button,_padded(styles.filled,5))
-	if seed != -1:
-		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-		button.icon = actions.menu_icon(actions.tool_picture(tool,seed))
-	button.mouse_entered.connect(_show_tooltip.bind(button,label))
+	button.add_theme_constant_override("icon_max_width",32)
+	button.add_theme_font_size_override("font_size",10)
+	_style_button(button,_padded(styles.filled,3))
+	button.disabled = true
+	button.mouse_entered.connect(_show_tooltip.bind(button))
 	button.mouse_exited.connect(_hide_tooltip.bind(button))
-	button.focus_entered.connect(_show_tooltip.bind(button,label))
+	button.focus_entered.connect(_focus_slot.bind(button))
 	button.focus_exited.connect(_hide_tooltip.bind(button))
-	button.pressed.connect(_select.bind(tool,seed))
-	grid.add_child(button)
-	entries[seed if seed != -1 else tool] = button
+	button.pressed.connect(_select.bind(button))
+	parent.add_child(button)
+	return button
 
 
-func _show_tooltip(slot: Button, item_name: String) -> void:
+func _refresh_slots() -> void:
+	_set_slot(held_slot,rucksack.active_tool(actions))
+	for index in bag_slots.size():
+		var button := bag_slots[index]
+		button.visible = index<rucksack.capacity
+		_set_slot(button,rucksack.tools[index] if button.visible else 0)
+	for item: int in entries:
+		_set_slot(entries[item],item)
+
+
+func _set_slot(button: Button, item: int) -> void:
+	var seed: Dictionary = actions.seed_catalogue.get(str(item),{})
+	button.set_meta("item",item)
+	button.disabled = item==0 or (seed.is_empty() and not actions.owns_tool(item))
+	button.text = "" if seed.is_empty() else "×%d" % seed_count.call(item)
+	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER if seed.is_empty() else VERTICAL_ALIGNMENT_TOP
+	var tool_name: String = actions.TOOL_NAMES[actions.TOOL_IDS.find(item)] if item!=0 and seed.is_empty() else seed.get("name","")
+	button.set_meta("item_name",tool_name)
+	button.icon = null if item==0 else actions.menu_icon(actions.tool_picture(item) if seed.is_empty() else actions.tool_picture(34,item))
+
+
+func _focus_slot(slot: Button) -> void:
+	if panel.visible:
+		_show_tooltip(slot)
+		sound.call("cursor")
+
+
+func _show_tooltip(slot: Button) -> void:
+	var item_name: String = slot.get_meta("item_name","")
+	if item_name.is_empty():
+		return
 	tooltip_slot = slot
 	_place_tooltip.call_deferred(slot,item_name)
 
@@ -242,9 +337,12 @@ func _hide_tooltip(slot: Button) -> void:
 		tooltip.hide()
 
 
-func _select(tool: int, seed: int) -> void:
-	_close()
-	choose_tool.call(seed if seed!=-1 else tool)
+func _select(slot: Button) -> void:
+	if slot.disabled:
+		return
+	sound.call("confirm")
+	_close(false)
+	choose_tool.call(int(slot.get_meta("item")))
 
 
 func _focus_tab(preferred := 0) -> void:
@@ -257,6 +355,8 @@ func _focus_tab(preferred := 0) -> void:
 		if not entry.disabled:
 			entry.grab_focus()
 			return
+	if not held_slot.disabled:
+		held_slot.grab_focus()
 
 
 func _input(event: InputEvent) -> void:
@@ -270,14 +370,15 @@ func _input(event: InputEvent) -> void:
 				_close()
 			KEY_TAB:
 				get_viewport().set_input_as_handled()
-				tabs.current_tab = 1 - tabs.current_tab
-				_focus_tab()
+				_change_page(-1 if event.shift_pressed else 1)
 			KEY_F1:
 				get_viewport().set_input_as_handled()
 
 
-func _close() -> void:
+func _close(cancelled := true) -> void:
 	if panel.visible:
+		if cancelled:
+			sound.call("cancel")
 		_hide_tooltip(tooltip_slot)
 		panel.hide()
 		if is_instance_valid(lid):

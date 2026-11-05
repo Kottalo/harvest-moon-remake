@@ -1,5 +1,5 @@
 {
-  "jeff": {"area":180,"goods":[153,154,165,166,167,100,109,110,33],"seasonal_seeds":true},
+  "jeff": {"area":180,"goods":[153,154,165,166,167,100,109,110,33,132],"seasonal_seeds":true},
   "saibara": {"area":156,"goods":[26,27,28,319],"upgrade":true},
   "barley": {"area":136,"goods":[104,29,30,31,32,353,357],"livestock":true},
   "lillia": {"area":128,"goods":[105,30,265],"livestock":true},

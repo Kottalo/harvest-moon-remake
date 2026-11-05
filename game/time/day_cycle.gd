@@ -154,6 +154,7 @@ func interact() -> void:
 		world.player.input_locked = true
 		_draw_menu()
 		menu.show()
+		world.sound.cue("menu")
 
 func _draw_menu() -> void:
 	menu_text.text = "今天就休息吗？\n"+("▶ " if menu_selection==0 else "   ")+"睡觉到明天\n"+("▶ " if menu_selection==1 else "   ")+"继续活动"
@@ -163,10 +164,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if event.physical_keycode in [KEY_UP,KEY_DOWN]:
 		menu_selection = 1-menu_selection
+		world.sound.cue("cursor")
 		_draw_menu()
 	elif event.is_action_pressed("ui_cancel"):
+		world.sound.cue("cancel")
 		close_menu()
 	elif event.is_action_pressed("ui_accept"):
+		world.sound.cue("confirm")
 		if menu_selection==1:
 			close_menu()
 		else:

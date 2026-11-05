@@ -8,6 +8,7 @@ Start in the named runtime folder. Read its linked rules for implementation and 
 
 | Task | Runtime owner | Rules | Headless check group |
 | --- | --- | --- | --- |
+| Sound effects and the source sample mixer | `game/audio/` | `tools/import_interaction_assets.py` decodes the USA VAB samples offline | `player` |
 | Camera, framing, occlusion at map edges | `game/camera/` | [Camera](docs/engineering/camera.md) | `camera` |
 | Input, player actions, motion, hops, shadows | `game/player/`, `game/characters/` | [Player](docs/engineering/player.md) | `player` |
 | Soil, crops, mines, loose items and prefabs | `game/field/`, `game/items/` | [Field](docs/engineering/field.md) | `field` |

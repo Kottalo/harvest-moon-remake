@@ -15,6 +15,8 @@ TOOL = ROOT/'tools/texture_packer'
 SOURCE = TOOL/'source'
 MANIFEST = TOOL/'atlas_manifest.json'
 NODE = shutil.which('node')
+# Fixed frame grids are already native atlases used by Sprite3D frame indices.
+FIXED_GRIDS = {'game/items/debris_effects.png', 'game/locations/supermarket/merchandise.png'}
 
 
 def read(path):
@@ -50,6 +52,7 @@ def capture():
     candidates = {ROOT/p[6:] for p in old['images']}
     candidates.update(p for base in ['game','assets'] for p in (ROOT/base).rglob('*.png')
                       if 'res://'+p.relative_to(ROOT).as_posix() not in generated
+                      and p.relative_to(ROOT).as_posix() not in FIXED_GRIDS
                       and not p.is_relative_to(ROOT/'game/original_sprites'))
     for path in candidates:
         if path.exists():

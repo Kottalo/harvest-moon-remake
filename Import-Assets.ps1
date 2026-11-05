@@ -16,6 +16,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Day cycle conversion failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Original NPC, animal and item conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\import_crops.py') $Disc
 if ($LASTEXITCODE -ne 0) { throw 'Crop conversion failed' }
+& $Python (Join-Path $PSScriptRoot 'tools\import_interaction_assets.py') $Disc
+if ($LASTEXITCODE -ne 0) { throw 'Interaction asset conversion failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\texture_dedup.py') apply
 if ($LASTEXITCODE -ne 0) { throw 'Texture consolidation failed' }
 & $Python (Join-Path $PSScriptRoot 'tools\pack_textures.py') build

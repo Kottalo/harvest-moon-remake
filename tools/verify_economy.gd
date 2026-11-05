@@ -23,7 +23,7 @@ func run() -> void:
 	root.add_child(world)
 	world.set_physics_process(false)
 	world.day_cycle.minute = 10*60
-	world._change_area(180,Vector3(0,0,1.2))
+	world._change_area(180,Vector3(0.19,0,1.2))
 	for tick in 120:
 		if world.npcs.active.has("jeff") and world.npcs.active.jeff.placed:
 			break
@@ -37,7 +37,19 @@ func run() -> void:
 	if not check(labels.has("交谈"),"The normal shop menu lost the AI conversation option"): return
 	if not click("购买商品") or not click("芜菁种子") or not check(economy.gold==380 and economy.count(34)==2,"The native counter purchase did not consume the USA price"): return
 	economy.dialogue.close()
+	var display = economy.supermarket
+	if not check(display.sprites.size()==13 and display.sprites[0].visible and not display.sprites[1].visible,
+			"Supermarket is missing the source shelf displays or shows off-season seeds"): return
+	player.position = Vector3(0,0,1.25)
+	player.facing = 2
+	world._interact()
+	var shelf_labels: Array = economy.dialogue.choices_panel.get_children().map(func(button): return button.text)
+	if not check(shelf_labels.any(func(label): return label.begins_with("芜菁种子")) and not shelf_labels.any(func(label): return label.begins_with("面包")),
+			"Selecting a seed stand did not open the goods on that display"): return
+	economy.dialogue.close()
 	world.day_cycle.season = 1
+	display.refresh()
+	if not check(not display.sprites[0].visible and display.sprites[1].visible,"Seasonal stand visibility failed to change"): return
 	if not check(economy.goods_for("jeff").has(39) and not economy.goods_for("jeff").has(34),"Grocery season did not change seeds"): return
 	if not check(not economy.buy("jeff",109).begins_with("已购买") and economy.gold==380,"Unaffordable purchase changed cash"): return
 

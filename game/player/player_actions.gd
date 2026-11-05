@@ -4,6 +4,8 @@ signal interact_requested
 signal item_released(item: int, thrown: bool)
 signal tool_used(tool: int, charge: int)
 signal equipment_selected(tool: int)
+signal sound_requested(cue: String)
+
 var player
 var data: Dictionary
 var items: Dictionary
@@ -167,6 +169,9 @@ func play(source: String, animation: int, action: String, start := 0) -> void:
 	state = action
 	_sow_after_show = false
 	_draw()
+	match action:
+		"show_tool": sound_requested.emit("show_item")
+		"pickup": sound_requested.emit("pickup")
 
 func start_tool() -> bool:
 	if busy() or carried_id != 0 or player.input_locked or equipped==0 or not owns_tool(equipped):
@@ -191,6 +196,8 @@ func release_tool() -> void:
 	if state != "charge":
 		return
 	var level := mini(int(charge_ticks / 20),upgrade)
+	var name: String = ["sickle","hoe","axe","hammer","water"][(equipped-1)/5]
+	sound_requested.emit("tool_%s_%d" % [name,level])
 	play("tool_%d" % upgrade,72 + ((equipped-1)/5 as int)*20 + player.facing*5 + level,"swing",level+1)
 
 func start_pickup(item: int) -> bool:
@@ -302,9 +309,14 @@ func _finish() -> void:
 		carried_id = pending_item
 		pending_item = 0
 	if finished in ["drop","throw"]:
+		sound_requested.emit("put_down")
 		var item := carried_id
 		carried_id = 0
 		item_released.emit(item,finished=="throw")
+	if finished == "seed":
+		sound_requested.emit("sow")
+	elif finished == "refill":
+		sound_requested.emit("refill")
 	if finished in ["swing","animal_tool","reel","refill","seed"]:
 		tool_used.emit(equipped+upgrade if equipped<=25 else equipped,mini(int(charge_ticks/20),upgrade))
 	state = ""

@@ -4,11 +4,16 @@ signal action_committed(content: String)
 
 const HISTORY_NAMES := {58:"石头",62:"树枝",64:"杂草"}
 var world
+var clock
 var catalogue: Dictionary
 var records := {}
 var current_area := -1
 var materials := {}
 var flights := []
+var breaks := []
+var break_atlas: Texture2D
+var break_ranges: Dictionary
+const BREAK_ART := "res://game/items/debris_effects.png"
 var ticks := 0.0
 var field_cells: Array
 var placement := {}
@@ -36,6 +41,7 @@ func set_area(area: int) -> void:
 		remove_child(child)
 		child.queue_free()
 	flights.clear()
+	breaks.clear()
 	batches.clear()
 	current_area = area
 	if not records.has(area):
@@ -363,7 +369,7 @@ func release_item(item: int, thrown: bool) -> void:
 	var direction: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
 	if thrown:
 		var node := _spawn(item,world.player.position+Vector3.UP*0.3,false)
-		flights.append({"node":node,"direction":direction,"velocity":0.0,"ground":world.player.position.y})
+		flights.append({"node":node,"item":item,"direction":direction,"velocity":0.0,"ground":world.player.position.y})
 	else:
 		# Re-evaluate after the release animation in case an obstacle moved in.
 		placement = _placement(item)
@@ -393,8 +399,31 @@ func use_tool(tool: int, _charge: int) -> void:
 	if tool >= 1 and tool <= 25:
 		kind = ["sickle","hoe","axe","hammer","watering_can"][(tool-1)/5 as int]
 	if kind == catalogue.pictures[str(record.id)].tool:
+		_play_break(int(record.id),record.position)
 		_remove(record)
 		action_committed.emit("清理了%s" % HISTORY_NAMES[int(record.id)])
+
+func _play_break(item: int, point: Vector3) -> void:
+	if break_atlas==null:
+		break_atlas = load(BREAK_ART) if ResourceLoader.exists(BREAK_ART) else ImageTexture.create_from_image(Image.load_from_file(BREAK_ART))
+		break_ranges = JSON.parse_string(FileAccess.get_file_as_string("res://game/items/debris_effects.json"))
+	var season: int = clock.season if clock!=null else 0
+	var key := "%d_%d" % [item,mini(season,2) if item==64 else season]
+	var range_data: Array = break_ranges[key]
+	var sprite := Sprite3D.new()
+	sprite.name = "DebrisBreak"
+	sprite.texture = break_atlas
+	sprite.hframes = 8
+	sprite.vframes = break_atlas.get_height()/128
+	sprite.frame = int(range_data[0])
+	sprite.offset = Vector2(0,48)
+	sprite.position = point+Vector3(0.15,0.1,0.15)
+	sprite.pixel_size = world.player.sprite.pixel_size
+	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+	add_child(sprite)
+	breaks.append({"sprite":sprite,"start":sprite.frame,"count":int(range_data[1]),"ticks":0})
+
 
 func _physics_process(delta: float) -> void:
 	if world == null or world.transitioning:
@@ -402,10 +431,22 @@ func _physics_process(delta: float) -> void:
 	ticks += delta*30.0
 	while ticks >= 1.0:
 		ticks -= 1.0
+		for i in range(breaks.size()-1,-1,-1):
+			var effect: Dictionary = breaks[i]
+			effect.ticks += 1
+			var frame := int(effect.ticks)/3
+			if frame >= effect.count:
+				effect.sprite.queue_free()
+				breaks.remove_at(i)
+			else:
+				effect.sprite.frame = effect.start+frame
 		for i in range(flights.size()-1,-1,-1):
 			var flight: Dictionary = flights[i]
 			flight.node.position += flight.direction*0.044 + Vector3.UP*flight.velocity
 			flight.velocity = maxf(flight.velocity-0.009,-0.045)
 			if flight.node.position.y <= flight.ground:
+				var impact: Vector3 = flight.node.position
+				impact.y = flight.ground
+				_play_break(int(flight.item),impact)
 				flight.node.queue_free()
 				flights.remove_at(i)

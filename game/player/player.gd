@@ -68,6 +68,7 @@ func _physics_process(delta: float) -> void:
 		if scripted_walk_time<0.000001: scripted_walk_time = 0
 	var running := Input.is_action_pressed("run") and not input_locked
 	if running and not input_locked and not actions.busy() and scripted_walk_time<=0 and hop.try_start(Vector3(direction.x,0,direction.y),delta):
+		actions.sound_requested.emit("jump")
 		hop.advance(delta)
 		return
 	var speed := RUN_SPEED if running else WALK_SPEED
@@ -195,6 +196,8 @@ func _update_animation(direction: Vector2, running: bool, delta: float) -> void:
 			if control & 0x80 or animation_frame >= frames.size():
 				animation_frame = control & 0x7f
 			animation_frame = clampi(animation_frame, 0, frames.size() - 1)
+			if animation_frame in [0,frames.size()/2] and get_real_velocity().length_squared()>0.04:
+				actions.sound_requested.emit("step")
 			duration = maxf(ceilf(float(frames[animation_frame].duration) / 2.0), 1.0) / 30.0
 	else:
 		animation_frame = facing

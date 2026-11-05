@@ -234,6 +234,7 @@ func show_choices(heading: String, text: String, choices: Array) -> void:
 		choices_panel.get_child(0).grab_focus()
 
 func _open() -> void:
+	world.sound.cue("menu")
 	overlay.show()
 	was_paused = get_tree().paused
 	get_tree().paused = true
@@ -292,6 +293,7 @@ func _input(event: InputEvent) -> void:
 	var close_notice := notice_open and choices_panel.get_child_count()==0 and event.is_action_pressed("interact")
 	if (event.is_action_pressed("ui_cancel") and not typing_x) or close_notice:
 		get_viewport().set_input_as_handled()
+		world.sound.cue("cancel")
 		close()
 	elif event.keycode == KEY_F1:
 		get_viewport().set_input_as_handled()

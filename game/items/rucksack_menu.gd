@@ -1,8 +1,8 @@
 extends CanvasLayer
 ## Wooden toolbox skin. Directional links still follow PS1 storage_swap.c.
-const TOOLBOX_SIZE := Vector2(472,335)
-const SLOT_SIZE := Vector2(52,52)
-const SLOT_PITCH := 62
+const TOOLBOX_SIZE := ToolboxStyle.FRAME_SIZE
+const SLOT_SIZE := ToolboxStyle.SLOT_SIZE
+const SLOT_PITCH := ToolboxStyle.SLOT_PITCH
 const ToolboxStyle := preload("res://game/items/toolbox_style.gd")
 const SLOT_LINKS := [
 	[9,9,9,9,9,9,2,4,4,1,1,1,0,0,5,0,0,5,2,4,4,1,1,1],
@@ -146,6 +146,7 @@ func open() -> void:
 	if frame.size.y!=TOOLBOX_SIZE.y+2*_extra_row():
 		_layout()
 	panel.show()
+	economy.world.sound.cue("menu")
 	get_tree().paused = true
 	set_process_input(true)
 	_refresh()
@@ -159,7 +160,7 @@ func _slot_origin(index: int) -> Vector2:
 	if index in [0,9]:
 		return Vector2(37,start_y)
 	var slot := index-10 if item_row else index-1
-	return Vector2(195+(slot%4)*SLOT_PITCH,start_y+(slot/4 as int)*SLOT_PITCH)
+	return Vector2(195+(slot%ToolboxStyle.SLOT_COLUMNS)*SLOT_PITCH,start_y+(slot/ToolboxStyle.SLOT_COLUMNS as int)*SLOT_PITCH)
 
 func _refresh() -> void:
 	capacity_label.text = "背包  %d 格" % economy.rucksack.capacity
@@ -307,7 +308,10 @@ func _input(event: InputEvent) -> void:
 	if direction>=0:
 		if not explaining:
 			var level := [2,4,8].find(economy.rucksack.capacity)
+			var previous := cursor
 			cursor = SLOT_LINKS[cursor][level+direction*3+(12 if marked>=0 else 0)]
+			if cursor!=previous:
+				economy.world.sound.cue("cursor")
 			art.queue_redraw()
 	elif event.echo:
 		return
@@ -323,6 +327,7 @@ func _input(event: InputEvent) -> void:
 			_close()
 	elif event.is_action_pressed("ui_accept"):
 		if not explaining:
+			economy.world.sound.cue("confirm")
 			_confirm(cursor)
 	elif event.is_action_pressed("use_tool"):
 		_explain()
@@ -331,6 +336,7 @@ func _input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 
 func _close() -> void:
+	economy.world.sound.cue("cancel")
 	panel.hide()
 	_restore_world()
 	set_process_input(false)
