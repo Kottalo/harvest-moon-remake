@@ -90,6 +90,7 @@ func _ready() -> void:
 	loose_items = load("res://game/items/loose_items.gd").new()
 	loose_items.name = "LooseItems"
 	add_child(loose_items)
+	loose_items.action_committed.connect(record_player_action)
 	loose_items.setup(self)
 	print("BOOT_STAGE: items ready")
 	day_cycle = load("res://game/time/day_cycle.gd").new()

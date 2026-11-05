@@ -113,6 +113,10 @@ func _run() -> void:
 	await _frames(45)
 	if not _require(action.carried_id==0 and world.loose_items.flights.is_empty(),"Release/throw did not clear the hand and finish its source fall"):
 		return
+	var recent: Array = world.history.entries.slice(-2)
+	if not _require(recent.map(func(event): return event.content)==["拿起了杂草","扔出了杂草"],
+			"Physical pickup and discard did not reach world history"):
+		return
 	print("CARRY_OK: physical E pickup, real carry walking and E discard; no duplicated item")
 	var stone: Dictionary
 	for record in world.loose_items.records[0]:
@@ -209,6 +213,9 @@ func _run() -> void:
 	var panel := Node3D.new()
 	panel.name = "ZoneModel_00"
 	location.add_child(panel)
+	var stop := StaticBody3D.new()
+	location.add_child(stop)
+	panel.set_meta("doorway_stop",stop)
 	var twin := Node3D.new()
 	twin.name = "ZoneModel_01"
 	location.add_child(twin)

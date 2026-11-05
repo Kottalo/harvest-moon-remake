@@ -39,5 +39,8 @@ for path in (ROOT / 'game').rglob('*'):
         assert (ROOT / ref[6:]).is_file(), (relative, ref)
     if relative.parts[0] in {'player', 'camera'}:
         assert 'res://game/world/' not in text and 'res://game/locations/' not in text, relative
-assert (ROOT / 'tools/generated/.gdignore').is_file()
+generated = ROOT / 'tools/generated'
+assert not generated.exists() or (generated / '.gdignore').is_file(), (
+    'Offline intermediates in tools/generated must be hidden from Godot with .gdignore'
+)
 print(f'STRUCTURE_CHECK_OK: {len(world)} named location folders; player/camera/world boundaries and resource references valid')
