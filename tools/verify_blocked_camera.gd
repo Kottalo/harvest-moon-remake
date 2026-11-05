@@ -5,6 +5,10 @@ func run() -> void:
 	arena = Node3D.new();root.add_child(arena)
 	floor_body = box(Vector3(0,-0.05,0),Vector3(6,0.1,6));floor_body.collision_layer = 11
 	player = load("res://game/player/player.tscn").instantiate();arena.add_child(player)
+	var steps: Array[int] = []
+	player.actions.sound_requested.connect(func(cue: String):
+		if cue=="step":
+			steps.append(Engine.get_physics_frames()))
 	items = load("res://game/items/loose_items.gd").new();arena.add_child(items)
 	items.world = {"player":player,"transitioning":false};items.set_physics_process(false)
 	items.catalogue = JSON.parse_string(FileAccess.get_file_as_string("res://game/items/item_catalog.json"))
@@ -18,6 +22,7 @@ func run() -> void:
 		player.velocity = Vector3.ZERO;player.reset_physics_interpolation()
 		await frames(0.1);key(KEYS[facing],true);await frames(0.7)
 		camera.follow(player,false,false)
+		steps.clear()
 		var first := true
 		var origin := Vector3.ZERO
 		var reference := Vector2.ZERO
@@ -35,6 +40,7 @@ func run() -> void:
 			error = maxf(error,projected.distance_to(reference))
 			if not require_ok(camera.position==origin and camera.basis==rotation and error<0.0001,"Scenery/camera jittered while the player was blocked: "+str([facing,error,camera.position-origin])): return
 		key(KEYS[facing],false)
+		if not require_ok(steps.is_empty(),"Footsteps played while the player's position was blocked"): return
 		print("BLOCKED_CAMERA_SAMPLE: ",facing," physical recovery range=",body_max-body_min," projected scenery drift=",error)
 		# Reverse movement starts smoothly, then the camera tracks and settles.
 		var began: Vector3 = player.position

@@ -4,6 +4,7 @@ var facing := 0
 var animation := 0
 var animation_frame := 0
 var animation_time := 0.0
+var footstep_ticks := 0.0
 var animation_data: Dictionary
 var actions
 var hop
@@ -89,6 +90,14 @@ func _physics_process(delta: float) -> void:
 		velocity.x *= clearance
 		velocity.z *= clearance
 	move_and_slide()
+	if is_on_floor() and not direction.is_zero_approx():
+		var motion := get_real_velocity()
+		if Vector2(motion.x,motion.z).length_squared()>0.04:
+			# Source checks timer > 12 (walking) or > 8 (running) before incrementing.
+			footstep_ticks += delta*30.0
+			if footstep_ticks >= (10.0 if running else 14.0):
+				footstep_ticks = 0.0
+				actions.sound_requested.emit("step")
 	# Align the visible feet to the support plane, not the capsule's rounded bottom.
 	sprite.position.y = -footprint.radius * (1.0 / get_floor_normal().y - 1.0) if is_on_floor() else 0.0
 	if is_on_floor():
@@ -196,8 +205,6 @@ func _update_animation(direction: Vector2, running: bool, delta: float) -> void:
 			if control & 0x80 or animation_frame >= frames.size():
 				animation_frame = control & 0x7f
 			animation_frame = clampi(animation_frame, 0, frames.size() - 1)
-			if animation_frame in [0,frames.size()/2] and get_real_velocity().length_squared()>0.04:
-				actions.sound_requested.emit("step")
 			duration = maxf(ceilf(float(frames[animation_frame].duration) / 2.0), 1.0) / 30.0
 	else:
 		animation_frame = facing

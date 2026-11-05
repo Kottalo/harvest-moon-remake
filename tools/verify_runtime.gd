@@ -93,11 +93,16 @@ func _run() -> void:
 	if not _require(entry0.position.is_equal_approx(Vector3(-4.799, 0, -4.28)) and entry1.position.is_equal_approx(Vector3(1.53, 0.04, -3.18)), "Original scene-object placement changed"):
 		return
 	var distances := []
+	var step_frames: Array[int] = []
+	actions.sound_requested.connect(func(cue: String):
+		if cue=="step":
+			step_frames.append(Engine.get_physics_frames()))
 	for mode in [0, 1, 2]:
 		farm.player.position = start
 		farm.player.velocity = Vector3.ZERO
 		await _frames(3)
 		var first_tick := Engine.get_physics_frames()
+		step_frames.clear()
 		Input.action_press("move_right")
 		if mode == 1:
 			Input.action_press("move_down")
@@ -117,6 +122,11 @@ func _run() -> void:
 			return
 		if not _require(farm.player.is_on_floor(), "Player left the floor while walking"):
 			return
+		var step_interval := roundi((10.0 if mode==2 else 14.0)*Engine.physics_ticks_per_second/30.0)
+		if not _require(step_frames.size()>=2,"Moving player did not emit footsteps"): return
+		for index in range(1,step_frames.size()):
+			if not _require(step_frames[index]-step_frames[index-1]==step_interval,
+					"Footsteps did not follow the source walk/run timer"): return
 	# Find a real vertical farm wall/fence, then move the actual player capsule into it.
 	farm.set_physics_process(false)
 	var space: PhysicsDirectSpaceState3D = farm.get_world_3d().direct_space_state
