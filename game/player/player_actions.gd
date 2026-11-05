@@ -11,6 +11,8 @@ var data: Dictionary
 var items: Dictionary
 var textures := {}
 var frame_textures := {}
+var menu_icons: Dictionary = {}
+var menu_atlas_images: Dictionary = {}
 var hop_atlas_paths: Array[String] = []
 var hop_atlas_request := ""
 var state := ""
@@ -118,16 +120,26 @@ func tool_picture(tool: int, seed := -1, level := -1) -> Texture2D:
 	var item := tool + (upgrade if level<0 else level) if tool <= 25 else tool
 	return _texture(data.tool_pictures[str(item)])
 
-static func menu_icon(picture: Texture2D) -> Texture2D:
+func menu_icon(picture: Texture2D) -> Texture2D:
 	if picture is not AtlasTexture:
 		return picture
+	if menu_icons.has(picture):
+		return menu_icons[picture]
 	var icon := AtlasTexture.new()
 	icon.atlas = picture.atlas
 	icon.region = picture.region
 	if picture.region.size==Vector2(128,128):
 		# The source tool pictures fit this part of their ANI canvas.
 		icon.region = Rect2(picture.region.position+Vector2(46,83),Vector2(36,37))
+		if not menu_atlas_images.has(icon.atlas):
+			menu_atlas_images[icon.atlas] = icon.atlas.get_image()
+		var atlas_image: Image = menu_atlas_images[icon.atlas]
+		if atlas_image != null and not atlas_image.is_empty():
+			var ink := atlas_image.get_region(Rect2i(icon.region)).get_used_rect()
+			if ink.has_area():
+				icon.region = Rect2(icon.region.position+Vector2(ink.position),Vector2(ink.size))
 	icon.filter_clip = true
+	menu_icons[picture] = icon
 	return icon
 
 func poll_input() -> void:

@@ -92,21 +92,26 @@ func run() -> void:
 			and picker.tabs.get_current_tab_control()==active.get_parent(),"I did not open the source eight-page layout on the equipped seed page"): return
 	for grid: GridContainer in picker.tabs.get_children():
 		if not require_ok(grid.columns==4 and grid.get_child_count()==8,"Toolbox storage did not use the source four-by-two slots"): return
-	if not require_ok(picker.held_slot.icon!=null and picker.bag_slots.filter(func(button): return button.visible).size()==2,
+	if not require_ok(picker.held_slot.get_node("Icon").texture!=null and picker.bag_slots.filter(func(button): return button.visible).size()==2,
 			"Held tool and current rucksack slots are missing"): return
 	var close: Button = picker.title.get_parent().get_node("CloseButton")
 	if not require_ok(close.focus_mode==Control.FOCUS_NONE,"Close button can receive focus"): return
 	for slot: Button in [picker.held_slot,picker.bag_slots[0],picker.bag_slots[1]] + active.get_parent().get_children():
 		if not require_ok(slot.size.is_equal_approx(Vector2(52,52)),"Toolbox slot expanded beyond its square: "+str(slot.size)): return
 	var bag_seed: Label = picker.bag_slots[1].get_node("Quantity")
-	if not require_ok(bag_seed.text=="×9999","Backpack seed count was missing from its square slot"): return
+	if not require_ok(bag_seed.text=="×9999" and bag_seed.position.is_equal_approx(Vector2(3,37))
+			and bag_seed.horizontal_alignment==HORIZONTAL_ALIGNMENT_LEFT,"Seed count was not at the bottom left of its slot"): return
 	if not require_ok(not world.hud.visible and not world.day_cycle.clock_label.visible,
 			"Gameplay HUD showed through the toolbox"): return
 	if not require_ok(viewport.get_visible_rect().encloses(active.get_global_rect()),
 			"Seed grid is clipped at the gameplay resolution"): return
 	for id in picker.entries:
 		var button: Button = picker.entries[id]
-		if not require_ok(button.icon != null and button.icon.get_width() in [16,36],"Picker icon is missing or includes its transparent source canvas: "+str(id)): return
+		var icon := button.get_node("Icon") as TextureRect
+		if not require_ok(icon.texture!=null and icon.texture.get_width()<=36 and icon.texture.get_height()<=37
+				and is_equal_approx(maxf(icon.size.x,icon.size.y),32.0)
+				and is_equal_approx(icon.size.aspect(),icon.texture.get_size().aspect()),
+				"Picker icon does not use the shared proportional size: "+str(id)): return
 	_picker_key(viewport,KEY_F1)
 	if not require_ok(paused and picker.panel.visible and not world.day_cycle.debug_panel.panel.visible,"Picker let another pause menu open"): return
 	var previous_page: int = picker.tabs.current_tab

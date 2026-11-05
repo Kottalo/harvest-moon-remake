@@ -110,7 +110,7 @@ func _layout() -> void:
 	detail.size.x = roundi(394*amount)
 	for index in seed_labels.size():
 		var label := seed_labels[index]
-		_place_text(label,_slot_origin(index)+Vector2(18,37),10,amount)
+		_place_text(label,_slot_origin(index)+ToolboxStyle.QUANTITY_ORIGIN,10,amount)
 	art.queue_redraw()
 
 func _place_text(label: Label, point: Vector2, font_size: int, amount: float) -> void:
@@ -199,8 +199,9 @@ func _draw_art() -> void:
 		var icon := icons[index]
 		_draw_box("filled" if icon!=null else "empty",Rect2(point,SLOT_SIZE))
 		if icon!=null:
-			var picture_size := icon.get_size()*1.25
-			art.draw_texture_rect(icon,Rect2(point+(SLOT_SIZE-picture_size)*0.5,picture_size),false)
+			var picture := ToolboxStyle.icon_rect(icon)
+			picture.position += point
+			art.draw_texture_rect(icon,picture,false)
 		if index==marked:
 			_draw_box("marked",Rect2(point,SLOT_SIZE).grow(-4))
 		if index==cursor:

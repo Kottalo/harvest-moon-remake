@@ -208,7 +208,6 @@ func _style_button(button: Button, normal: StyleBoxFlat) -> void:
 	button.add_theme_color_override("font_hover_color",ToolboxStyle.DARK_INK)
 	button.add_theme_color_override("font_pressed_color",ToolboxStyle.DARK_INK)
 	button.add_theme_color_override("font_disabled_color",ToolboxStyle.MUTED_INK)
-	button.add_theme_color_override("icon_disabled_color",Color(1,1,1,0.46))
 
 
 func open(toolbox_lid: Node3D = null) -> void:
@@ -273,18 +272,20 @@ func _slot(parent: Container) -> Button:
 	button.custom_minimum_size = ToolboxStyle.SLOT_SIZE
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	button.expand_icon = true
-	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_style_button(button,_padded(styles.filled,3))
+	var picture := TextureRect.new()
+	picture.name = "Icon"
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(picture)
 	var quantity := _label(button,"",10,ToolboxStyle.DARK_INK)
 	quantity.name = "Quantity"
 	quantity.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	quantity.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	quantity.clip_text = true
 	quantity.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	quantity.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	quantity.offset_left = 3
-	quantity.offset_top = -15
+	quantity.offset_left = ToolboxStyle.QUANTITY_ORIGIN.x
+	quantity.offset_top = ToolboxStyle.QUANTITY_ORIGIN.y - ToolboxStyle.SLOT_SIZE.y
 	quantity.offset_right = -3
 	quantity.offset_bottom = -2
 	button.disabled = true
@@ -314,11 +315,15 @@ func _set_slot(button: Button, item: int) -> void:
 	# A child label overlays the slot without changing the button's minimum size.
 	var quantity := button.get_node("Quantity") as Label
 	quantity.text = "" if seed.is_empty() else "×%d" % seed_count.call(item)
-	button.add_theme_constant_override("icon_max_width",32 if seed.is_empty() else 28)
-	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER if seed.is_empty() else VERTICAL_ALIGNMENT_TOP
 	var tool_name: String = actions.TOOL_NAMES[actions.TOOL_IDS.find(item)] if item!=0 and seed.is_empty() else seed.get("name","")
 	button.set_meta("item_name",tool_name)
-	button.icon = null if item==0 else actions.menu_icon(actions.tool_picture(item) if seed.is_empty() else actions.tool_picture(34,item))
+	var picture := button.get_node("Icon") as TextureRect
+	picture.texture = null if item==0 else actions.menu_icon(actions.tool_picture(item) if seed.is_empty() else actions.tool_picture(34,item))
+	if picture.texture != null:
+		var rect := ToolboxStyle.icon_rect(picture.texture)
+		picture.position = rect.position
+		picture.size = rect.size
+	picture.modulate.a = 0.46 if button.disabled else 1.0
 
 
 func _focus_slot(slot: Button) -> void:
