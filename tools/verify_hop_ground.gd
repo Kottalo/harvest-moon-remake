@@ -15,12 +15,12 @@ func run() -> void:
 		# Native move_and_slide reports this body on_floor despite the penetration.
 		player.position.y = -0.000155
 		var started: Vector3 = player.position
-		key(KEY_SHIFT,true);key(KEY_LEFT,true)
+		key(KEY_X,true);key(KEY_LEFT,true)
 		var hopped := false
 		for tick in 6:
 			await physics_frame;await process_frame
 			hopped = hopped or player.hop.active
-		key(KEY_SHIFT,false);key(KEY_LEFT,false)
+		key(KEY_X,false);key(KEY_LEFT,false)
 		if not require_ok(hopped,"Native farm floor was mistaken for a blocked landing: "+str([started,player.position])): return
 		await frames(0.5)
 		if not require_ok(player.is_on_floor() and not player.hop.active and player.get_collision_exceptions().is_empty() and player.position.x<started.x-0.45,"Hop did not land/restore collision"): return

@@ -51,12 +51,37 @@ func run() -> void:
 		key(code,false)
 	key(KEY_RIGHT,true)
 	if not check(Input.is_action_pressed("move_right"),"Arrow does not drive movement"): return
+	key(KEY_SHIFT,true)
+	if not check(not Input.is_action_pressed("run"),"Shift still starts running"): return
+	key(KEY_SHIFT,false)
+	key(KEY_X,true)
+	if not check(Input.is_action_pressed("run") and Input.is_action_pressed("ui_cancel"),"X is not shared by running and cancel"): return
+	key(KEY_X,false)
 	key(KEY_RIGHT,false)
-	await tap(KEY_SPACE)
+	if not check(menu.marks!=null and menu.icons[0]!=null and menu.icons[1]!=null and menu.icons[2]!=null,"The default bag assets were not warmed before the first Space"): return
+	var cached_icons: int = menu.icon_cache.size()
+	var opened_at := Time.get_ticks_usec()
+	key(KEY_SPACE,true)
+	var open_usec := Time.get_ticks_usec()-opened_at
+	await tick(2)
+	key(KEY_SPACE,false)
+	await tick(2)
+	print("RUCKSACK_OPEN_CPU: ",open_usec," us")
 	if not check(menu.panel.visible and paused and menu._slot_visible(1) and not menu._slot_visible(3),"Space did not open the original two-slot bag"): return
 	if not check(menu.detail.text.count("\n")==3 and not world.hud.visible and not world.day_cycle.clock_label.visible,"The original help and shaded field were not shown"): return
 	if not check(menu.frame.size==Vector2(320,240) and menu.marks.get_size()==Vector2(616,36),"Original screen coordinates or sprite atlas are missing"): return
-	if not check(menu.detail.position.y+menu.detail.get_minimum_size().y<=226,"Localized help overflows the original bottom frame"): return
+	if not check(menu.icon_cache.size()==cached_icons,"Opening the default bag loaded additional icons"): return
+	var scale_factor: float = menu.frame.scale.y
+	if not check(menu.detail.get_parent()==menu.panel and menu.detail.scale==Vector2.ONE
+			and menu.detail.get_theme_font_size("font_size")==roundi(10*scale_factor),"Text inherits pixel-art scaling"): return
+	var help_bottom: float = menu.frame.position.y+226*scale_factor
+	if not check(menu.detail.position.y+menu.detail.get_minimum_size().y<=help_bottom,"Localized help overflows the original bottom frame"): return
+	var marks := Image.new()
+	if not check(marks.load_png_from_buffer(FileAccess.get_file_as_bytes("res://game/items/rucksack_marks.png"))==OK,"Original marks PNG could not be read"): return
+	var ring := Rect2(marks.get_region(Rect2i(0,0,44,36)).get_used_rect())
+	var hand := Rect2(marks.get_region(Rect2i(44,0,44,36)).get_used_rect())
+	if not check((ring.get_center()-Vector2(10,0)+menu.SELECTION_OFFSET).is_equal_approx(menu.SLOT_SIZE*0.5)
+			and is_equal_approx(hand.get_center().x-10+menu.CURSOR_OFFSET.x,menu.SLOT_SIZE.x*0.5),"Ring or cursor is off-centre relative to the original slot"): return
 	if not capture.is_empty():
 		await RenderingServer.frame_post_draw
 		var screenshot := root.get_texture().get_image()

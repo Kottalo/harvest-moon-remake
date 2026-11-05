@@ -324,6 +324,21 @@ def extract_makers(disc, library, work):
 
 
 
+def item_picture_catalogue(catalogue):
+    items = {}
+    images = {}
+    for record in catalogue["items"].values():
+        sector = record["variants"].get("sector")
+        if not sector or not sector[0] or sector[0][0]["image"] is None:
+            continue
+        frame = sector[0][0]
+        key = frame["image"]
+        items[str(record["id"])] = {"image": key, "offset": frame["offset"]}
+        images[key] = catalogue["images"][key]
+    return dict(items=items, images=images, pages=catalogue["pages"],
+                canvas=catalogue["canvas"], origin=catalogue["origin"])
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("disc", type=Path)
@@ -359,10 +374,14 @@ def main():
         catalogue["item_models"] = {name: f"res://game/original_sprites/models/{name}.tscn" for name in models}
         output = json.dumps(catalogue, separators=(",", ":")) + "\n"
         model_output = json.dumps(models, separators=(",", ":")) + "\n"
+        item_output = json.dumps(item_picture_catalogue(catalogue), separators=(",", ":")) + "\n"
+        item_index = destination / "item_picture_catalogue.json"
         if not args.check:
             (destination / "models").mkdir(parents=True, exist_ok=True)
             (destination / "catalogue.json").write_text(output, encoding="utf-8")
             (destination / "models/makers.json").write_text(model_output, encoding="utf-8")
+            item_index.write_text(item_output, encoding="utf-8")
+        assert item_index.read_text(encoding="utf-8") == item_output
         assert (destination / "models/makers.json").read_text(encoding="utf-8") == model_output
         assert (destination / "catalogue.json").read_text(encoding="utf-8") == output
         for page in pages:

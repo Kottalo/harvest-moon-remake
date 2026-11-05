@@ -136,7 +136,7 @@ func _setup_input() -> void:
 	var keys := {
 		"move_left": [KEY_LEFT], "move_right": [KEY_RIGHT],
 		"move_up": [KEY_UP], "move_down": [KEY_DOWN],
-		"run": [KEY_SHIFT], "interact": [KEY_Z], "backpack": [KEY_SPACE],
+		"run": [KEY_X], "interact": [KEY_Z], "backpack": [KEY_SPACE],
 		"use_tool": [KEY_C], "next_tool": [KEY_A], "tool_level": [KEY_R], "refill_can": [KEY_G],
 		"ui_accept": [KEY_Z], "ui_cancel": [KEY_X, KEY_ESCAPE]
 	}

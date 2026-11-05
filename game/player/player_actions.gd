@@ -347,18 +347,12 @@ func item_picture(item: int) -> Texture2D:
 
 func source_item_picture(item: int) -> Texture2D:
 	if item_art==null:
-		item_art = preload("res://game/original_sprites/sprite_library.gd").new()
-		for record: Dictionary in item_art.catalogue.items.values():
-			var variants: Dictionary = record.variants
-			if variants.has("sector") and not variants.sector.is_empty() and not variants.sector[0].is_empty():
-				item_images[int(record.id)] = variants.sector[0][0]
+		item_art = preload("res://game/original_sprites/sprite_library.gd").new(
+			"res://game/original_sprites/item_picture_catalogue.json")
 	if not item_images.has(item):
-		return null
-	var frame = item_images[item]
-	if frame is Dictionary:
-		frame = item_art.frame_texture(frame)
-		item_images[item] = frame
-	return frame
+		var frame: Dictionary = item_art.catalogue.items.get(str(item),{})
+		item_images[item] = item_art.frame_texture(frame) if not frame.is_empty() else null
+	return item_images[item]
 
 func _texture(path: String) -> Texture2D:
 	if not textures.has(path):

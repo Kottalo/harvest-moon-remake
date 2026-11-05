@@ -177,7 +177,7 @@ func _set_overview() -> void:
 	camera.show_overview(get_node("Location"))
 
 func _refresh_hud() -> void:
-	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · Z 交互 · C 工具 · 空格 背包 · A 换工具 · I 工具箱 · Tab 全景"
+	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nX 跑步 · Z 交互 · C 工具 · 空格 背包 · A 换工具 · I 工具箱 · Tab 全景"
 	text += "\n%d G · " % economy.gold + player.actions.tool_name()
 	if player.actions.equipped == 34:
 		text += " · R 选种"
@@ -189,9 +189,9 @@ func _refresh_hud() -> void:
 		text += " · 蓄力 " + str(mini(int(player.actions.charge_ticks/20),player.actions.upgrade))
 	if player.actions.carried_id != 0:
 		if player.actions.items.has(str(player.actions.carried_id)):
-			text += " · Z / C 放下或丢弃 · Shift+C 投掷"
+			text += " · Z / C 放下或丢弃 · X+C 投掷"
 		else:
-			text += " · Z 收入背包 · Shift+C 丢弃"
+			text += " · Z 收入背包 · X+C 丢弃"
 	if not nearby_exit.is_empty():
 		var destination: String = world[str(int(nearby_exit.target))].name
 		text += "\nZ 查看 " + destination + " · 门锁着" if nearby_exit_locked else "\nZ 进入 " + destination

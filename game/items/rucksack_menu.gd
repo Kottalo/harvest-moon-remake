@@ -26,6 +26,9 @@ const SPOTS := [
 const MARKS_PATH := "res://game/items/rucksack_marks.png"
 const TILE := Vector2(44,36)
 const SLOT_SIZE := Vector2(32,32)
+# Range 11's ring is 34×34. The hand's visible pixels sit left of its anchor.
+const SELECTION_OFFSET := Vector2(-1,-1)
+const CURSOR_OFFSET := Vector2(20.5,24)
 const HELP := "方向键：移动光标\nZ：选择／交换\nC：查看物品\nX：取消／关闭"
 
 var economy
@@ -33,9 +36,12 @@ var actions
 var panel: ColorRect
 var frame: Control
 var art: Control
+var equip_label: Label
+var carry_label: Label
 var detail: Label
 var marks: Texture2D
 var icons: Array[Texture2D] = []
+var icon_cache := {}
 var cursor := 0
 var marked := -1
 var explaining := false
@@ -51,7 +57,6 @@ func setup(owner_economy, font: Font) -> void:
 	panel.color = Color(0,0,0,0.5)
 	add_child(panel)
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	panel.resized.connect(_layout)
 	frame = Control.new()
 	frame.size = SOURCE_SIZE
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -69,37 +74,45 @@ func setup(owner_economy, font: Font) -> void:
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	art.draw.connect(_draw_art)
 	frame.add_child(art)
-	_label("装备",Vector2(29,19),font)
-	_label("持有",Vector2(29,93),font)
-	detail = _label(HELP,Vector2(30,167),font)
-	detail.add_theme_font_size_override("font_size",10)
-	detail.add_theme_constant_override("line_spacing",-2)
+	equip_label = _label("装备",font)
+	carry_label = _label("持有",font)
+	detail = _label(HELP,font)
 	panel.hide()
+	panel.resized.connect(_layout)
 	set_process_input(false)
 	_layout()
+	# Resolve the marks and starting loadout while the world is still starting.
+	marks = load(MARKS_PATH) if ResourceLoader.exists(MARKS_PATH) else ImageTexture.create_from_image(Image.load_from_file(MARKS_PATH))
+	icons.resize(SPOTS.size())
+	_refresh()
 
 func _layout() -> void:
 	var amount := minf(panel.size.x/SOURCE_SIZE.x,panel.size.y/SOURCE_SIZE.y)
 	frame.scale = Vector2.ONE*amount
 	frame.position = ((panel.size-SOURCE_SIZE*amount)*0.5).floor()
+	_place_text(equip_label,Vector2(29,19),11,amount)
+	_place_text(carry_label,Vector2(29,93),11,amount)
+	_place_text(detail,Vector2(30,167),10,amount)
+	detail.add_theme_constant_override("line_spacing",roundi(-2*amount))
 
-func _label(value: String, point: Vector2, font: Font) -> Label:
+func _place_text(label: Label, point: Vector2, source_font_size: int, amount: float) -> void:
+	# Rasterize the font at the destination size, independently of the pixel-art layer.
+	label.position = (frame.position+point*amount).round()
+	label.add_theme_font_size_override("font_size",maxi(1,roundi(source_font_size*amount)))
+
+func _label(value: String, font: Font) -> Label:
 	var label := Label.new()
-	label.position = point
 	label.text = value
 	label.add_theme_font_override("font",font)
-	label.add_theme_font_size_override("font_size",11)
 	label.add_theme_color_override("font_color",Color("#202020"))
-	label.add_theme_constant_override("line_spacing",0)
+	label.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	frame.add_child(label)
+	panel.add_child(label)
 	return label
 
 func open() -> void:
 	if get_tree().paused or actions.busy() or actions.player.input_locked or not actions.player.is_on_floor():
 		return
-	if marks==null:
-		marks = load(MARKS_PATH) if ResourceLoader.exists(MARKS_PATH) else ImageTexture.create_from_image(Image.load_from_file(MARKS_PATH))
 	marked = -1
 	cursor = 0
 	explaining = false
@@ -120,7 +133,6 @@ func _slot_origin(index: int) -> Vector2:
 	return Vector2(SPOTS[index][0],SPOTS[index][1])
 
 func _refresh() -> void:
-	icons.resize(SPOTS.size())
 	for index in SPOTS.size():
 		if _slot_visible(index):
 			icons[index] = _icon(_item(index),index<9)
@@ -136,7 +148,7 @@ func _draw_art() -> void:
 		_draw_mark(2,point)
 		var icon := icons[index]
 		if icon!=null:
-			art.draw_texture(icon,point+((SLOT_SIZE-icon.get_size())*0.5).floor())
+			art.draw_texture(icon,point+(SLOT_SIZE-icon.get_size())*0.5)
 		var item := _item(index)
 		if actions.seed_catalogue.has(str(item)):
 			var number: int = clampi(economy.count(item),0,99)
@@ -145,8 +157,8 @@ func _draw_art() -> void:
 				_draw_mark(3+number/10,point+Vector2(12,22))
 			_draw_mark(3+number%10,point+Vector2(22,22))
 	if marked>=0:
-		_draw_mark(0,_slot_origin(marked))
-	_draw_mark(1,_slot_origin(cursor)+Vector2(12,24))
+		_draw_mark(0,_slot_origin(marked)+SELECTION_OFFSET)
+	_draw_mark(1,_slot_origin(cursor)+CURSOR_OFFSET)
 
 func _draw_mark(index: int, point: Vector2) -> void:
 	art.draw_texture_rect_region(marks,Rect2(point-Vector2(10,0),TILE),Rect2(Vector2(index*TILE.x,0),TILE))
@@ -165,13 +177,18 @@ func _icon(item: int, tool_row: bool) -> Texture2D:
 	if item==0:
 		return null
 	var level: int = economy.levels.get(item,0)
-	var picture: Texture2D = actions.source_item_picture(item+level)
+	var source_id := item+level
+	if icon_cache.has(source_id):
+		return icon_cache[source_id]
+	var picture: Texture2D = actions.source_item_picture(source_id)
 	if picture==null:
 		if tool_row:
 			picture = actions.tool_picture(34,item) if actions.seed_catalogue.has(str(item)) else actions.tool_picture(item,-1,level)
 		else:
 			picture = actions.item_picture(item)
-	return actions.menu_icon(picture)
+	var icon: Texture2D = actions.menu_icon(picture)
+	icon_cache[source_id] = icon
+	return icon
 
 func _explain() -> void:
 	var item := _item(cursor)

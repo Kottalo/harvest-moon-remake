@@ -44,7 +44,7 @@ func drive(facing: int,running: bool,lateral := 0.0) -> Dictionary:
 	player.velocity = Vector3.ZERO
 	player.reset_physics_interpolation()
 	await frames(0.1)
-	key(KEY_SHIFT,running)
+	key(KEY_X,running)
 	key(KEYS[facing],true)
 	var hops := 0
 	var was_hopping := false
@@ -65,7 +65,7 @@ func drive(facing: int,running: bool,lateral := 0.0) -> Dictionary:
 		peak = maxf(peak,player.position.y)
 		max_exceptions = maxi(max_exceptions,player.get_collision_exceptions().size())
 	key(KEYS[facing],false)
-	key(KEY_SHIFT,false)
+	key(KEY_X,false)
 	await frames(0.1)
 	return {"hops":hops,"peak":peak,"time":hop_seconds,"end":player.get_node("CollisionShape3D").global_position,"exceptions":player.get_collision_exceptions().size(),"max_exceptions":max_exceptions}
 func run() -> void:
@@ -118,11 +118,11 @@ func run() -> void:
 		wall.free()
 		# Cancellation must release every body, including after one item is removed.
 		player.hop.cancel();player.position=-DIRS[facing]*0.65+side*0.2+Vector3(0.03,0.001,0);player.velocity=Vector3.ZERO
-		await frames(0.1);key(KEY_SHIFT,true);key(KEYS[facing],true)
+		await frames(0.1);key(KEY_X,true);key(KEYS[facing],true)
 		for tick in Engine.physics_ticks_per_second:
 			await physics_frame;await process_frame
 			if player.hop.active: break
-		key(KEY_SHIFT,false);key(KEYS[facing],false)
+		key(KEY_X,false);key(KEYS[facing],false)
 		if not require_ok(player.hop.active and player.get_collision_exceptions().size()==2,"Cancellation fixture did not enter a multi-item row hop"): return
 		left.free();player.hop.cancel()
 		if not require_ok(player.get_collision_exceptions().is_empty(),"Cancelling left a lateral collision exception"): return

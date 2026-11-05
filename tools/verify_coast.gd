@@ -30,7 +30,7 @@ func _travel(target: float, key: int, running: bool) -> bool:
 	var beach_mesh: RID = world.get_node("Location/Beach/Geometry").mesh.get_rid()
 	var speed: float = world.player.RUN_SPEED if running else world.player.WALK_SPEED
 	_key(key, true)
-	_key(KEY_SHIFT, running)
+	_key(KEY_X, running)
 	for tick in Engine.physics_ticks_per_second * 4:
 		var previous: Vector3 = world.player.position
 		var camera_before: Vector3 = world.camera.position
@@ -54,7 +54,7 @@ func _travel(target: float, key: int, running: bool) -> bool:
 			return false
 		if (key == KEY_LEFT and point.x <= target) or (key == KEY_RIGHT and point.x >= target):
 			_key(key, false)
-			_key(KEY_SHIFT, false)
+			_key(KEY_X, false)
 			return true
 	push_error("Could not traverse the entire beach staircase")
 	quit(1)
