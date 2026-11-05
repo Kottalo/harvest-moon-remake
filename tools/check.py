@@ -12,7 +12,7 @@ GROUPS = {
     "smoke": {"runtime": "NATIVE_CHECK_OK"},
     "camera": {"camera_limits": "CAMERA_LIMITS_OK", "blocked_camera": "BLOCKED_CAMERA_OK"},
     "player": {"collision": "COLLISION_CHECK_OK", "hop_ground": "HOP_GROUND_OK",
-               "tool_switch": "TOOL_SWITCH_OK", "actions": "ACTIONS_CHECK_OK"},
+               "tool_switch": "TOOL_SWITCH_OK", "actions": "ACTIONS_CHECK_OK", "rucksack": "RUCKSACK_OK"},
     "field": {"crops": "CROPS_OK", "item_collision": "ITEM_COLLISION_CHECK_OK",
               "mine_dig": "MINE_DIG_OK"},
     "world": {"door_access": "DOOR_ACCESS_OK", "door_entry": "DOOR_ENTRY_CHECK_OK",

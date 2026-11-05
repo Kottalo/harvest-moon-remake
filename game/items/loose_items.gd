@@ -357,6 +357,9 @@ func _placement_backstep(point: Vector3, facing: Vector3, half_size: Vector2) ->
 	return distance
 
 func release_item(item: int, thrown: bool) -> void:
+	if not catalogue.pictures.has(str(item)):
+		world.economy.message = "丢弃了"+world.economy.item_name(item)
+		return
 	var direction: Vector3 = world.player.actions.DIRECTIONS[world.player.facing]
 	if thrown:
 		var node := _spawn(item,world.player.position+Vector3.UP*0.3,false)

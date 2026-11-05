@@ -28,7 +28,7 @@ func at_door(world, area: int, event_id: int, minute: int, weekday: int, season 
 	return exit
 
 
-func enter_key(pressed: bool, code := KEY_E) -> void:
+func enter_key(pressed: bool, code := KEY_Z) -> void:
 	var event := InputEventKey.new()
 	event.physical_keycode = code
 	event.keycode = code
@@ -37,7 +37,7 @@ func enter_key(pressed: bool, code := KEY_E) -> void:
 	Input.flush_buffered_events()
 
 
-func press_enter(code := KEY_E) -> void:
+func press_enter(code := KEY_Z) -> void:
 	enter_key(true,code)
 	for tick in 2:
 		await physics_frame
@@ -171,7 +171,7 @@ func run() -> void:
 		return
 	world.player.facing = 3
 	world._refresh_hud()
-	if not require_ok(world.hud.text.contains("E 查看 杂货店"),"Nearby sign did not show its interaction hint"):
+	if not require_ok(world.hud.text.contains("Z 查看 杂货店"),"Nearby sign did not show its interaction hint"):
 		return
 	await press_enter()
 	if not require_ok(dialogue.notice_open and paused and dialogue.title.text=="杂货店"
@@ -188,9 +188,9 @@ func run() -> void:
 	if not require_ok(dialogue.notice_open and dialogue.title.text=="马厩告示"
 			and dialogue.reply.text.contains("刷毛"),"An indoor object did not use its own source notice"):
 		return
-	await press_enter(KEY_ENTER)
-	if not require_ok(not dialogue.overlay.visible and not paused,"Enter did not dismiss the indoor notice"):
+	await press_enter(KEY_Z)
+	if not require_ok(not dialogue.overlay.visible and not paused,"Z did not dismiss the indoor notice"):
 		return
 	world.free()
-	print("DOOR_ACCESS_OK: source locks, actual entry and exit, E refusal, outdoor signs and indoor notices")
+	print("DOOR_ACCESS_OK: source locks, actual entry and exit, Z refusal, outdoor signs and indoor notices")
 	quit()

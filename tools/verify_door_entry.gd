@@ -9,7 +9,7 @@ func _frames(count: int) -> void:
 	for tick in count: await physics_frame
 	await process_frame
 
-func _key(pressed: bool, code := KEY_E) -> void:
+func _key(pressed: bool, code := KEY_Z) -> void:
 	var event := InputEventKey.new()
 	event.physical_keycode = code
 	event.keycode = code
@@ -191,5 +191,5 @@ func _run() -> void:
 	print("DOOR_CANCEL_OK: normal collision mask/input restored and old coroutine cancelled")
 	world.queue_free()
 	await process_frame
-	print("DOOR_ENTRY_CHECK_OK: ",Engine.physics_ticks_per_second," Hz; seven exterior/interior single/twin doors via actual E, turn away/back-step/turn back/enter/fade and cancellation")
+	print("DOOR_ENTRY_CHECK_OK: ",Engine.physics_ticks_per_second," Hz; seven exterior/interior single/twin doors via actual Z, turn away/back-step/turn back/enter/fade and cancellation")
 	quit()

@@ -2,15 +2,17 @@ extends CanvasLayer
 ## Tool and seed selection. PlayerActions owns equipment and the show animation.
 var actions
 var seed_count: Callable
+var choose_tool: Callable
 var panel: ColorRect
 var tabs: TabContainer
 var title: Label
 var entries: Dictionary = {}
 
 
-func setup(player_actions, font: Font, available_seeds: Callable) -> void:
+func setup(player_actions, font: Font, available_seeds: Callable, select_tool: Callable) -> void:
 	actions = player_actions
 	seed_count = available_seeds
+	choose_tool = select_tool
 	layer = 40
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	panel = ColorRect.new()
@@ -38,7 +40,7 @@ func setup(player_actions, font: Font, available_seeds: Callable) -> void:
 	tabs = TabContainer.new()
 	rows.add_child(tabs)
 	var hint := Label.new()
-	hint.text = "点击图标装备 · Tab 换页 · 方向键选择，Enter 确认 · I / Esc 关闭"
+	hint.text = "点击图标装备 · Tab 换页 · 方向键选择，Z 确认 · I / X 关闭"
 	rows.add_child(hint)
 	var close := Button.new()
 	close.text = "返回游戏"
@@ -62,7 +64,7 @@ func open() -> void:
 			_add_entry(seeds,actions.seed_catalogue[key].name,34,int(key))
 	for tool: int in actions.TOOL_IDS:
 		if tool != 34:
-			entries[tool].icon = _icon(actions.tool_picture(tool))
+			entries[tool].icon = actions.menu_icon(actions.tool_picture(tool))
 			entries[tool].disabled = not actions.owns_tool(tool)
 	for key: String in actions.seed_catalogue:
 		var seed := int(key)
@@ -73,7 +75,8 @@ func open() -> void:
 	panel.show()
 	get_tree().paused = true
 	set_process_input(true)
-	entries[actions.selected_seed if using_seeds else actions.equipped].grab_focus()
+	var focused: int = actions.selected_seed if using_seeds else actions.equipped
+	entries.get(focused,entries[1]).grab_focus()
 
 
 func _add_tab(label: String) -> GridContainer:
@@ -93,32 +96,21 @@ func _add_entry(grid: GridContainer, label: String, tool: int, seed := -1) -> vo
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.add_theme_constant_override("icon_max_width",28)
 	if seed != -1:
-		button.icon = _icon(actions.tool_picture(tool,seed))
+		button.icon = actions.menu_icon(actions.tool_picture(tool,seed))
 	button.pressed.connect(_select.bind(tool,seed))
 	grid.add_child(button)
 	entries[seed if seed != -1 else tool] = button
 
 
-func _icon(picture: AtlasTexture) -> AtlasTexture:
-	var icon := AtlasTexture.new()
-	icon.atlas = picture.atlas
-	icon.region = picture.region
-	if picture.region.size == Vector2(128,128):
-		# All 35 source tool pictures fit inside this part of their ANI canvas.
-		icon.region = Rect2(picture.region.position + Vector2(46,83),Vector2(36,37))
-	icon.filter_clip = true
-	return icon
-
-
 func _select(tool: int, seed: int) -> void:
 	_close()
-	actions.select_tool(tool,seed)
+	choose_tool.call(seed if seed!=-1 else tool)
 
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
-			KEY_I, KEY_ESCAPE:
+			KEY_I, KEY_X, KEY_ESCAPE:
 				get_viewport().set_input_as_handled()
 				_close()
 			KEY_TAB:

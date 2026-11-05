@@ -13,7 +13,6 @@ var atlas_pages := {}
 var crop_body := StaticBody3D.new()
 var crop_shape := BoxShape3D.new()
 var colliders := {}
-var harvest := {}
 var water_remaining := 100
 var message := ""
 
@@ -121,7 +120,7 @@ func use_tool(tool: int, charge: int, origin: Vector2i) -> void:
 			var crop: Dictionary = data.crops[str(plant.id)]
 			if plant.id == GRASS:
 				if plant.stage == crop.mature:
-					harvest[FODDER] = harvest.get(FODDER,0) + 1
+					world.economy._add(FODDER)
 					after_harvest(index,crop)
 			else:
 				plants.erase(index)
@@ -166,11 +165,6 @@ func pick_crop() -> void:
 		return
 	var actions = world.player.actions
 	if actions.carried_id != 0:
-		if data.produce.has(str(actions.carried_id)):
-			var item: int = actions.carried_id
-			harvest[item] = harvest.get(item,0) + 1
-			message = "已收起 · 该作物共 %d 个" % harvest[item]
-			actions.carried_id = 0
 		return
 	if world.current_area != 0 or world.day_cycle.season == 3:
 		return

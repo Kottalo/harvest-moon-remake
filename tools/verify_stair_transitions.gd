@@ -34,9 +34,9 @@ func _walk_exit(world, area: int, exit: Dictionary, locked: bool) -> bool:
 		if world.current_area!=area or world.npcs.dialogue.notice_open:
 			break
 		if (exit.requires_action or locked) and not pressed and world.nearby_exit.get("index",-1)==exit.index:
-			_key(KEY_E,true)
+			_key(KEY_Z,true)
 			await _frames(1)
-			_key(KEY_E,false)
+			_key(KEY_Z,false)
 			pressed = true
 	_key(movement,false)
 	if locked:

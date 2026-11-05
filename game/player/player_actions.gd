@@ -20,6 +20,9 @@ var charge_ticks := 0.0
 var equipped := 6
 var service_tool := 0
 var equipment_available: Callable
+var quick_switch: Callable
+var item_art
+var item_images := {}
 var upgrade := 0
 var selected_seed := 34
 var _sow_after_show := false
@@ -75,6 +78,8 @@ func busy() -> bool:
 	return not state.is_empty()
 
 func tool_name() -> String:
+	if equipped==0:
+		return "空手"
 	if equipped == 34 and seed_catalogue.has(str(selected_seed)):
 		return seed_catalogue[str(selected_seed)].name + "种子"
 	var index := TOOL_IDS.find(equipped)
@@ -92,18 +97,36 @@ func select_tool(tool: int, seed := -1) -> bool:
 	if seed != -1:
 		if tool != 34 or not seed_catalogue.has(str(seed)):
 			return false
-		selected_seed = seed
-	equipped = tool
-	equipment_selected.emit(tool)
+	set_bag_tool(seed if seed!=-1 else (selected_seed if tool==34 else tool))
 	# player_check_tool_slots: show animation 0x47 for ten source ticks.
 	play("base",71,"show_tool",player.facing)
 	return true
 
-func tool_picture(tool: int, seed := -1) -> Texture2D:
+func set_bag_tool(item: int) -> void:
+	if seed_catalogue.has(str(item)):
+		selected_seed = item
+		equipped = 34
+	else:
+		equipped = item
+	equipment_selected.emit(equipped)
+
+func tool_picture(tool: int, seed := -1, level := -1) -> Texture2D:
 	if tool == 34 and seed != 34 and seed_catalogue.has(str(seed)):
 		return crop_picture_provider.call(seed_catalogue[str(seed)].icon)
-	var item := tool + upgrade if tool <= 25 else tool
+	var item := tool + (upgrade if level<0 else level) if tool <= 25 else tool
 	return _texture(data.tool_pictures[str(item)])
+
+static func menu_icon(picture: Texture2D) -> Texture2D:
+	if picture is not AtlasTexture:
+		return picture
+	var icon := AtlasTexture.new()
+	icon.atlas = picture.atlas
+	icon.region = picture.region
+	if picture.region.size==Vector2(128,128):
+		# The source tool pictures fit this part of their ANI canvas.
+		icon.region = Rect2(picture.region.position+Vector2(46,83),Vector2(36,37))
+	icon.filter_clip = true
+	return icon
 
 func poll_input() -> void:
 	if player.input_locked:
@@ -116,11 +139,8 @@ func poll_input() -> void:
 		elif state == "fishing_wait" and not Input.is_action_pressed("use_tool"):
 			play("fishing", player.facing + 4, "reel")
 		return
-	if Input.is_action_just_pressed("next_tool"):
-		var current := TOOL_IDS.find(equipped)
-		for offset in range(1,TOOL_IDS.size()):
-			if select_tool(TOOL_IDS[(current+offset)%TOOL_IDS.size()]):
-				return
+	if Input.is_action_just_pressed("next_tool") and quick_switch.is_valid() and quick_switch.call():
+		return
 	if Input.is_action_just_pressed("tool_level"):
 		if equipped <= 25:
 			equipment_selected.emit(equipped)
@@ -149,7 +169,7 @@ func play(source: String, animation: int, action: String, start := 0) -> void:
 	_draw()
 
 func start_tool() -> bool:
-	if busy() or carried_id != 0 or player.input_locked or not owns_tool(equipped):
+	if busy() or carried_id != 0 or player.input_locked or equipped==0 or not owns_tool(equipped):
 		return false
 	if equipped <= 25:
 		charge_ticks = 1
@@ -181,7 +201,7 @@ func start_pickup(item: int) -> bool:
 	return true
 
 func start_drop(thrown := false) -> bool:
-	if busy() or carried_id == 0 or player.input_locked or crop_produce.has(carried_id):
+	if busy() or carried_id==0 or player.input_locked or (not thrown and not items.has(str(carried_id))):
 		return false
 	play("base",23+player.facing,"throw" if thrown else "drop")
 	return true
@@ -302,10 +322,11 @@ func update_held(running: bool) -> void:
 		return
 	if showing:
 		held_sprite.texture = tool_picture(equipped,selected_seed)
-	elif crop_produce.has(item):
-		held_sprite.texture = crop_produce[item]
 	else:
-		held_sprite.texture = _texture(items[str(item)].texture)
+		held_sprite.texture = item_picture(item)
+	if held_sprite.texture==null:
+		held_sprite.hide()
+		return
 	held_sprite.material_override.set_shader_parameter("albedo_texture",held_sprite.texture)
 	var group := 0 if showing or pending_item != 0 or state in ["drop","throw"] else (2 if running else 1)
 	var offset: Array = data.item_offsets[0 if showing else group*4+player.facing]
@@ -316,6 +337,25 @@ func update_held(running: bool) -> void:
 	var carrying: bool = carried_id != 0 and state not in ["drop","throw"]
 	var behind: bool = not (showing or carrying or player.facing in [0,3])
 	held_sprite.material_override.set_shader_parameter("sort_bias",0.005 if behind else -0.005)
+
+func item_picture(item: int) -> Texture2D:
+	if crop_produce.has(item):
+		return crop_produce[item]
+	if items.has(str(item)):
+		return _texture(items[str(item)].texture)
+	if item_art==null:
+		item_art = preload("res://game/original_sprites/sprite_library.gd").new()
+		for record: Dictionary in item_art.catalogue.items.values():
+			var variants: Dictionary = record.variants
+			if variants.has("sector") and not variants.sector.is_empty() and not variants.sector[0].is_empty():
+				item_images[int(record.id)] = variants.sector[0][0]
+	if not item_images.has(item):
+		return null
+	var frame = item_images[item]
+	if frame is Dictionary:
+		frame = item_art.frame_texture(frame)
+		item_images[item] = frame
+	return frame
 
 func _texture(path: String) -> Texture2D:
 	if not textures.has(path):

@@ -43,7 +43,7 @@ func run() -> void:
 
 	world._change_area(0,Vector3(-4.68,0,-3.02))
 	player.facing = 1
-	world.farm_field.crops.harvest[65] = 1
+	economy.rucksack.add_item(65)
 	if not check(economy.shipping_near(),"Farm shipping interaction is inaccessible"): return
 	world._interact()
 	if not click("芜菁") or not check(economy.shipped_value==60 and economy.gold==380,"Shipping removed stock without recording native price"): return

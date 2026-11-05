@@ -156,17 +156,17 @@ func interact() -> void:
 		menu.show()
 
 func _draw_menu() -> void:
-	menu_text.text = "今天就休息吗？\n"+("▶ " if menu_selection==0 else "   ")+"睡觉到明天\n"+("▶ " if menu_selection==1 else "   ")+"继续活动\n↑↓ 选择 · E 确定 · Esc 返回"
+	menu_text.text = "今天就休息吗？\n"+("▶ " if menu_selection==0 else "   ")+"睡觉到明天\n"+("▶ " if menu_selection==1 else "   ")+"继续活动\n↑↓ 选择 · Z 确定 · X 返回"
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not menu_open or not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if event.physical_keycode in [KEY_UP,KEY_DOWN,KEY_W,KEY_S]:
+	if event.physical_keycode in [KEY_UP,KEY_DOWN]:
 		menu_selection = 1-menu_selection
 		_draw_menu()
-	elif event.physical_keycode == KEY_ESCAPE:
+	elif event.is_action_pressed("ui_cancel"):
 		close_menu()
-	elif event.physical_keycode in [KEY_E,KEY_ENTER,KEY_SPACE]:
+	elif event.is_action_pressed("ui_accept"):
 		if menu_selection==1:
 			close_menu()
 		else:

@@ -86,33 +86,33 @@ func _run() -> void:
 	world.player.actions.carried_id = 58
 	if not _require(not clock.nearby_bed(),"Bed interaction must reject carried items"): return
 	world.player.actions.carried_id = 0
-	_key(KEY_E,true)
+	_key(KEY_Z,true)
 	await _frames(2)
-	_key(KEY_E,false)
+	_key(KEY_Z,false)
 	if not _require(clock.menu_open and world.player.input_locked,"Physical E did not open the bed menu"): return
-	_key(KEY_ESCAPE,true)
+	_key(KEY_X,true)
 	await _frames(2)
-	_key(KEY_ESCAPE,false)
+	_key(KEY_X,false)
 	if not _require(not clock.menu_open and not world.player.input_locked,"Cancelling sleep must restore control"): return
 	clock.day = 29
 	clock.season = 0
 	clock.weekday = 6
 	clock.minute = 1430
 	clock.elapsed = 0
-	_key(KEY_E,true)
+	_key(KEY_Z,true)
 	await _frames(2)
-	_key(KEY_E,false)
+	_key(KEY_Z,false)
 	await _frames(1)
-	_key(KEY_ENTER,true)
+	_key(KEY_Z,true)
 	await _frames(2)
-	_key(KEY_ENTER,false)
+	_key(KEY_Z,false)
 	if not _require(world.transitioning and clock.sleeping,"Confirming sleep did not start the real transition"): return
 	if not _require(await _wait_wake(world),"Sleep animation/fade sequence did not finish"): return
 	if not _require(bed_arc_height>0.45 and Vector2(bed_arrival.x,bed_arrival.z).distance_to(Vector2(-1.35,0.96))<0.001,"Original 18-tick bedtime arc did not reach the bed"): return
 	if not _require(clock.minute==360 and clock.day==0 and clock.season==1 and clock.weekday==0 and world.current_area==80,"Sleep did not cross midnight/season and wake at 06:00"): return
 	await _frames(5)
 	if not _require(world.player.is_on_floor() and not world.player.input_locked,"Morning player was not grounded/unlocked"): return
-	print("SLEEP_OK: physical E menu, Esc cancel, Enter sleep; original ANI and 18-tick bed arc; spring 30 -> summer 1, 06:00, farmhouse spawn grounded")
+	print("SLEEP_OK: physical Z menu, X cancel, Z sleep; original ANI and 18-tick bed arc; spring 30 -> summer 1, 06:00, farmhouse spawn grounded")
 	world._change_area(0,Vector3.ZERO)
 	clock.day = 29
 	clock.season = 3

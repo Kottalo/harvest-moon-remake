@@ -1,5 +1,5 @@
 extends SceneTree
-## Physical Q input: original show-tool body/mark, ten source ticks, no tool-use effect.
+## Physical A input: original show-tool body/mark, ten source ticks, no tool-use effect.
 var world
 var effects := 0
 func _initialize() -> void: run.call_deferred()
@@ -41,16 +41,20 @@ func run() -> void:
 	for facing in 4:
 		for index in action.TOOL_IDS.size():
 			action.equipped = action.TOOL_IDS[posmod(index-1,action.TOOL_IDS.size())]
+			var bag = world.economy.rucksack
+			bag.next_tool = 0
+			bag.tools[0] = action.selected_seed if action.TOOL_IDS[index]==34 else action.TOOL_IDS[index]
+			bag.tools[1] = 0
 			action.upgrade = index%5
 			world.player.facing = facing
 			var before: Vector3 = world.player.position
 			var began := Engine.get_physics_frames()
-			key(KEY_Q,true)
+			key(KEY_A,true)
 			await frames(1)
-			key(KEY_Q,false)
+			key(KEY_A,false)
 			await frames(1)
 			var id: int = action.equipped+action.upgrade if action.equipped<=25 else action.equipped
-			if not require_ok(action.state=="show_tool" and action.bank=="base" and action.range_id==71 and action.frame==facing and action.equipped==action.TOOL_IDS[index],"Q did not select and play original show-tool range"): return
+			if not require_ok(action.state=="show_tool" and action.bank=="base" and action.range_id==71 and action.frame==facing and action.equipped==action.TOOL_IDS[index],"A did not select and play original show-tool range"): return
 			if not require_ok(action.held_sprite.visible and action.held_sprite.texture.resource_path==action.data.tool_pictures[str(id)] and action.held_sprite.offset==Vector2(-8,59) and action.held_sprite.material_override.get_shader_parameter("sort_bias")<0,"Tool picture, body-relative offset or front layering is wrong"): return
 			key(KEY_RIGHT,true)
 			if facing==0 and index==1 and DisplayServer.get_name()!="headless":
@@ -64,18 +68,18 @@ func run() -> void:
 			var seconds := float(Engine.get_physics_frames()-began)/Engine.physics_ticks_per_second
 			if not require_ok(seconds>=0.3 and seconds<=0.37 and not moved_while_busy and not action.held_sprite.visible,"Showing tool has wrong duration, allows motion or leaves picture visible: "+str([seconds,world.player.position,before])): return
 			checks += 1
-	# All metal-tier icons must be distinct, hydrated native images; carry/input lock refuse Q.
+	# All metal-tier icons must be distinct, hydrated native images; carry/input lock refuse A.
 	for id in range(1,26):
 		if not require_ok(ResourceLoader.exists(action.data.tool_pictures[str(id)]),"Missing metal-tier tool picture"): return
 	for locked in [false,true]:
 		action.carried_id = 58 if not locked else 0
 		world.player.input_locked = locked
 		var previous: int = action.equipped
-		key(KEY_Q,true)
+		key(KEY_A,true)
 		await frames(2)
-		key(KEY_Q,false)
+		key(KEY_A,false)
 		await frames(2)
-		if not require_ok(action.equipped==previous and not action.busy(),"Q switched while carrying or input-locked"): return
+		if not require_ok(action.equipped==previous and not action.busy(),"A switched while carrying or input-locked"): return
 	world.player.input_locked = false
 	action.carried_id = 0
 	var picker = world.tool_picker
@@ -117,7 +121,7 @@ func run() -> void:
 	_picker_key(viewport,KEY_I)
 	if not require_ok(not paused and not picker.panel.visible,"I opened while carrying an item"): return
 	if not require_ok(effects==0 and world.camera.projection==Camera3D.PROJECTION_ORTHOGONAL and not debug_collisions_hint,"Switching used a tool, changed the orthographic camera or enabled colliders"): return
-	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical Q selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders; modal tool and seed selection, icon crop, tabs, pause and cancellation")
+	print("TOOL_SWITCH_OK: ",Engine.physics_ticks_per_second," Hz; ",checks," physical A selections/facings, source 0x47 pose and ten-tick hold, correct item PNG/offset/front order, input lock, no tool effects; orthographic/no debug colliders; modal tool and seed selection, icon crop, tabs, pause and cancellation")
 	viewport.free()
 	quit()
 

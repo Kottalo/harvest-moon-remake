@@ -62,9 +62,9 @@ func _sow_from_picker(seed: int, target: int) -> bool:
 	world.tool_picker.entries[seed].pressed.emit()
 	await _ticks(2)
 	if not _require(actions.state == "show_tool" and not paused,"Seed picker did not equip the seed bag"): return false
-	_key(KEY_SPACE,true)
+	_key(KEY_C,true)
 	await _ticks(2)
-	_key(KEY_SPACE,false)
+	_key(KEY_C,false)
 	var poses := {}
 	var expected_animation: int = crops.data.seeds[str(seed)].animation
 	for tick in ceili(Engine.physics_ticks_per_second*1.2):
@@ -75,7 +75,7 @@ func _sow_from_picker(seed: int, target: int) -> bool:
 			if not _require(crops.plants.is_empty(),"Ground changed before the original sowing pose completed"): return false
 	world.player.set_physics_process(false)
 	return _require(poses.size()==3 and crops.plants.has(target) and field.pixels[target]==3,
-		"Space during the equip pose lost the sowing action or source soil update: "+str(seed))
+		"C during the equip pose lost the sowing action or source soil update: "+str(seed))
 
 func _dawn() -> void:
 	world.day_cycle.minute = 359
@@ -103,12 +103,12 @@ func _run() -> void:
 	_position(ORIGIN)
 	world.player.set_physics_process(true)
 	await _ticks(5)
-	_key(KEY_SPACE,true)
+	_key(KEY_C,true)
 	await _ticks(2)
-	_key(KEY_SPACE,false)
+	_key(KEY_C,false)
 	await _ticks(Engine.physics_ticks_per_second)
 	world.player.set_physics_process(false)
-	if not _require(field.states[target]==field.TILLED and not actions.busy(),"Physical Space did not hoe the plot used for sowing"):
+	if not _require(field.states[target]==field.TILLED and not actions.busy(),"Physical C did not hoe the plot used for sowing"):
 		return
 	if not _require(field.material.get_shader_parameter("crop_ground") is Texture2D,"The original sown soil texture is not bound"):
 		return
@@ -146,7 +146,7 @@ func _run() -> void:
 			"Harvest was missing from history or a day change lost the earlier sowing"):
 		return
 	actions.interact_requested.emit()
-	if not _require(actions.carried_id == 0 and crops.harvest.get(65,0) == 1,"Harvest pouch did not receive crop"):
+	if not _require(actions.carried_id == 0 and world.economy.take(65),"Rucksack did not receive crop"):
 		return
 	var ids := range(34,55)
 	ids.append(377)
@@ -182,7 +182,7 @@ func _run() -> void:
 		if not _require(crops.plants[target].stage == row.mature,"Wrong maturation duration for seed "+str(seed)):
 			return
 		if seed == 54:
-			if not _tool(1) or not _require(crops.harvest.get(104,0) == 1 and crops.plants[target].stage == 1,"Mature grass did not make fodder"):
+			if not _tool(1) or not _require(world.economy.count(104) == 1 and crops.plants[target].stage == 1,"Mature grass did not make fodder"):
 				return
 			world.day_cycle.season = 2
 			world.day_cycle.day = 29
@@ -193,7 +193,10 @@ func _run() -> void:
 			actions.interact_requested.emit()
 			if not _finish() or not _require(actions.carried_id > 0,"Mature crop did not harvest: "+str(seed)):
 				return
+			var harvested: int = actions.carried_id
 			actions.interact_requested.emit()
+			if not _require(actions.carried_id==0 and world.economy.take(harvested),"Rucksack did not receive crop: "+str(seed)):
+				return
 			if not _require(crops.plants.has(target) == (row.regrow >= 0),"Wrong regrowth for seed "+str(seed)):
 				return
 			if row.regrow >= 0:
@@ -208,5 +211,5 @@ func _run() -> void:
 				_dawn()
 				if not _require(not crops.plants.has(target),"Season rollover left a seasonal crop alive"):
 					return
-	print("CROPS_OK: physical hoe, picker + Space, 21 seed tools sow in spring with all 3 source poses, off-season withers at dawn, 22 crop records, water, dry day, sleep, produce harvests, fodder, regrowth and seasons")
+	print("CROPS_OK: physical hoe, picker + C, 21 seed tools sow in spring with all 3 source poses, off-season withers at dawn, 22 crop records, water, dry day, sleep, produce harvests, fodder, regrowth and seasons")
 	quit()

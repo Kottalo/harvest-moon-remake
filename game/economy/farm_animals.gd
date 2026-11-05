@@ -55,7 +55,7 @@ func _nearby() -> Dictionary:
 
 func prompt() -> String:
 	var record := _nearby()
-	return "E 照料"+NAMES[record.kind] if not record.is_empty() else ""
+	return "Z 照料"+NAMES[record.kind] if not record.is_empty() else ""
 
 func interact() -> bool:
 	var record := _nearby()
@@ -76,11 +76,8 @@ func interact() -> bool:
 func _feed(record: Dictionary) -> void:
 	var feed := 105 if record.kind=="chicken" else 104
 	if not economy.take(feed):
-		var harvest: Dictionary = economy.world.farm_field.crops.harvest
-		if feed!=104 or int(harvest.get(feed,0))==0:
-			economy.dialogue.show_choices(NAMES[record.kind],"饲料不足。",[["结束",economy.dialogue.close]])
-			return
-		harvest[feed] -= 1
+		economy.dialogue.show_choices(NAMES[record.kind],"饲料不足。",[["结束",economy.dialogue.close]])
+		return
 	record.fed = true
 	economy.world.record_player_action("喂了"+NAMES[record.kind])
 	interact()
@@ -97,12 +94,11 @@ func use_tool(tool: int) -> void:
 	_collect(record,139 if tool==26 else 145)
 
 func _collect(record: Dictionary, item: int) -> void:
-	if not record.product:
+	if not record.product or not economy.receive(item):
 		return
 	record.product = false
 	if item==145:
 		record.cooldown = 7
-	economy._add(item)
 	economy.message = "获得"+economy.item_name(item)
 	economy.world.record_player_action("获得了"+economy.item_name(item))
 	if economy.dialogue.overlay.visible:

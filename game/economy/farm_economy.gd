@@ -23,7 +23,10 @@ var world
 var data: Dictionary
 var shops: Dictionary
 var gold := 500
+var rucksack_delivery := 0
+# Ownership, seeds and farm supply counters use their own native categories.
 var stock := {34:1}
+var rucksack := preload("res://game/items/rucksack.gd").new()
 var shipped_value := 0
 var last_income := 0
 var levels := {}
@@ -52,6 +55,7 @@ func setup(owner_world) -> void:
 	fishing.economy = self
 	add_child(fishing)
 	world.player.actions.equipment_available = can_equip
+	world.player.actions.quick_switch = rucksack.cycle_tool.bind(world.player.actions)
 
 func buy_price(item: int) -> int:
 	return int(data.prices.get(str(item),[0,0])[0])
@@ -60,6 +64,8 @@ func sell_price(item: int) -> int:
 	return int(data.prices.get(str(item),[0,0])[1])
 
 func item_name(item: int) -> String:
+	if world.loose_items.HISTORY_NAMES.has(item):
+		return world.loose_items.HISTORY_NAMES[item]
 	var seeds: Dictionary = world.player.actions.seed_catalogue
 	if seeds.has(str(item)):
 		return seeds[str(item)].name+"种子"
@@ -80,6 +86,11 @@ func offer_for(id: String) -> Dictionary:
 func goods_for(id: String) -> Array:
 	var offer := offer_for(id)
 	var goods: Array = offer.get("goods",[]).duplicate()
+	if id=="jeff":
+		if rucksack.capacity!=2:
+			goods.erase(109.0)
+		if rucksack.capacity!=4 or rucksack_delivery>0:
+			goods.erase(110.0)
 	if offer.get("seasonal_seeds",false):
 		var seasonal := [[34,35,36],[39,40,41],[44,45,46],[]]
 		goods.append_array(seasonal[world.day_cycle.season])
@@ -93,10 +104,8 @@ func buy(id: String, item: int) -> String:
 	var price := buy_price(item)
 	if price<=0 and item!=171:
 		return "这件商品暂时无法购买。"
-	if item in SINGLE_PURCHASE and count(item)>0:
+	if item in SINGLE_PURCHASE and (count(item)>0 or world.player.actions.carried_id==item):
 		return "你已经拥有这件物品。"
-	if item==110 and count(109)==0:
-		return "请先购买中背包。"
 	if item==319 and not _has_animal("chicken"):
 		return "鸡舍有鸡后才能订购。"
 	if ANIMALS.has(item):
@@ -106,11 +115,19 @@ func buy(id: String, item: int) -> String:
 			return "已经没有空畜栏。"
 	if gold<price:
 		return "钱不够，需要 %d G。" % price
+	if item!=171 and not ANIMALS.has(item) and not _add(item):
+		return "背包已满。"
 	gold -= price
+	if world.player.actions.seed_catalogue.has(str(item)) and rucksack.active_tool(world.player.actions)!=item and not rucksack.tools.has(item):
+		var slot := rucksack.tools.find(0)
+		if slot>=0 and slot<rucksack.capacity:
+			rucksack.tools[slot] = item
 	if ANIMALS.has(item):
 		animals.append({"kind":ANIMALS[item],"age":0,"fed":false,"product":false,"cooldown":0})
-	elif item!=171:
-		_add(item)
+	elif item in [109,110]:
+		rucksack.capacity = 4 if item==109 else 8
+		if item==109:
+			rucksack_delivery = 10
 	world.record_player_action("购买了"+item_name(item))
 	return "已购买%s。剩余 %d G。" % [item_name(item),gold]
 
@@ -118,15 +135,41 @@ func can_equip(tool: int) -> bool:
 	return tool in TOOL_BASES or tool==34 or count(tool)>0
 
 func count(item: int) -> int:
-	return int(stock.get(item,0))
+	return int(stock.get(item,0))+rucksack.items.count(item)
 
-func _add(item: int, amount := 1) -> void:
-	stock[item] = count(item)+amount
+func _add(item: int) -> bool:
+	if item in [26,27,28,29,30,31,32,56,57,63,100,104,105,109,110,319] or world.player.actions.seed_catalogue.has(str(item)):
+		stock[item] = int(stock.get(item,0))+1
+		return true
+	return rucksack.add_item(item)
 
 func take(item: int) -> bool:
-	if count(item)==0:
+	if int(stock.get(item,0))>0:
+		stock[item] -= 1
+		return true
+	return rucksack.take_item(item)
+
+func receive(item: int) -> bool:
+	if _add(item):
+		return true
+	var actions = world.player.actions
+	if actions.carried_id!=0:
 		return false
-	_add(item,-1)
+	actions.carried_id = item
+	actions.update_held(false)
+	return true
+
+func stow_held() -> bool:
+	var actions = world.player.actions
+	var item: int = actions.carried_id
+	if item==0 or actions.items.has(str(item)):
+		return false
+	if _add(item):
+		actions.carried_id = 0
+		actions.held_sprite.hide()
+		message = "已收入背包 · "+item_name(item)
+	else:
+		message = "背包已满。"
 	return true
 
 func _mined(item: int) -> void:
@@ -135,8 +178,8 @@ func _mined(item: int) -> void:
 		gold += amount
 		message = "挖到 %d G" % amount
 	else:
-		_add(item)
-		message = "挖到"+item_name(item)
+		if receive(item):
+			message = "挖到"+item_name(item)
 
 func _has_animal(kind: String) -> bool:
 	return animals.any(func(record): return record.kind==kind)
@@ -166,7 +209,7 @@ func upgrade_tool(tool: int, tier: int) -> String:
 	if count(ore)==0 or gold<UPGRADE_COST[tier-1]:
 		return "需要%s和 %d G。" % [item_name(ore),UPGRADE_COST[tier-1]]
 	gold -= UPGRADE_COST[tier-1]
-	_add(ore,-1)
+	take(ore)
 	order = {"tool":tool,"tier":tier,"days":2}
 	world.player.actions.service_tool = tool
 	world.record_player_action("委托赛巴拉升级农具")
@@ -187,6 +230,7 @@ func collect_upgrade() -> String:
 	return "升级完成。"
 
 func _new_day(_previous_season: int) -> void:
+	rucksack_delivery = maxi(0,rucksack_delivery-1)
 	if not order.is_empty():
 		order.days = maxi(0,int(order.days)-1)
 	for animal in animals:
@@ -232,15 +276,10 @@ func ship(item: int) -> String:
 	if price<=0:
 		return "这个物品不能出货。"
 	var actions = world.player.actions
-	var harvest: Dictionary = world.farm_field.crops.harvest
 	if actions.carried_id==item:
 		actions.carried_id = 0
 		actions.held_sprite.hide()
-	elif int(harvest.get(item,0))>0:
-		harvest[item] -= 1
-	elif count(item)>0:
-		_add(item,-1)
-	else:
+	elif not take(item):
 		return "没有这件物品。"
 	shipped_value += price
 	world.record_player_action("出货了"+item_name(item))
@@ -321,10 +360,10 @@ func show_shipping() -> void:
 		dialogue.show_notice("出货箱",ship(actions.carried_id))
 		return
 	var options: Array = []
-	var harvest: Dictionary = world.farm_field.crops.harvest
 	var available := stock.duplicate()
-	for item in harvest:
-		available[item] = int(available.get(item,0))+int(harvest[item])
+	for item in rucksack.items:
+		if item!=0:
+			available[item] = count(item)
 	for item in available:
 		if int(available[item])>0 and sell_price(item)>0:
 			options.append(["%s × %d · %d G" % [item_name(item),available[item],sell_price(item)],_ship_choice.bind(item)])

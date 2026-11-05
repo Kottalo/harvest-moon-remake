@@ -15,8 +15,8 @@ func frames(count: int) -> void:
 		await process_frame
 func key(pressed: bool) -> void:
 	var event := InputEventKey.new()
-	event.physical_keycode = KEY_SPACE
-	event.keycode = KEY_SPACE
+	event.physical_keycode = KEY_C
+	event.keycode = KEY_C
 	event.pressed = pressed
 	Input.parse_input_event(event)
 	Input.flush_buffered_events()
@@ -90,7 +90,7 @@ func run() -> void:
 				if not world.player.actions.busy(): break
 				await frames(1)
 			var index: int = [65,54,45,56][facing]
-			if not require_ok(world.mine_field.states[str(area)][index]==255 and count_dug(str(area))==facing+1,"Physical Space hoe did not dig exactly the source-facing cell: "+str([area,facing])): return
+			if not require_ok(world.mine_field.states[str(area)][index]==255 and count_dug(str(area))==facing+1,"Physical C hoe did not dig exactly the source-facing cell: "+str([area,facing])): return
 			if facing==0 and DisplayServer.get_name()!="headless":
 				if not await reference_pixels(str(area)): return
 		if not require_ok(geometry.mesh.get_rid()==original_mesh and world.mine_field.textures[str(area)]==texture,"Digging rebuilt the mine mesh or state texture"): return
@@ -122,7 +122,7 @@ func run() -> void:
 		world._change_area(0,Vector3.ZERO)
 		world._change_area(area,Vector3(0.2,0.01,0.2))
 		if not require_ok(count_dug(str(area))==5 and world.mine_field.textures[str(area)]==texture,"Mine dig cells did not persist on reload"): return
-		print("MINE_DIG_AREA_OK: ",area," four facings, real Space, single-cell charged action, winter, blockers/bounds, repeat/reload, stable mesh/texture")
+		print("MINE_DIG_AREA_OK: ",area," four facings, real C, single-cell charged action, winter, blockers/bounds, repeat/reload, stable mesh/texture")
 	world._change_area(68,Vector3.ZERO)
 	if not require_ok(world.mine_field.states.is_empty(),"Leaving through an original outdoor entrance did not reset the mine visit"): return
 	world._change_area(234,Vector3(0.2,0.01,0.2))

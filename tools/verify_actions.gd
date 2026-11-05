@@ -98,9 +98,9 @@ func _run() -> void:
 	world._change_area(0,weed.position-Vector3(0,0,0.224)+Vector3.UP*0.05)
 	world.player.facing = 0
 	await _frames(20)
-	_key(KEY_E,true)
+	_key(KEY_Z,true)
 	await _frames(2)
-	_key(KEY_E,false)
+	_key(KEY_Z,false)
 	await _frames(30)
 	if not _require(action.carried_id==64 and not weed.active and action.held_sprite.visible,"Real pickup input did not transfer the source weed into the hand"):
 		return
@@ -109,9 +109,9 @@ func _run() -> void:
 	_key(KEY_RIGHT,false)
 	if not _require(action.range_id==18 and action.carried_id==64,"Carry walking did not use source range 15+facing"):
 		return
-	_key(KEY_E,true)
+	_key(KEY_Z,true)
 	await _frames(2)
-	_key(KEY_E,false)
+	_key(KEY_Z,false)
 	await _frames(45)
 	if not _require(action.carried_id==0 and world.loose_items.flights.is_empty(),"Release/throw did not clear the hand and finish its source fall"):
 		return
@@ -136,18 +136,18 @@ func _run() -> void:
 	for item in world.loose_items.batches:
 		var mesh: MultiMesh = world.loose_items.batches[item].mesh
 		batch_ids[item] = [mesh.get_instance_id(),mesh.instance_count]
-	_key(KEY_E,true)
+	_key(KEY_Z,true)
 	await _frames(2)
-	_key(KEY_E,false)
+	_key(KEY_Z,false)
 	await _frames(30)
 	if not _require(action.carried_id==58 and int(world.loose_items.field_cells[stone.cell])==0x167,"Stone pickup did not free its original field cell"):
 		return
 	var planned: Dictionary = world.loose_items._placement(58)
 	if not _require(not planned.get("blocked",false),"Stone has no valid grid-centred placement target"):
 		return
-	_key(KEY_E,true)
+	_key(KEY_Z,true)
 	await _frames(2)
-	_key(KEY_E,false)
+	_key(KEY_Z,false)
 	await _frames(30)
 	var grid := Vector2((planned.position.x+4.2)/0.4,(planned.position.z+1.4)/0.4)
 	if not _require(grid.distance_to(grid.round())<0.0001,"Actual E drop missed the visible soil grid centres"):

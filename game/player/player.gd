@@ -134,14 +134,18 @@ func has_walkable_ground(motion: Vector3) -> bool:
 
 func _setup_input() -> void:
 	var keys := {
-		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
-		"move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
-		"run": [KEY_SHIFT], "interact": [KEY_E, KEY_ENTER],
-		"use_tool": [KEY_SPACE, KEY_X], "next_tool": [KEY_Q], "tool_level": [KEY_R], "refill_can": [KEY_G]
+		"move_left": [KEY_LEFT], "move_right": [KEY_RIGHT],
+		"move_up": [KEY_UP], "move_down": [KEY_DOWN],
+		"run": [KEY_SHIFT], "interact": [KEY_Z], "backpack": [KEY_SPACE],
+		"use_tool": [KEY_C], "next_tool": [KEY_A], "tool_level": [KEY_R], "refill_can": [KEY_G],
+		"ui_accept": [KEY_Z], "ui_cancel": [KEY_X, KEY_ESCAPE]
 	}
 	for action in keys:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
+		for old_event in InputMap.action_get_events(action):
+			if old_event is InputEventKey:
+				InputMap.action_erase_event(action,old_event)
 		for key in keys[action]:
 			var event := InputEventKey.new()
 			event.physical_keycode = key

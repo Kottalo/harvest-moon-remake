@@ -61,7 +61,7 @@ func run() -> void:
 	# Activate the native popup's index_pressed path; headless windows have no OS focus.
 	for index in [1,2,3,4,0]:
 		debug.selector.grab_focus()
-		await tap(KEY_ENTER)
+		await tap(KEY_Z)
 		if not require_ok(debug.selector.get_popup().visible,"Native time selector did not open"): return
 		debug.selector.get_popup().index_pressed.emit(index)
 		debug.selector.get_popup().hide()
@@ -82,7 +82,7 @@ func run() -> void:
 		if not require_ok(brighter==3,"Actual GPU scene did not darken under the night preview"): return
 		print("DAY_DEBUG_GPU_OK: three real scene samples darken; panel remains above the colour filter")
 	# F1 must also work while the native dropdown owns keyboard focus.
-	await tap(KEY_ENTER)
+	await tap(KEY_Z)
 	key(KEY_F1)
 	key(KEY_F1,false)
 	await frames(2)

@@ -169,8 +169,8 @@ func greet() -> void:
 func prompt() -> String:
 	var counter = world.economy.counter_actor()
 	if counter!=null:
-		return "E 在柜台购物"
+		return "Z 在柜台购物"
 	var actor = _nearby()
 	if actor==null:
 		return ""
-	return "E 与%s%s" % [actor.display_name,"交谈" if world.economy.offer_for(str(actor.name)).is_empty() else "互动"]
+	return "Z 与%s%s" % [actor.display_name,"交谈" if world.economy.offer_for(str(actor.name)).is_empty() else "互动"]

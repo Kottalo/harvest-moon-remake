@@ -28,7 +28,7 @@ func _physics_process(delta: float) -> void:
 			economy.message = "鱼漂没有落在可钓鱼的水面。"
 			return
 		spot = SPOT_KIND.get(economy.world.current_area,4)
-		economy.message = "按住工具键等鱼咬钩。"
+		economy.message = "按住 C 等鱼咬钩。"
 		_reset_wait()
 	if cast_point==Vector3.INF:
 		return
@@ -43,7 +43,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if randi_range(0,99)<(40 if actions.equipped==57 else 20):
 		pull = (5+randi_range(0,9 if spot==3 else 24))/30.0
-		economy.message = "鱼咬钩了！松开工具键"
+		economy.message = "鱼咬钩了！松开 C"
 	else:
 		_reset_wait()
 
@@ -55,7 +55,8 @@ func finish() -> void:
 	if item==0:
 		economy.message = "没有钓到东西。"
 		return
-	economy._add(item)
+	if not economy.receive(item):
+		return
 	economy.message = "钓到了"+economy.item_name(item)
 	economy.world.record_player_action(economy.message)
 

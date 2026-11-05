@@ -118,9 +118,9 @@ func run() -> void:
 	await frames(Engine.physics_ticks_per_second/2)
 	key(KEY_LEFT,false)
 	await frames(8)
-	key(KEY_E,true)
+	key(KEY_Z,true)
 	await frames(2)
-	key(KEY_E,false)
+	key(KEY_Z,false)
 	if not require_ok(world.transitioning and world.player.door_passage,"Standing at an open indoor door could not re-enter via actual E"): return
 	indoor.event = source_event
 	print("DOOR_EXIT_RETURN_OK: stationary E re-enters an open door at the native walkability boundary")

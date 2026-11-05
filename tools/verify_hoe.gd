@@ -1,5 +1,5 @@
 extends SceneTree
-## Real Space-key hoe swings, source ranges and persistent soil; runs offscreen or headless.
+## Real C-key hoe swings, source ranges and persistent soil; runs offscreen or headless.
 var world
 var field
 var viewport: SubViewport
@@ -23,8 +23,8 @@ func _require(ok: bool,message: String) -> bool:
 
 func _key(pressed: bool) -> void:
 	var event := InputEventKey.new()
-	event.physical_keycode = KEY_SPACE
-	event.keycode = KEY_SPACE
+	event.physical_keycode = KEY_C
+	event.keycode = KEY_C
 	event.pressed = pressed
 	Input.parse_input_event(event)
 	Input.flush_buffered_events()
@@ -52,12 +52,12 @@ func _swing(facing: int,level: int) -> bool:
 	action.upgrade = level
 	_key(true)
 	await _frames(2)
-	if not _require(action.state=="charge","Space did not start charging the hoe"): return false
+	if not _require(action.state=="charge","C did not start charging the hoe"): return false
 	action.advance(level*20.0/30.0)
 	if not _require(field.states.count(field.TILLED)==0,"Ground changed during charge instead of after the swing"): return false
 	_key(false)
 	await _frames(1)
-	if not _require(action.state=="swing","Releasing Space did not start the source hoe swing"): return false
+	if not _require(action.state=="swing","Releasing C did not start the source hoe swing"): return false
 	return await _settle_result()
 
 func _run() -> void:
@@ -96,7 +96,7 @@ func _run() -> void:
 			# Dummy rendering has no GPU texture readback; the isolated GPU run checks it.
 			var uploaded: bool = DisplayServer.get_name()=="headless" or field.state_texture.get_image().get_data()==field.pixels
 			if not _require(not world.player.input_locked and uploaded,"Result did not release input or upload soil pixels: "+str([world.player.input_locked,uploaded])): return
-	print("HOE_INPUT_OK: ",Engine.physics_ticks_per_second," Hz; real Space down/up, four facings x five tiers, source lengths 1/2/3/4/6, no charge-time mutation")
+	print("HOE_INPUT_OK: ",Engine.physics_ticks_per_second," Hz; real C down/up, four facings x five tiers, source lengths 1/2/3/4/6, no charge-time mutation")
 	_reset()
 	world.player.facing = 3
 	var blocked := ORIGIN+Vector2i(2,0)
@@ -196,5 +196,5 @@ func _gpu_effect() -> bool:
 			var old := before.get_pixelv(pixel)
 			if Vector3(a.r-old.r,a.g-old.g,a.b-old.b).length()>0.05: changed += 1
 	if not _require(changed>=5 and worst<0.04,"Hoe ground effect is invisible or differs from source CLUT/UV: "+str([changed,worst])): return false
-	print("HOE_GPU_OK: actual Space swing visibly changes ground; ",changed,"/9 samples differ; source tilled quad/CLUT pixel comparison max error=",worst)
+	print("HOE_GPU_OK: actual C swing visibly changes ground; ",changed,"/9 samples differ; source tilled quad/CLUT pixel comparison max error=",worst)
 	return true

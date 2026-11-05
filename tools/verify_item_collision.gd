@@ -412,8 +412,8 @@ func _crowded_pickup_return(_arena: Node3D) -> bool:
 
 func _interact_key(pressed: bool) -> void:
 	var event := InputEventKey.new()
-	event.physical_keycode = KEY_E
-	event.keycode = KEY_E
+	event.physical_keycode = KEY_Z
+	event.keycode = KEY_Z
 	event.pressed = pressed
 	Input.parse_input_event(event)
 	Input.flush_buffered_events()

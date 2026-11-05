@@ -24,6 +24,7 @@ var farm_field
 var mine_field
 var economy
 var tool_picker
+var rucksack_menu
 var npcs
 var history := WorldHistory.new()
 
@@ -112,7 +113,10 @@ func _ready() -> void:
 	economy.setup(self)
 	tool_picker = preload("res://game/player/tool_picker.gd").new()
 	add_child(tool_picker)
-	tool_picker.setup(player.actions,ui_font,economy.count)
+	tool_picker.setup(player.actions,ui_font,economy.count,func(item: int): return economy.rucksack.choose_tool(player.actions,item))
+	rucksack_menu = preload("res://game/items/rucksack_menu.gd").new()
+	add_child(rucksack_menu)
+	rucksack_menu.setup(economy,ui_font)
 	_refresh_hud()
 	_configure_camera_limits()
 	_update_camera()
@@ -173,7 +177,7 @@ func _set_overview() -> void:
 	camera.show_overview(get_node("Location"))
 
 func _refresh_hud() -> void:
-	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · E 交互 · Space/X 工具 · I 工具栏 · Q 快切 · R 选种 · Tab 全景"
+	var text := str(world[str(current_area)].name) + " · ↑东北 ↓西南 ←西北 →东南\nShift 跑步 · Z 交互 · C 工具 · 空格 背包 · A 换工具 · I 工具箱 · Tab 全景"
 	text += "\n%d G · " % economy.gold + player.actions.tool_name()
 	if player.actions.equipped == 34:
 		text += " · R 选种"
@@ -184,24 +188,24 @@ func _refresh_hud() -> void:
 	if player.actions.state == "charge":
 		text += " · 蓄力 " + str(mini(int(player.actions.charge_ticks/20),player.actions.upgrade))
 	if player.actions.carried_id != 0:
-		if player.actions.crop_produce.has(player.actions.carried_id):
-			text += " · E 收入收成袋"
+		if player.actions.items.has(str(player.actions.carried_id)):
+			text += " · Z / C 放下或丢弃 · Shift+C 投掷"
 		else:
-			text += " · E / Space 放下或丢弃 · Shift+Space 投掷"
+			text += " · Z 收入背包 · Shift+C 丢弃"
 	if not nearby_exit.is_empty():
 		var destination: String = world[str(int(nearby_exit.target))].name
-		text += "\nE 查看 " + destination + " · 门锁着" if nearby_exit_locked else "\nE 进入 " + destination
+		text += "\nZ 查看 " + destination + " · 门锁着" if nearby_exit_locked else "\nZ 进入 " + destination
 	elif mine_field.ladder_near():
-		text += "\nE 下到矿洞第 %d 层" % (mine_field.depth+2)
+		text += "\nZ 下到矿洞第 %d 层" % (mine_field.depth+2)
 	elif economy.shipping_near():
-		text += "\nE 出货"
+		text += "\nZ 出货"
 	elif day_cycle != null and day_cycle.nearby_bed():
-		text += "\nE 床边休息"
+		text += "\nZ 床边休息"
 	elif npcs != null:
 		var notice := _notice_ahead()
 		var prompt: String = economy.livestock.prompt()
 		if prompt.is_empty():
-			prompt = "E 查看 " + notice[0] if not notice.is_empty() else npcs.prompt()
+			prompt = "Z 查看 " + notice[0] if not notice.is_empty() else npcs.prompt()
 		if not prompt.is_empty():
 			text += "\n" + prompt
 	if not economy.message.is_empty():
@@ -233,6 +237,8 @@ func _interact() -> void:
 			return
 		if economy.livestock.interact():
 			return
+	if economy.stow_held():
+		return
 	loose_items.interact()
 	day_cycle.interact()
 	farm_field.crops.pick_crop()
@@ -397,7 +403,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if event.physical_keycode == KEY_I:
+	if event.is_action_pressed("backpack"):
+		rucksack_menu.open()
+		get_viewport().set_input_as_handled()
+	elif event.physical_keycode == KEY_I:
 		tool_picker.open()
 		get_viewport().set_input_as_handled()
 	elif event.keycode == KEY_TAB:
