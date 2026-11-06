@@ -1,4 +1,4 @@
-"""Bake USA item prices and shipping-box interaction zones."""
+"""Bake USA item prices, storage rules and shipping-box interaction zones."""
 import argparse
 import json
 import re
@@ -24,9 +24,19 @@ def scene_offsets():
 def bake(disc, ids, offsets):
     table = (SOURCE / "main/game/farm_tables.c").read_text().split("static ItemInfo item_info", 1)[1].split("};", 1)[0]
     prices = {}
-    for key, buy, sell in re.findall(r"\[(ITEM_\w+)\]\s*=\s*\{[^\n{]+\{[^}]+\},\s*-?\d+,\s*(-?\d+),\s*(-?\d+),", table):
-        if key in ids and (int(buy) > 0 or int(sell) > 0):
-            prices[str(ids[key])] = [int(buy), int(sell)]
+    stowable = []
+    pattern = (r"\[(ITEM_\w+)\]\s*=\s*\{[^\n{]+\{[^}]+\},\s*-?\d+,\s*(-?\d+),\s*(-?\d+),"
+               r"\s*\{\.word\s*=\s*[^}]+\},\s*\{\.word\s*=\s*(0x[\da-fA-F]+)\}")
+    for key, buy, sell, class_flags in re.findall(pattern, table):
+        if key not in ids:
+            continue
+        item = ids[key]
+        if int(buy) > 0 or int(sell) > 0:
+            prices[str(item)] = [int(buy), int(sell)]
+        # player_pending_transition uses item_class_word_negative.
+        if int(class_flags, 16) & 0x80000000:
+            stowable.append(item)
+    assert ids["ITEM_COPPER_ORE"] in stowable and ids["ITEM_BASKET"] not in stowable
     assert prices[str(ids["ITEM_YOUNG_COW"])] == [6000, 0]
     assert prices[str(ids["ITEM_TURNIP"])] == [0, 60]
     world = json.loads((ROOT / "game/world/location_catalog.json").read_text(encoding="utf-8"))
@@ -52,7 +62,7 @@ def bake(disc, ids, offsets):
             "weights": [[int(value) for value in row.split(",")] for row in re.findall(r"\{([^}]+)\}", weights)],
             "events": [0] + [ids[name] for name in re.findall(r"ITEM_\w+", events)],
         }
-    return {"prices": prices, "shipping": zones[34], "counters": zones[37], "mines": mines}
+    return {"prices": prices, "shipping": zones[34], "counters": zones[37], "mines": mines, "stowable": sorted(stowable)}
 
 
 def fishing_data(disc, ids, offsets):

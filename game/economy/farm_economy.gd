@@ -26,6 +26,7 @@ var gold := 500
 var rucksack_delivery := 0
 # Ownership, seeds and farm supply counters use their own native categories.
 var stock := {34:1}
+var stowable: PackedInt32Array
 var rucksack := preload("res://game/items/rucksack.gd").new()
 var shipped_value := 0
 var last_income := 0
@@ -43,10 +44,13 @@ func setup(owner_world) -> void:
 	world = owner_world
 	name = "FarmEconomy"
 	data = JSON.parse_string(FileAccess.get_file_as_string("res://game/economy/source_economy.json"))
+	stowable = PackedInt32Array(data.stowable)
 	shops = JSON.parse_string(FileAccess.get_file_as_string("res://game/economy/shops.json"))
 	world.day_cycle.minute_changed.connect(_minute_changed)
 	world.day_cycle.day_started.connect(_new_day)
 	world.player.actions.tool_used.connect(_gain_experience)
+	world.player.actions.stow_requested.connect(_start_stow)
+	world.player.actions.stow_finished.connect(_finish_stow)
 	world.player.actions.equipment_selected.connect(_equip)
 	world.mine_field.found.connect(_mined)
 	livestock = preload("res://game/economy/farm_animals.gd").new()
@@ -166,6 +170,28 @@ func receive(item: int) -> bool:
 	actions.carried_id = item
 	actions.update_held(false)
 	return true
+
+func _start_stow() -> void:
+	var actions = world.player.actions
+	if not stowable.has(actions.carried_id):
+		return
+	if rucksack.free_item_slot()<0:
+		message = "背包已满。"
+		return
+	actions.start_stow()
+
+func _finish_stow() -> void:
+	var actions = world.player.actions
+	var item: int = actions.carried_id
+	if item==0:
+		return
+	rucksack.compact_items()
+	if not rucksack.add_item(item):
+		message = "背包已满。"
+		return
+	actions.carried_id = 0
+	message = ""
+	world.record_player_action("把%s收进了背包" % item_name(item))
 
 func _mined(item: int) -> void:
 	if item==102:

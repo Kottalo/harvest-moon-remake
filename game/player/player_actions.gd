@@ -1,6 +1,8 @@
 extends Node
 ## Original ANI action ranges and 30 Hz timing; movement remains in player.gd.
 signal interact_requested
+signal stow_requested
+signal stow_finished
 signal item_released(item: int, thrown: bool)
 signal tool_used(tool: int, charge: int)
 signal equipment_selected(tool: int)
@@ -161,7 +163,9 @@ func poll_input() -> void:
 			equipment_selected.emit(equipped)
 		elif equipped == 34 and quick_seed_switch.is_valid() and quick_seed_switch.call():
 			return
-	if Input.is_action_just_pressed("interact"):
+	if Input.is_action_just_pressed("stow_item") and carried_id!=0 and player.is_on_floor():
+		stow_requested.emit()
+	elif Input.is_action_just_pressed("interact"):
 		interact_requested.emit()
 	elif Input.is_action_just_pressed("use_tool"):
 		start_tool()
@@ -214,6 +218,11 @@ func start_pickup(item: int, from_ground := true) -> bool:
 	if from_ground: # player_collect_target plays cue 7; mine_dig only calls player_show_item.
 		sound_requested.emit("show_item")
 	return true
+
+func start_stow() -> void:
+	# player_carry_tick clears SHOWING_ITEM and plays this directional range.
+	play("base",0x1D+player.facing,"stow")
+	sound_requested.emit("stow")
 
 func start_drop(thrown := false) -> bool:
 	if busy() or carried_id==0 or player.input_locked or (not thrown and not items.has(str(carried_id))):
@@ -321,7 +330,9 @@ func _finish() -> void:
 		var item := carried_id
 		carried_id = 0
 		item_released.emit(item,finished=="throw")
-	if finished == "seed":
+	if finished == "stow":
+		stow_finished.emit()
+	elif finished == "seed":
 		sound_requested.emit("sow")
 	elif finished == "refill":
 		sound_requested.emit("refill")
@@ -345,8 +356,8 @@ func draw_carry(direction: Vector2, running: bool, delta: float) -> void:
 func update_held(running: bool) -> void:
 	var showing := state == "show_tool"
 	var item := (equipped+upgrade if equipped<=25 else equipped) if showing else (pending_item if pending_item != 0 else carried_id)
-	held_sprite.visible = item != 0
-	if item == 0:
+	held_sprite.visible = item!=0 and state!="stow"
+	if not held_sprite.visible:
 		return
 	if showing:
 		held_sprite.texture = tool_picture(equipped,selected_seed)

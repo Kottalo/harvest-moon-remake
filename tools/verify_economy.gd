@@ -138,16 +138,20 @@ func run() -> void:
 	await _press(KEY_C)
 	await _frames(75)
 	if not check(player.actions.carried_id==124,"Second mined ore did not return to the hand"): return
-	await _press(KEY_SPACE)
-	if not check(world.rucksack_menu.panel.visible,"Space did not open the backpack while carrying ore"): return
-	await _press(KEY_DOWN)
-	await _press(KEY_Z)
-	await _press(KEY_RIGHT)
-	await _press(KEY_RIGHT)
-	await _press(KEY_Z)
-	await _press(KEY_SPACE)
-	if not check(player.actions.carried_id==0 and economy.count(124)==1 and economy.count(163)==1,
-			"Backpack swap did not store the held ore in the empty slot"): return
+	economy.rucksack.items[0] = 0
+	economy.rucksack.items[1] = 163
+	var stow_cues: Array[String] = []
+	player.actions.sound_requested.connect(func(cue: String): stow_cues.append(cue))
+	await _press(KEY_S)
+	if not check(player.actions.state=="stow" and player.actions.range_id==0x1D+player.facing
+			and player.actions.carried_id==124 and not player.actions.held_sprite.visible
+			and economy.count(124)==0 and stow_cues==["stow"],
+			"S did not begin the original stow pose, sound and delayed transfer"): return
+	await _frames(42)
+	await _press(KEY_S)
+	if not check(player.actions.carried_id==0 and not player.actions.busy()
+			and economy.rucksack.items.slice(0,2)==[163,124] and economy.count(124)==1
+			and stow_cues==["stow"],"S did not compact the backpack and store exactly one copper ore"): return
 
 	world.day_cycle.minute = 11*60
 	world._change_area(156,Vector3.ZERO)

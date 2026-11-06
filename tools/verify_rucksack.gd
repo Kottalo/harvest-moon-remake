@@ -114,6 +114,10 @@ func run() -> void:
 	if not check(economy.rucksack.add_item(124) and economy.rucksack.add_item(65) and not economy.rucksack.add_item(66),"Backpack capacity did not prevent overflow"): return
 	if not check(economy.receive(66) and actions.carried_id==66 and economy.count(66)==0,
 			"A full bag did not keep the received item in hand"): return
+	await tap(KEY_S)
+	if not check(actions.carried_id==66 and economy.count(66)==0 and not actions.busy()
+			and economy.message.contains("背包已满"),
+			"S consumed the carried item or started stowing with a full bag"): return
 	await tap(KEY_SPACE)
 	await tap(KEY_DOWN)
 	await tap(KEY_RIGHT)

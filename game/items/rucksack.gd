@@ -56,12 +56,21 @@ func put_tool(actions, slot: int, item: int) -> void:
 		toolbox[slot-TOOLBOX_FIRST_SLOT] = item
 
 
-func add_item(item: int) -> bool:
+func free_item_slot() -> int:
 	var slot := items.find(0)
-	if slot<0 or slot>=capacity:
+	return slot if slot<capacity else -1
+
+func add_item(item: int) -> bool:
+	var slot := free_item_slot()
+	if slot<0:
 		return false
 	items[slot] = item
 	return true
+
+func compact_items() -> void:
+	var occupied := items.slice(0,capacity).filter(func(item: int): return item!=0)
+	for index in capacity:
+		items[index] = occupied[index] if index<occupied.size() else 0
 
 func take_item(item: int) -> bool:
 	var slot := items.find(item)
