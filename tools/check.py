@@ -19,7 +19,7 @@ GROUPS = {
               "door_exit": "DOOR_EXIT_CHECK_OK", "stair_transitions": "STAIR_TRANSITIONS_OK",
               "coast": "COAST_CHECK_OK"},
     "debug": {"debug_scenes": "DEBUG_SCENES_OK"},
-    "npc": {"npc_navigation": "NPC_NAVIGATION_OK", "npc_roster": "NPC_ROSTER_OK"},
+    "npc": {"npc_navigation": "NPC_NAVIGATION_OK", "npc_roster": "NPC_ROSTER_OK", "npc_travel": "NPC_TRAVEL_OK"},
     "economy": {"economy": "ECONOMY_OK"},
     "time": {"day_cycle": "DAY_CYCLE_CHECK_OK", "day_debug": "DAY_DEBUG_CHECK_OK"},
 }

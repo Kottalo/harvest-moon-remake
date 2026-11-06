@@ -143,12 +143,20 @@ func _run() -> void:
 	clock.day = 29
 	clock.season = 3
 	clock.year = 0
+	clock.weekday = 6
 	clock.minute = 359
 	clock.elapsed = 0
-	clock.advance(2.0)
-	if not _require(await _wait_wake(world),"Natural 06:00 rollover from an indoor location failed"): return
-	if not _require(clock.year==1 and clock.season==0 and clock.day==0 and clock.minute==360 and world.current_area==80,"Natural overnight/year rollover advanced the day twice"): return
-	print("OVERNIGHT_OK: natural 06:00 returns home; winter 30 -> year 2 spring 1 exactly once")
+	var position: Vector3 = world.player.global_position
+	world.npcs.dialogue.show_notice("测试","跨日时保持这个窗口打开。")
+	clock.advance(4.25)
+	if not _require(paused and clock.minute==361 and not clock.sleeping and not world.transitioning,
+			"Dawn paused the clock or started a transition while the notice was open"): return
+	world.npcs.dialogue.close()
+	clock.advance(0.0)
+	if not _require(clock.year==1 and clock.season==0 and clock.day==0 and clock.weekday==0 and clock.minute==361
+			and is_equal_approx(clock.elapsed,0.25) and world.current_area==180 and world.player.global_position==position,
+			"Dawn moved the player or advanced the day twice"): return
+	print("OVERNIGHT_OK: dawn advances the calendar in place, including through a modal")
 	world.free()
 	print("DAY_CYCLE_CHECK_OK")
 	quit()

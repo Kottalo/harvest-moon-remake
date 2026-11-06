@@ -131,13 +131,18 @@ func run() -> void:
 		return
 	clock.minute = 480
 	npc.update(0.0)
-	if not check(npc.active.has("jeff"),"Jeff did not enter the shop at 08:00"):
+	if not check(not npc.active.has("jeff") and npc.travel.trips.has("jeff"),
+			"Jeff appeared mid-map instead of using the scheduled entrance"):
+		return
+	for tick in 900:
+		npc.update(1.0/60.0)
+		await physics_frame
+		if npc.active.has("jeff") and npc.active.jeff.placed:
+			break
+	if not check(npc.active.has("jeff") and npc.active.jeff.placed,"Jeff never walked into the shop for his shift"):
 		return
 	var jeff = npc.active.jeff
-	for tick in 40:
-		if jeff.placed:
-			break
-		await physics_frame
+	npc.update(1.0/60.0)
 	npc.update(0.2)
 	if not check(not npc.player_arrivals.has("jeff"),"Jeff noticed a player outside his range"):
 		return
@@ -172,7 +177,7 @@ func run() -> void:
 			"Presence did not distinguish a live actor from an offscreen scheduled point"):
 		return
 	clock.minute = 840
-	npc.update(0.0)
+	npc.update(0.0,true)
 	for tick in 45:
 		await physics_frame
 	var karen = npc.active.karen
@@ -236,7 +241,8 @@ func run() -> void:
 	dialogue.close()
 	clock.minute = 1080
 	npc.update(0.0)
-	if not check(not npc.active.has("jeff"),"Jeff stayed in the shop after leaving"):
+	if not check(npc.active.has("jeff") and npc.travel.trips.has("jeff")
+			and npc.travel.trips.jeff.destination!=180,"Jeff vanished instead of starting his scheduled departure"):
 		return
 
 	clock.minute = 420
@@ -273,7 +279,7 @@ func run() -> void:
 		return
 	clock.season = 1
 	npc.update(0.0)
-	if not check(npc.active.has("kai"),"Kai was missing from his summer schedule"):
+	if not check(npc.active.has("kai") or npc.travel.trips.has("kai"),"Kai was missing from his summer schedule"):
 		return
 	clock.season = 0
 	world._change_area(200,Vector3(-100,0,-100))

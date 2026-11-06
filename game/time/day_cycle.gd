@@ -1,6 +1,6 @@
 extends Node
 ## Source clock.c/calendar and weather.c drift; independent of rendering FPS.
-signal sleep_requested(automatic: bool)
+signal sleep_requested
 signal day_started(previous_season: int)
 signal minute_changed(minute: int)
 const SECONDS_PER_MINUTE := 2.0
@@ -14,7 +14,6 @@ var weekday := 1
 var minute := 360
 var elapsed := 0.0
 var sleeping := false
-var dawn_pending := false
 var menu_open := false
 var menu: PanelContainer
 var clock_label: Label
@@ -99,15 +98,8 @@ func advance(delta: float) -> void:
 	while elapsed+0.00000001 >= SECONDS_PER_MINUTE:
 		elapsed -= SECONDS_PER_MINUTE
 		_tick_minute()
-		if minute == 360:
-			dawn_pending = true
 	if previous_minute != minute:
 		refresh()
-	# A modal interface can delay the forced return home, while the calendar
-	# and clock continue through dawn.
-	if dawn_pending and not get_tree().paused and not menu_open and not debug_panel.panel.visible:
-		sleeping = true
-		sleep_requested.emit(true)
 
 func _tick_minute() -> void:
 	minute = (minute+1)%1440
@@ -130,13 +122,11 @@ func _tick_minute() -> void:
 		tint_to = _period_rgb(period)
 		tint_elapsed = 0
 
-func wake_next_morning(automatic := false) -> void:
-	if not automatic and not dawn_pending:
-		var remaining := (360-minute+1440)%1440
-		if remaining == 0: remaining = 1440
-		for i in remaining: _tick_minute()
-		elapsed = 0
-	dawn_pending = false
+func wake_next_morning() -> void:
+	var remaining := (360-minute+1440)%1440
+	if remaining == 0: remaining = 1440
+	for i in remaining: _tick_minute()
+	elapsed = 0
 	period = time_period()
 	tint_rgb = _period_rgb(period)
 	tint_from = tint_rgb
@@ -189,7 +179,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			menu_open = false
 			menu.hide()
 			sleeping = true
-			sleep_requested.emit(false)
+			sleep_requested.emit()
 	world.get_viewport().set_input_as_handled()
 
 func close_menu() -> void:

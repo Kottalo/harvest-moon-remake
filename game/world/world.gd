@@ -452,31 +452,27 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			camera.reset_gameplay()
 		_update_camera()
 
-func _sleep_until_morning(automatic: bool) -> void:
+func _sleep_until_morning() -> void:
 	if transitioning:
 		return
-	var actions = player.actions
-	if automatic and actions.state == "pickup":
-		actions._finish()
 	transitioning = true
 	player.input_locked = true
 	player.scripted_walk_time = 0
 	var token := transition_token
-	if not automatic:
-		var bed: Array = day_cycle.catalogue.bed_position
-		var blanket := get_node_or_null("Location/ZoneModel_01/Geometry") as MeshInstance3D
-		await player.actions.go_to_bed(Vector3(bed[0],bed[1],bed[2]),blanket)
-		if token != transition_token:
-			day_cycle.sleeping = false
-			return
-	transition_effect.start_sleep_out(45 if automatic else 30)
+	var bed: Array = day_cycle.catalogue.bed_position
+	var blanket := get_node_or_null("Location/ZoneModel_01/Geometry") as MeshInstance3D
+	await player.actions.go_to_bed(Vector3(bed[0],bed[1],bed[2]),blanket)
+	if token != transition_token:
+		day_cycle.sleeping = false
+		return
+	transition_effect.start_sleep_out(30)
 
 	while transition_effect.phase != "black":
 		await get_tree().process_frame
 		if token != transition_token:
 			day_cycle.sleeping = false
 			return
-	day_cycle.wake_next_morning(automatic)
+	day_cycle.wake_next_morning()
 	player.actions.state = ""
 	player.actions.range_id = -1
 	player.animation = -1

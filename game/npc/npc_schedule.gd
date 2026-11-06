@@ -1,6 +1,7 @@
 extends Node
 ## Selects the original ordinary-day rows for the currently loaded location.
 const SpriteLibrary := preload("res://game/original_sprites/sprite_library.gd")
+const Travel := preload("res://game/npc/npc_travel.gd")
 const Villager := preload("res://game/npc/villager.tscn")
 const CATALOGUE_PATH := "res://game/npc/npc_catalogue.json"
 const DAY_START := 360
@@ -22,6 +23,7 @@ const NAMES := {
 
 var world
 var library
+var travel := Travel.new()
 var location: Node3D
 var active := {}
 var scheduled_areas := {}
@@ -34,15 +36,17 @@ var awareness_elapsed := 0.0
 
 func enter_location(next_location: Node3D) -> void:
 	location = next_location
+	travel.setup(self)
 	active.clear()
 	player_arrivals.clear()
 	awareness_elapsed = 0.0
 	dialogue.close()
 	clock_key = Vector4i(-1,-1,-1,-1)
-	update(0.0)
+	update(0.0,true)
 
 
-func update(delta: float) -> void:
+func update(delta: float, loading := false) -> void:
+	travel.tick(delta)
 	awareness_elapsed += delta
 	if awareness_elapsed>=0.2:
 		awareness_elapsed = 0.0
@@ -57,31 +61,39 @@ func update(delta: float) -> void:
 	var day_index: int = (0 if clock.year==0 else 28)+clock.season*7+clock.weekday
 	var minute := posmod(clock.minute-DAY_START,1440)
 	var areas: Array = COAST if world.current_area in COAST else [world.current_area]
+	var previous_spots := scheduled_spots.duplicate()
 	scheduled_spots.clear()
 	for name in library.catalogue.actors:
 		var record: Dictionary = library.catalogue.actors[name]
 		var variant := int(record.days[day_index])
 		var step: Array = _current_step(record.schedules[variant],minute) if variant>=0 else []
 		var scheduled_area := -1 if step.is_empty() else int(step[1])
+		var prior_area: int = scheduled_areas.get(name,-1)
 		scheduled_areas[name] = scheduled_area
 		if scheduled_area<0:
-			_remove(name)
+			_depart_for_schedule(name,-1)
 			continue
 		var area := str(scheduled_area)
 		var row := str(int(step[2]))
 		var itinerary: Array = library.catalogue.routes[area][row]
 		if not itinerary[0].is_empty():
 			scheduled_spots[name] = _local_point(itinerary[0][0])
-		if scheduled_area not in areas or itinerary[0].is_empty():
-			_remove(name)
+		if travel.trips.has(name):
 			continue
+		if scheduled_area not in areas or itinerary[0].is_empty():
+			_depart_for_schedule(name,scheduled_area if scheduled_area not in areas else -1)
+			continue
+		if not loading and not active.has(name) and prior_area!=scheduled_area:
+			if travel.arrive_for_schedule(name,prior_area,previous_spots.get(name,Vector3.INF),
+					scheduled_area,scheduled_spots[name]):
+				continue
 		var pack := str(int(record.area_art.get(area,record.default_art)))
 		_place(name,int(area),row,record.art[pack],itinerary,(minute-float(step[0]))*clock.SECONDS_PER_MINUTE)
 	for name in library.catalogue.helpers:
 		var helper: Dictionary = library.catalogue.helpers[name]
 		scheduled_areas[name] = 200
 		scheduled_spots[name] = _local_point(helper.spot)
-		if world.current_area==200:
+		if world.current_area==200 and not travel.trips.has(name):
 			_place(name,200,"home",helper.poses,[[helper.spot],-1,false],0.0)
 
 
@@ -94,7 +106,13 @@ func presence(id: String) -> Dictionary:
 	if actor!=null and actor.placed:
 		var area: int = world.area_at(actor.global_position)
 		return {"area":area,"point":world.world_to_area(area,actor.global_position),"live":true,
-			"activity":"走动" if actor.walking else "停留"}
+			"activity":"前往%s" % world.world[str(travel.trips[id].destination)].name
+				if travel.trips.has(id) and travel.trips[id].requested and travel.trips[id].phase!="visit"
+				else ("走动" if actor.walking else "停留")}
+	if travel.trips.has(id):
+		var trip: Dictionary = travel.trips[id]
+		return {"area":trip.area,"point":trip.point,"live":false,
+			"activity":"临时到访" if trip.phase=="visit" else "在路上"}
 	return {"area":scheduled_areas.get(id,-1),"point":scheduled_spots.get(id,Vector3.INF),"live":false,
 		"activity":"日程位置" if scheduled_spots.has(id) else "暂无定位"}
 
@@ -118,30 +136,63 @@ func _remove(name: String) -> void:
 	player_arrivals.erase(name)
 
 
+func _depart_for_schedule(id: String, destination: int) -> void:
+	if travel.trips.has(id) or not active.has(id):
+		return
+	var actor = active[id]
+	if actor.placed:
+		travel.start(actor,destination,false)
+	else:
+		_remove(id)
+
+
 func _place(name: String, area: int, row: String, poses: Array, route: Array, elapsed: float) -> void:
 	var actor = active.get(name)
 	var route_key := str(area)+"/"+row
-	if actor != null and actor.get_meta("route")==route_key:
+	if actor != null and actor.get_meta("route","")==route_key:
 		return
 	var points := []
 	for cell: Array in route[0]:
 		var point: Vector3 = world.area_to_world(area,_local_point(cell))
 		points.append([point,int(cell[3]),float(cell[4])/30.0])
-	if actor == null:
+	actor = _install_route(name,area,poses,points,int(route[1]),elapsed,bool(route[2]))
+	actor.set_meta("route",route_key)
+
+
+func place_traveller(id: String, area: int, points: Array):
+	var poses: Array
+	if library.catalogue.helpers.has(id):
+		poses = library.catalogue.helpers[id].poses
+	else:
+		var record: Dictionary = library.catalogue.actors[id]
+		var pack := str(int(record.area_art.get(str(area),record.default_art)))
+		poses = record.art[pack]
+	var actor = _install_route(id,area,poses,points,-1,0.0,false)
+	if actor.has_meta("route"):
+		actor.remove_meta("route")
+	return actor
+
+
+func _install_route(id: String, area: int, poses: Array, points: Array, repeat_from: int,
+		elapsed: float, keep_position: bool):
+	var actor = active.get(id)
+	var flags: int = world.day_cycle.catalogue.areas[str(area)].source_flags
+	var speed := INDOOR_SPEED if flags&0x1000 else OUTDOOR_SPEED
+	if actor==null:
 		actor = Villager.instantiate()
-		actor.name = name
+		actor.name = id
 		actor.world = world
-		actor.display_name = NAMES[name]
+		actor.display_name = NAMES[id]
 		actor.art = library
 		actor.poses = poses
-		var flags: int = world.day_cycle.catalogue.areas[str(area)].source_flags
-		actor.speed = INDOOR_SPEED if flags&0x1000 else OUTDOOR_SPEED
-		actor.set_itinerary(points,int(route[1]),elapsed)
+		actor.speed = speed
+		actor.set_itinerary(points,repeat_from,elapsed)
 		location.add_child(actor)
-		active[name] = actor
+		active[id] = actor
 	else:
-		actor.set_itinerary(points,int(route[1]),0.0,bool(route[2]))
-	actor.set_meta("route",route_key)
+		actor.speed = speed
+		actor.set_itinerary(points,repeat_from,0.0,keep_position)
+	return actor
 
 
 func _nearby():

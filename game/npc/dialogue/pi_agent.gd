@@ -17,12 +17,14 @@ var requests := 0
 var reported := 0
 var totals := {"input":0,"output":0,"cacheRead":0,"cacheWrite":0}
 var last_usage := {}
+var last_destination := ""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process(false)
 
 func ask(messages: Array) -> void:
+	last_destination = ""
 	var key := OS.get_environment("DEEPSEEK_API_KEY").strip_edges()
 	if key.is_empty() and FileAccess.file_exists(KEY_FILE):
 		key = FileAccess.get_file_as_string(KEY_FILE).strip_edges()
@@ -106,6 +108,7 @@ func _process(_delta: float) -> void:
 		else:
 			set_process(false)
 			var reply: String = event.get("answer","")
+			last_destination = event.get("destination","")
 			if event.has("usage") and event.usage.values().any(func(count): return count>0):
 				last_usage = event.usage
 				reported += 1

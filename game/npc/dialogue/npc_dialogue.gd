@@ -52,6 +52,7 @@ var first_line := ""
 var first_speaker := ""
 var pending_text := ""
 var pending_record := -1
+var travel_options := {}
 var conversation_start := 0
 var where_subject := ""
 var pending := false
@@ -390,6 +391,7 @@ func close_chat(keep_finished := false) -> void:
 	waiting_for_text = false
 	pending_text = ""
 	pending_record = -1
+	travel_options.clear()
 	where_subject = ""
 	npc_id = ""
 	prior_activity.clear()
@@ -662,9 +664,17 @@ func _ask() -> void:
 			world.npcs.NAMES[first_speaker],first_line]
 	if not next_speakers.is_empty():
 		context += "\n这一轮还有其他人接话。先说完你的看法，把需要玩家回答的问题留到最后一位。"
+	travel_options = world.npcs.travel.options(actor,pending_text) if pending_record>=0 else {}
+	if not travel_options.is_empty():
+		context += "\n玩家的话可能让你临时改主意。你可以根据自己的性格和眼下的事拒绝或同意。此轮必须返回 JSON 对象，speech 是角色对白，destination 是 travel_options 中的地点编号，或空字符串表示留下。答应现在过去或说自己要马上过去时，必须填写对应的编号。只是谈到一个地点、约以后再去或拒绝时，destination 留空。"
+	else:
+		context += "\n本轮没有可执行的出行选项。你可以谈地点，但不要承诺现在动身。"
 	actor.greet(world.player.global_position)
+	var request := {"message":pending_text,"memory":memory}
+	if not travel_options.is_empty():
+		request.travel_options = travel_options
 	var messages := [{"role":"system","content":SYSTEM+"\n"+context},
-		{"role":"user","content":JSON.stringify({"message":pending_text,"memory":memory})}]
+		{"role":"user","content":JSON.stringify(request)}]
 	client.ask(messages)
 
 func _queued_records() -> PackedInt32Array:
@@ -727,6 +737,12 @@ func _on_answer(text: String, problem: String) -> void:
 		heard_by.append("player")
 		world.record_history("speech",speaker_id,text.replace("\n",""),heard_by)
 		_bubble(speaker_id,text)
+		var option: Dictionary = travel_options.get(client.last_destination,{})
+		if not option.is_empty():
+			var actor = world.npcs.active[speaker_id]
+			if world.npcs.travel.start(actor,int(option.area),true):
+				actor.talk_wait = maxf(actor.talk_wait,minf(5.0,text.length()*0.09+0.4))
+				world.record_history("action",speaker_id,"决定前往"+str(option.name),heard_by)
 		if _continue_group(text,heard_by):
 			return
 		if queued.is_empty() and (text.ends_with("？") or text.ends_with("?")):
