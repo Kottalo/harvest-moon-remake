@@ -72,27 +72,41 @@ func refresh_near(point: Vector3) -> void:
 			_add_cell(Vector2i(x,y))
 
 
-func segment_clear(from: Vector3, to: Vector3) -> bool:
-	if ground_shadow != null and ground_shadow.motion_fraction(from,to-from)<1.0:
-		return false
-	if not _sweep_clear(from,to):
-		return false
-	var samples := ceili(Vector2(to.x-from.x,to.z-from.z).length()/(CELL_SIZE*0.5))
-	for i in range(1,samples):
-		var point := from.lerp(to,float(i)/samples)
-		var support := _ground(Vector2(point.x,point.z))
-		if not support.is_finite() or absf(support.y-point.y)>0.015:
-			return false
-	return true
-
-
 func path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	if not positions.has(start) or not positions.has(goal):
 		return result
+	# An open straight or L-shaped route is already Manhattan-shortest.
+	var offset := goal-start
+	var first := Vector2i(signi(offset.x),0)
+	var second := Vector2i(0,signi(offset.y))
+	if absi(offset.y)>absi(offset.x):
+		var swap := first
+		first = second
+		second = swap
+	result = _elbow_path(start,goal,first,second)
+	if not result.is_empty():
+		return result
+	result = _elbow_path(start,goal,second,first)
+	if not result.is_empty():
+		return result
 	for point in graph.get_point_path(_id(start),_id(goal)):
 		result.append(Vector2i(point))
 	return result
+
+
+func _elbow_path(start: Vector2i, goal: Vector2i, first: Vector2i, second: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = [start]
+	var current := start
+	for direction: Vector2i in [first,second]:
+		var distance := (goal-current).abs()*direction.abs()
+		for step in distance.x+distance.y:
+			var next := current+direction
+			if not positions.has(next) or not graph.are_points_connected(_id(current),_id(next)):
+				return []
+			cells.append(next)
+			current = next
+	return cells
 
 
 func nearby_cells(point: Vector3, radius: int) -> Array[Vector2i]:

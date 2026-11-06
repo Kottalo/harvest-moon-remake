@@ -1,6 +1,9 @@
 extends SceneTree
 ## Playable F2 fixtures share real mechanics and leave the suspended world intact.
 
+const Grid := preload("res://game/npc/manhattan_grid.gd")
+
+
 func _initialize() -> void:
 	_run.call_deferred()
 
@@ -54,6 +57,17 @@ func _run() -> void:
 			break
 	if not _check(arena.npc.walking and arena.npc.ground_shadow.visible,
 			"The real villager did not start walking in the fixture"): return
+	var start := Grid.cell_at(arena.get_node("Start").position)
+	var goal := Grid.cell_at(arena.get_node("Goal").position)
+	var cells: Array[Vector2i] = arena.npc.grid.path(start,goal)
+	var directions := {}
+	for i in range(1,cells.size()):
+		var step := cells[i]-cells[i-1]
+		if not _check(step.abs().x+step.abs().y==1,"The open path skipped an adjacent cell"): return
+		directions[step] = true
+	var distance := (goal-start).abs()
+	if not _check(cells.size()==distance.x+distance.y+1 and directions.size()==2
+			and cells[distance.x]==Vector2i(goal.x,start.y),"Open diagonal endpoints did not get a single-turn Manhattan route"): return
 	await _press(KEY_B)
 	if not _check(arena.obstacle.visible and arena.obstacle.collision_layer==1,
 			"B did not enable the arena obstacle through the game window"): return

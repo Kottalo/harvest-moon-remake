@@ -3,7 +3,7 @@ extends CharacterBody3D
 const Grid := preload("res://game/npc/manhattan_grid.gd")
 const CELLS_PER_TICK := 16
 const RETRY_SECONDS := 0.5
-const SHORTCUT_LOOKAHEAD := 6
+const GRID_EPSILON := 0.00001
 
 @onready var sprite: Sprite3D = $Sprite3D
 @onready var footprint: CollisionShape3D = $Footprint
@@ -107,12 +107,21 @@ func _physics_process(delta: float) -> void:
 	if difference.length_squared() < 0.0000001:
 		last_cell = next_cell
 		path.pop_front()
+		global_position = target
 		if path.is_empty():
 			_arrive()
-		return
+			return
+		target = grid.positions[path[0]]
+		difference = target-global_position
 	var step := difference.limit_length(speed*delta)
 	var clearance: float = ground_shadow.motion_fraction(global_position,step)
-	if move_and_collide(step*clearance) != null or clearance < 1.0:
+	var motion := step*clearance
+	# Sweep the capsule before applying the exact axis step. Collision recovery
+	# must not nudge the actor sideways between adjacent grid centres.
+	var blocked := test_move(global_transform,motion)
+	if not blocked:
+		global_position = target if clearance==1.0 and step==difference else global_position+motion
+	if blocked or clearance < 1.0:
 		path.clear()
 		grid.refresh_near(global_position+step)
 		if not _find_path(point):
@@ -180,36 +189,21 @@ func _find_path(point: Vector3) -> bool:
 	var reachable: Array[Vector2i] = []
 	for start in starts:
 		var step: Vector3 = grid.positions[start]-global_position
+		# After a mid-edge collision, resume from a reachable end of that edge.
+		if (absf(step.x)>GRID_EPSILON and absf(step.z)>GRID_EPSILON) \
+				or absf(step.x)+absf(step.z)>Grid.CELL_SIZE+GRID_EPSILON:
+			continue
 		if step.length_squared()>0.0000001 and (ground_shadow.motion_fraction(global_position,step)<1.0
 				or test_move(global_transform,step)):
 			continue
 		reachable.append(start)
 	for goal in goals:
 		for start in reachable:
-			var cells := grid.path(start,goal)
-			if not cells.is_empty():
-				path = _shorten_path(cells)
+			path = grid.path(start,goal)
+			if not path.is_empty():
 				route_goal = goal
 				return true
 	return false
-
-
-func _shorten_path(cells: Array[Vector2i]) -> Array[Vector2i]:
-	var result: Array[Vector2i] = []
-	var from := global_position
-	if cells.size()>1 and grid.segment_clear(from,grid.positions[cells.back()]):
-		return [cells.back()]
-	var next := 0
-	while next<cells.size():
-		var chosen := next
-		for candidate in range(mini(next+SHORTCUT_LOOKAHEAD,cells.size()-1),next,-1):
-			if grid.segment_clear(from,grid.positions[cells[candidate]]):
-				chosen = candidate
-				break
-		result.append(cells[chosen])
-		from = grid.positions[cells[chosen]]
-		next = chosen+1
-	return result
 
 
 func _arrive() -> void:

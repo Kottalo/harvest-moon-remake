@@ -54,8 +54,7 @@ func _run() -> void:
 		var difference := (path[i]-path[i-1]).abs()
 		if not _require(difference.x + difference.y == 1,"A* used a non-cardinal step"):
 			return
-	if not _require(npc.path.size()<path.size() and npc.path.back()==goal,
-			"NPC walked every grid centre or lost its original goal: "+str(npc.path)):
+	if not _require(npc.path==path,"NPC did not follow each adjacent grid centre: "+str(npc.path)):
 		return
 	if not _require(npc.grid.path(start,Vector2i(14,0)).is_empty(),"Initial debris remained reachable"):
 		return
@@ -73,9 +72,8 @@ func _run() -> void:
 	probe.begin(world.get_world_3d().direct_space_state,npc.grid.region,npc,npc.footprint.shape,
 		npc.footprint.position.y,0.0)
 	probe.build_step(1000)
-	if not _require(probe.positions.has(a) and probe.positions.has(b) and probe.path(a,b).size()!=2
-			and not probe.segment_clear(a_point,b_point),
-			"Neither the grid nor a shortcut should cross a thin wall"):
+	if not _require(probe.positions.has(a) and probe.positions.has(b) and probe.path(a,b).size()!=2,
+			"The grid should not cross a thin wall"):
 		return
 	wall.free()
 	# Place a new solid object across an already-planned route.
@@ -85,7 +83,12 @@ func _run() -> void:
 	var replanned := false
 	var frames := {}
 	for tick in 9 * Engine.physics_ticks_per_second:
+		var previous: Vector3 = npc.global_position
 		await physics_frame
+		var motion: Vector3 = npc.global_position-previous
+		if not _require(minf(absf(motion.x),absf(motion.z))<=0.00001 and motion.length()<Grid.CELL_SIZE,
+				"NPC moved diagonally or skipped a cell: "+str(motion)):
+			return
 		if not replanned and not npc.grid.positions.has(blocked):
 			if not _require(npc.wait<=0.0 and (npc.building or not npc.path.is_empty()),
 					"NPC delayed replanning after the first collision"):
@@ -110,7 +113,7 @@ func _run() -> void:
 	if not _require(not is_instance_valid(thomas) and not world.npcs.active.has("mayor_thomas"),
 			"Thomas was in two areas at the same time"):
 		return
-	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, collision-checked shortcuts, immediate replanning, walking animation, mutual shadow clearance and location lifecycle")
+	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, adjacent-only movement, immediate replanning, walking animation, mutual shadow clearance and location lifecycle")
 	quit()
 
 
