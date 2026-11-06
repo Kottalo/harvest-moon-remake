@@ -26,8 +26,8 @@ class TestPi extends "res://game/npc/dialogue/pi_agent.gd":
 
 	func finish() -> void:
 		partial.emit("今天想")
-		partial.emit("今天想尝点什么？")
-		answered.emit("今天想尝点什么？","")
+		partial.emit("今天想尝点什么？也可以尝尝新菜。")
+		answered.emit("今天想尝点什么？也可以尝尝新菜。","")
 
 
 
@@ -261,7 +261,8 @@ func run() -> void:
 			and snapshots==["今天想","今天想尝点什么？"]
 			and transport.last_messages[0].content.contains("你在小矮人之家。打招呼前，你在原地停留")
 			and transport.memory.contains("放下了树枝")
-			and world.history.entries.back().actor=="chef",
+			and world.history.entries.back().actor=="chef"
+			and world.history.entries.back().content=="今天想尝点什么？",
 			"NPC reply or persona was missing"):
 		return
 	var people: String = transport.last_messages[0].content.get_slice("你附近可见的其他人：",1)
