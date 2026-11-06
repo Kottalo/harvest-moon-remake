@@ -87,16 +87,17 @@ func run() -> void:
 	world.economy.rucksack.tools[1] = 54
 	_picker_key(viewport,KEY_I)
 	await process_frame
-	var active: Button = picker.entries[action.selected_seed]
-	if not require_ok(paused and picker.panel.visible and picker.entries.size()==35 and picker.tabs.get_tab_count()==8
-			and picker.tabs.get_current_tab_control()==active.get_parent(),"I did not open the source eight-page layout on the equipped seed page"): return
+	var bag = world.economy.rucksack
+	var active: Button = picker.held_slot
+	if not require_ok(paused and picker.panel.visible and picker.storage_slots.size()==64 and picker.tabs.get_tab_count()==8
+			and picker.tabs.current_tab==0 and active.has_focus(),"I did not open the source eight-page layout at the held tool"): return
 	for grid: GridContainer in picker.tabs.get_children():
 		if not require_ok(grid.columns==4 and grid.get_child_count()==8,"Toolbox storage did not use the source four-by-two slots"): return
 	if not require_ok(picker.held_slot.get_node("Icon").texture!=null and picker.bag_slots.filter(func(button): return button.visible).size()==2,
 			"Held tool and current rucksack slots are missing"): return
 	var close: Button = picker.title.get_parent().get_node("CloseButton")
 	if not require_ok(close.focus_mode==Control.FOCUS_NONE,"Close button can receive focus"): return
-	for slot: Button in [picker.held_slot,picker.bag_slots[0],picker.bag_slots[1]] + active.get_parent().get_children():
+	for slot: Button in [picker.held_slot,picker.bag_slots[0],picker.bag_slots[1]] + picker.tabs.get_current_tab_control().get_children():
 		if not require_ok(slot.size.is_equal_approx(Vector2(52,52)),"Toolbox slot expanded beyond its square: "+str(slot.size)): return
 	var bag_seed: Label = picker.bag_slots[1].get_node("Quantity")
 	var seed_icon: TextureRect = picker.bag_slots[1].get_node("Icon")
@@ -110,9 +111,12 @@ func run() -> void:
 			"Gameplay HUD showed through the toolbox"): return
 	if not require_ok(viewport.get_visible_rect().encloses(active.get_global_rect()),
 			"Seed grid is clipped at the gameplay resolution"): return
-	for id in picker.entries:
-		var button: Button = picker.entries[id]
+	for button: Button in picker.storage_slots:
 		var icon := button.get_node("Icon") as TextureRect
+		var id: int = button.get_meta("item")
+		if id==0:
+			if not require_ok(icon.texture==null and not button.disabled,"An empty storage slot was not selectable"): return
+			continue
 		if not require_ok(icon.texture!=null and icon.texture.get_width()<=36 and icon.texture.get_height()<=37
 				and is_equal_approx(maxf(icon.size.x,icon.size.y),46.0)
 				and icon.get_rect().get_center().is_equal_approx(button.size*0.5)
@@ -123,7 +127,7 @@ func run() -> void:
 	var previous_page: int = picker.tabs.current_tab
 	_picker_key(viewport,KEY_TAB)
 	if not require_ok(picker.tabs.current_tab==posmod(previous_page+1,8),"Tab did not switch to the next storage page"): return
-	var can: Button = picker.entries[21]
+	var can: Button = picker.storage_slots[bag.toolbox.find(21)]
 	while picker.tabs.get_current_tab_control()!=can.get_parent():
 		_picker_key(viewport,KEY_TAB)
 	await process_frame
@@ -140,32 +144,46 @@ func run() -> void:
 	await process_frame
 	if not require_ok(not picker.tooltip.visible,"Tool name stayed visible after the pointer left its slot"): return
 	_picker_click(viewport,can)
+	if not require_ok(picker.marked==can and picker.marker.visible,"The first click did not mark the watering can"): return
+	_picker_click(viewport,picker.bag_slots[0])
+	if not require_ok(paused and picker.panel.visible and bag.tools[0]==21 and not bag.toolbox.has(21),
+			"The watering can did not move into the backpack while the box stayed open"): return
+	var grass: Button = picker.bag_slots[1]
+	grass.grab_focus()
+	await process_frame
+	if not require_ok(picker.tooltip.visible and picker.tooltip_label.text==action.seed_catalogue["54"].name
+			and grass.get_node("Quantity").text=="×9999" and grass.size.is_equal_approx(Vector2(52,52)),
+			"Backpack seed count did not stay inside its square with the tooltip open"): return
+	_picker_key(viewport,KEY_Z)
+	_picker_key(viewport,KEY_TAB)
+	var empty: Button = picker.tabs.get_current_tab_control().get_child(7)
+	empty.grab_focus()
+	_picker_key(viewport,KEY_Z)
+	if not require_ok(paused and empty.get_meta("item")==54 and bag.tools[1]==0 and world.economy.count(54)==9999,
+			"A second transfer did not move the seed stack across pages"): return
+	empty.grab_focus()
+	_picker_key(viewport,KEY_Z)
+	_picker_key(viewport,KEY_X)
+	if not require_ok(paused and picker.marked==null and empty.get_meta("item")==54,
+			"X did not cancel just the mark"): return
+	empty.grab_focus()
+	_picker_key(viewport,KEY_Z)
+	_picker_key(viewport,KEY_Z)
+	if not require_ok(paused and picker.panel.visible and action.equipped==34 and action.selected_seed==54
+			and not action.busy() and not bag.toolbox.has(54),"Confirming the same slot did not swap it with the held slot"): return
+	_picker_click(viewport,close)
 	await frames(2)
-	if not require_ok(not paused and not picker.panel.visible and action.equipped==21
-			and action.state=="show_tool" and action.range_id==71,"Picker failed to equip the watering can with the source pose"): return
+	if not require_ok(not paused and not picker.panel.visible and action.state=="show_tool"
+			and action.held_sprite.texture==action.tool_picture(34,54),"Closing the toolbox did not show the final equipped seed bag"): return
 	if not require_ok(world.sound.voices!=null and world.sound.cues.get("show_item") is AudioStreamWAV,
 			"Tool selection did not load the original sound into the native mixer"): return
 	if not require_ok(world.hud.visible and world.day_cycle.clock_label.visible,
 			"Closing the toolbox did not restore the gameplay HUD"): return
 	while action.busy(): await frames(1)
 	_picker_key(viewport,KEY_I)
-	var grass: Button = picker.entries[54]
-	while picker.tabs.get_current_tab_control()!=grass.get_parent():
-		_picker_key(viewport,KEY_TAB)
-	grass.grab_focus()
-	await process_frame
-	if not require_ok(picker.tooltip.visible and picker.tooltip_label.text==action.seed_catalogue["54"].name
-			and grass.get_node("Quantity").text=="×9999" and grass.size.is_equal_approx(Vector2(52,52)),
-			"Storage seed count did not stay inside its square with the tooltip open"): return
-	_picker_key(viewport,KEY_Z)
-	await frames(2)
-	if not require_ok(not paused and action.equipped==34 and action.selected_seed==54
-			and action.state=="show_tool" and action.held_sprite.texture==action.tool_picture(34,54),"Picker failed to equip grass with its own seed bag"): return
-	while action.busy(): await frames(1)
+	if not require_ok(picker.bag_slots[0].get_meta("item")==21 and action.selected_seed==54
+			and not bag.toolbox.has(21),"Reopening the toolbox lost the previous transfers"): return
 	_picker_key(viewport,KEY_I)
-	await process_frame
-	_picker_click(viewport,close)
-	if not require_ok(not paused and not picker.panel.visible and action.selected_seed==54 and not action.busy(),"Close button altered the selection or left the game paused"): return
 	action.carried_id = 58
 	_picker_key(viewport,KEY_I)
 	if not require_ok(not paused and not picker.panel.visible,"I opened while carrying an item"): return

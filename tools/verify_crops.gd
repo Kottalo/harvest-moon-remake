@@ -57,9 +57,14 @@ func _sow_from_picker(seed: int, target: int) -> bool:
 	_key(KEY_I,true)
 	_key(KEY_I,false)
 	if not _require(world.tool_picker.panel.visible and paused,"I did not open the seed picker"): return false
-	_key(KEY_TAB,true)
-	_key(KEY_TAB,false)
-	world.tool_picker.entries[seed].pressed.emit()
+	var picker = world.tool_picker
+	var bag = world.economy.rucksack
+	var in_bag: int = bag.tools.find(seed)
+	var slot: Button = picker.bag_slots[in_bag] if in_bag>=0 else picker.storage_slots[bag.toolbox.find(seed)]
+	slot.pressed.emit()
+	picker.held_slot.pressed.emit()
+	_key(KEY_I,true)
+	_key(KEY_I,false)
 	await _ticks(2)
 	if not _require(actions.state == "show_tool" and not paused,"Seed picker did not equip the seed bag"): return false
 	_key(KEY_C,true)

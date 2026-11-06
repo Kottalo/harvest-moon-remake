@@ -264,20 +264,16 @@ func _explain() -> void:
 
 
 func _item(index: int) -> int:
-	if index==0:
-		return economy.rucksack.active_tool(actions)
-	if index==9:
-		return actions.carried_id
-	return economy.rucksack.tools[index-1] if index<9 else economy.rucksack.items[index-10]
+	if index<9:
+		return economy.rucksack.tool_at(actions,index)
+	return actions.carried_id if index==9 else economy.rucksack.items[index-10]
 
 func _put(index: int, item: int) -> void:
-	if index==0:
-		actions.set_bag_tool(item)
+	if index<9:
+		economy.rucksack.put_tool(actions,index,item)
 	elif index==9:
 		actions.carried_id = item
 		actions.update_held(false)
-	elif index<9:
-		economy.rucksack.tools[index-1] = item
 	else:
 		economy.rucksack.items[index-10] = item
 

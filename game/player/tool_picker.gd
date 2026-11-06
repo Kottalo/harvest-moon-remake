@@ -1,20 +1,24 @@
 extends CanvasLayer
-## Farmhouse tool and seed selection. PlayerActions owns equipment and the show animation.
+## Farmhouse tool storage, using the source mark-and-swap interaction.
 const ToolboxStyle := preload("res://game/items/toolbox_style.gd")
 # scene_camera_transition turns the lid 0x20 per farm tick, up to 0x280.
 const LID_ANGLE := -0x280 * TAU / 4096.0
 const LID_TIME := 20.0 / 30.0
-const PAGE_COUNT := 8
-const PAGE_SIZE := 8
+const Rucksack := preload("res://game/items/rucksack.gd")
+const PAGE_COUNT := Rucksack.TOOLBOX_PAGES
+const PAGE_SIZE := Rucksack.TOOLBOX_PAGE_SIZE
 
 var actions
-var rucksack
+var rucksack: Rucksack
 var sound: Callable
 var page_label: Label
 var held_slot: Button
 var bag_slots: Array[Button] = []
 var seed_count: Callable
-var choose_tool: Callable
+var storage_slots: Array[Button] = []
+var marked: Button
+var marker: Panel
+var opened_tool := 0
 var gameplay_hud: Label
 var clock_label: Label
 var panel: ColorRect
@@ -24,7 +28,6 @@ var title: Label
 var tooltip: PanelContainer
 var tooltip_label: Label
 var tooltip_slot: Button
-var entries: Dictionary = {}
 var styles: Dictionary
 var strong_font: Font
 var hud_visible := false
@@ -33,13 +36,12 @@ var owns_pause := false
 var lid: Node3D
 
 
-func setup(player_actions, font: Font, available_seeds: Callable, select_tool: Callable,
+func setup(player_actions, font: Font, available_seeds: Callable,
 		hud: Label, clock: Label, bag, play_sound: Callable) -> void:
 	actions = player_actions
 	rucksack = bag
 	sound = play_sound
 	seed_count = available_seeds
-	choose_tool = select_tool
 	gameplay_hud = hud
 	clock_label = clock
 	styles = ToolboxStyle.materials()
@@ -90,13 +92,13 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	rows.add_child(top)
 	var equipped := _tray(top,"手持工具")
 	equipped.custom_minimum_size.x = 114
-	held_slot = _slot(equipped)
+	held_slot = _slot(equipped,0)
 	var bag_tools := _tray(top,"背包工具")
 	bag_tools.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var bag_grid := _grid()
 	bag_tools.add_child(bag_grid)
 	for index in PAGE_SIZE:
-		bag_slots.append(_slot(bag_grid))
+		bag_slots.append(_slot(bag_grid,index+1))
 	var storage := _tray(rows,"箱内工具")
 	var shelf := HBoxContainer.new()
 	# Match the start of the rucksack grid above the storage grid.
@@ -121,6 +123,13 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	tooltip_label = _label(tooltip,"",14,ToolboxStyle.DARK_INK)
 	tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tooltip.hide()
+
+	marker = Panel.new()
+	marker.name = "MarkedSlot"
+	marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	marker.add_theme_stylebox_override("panel",styles.marked)
+	panel.add_child(marker)
+	marker.hide()
 
 	panel.hide()
 	set_process_input(false)
@@ -215,25 +224,16 @@ func _style_button(button: Button, normal: StyleBoxFlat) -> void:
 func open(toolbox_lid: Node3D = null) -> void:
 	if get_tree().paused or not actions.can_select_tool():
 		return
-	if entries.is_empty():
-		var stock: Array[int] = []
-		for tool: int in actions.TOOL_IDS:
-			if tool!=34:
-				stock.append(tool)
-		for key: String in actions.seed_catalogue:
-			stock.append(int(key))
+	if storage_slots.is_empty():
 		for page in PAGE_COUNT:
 			var grid := _grid()
 			tabs.add_child(grid)
 			for slot in PAGE_SIZE:
-				var index := page*PAGE_SIZE+slot
-				var button := _slot(grid)
-				if index<stock.size():
-					entries[stock[index]] = button
+				storage_slots.append(_slot(grid,Rucksack.TOOLBOX_FIRST_SLOT+page*PAGE_SIZE+slot))
+	rucksack.sync_toolbox(actions,seed_count)
 	_refresh_slots()
-	var active: int = rucksack.active_tool(actions)
-	var preferred: Button = entries.get(active)
-	tabs.current_tab = preferred.get_parent().get_index() if preferred!=null else 0
+	opened_tool = rucksack.active_tool(actions)
+	tabs.current_tab = 0
 	_update_page_label()
 	hud_visible = gameplay_hud.visible
 	clock_visible = clock_label.visible
@@ -251,7 +251,7 @@ func open(toolbox_lid: Node3D = null) -> void:
 	panel.show()
 	_layout()
 	sound.call("menu")
-	_focus_tab(active)
+	held_slot.grab_focus()
 
 
 func _move_lid(angle: float) -> void:
@@ -269,7 +269,7 @@ func _grid() -> GridContainer:
 	return grid
 
 
-func _slot(parent: Container) -> Button:
+func _slot(parent: Container, index: int) -> Button:
 	var button := Button.new()
 	button.custom_minimum_size = ToolboxStyle.SLOT_SIZE
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -287,7 +287,7 @@ func _slot(parent: Container) -> Button:
 	quantity.offset_top = ToolboxStyle.QUANTITY_ORIGIN.y - ToolboxStyle.SLOT_SIZE.y
 	quantity.offset_right = -3
 	quantity.offset_bottom = -2
-	button.disabled = true
+	button.set_meta("slot",index)
 	button.mouse_entered.connect(_show_tooltip.bind(button))
 	button.mouse_exited.connect(_hide_tooltip.bind(button))
 	button.focus_entered.connect(_focus_slot.bind(button))
@@ -303,14 +303,15 @@ func _refresh_slots() -> void:
 		var button := bag_slots[index]
 		button.visible = index<rucksack.capacity
 		_set_slot(button,rucksack.tools[index] if button.visible else 0)
-	for item: int in entries:
-		_set_slot(entries[item],item)
+	for index in storage_slots.size():
+		_set_slot(storage_slots[index],rucksack.toolbox[index])
 
 
 func _set_slot(button: Button, item: int) -> void:
 	var seed: Dictionary = actions.seed_catalogue.get(str(item),{})
 	button.set_meta("item",item)
-	button.disabled = item==0 or (seed.is_empty() and not actions.owns_tool(item))
+	button.disabled = item!=0 and seed.is_empty() and not actions.owns_tool(item)
+	button.add_theme_stylebox_override("normal",styles.empty if item==0 else styles.filled)
 	# A child label overlays the slot without changing the button's minimum size.
 	var quantity := button.get_node("Quantity") as Label
 	quantity.text = "" if seed.is_empty() else "×%d" % seed_count.call(item)
@@ -360,17 +361,34 @@ func _hide_tooltip(slot: Button) -> void:
 func _select(slot: Button) -> void:
 	if slot.disabled:
 		return
+	if marked==null:
+		marked = slot
+		marker.reparent(slot,false)
+		marker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		marker.show()
+	else:
+		var from := int(marked.get_meta("slot"))
+		var to := 0 if marked==slot else int(slot.get_meta("slot"))
+		if from==to or (to==0 and held_slot.disabled):
+			return
+		var item := rucksack.tool_at(actions,from)
+		var other := rucksack.tool_at(actions,to)
+		rucksack.put_tool(actions,from,other)
+		rucksack.put_tool(actions,to,item)
+		_clear_mark()
+		_refresh_slots()
+		_hide_tooltip(tooltip_slot)
+		_show_tooltip(slot)
 	sound.call("confirm")
-	_close(false)
-	choose_tool.call(int(slot.get_meta("item")))
 
 
-func _focus_tab(preferred := 0) -> void:
+func _clear_mark() -> void:
+	marked = null
+	marker.hide()
+
+
+func _focus_tab() -> void:
 	var grid := tabs.get_current_tab_control()
-	var button: Button = entries.get(preferred)
-	if button!=null and button.get_parent()==grid and not button.disabled:
-		button.grab_focus()
-		return
 	for entry: Button in grid.get_children():
 		if not entry.disabled:
 			entry.grab_focus()
@@ -385,7 +403,14 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		match event.physical_keycode:
-			KEY_I, KEY_X, KEY_ESCAPE:
+			KEY_X, KEY_ESCAPE:
+				get_viewport().set_input_as_handled()
+				if marked!=null:
+					_clear_mark()
+					sound.call("cancel")
+				else:
+					_close()
+			KEY_I:
 				get_viewport().set_input_as_handled()
 				_close()
 			KEY_TAB:
@@ -395,15 +420,18 @@ func _input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 
 
-func _close(cancelled := true) -> void:
+func _close() -> void:
 	if panel.visible:
-		if cancelled:
-			sound.call("cancel")
+		sound.call("cancel")
+		_clear_mark()
 		_hide_tooltip(tooltip_slot)
 		panel.hide()
 		if is_instance_valid(lid):
 			await _move_lid(0.0)
 		_restore_world()
+		var equipped := rucksack.active_tool(actions)
+		if equipped!=0 and equipped!=opened_tool:
+			actions.select_tool(actions.equipped,equipped if actions.equipped==34 else -1)
 
 
 func _restore_world() -> void:

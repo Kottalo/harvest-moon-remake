@@ -27,17 +27,13 @@ func _ready() -> void:
 	bag.capacity = 4
 	picker = ToolPicker.new()
 	add_child(picker)
-	picker.setup(player.actions,font,_seed_count,_choose_tool,open_button.get_node("Status"),$Hint,bag,sound.cue)
+	picker.setup(player.actions,font,_seed_count,open_button.get_node("Status"),$Hint,bag,sound.cue)
 	open_button.pressed.connect(picker.open)
 	picker.open.call_deferred()
 
 
 func _seed_count(item: int) -> int:
 	return 1 if item==34 else 12 if item==39 else 0
-
-
-func _choose_tool(item: int) -> bool:
-	return bag.choose_tool(player.actions,item)
 
 
 func _physics_process(delta: float) -> void:

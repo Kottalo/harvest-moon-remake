@@ -83,7 +83,7 @@ func _run() -> void:
 	await _frames(6)
 	var toolbox = menu.fixture
 	if not _check(not is_instance_valid(arena) and toolbox.name=="ToolboxTest" and toolbox.picker.panel.visible
-			and toolbox.picker.entries.size()==35 and paused,"Switching fixtures did not open the real toolbox"): return
+			and toolbox.picker.storage_slots.size()==64 and paused,"Switching fixtures did not open the real toolbox"): return
 	await _press(KEY_F2)
 	if not _check(menu.menu.visible and paused,"F2 could not open over the paused toolbox"): return
 	await _press(KEY_F2)
@@ -93,7 +93,11 @@ func _run() -> void:
 	if not _check(not toolbox.picker.panel.visible and not paused,"X was not routed to the toolbox viewport"): return
 	await _press(KEY_I)
 	if not _check(toolbox.picker.panel.visible and paused,"I did not reopen the standalone toolbox"): return
-	toolbox.picker.entries[21].pressed.emit()
+	var can: Button = toolbox.picker.storage_slots[toolbox.bag.toolbox.find(21)]
+	can.pressed.emit()
+	toolbox.picker.held_slot.pressed.emit()
+	if not _check(paused and toolbox.picker.panel.visible,"Tool swap closed the test toolbox"): return
+	await _press(KEY_X)
 	await _frames(30)
 	if not _check(toolbox.player.actions.equipped==21 and not toolbox.player.actions.busy()
 			and world.economy.rucksack.tools==bag,"Toolbox selection did not stay in the fixture"): return

@@ -25,6 +25,7 @@ var equipped := 6
 var service_tool := 0
 var equipment_available: Callable
 var quick_switch: Callable
+var quick_seed_switch: Callable
 var item_art
 var item_images := {}
 var upgrade := 0
@@ -158,8 +159,8 @@ func poll_input() -> void:
 	if Input.is_action_just_pressed("tool_level"):
 		if equipped <= 25:
 			equipment_selected.emit(equipped)
-		elif equipped == 34 and not seed_catalogue.is_empty():
-			selected_seed = 34 + (selected_seed - 33) % seed_catalogue.size()
+		elif equipped == 34 and quick_seed_switch.is_valid() and quick_seed_switch.call():
+			return
 	if Input.is_action_just_pressed("interact"):
 		interact_requested.emit()
 	elif Input.is_action_just_pressed("use_tool"):

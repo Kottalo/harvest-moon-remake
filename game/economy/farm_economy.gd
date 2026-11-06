@@ -61,6 +61,7 @@ func setup(owner_world) -> void:
 	supermarket.setup(self)
 	world.player.actions.equipment_available = can_equip
 	world.player.actions.quick_switch = rucksack.cycle_tool.bind(world.player.actions)
+	world.player.actions.quick_seed_switch = rucksack.cycle_tool.bind(world.player.actions,true)
 
 func buy_price(item: int) -> int:
 	return int(data.prices.get(str(item),[0,0])[0])
@@ -123,7 +124,7 @@ func buy(id: String, item: int) -> String:
 	if item!=171 and not ANIMALS.has(item) and not _add(item):
 		return "背包已满。"
 	gold -= price
-	if world.player.actions.seed_catalogue.has(str(item)) and rucksack.active_tool(world.player.actions)!=item and not rucksack.tools.has(item):
+	if world.player.actions.seed_catalogue.has(str(item)) and not rucksack.has_tool(world.player.actions,item):
 		var slot := rucksack.tools.find(0)
 		if slot>=0 and slot<rucksack.capacity:
 			rucksack.tools[slot] = item
