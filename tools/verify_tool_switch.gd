@@ -95,6 +95,32 @@ func run() -> void:
 		if not require_ok(grid.columns==4 and grid.get_child_count()==8,"Toolbox storage did not use the source four-by-two slots"): return
 	if not require_ok(picker.held_slot.get_node("Icon").texture!=null and picker.bag_slots.filter(func(button): return button.visible).size()==2,
 			"Held tool and current rucksack slots are missing"): return
+	for capacity in [2,4,8]:
+		bag.capacity = capacity
+		picker._refresh_slots()
+		_picker_key(viewport,KEY_RIGHT)
+		if not require_ok(picker.bag_slots[0].has_focus(),"Right did not reach the first backpack slot"): return
+		_picker_key(viewport,KEY_LEFT)
+		if not require_ok(active.has_focus(),"Left could not return from the backpack to the held tool"): return
+	bag.capacity = 2
+	picker._refresh_slots()
+	_picker_key(viewport,KEY_RIGHT)
+	_picker_key(viewport,KEY_Z)
+	_picker_key(viewport,KEY_LEFT)
+	if not require_ok(active.has_focus() and picker.marked==picker.bag_slots[0],
+			"A marked backpack tool could not reach the held slot"): return
+	_picker_key(viewport,KEY_X)
+	_picker_key(viewport,KEY_DOWN)
+	if not require_ok(picker.storage_slots[0].has_focus(),"Down from the held slot did not reach storage"): return
+	_picker_key(viewport,KEY_LEFT)
+	if not require_ok(picker.tabs.current_tab==7 and picker.storage_slots[59].has_focus(),
+			"Left at the storage edge did not wrap to the last page"): return
+	_picker_key(viewport,KEY_RIGHT)
+	if not require_ok(picker.tabs.current_tab==0 and picker.storage_slots[0].has_focus(),
+			"Right at the storage edge did not wrap back to the first page"): return
+	_picker_key(viewport,KEY_UP)
+	_picker_key(viewport,KEY_LEFT)
+	if not require_ok(active.has_focus(),"Storage to backpack to held tool navigation failed"): return
 	var close: Button = picker.title.get_parent().get_node("CloseButton")
 	if not require_ok(close.focus_mode==Control.FOCUS_NONE,"Close button can receive focus"): return
 	for slot: Button in [picker.held_slot,picker.bag_slots[0],picker.bag_slots[1]] + picker.tabs.get_current_tab_control().get_children():

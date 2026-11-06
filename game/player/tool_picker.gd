@@ -7,6 +7,27 @@ const LID_TIME := 20.0 / 30.0
 const Rucksack := preload("res://game/items/rucksack.gd")
 const PAGE_COUNT := Rucksack.TOOLBOX_PAGES
 const PAGE_SIZE := Rucksack.TOOLBOX_PAGE_SIZE
+const CURSOR_KEYS := [KEY_UP,KEY_DOWN,KEY_LEFT,KEY_RIGHT]
+# item_storage.c item_markers: up/down/left/right, each for 2/4/8 bag slots.
+const CURSOR_LINKS := [
+	[13,13,13,9,9,5,2,4,4,1,1,1],
+	[13,13,13,9,9,5,0,0,0,2,2,2],
+	[14,14,14,10,10,6,1,1,1,0,3,3],
+	[0,15,15,0,11,7,0,2,2,0,4,4],
+	[0,16,16,0,12,8,0,3,3,0,0,0],
+	[0,0,1,0,0,9,0,0,0,0,0,6],
+	[0,0,2,0,0,10,0,0,5,0,0,7],
+	[0,0,3,0,0,11,0,0,6,0,0,8],
+	[0,0,4,0,0,12,0,0,7,0,0,0],
+	[1,1,5,13,13,13,12,12,12,10,10,10],
+	[2,2,6,14,14,14,9,9,9,11,11,11],
+	[2,3,7,15,15,15,10,10,10,12,12,12],
+	[2,4,8,16,16,16,11,11,11,9,9,9],
+	[9,9,9,1,1,1,16,16,16,14,14,14],
+	[10,10,10,2,2,2,13,13,13,15,15,15],
+	[11,11,11,2,3,3,14,14,14,16,16,16],
+	[12,12,12,2,4,4,15,15,15,13,13,13],
+]
 
 var actions
 var rucksack: Rucksack
@@ -164,10 +185,16 @@ func _page_button(parent: Control, glyph: String, step: int) -> void:
 
 
 func _change_page(step: int) -> void:
-	tabs.current_tab = posmod(tabs.current_tab+step,PAGE_COUNT)
+	var slot := _cursor_index()
+	_set_page(tabs.current_tab+step)
+	_focus_slot_index(slot)
+	if slot<Rucksack.TOOLBOX_FIRST_SLOT:
+		sound.call("cursor")
+
+
+func _set_page(page: int) -> void:
+	tabs.current_tab = posmod(page,PAGE_COUNT)
 	_update_page_label()
-	sound.call("cursor")
-	_focus_tab()
 
 
 func _update_page_label() -> void:
@@ -387,37 +414,64 @@ func _clear_mark() -> void:
 	marker.hide()
 
 
-func _focus_tab() -> void:
-	var grid := tabs.get_current_tab_control()
-	for entry: Button in grid.get_children():
-		if not entry.disabled:
-			entry.grab_focus()
-			return
-	if not held_slot.disabled:
+func _cursor_index() -> int:
+	var focus := get_viewport().gui_get_focus_owner()
+	var slot := int(focus.get_meta("slot",0)) if focus!=null else 0
+	if slot>=Rucksack.TOOLBOX_FIRST_SLOT:
+		return Rucksack.TOOLBOX_FIRST_SLOT+(slot-Rucksack.TOOLBOX_FIRST_SLOT)%PAGE_SIZE
+	return slot
+
+
+func _focus_slot_index(slot: int) -> void:
+	if slot==0:
 		held_slot.grab_focus()
+	elif slot<Rucksack.TOOLBOX_FIRST_SLOT:
+		bag_slots[slot-1].grab_focus()
+	else:
+		storage_slots[tabs.current_tab*PAGE_SIZE+slot-Rucksack.TOOLBOX_FIRST_SLOT].grab_focus()
+
+
+func _move_cursor(direction: int) -> void:
+	var slot := _cursor_index()
+	var level := [2,4,8].find(rucksack.capacity)
+	if direction==2 and slot in [9,13]:
+		_set_page(tabs.current_tab-1)
+	elif direction==3 and slot in [12,16]:
+		_set_page(tabs.current_tab+1)
+	_focus_slot_index(CURSOR_LINKS[slot][direction*3+level])
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		if not panel.visible:
+	if not event is InputEventKey or not event.pressed:
+		return
+	if not panel.visible:
+		get_viewport().set_input_as_handled()
+		return
+	var direction := CURSOR_KEYS.find(event.physical_keycode)
+	if direction>=0:
+		get_viewport().set_input_as_handled()
+		_move_cursor(direction)
+		return
+	match event.physical_keycode:
+		KEY_X, KEY_ESCAPE:
 			get_viewport().set_input_as_handled()
-			return
-		match event.physical_keycode:
-			KEY_X, KEY_ESCAPE:
-				get_viewport().set_input_as_handled()
-				if marked!=null:
-					_clear_mark()
-					sound.call("cancel")
-				else:
-					_close()
-			KEY_I:
-				get_viewport().set_input_as_handled()
+			if event.echo:
+				return
+			if marked!=null:
+				_clear_mark()
+				sound.call("cancel")
+			else:
 				_close()
-			KEY_TAB:
-				get_viewport().set_input_as_handled()
+		KEY_I:
+			get_viewport().set_input_as_handled()
+			if not event.echo:
+				_close()
+		KEY_TAB:
+			get_viewport().set_input_as_handled()
+			if not event.echo:
 				_change_page(-1 if event.shift_pressed else 1)
-			KEY_F1:
-				get_viewport().set_input_as_handled()
+		KEY_F1:
+			get_viewport().set_input_as_handled()
 
 
 func _close() -> void:
