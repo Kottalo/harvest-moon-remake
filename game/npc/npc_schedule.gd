@@ -221,10 +221,7 @@ func known_people(observer: CharacterBody3D) -> Dictionary:
 			if same_area and world.world[str(area)].slug=="supermarket":
 				result.same_shop.append(NAMES[id])
 			continue
-		var side := "西北" if offset.x<0 else "东南"
-		if absf(offset.z)>=absf(offset.x):
-			side = "东北" if offset.z<0 else "西南"
-		var relation := "就在身旁" if distance<0.08 else ("就在你%s侧" if distance<=0.8 else "在你%s侧") % side
+		var relation := "就在你旁边" if distance<=0.8 else ("就在附近" if distance<=2.5 else "在同一处，隔着一段距离")
 		var group := "near" if distance<=2.5 else "elsewhere"
 		result[group].append("%s（%s）" % [NAMES[id],relation])
 	return result

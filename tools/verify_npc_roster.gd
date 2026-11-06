@@ -172,9 +172,34 @@ func run() -> void:
 	world.player.global_position = karen.global_position+Vector3(-0.25,0,0)
 	dialogue.begin(karen)
 	var shop_context: String = transport.last_messages[0].content
-	if not check(shop_context.contains("安娜（就在你东南侧）") and shop_context.contains("杰夫")
+	if not check(shop_context.contains("安娜（就在你旁边）") and shop_context.contains("杰夫")
 			and not shop_context.contains("里克（"),"Karen did not know the nearby visitor and shopkeeper without leaking Rick's remote location"):
 		return
+	dialogue.close()
+	jeff.global_position = Vector3(-0.2,0,1.2)
+	await physics_frame
+	transport.hold = true
+	dialogue.begin(jeff)
+	transport.answered.emit("卡莲也在店里。","")
+	transport.hold = false
+	var plans_before_whereabouts := transport.plans.size()
+	submit_after_reading(dialogue,"她在哪")
+	if not check(dialogue.speaker_id=="karen" and transport.plans.size()==plans_before_whereabouts
+			and transport.last_messages[0].content.contains("玩家在问你现在在哪儿。你就在现场")
+			and not transport.last_messages[0].content.contains("东南侧")
+			and not transport.memory.contains("卡莲也在店里。"),
+			"A visible Karen did not answer the follow-up herself, or received private speech"):
+		return
+	world.player.global_position = karen.global_position+Vector3(-0.3,0,0)
+	submit_after_reading(dialogue,"卡莲离我多远？")
+	if not check(dialogue.speaker_id=="karen" and transport.last_messages[0].content.contains("直线距离约 0.3 米"),
+			"A direct distance question did not receive the measured scene distance"):
+		return
+	if not check(dialogue._where_subject("她昨天在哪？").is_empty() and dialogue._where_subject("卡莲人呢？")=="karen",
+			"Past whereabouts were treated as live, or a colloquial whereabouts question was missed"):
+		return
+	dialogue.close()
+	dialogue.begin(karen)
 	var divider := StaticBody3D.new()
 	var divider_collision := CollisionShape3D.new()
 	var divider_box := BoxShape3D.new()
@@ -188,8 +213,11 @@ func run() -> void:
 	submit_after_reading(dialogue,"店里还有谁？")
 	shop_context = transport.last_messages[0].content
 	if not check(shop_context.get_slice("没看清他们的站位：",1).contains("安娜")
-			and not shop_context.contains("安娜（就在你东南侧）") and not npc.people_near(karen).has("anna"),
+			and not shop_context.contains("安娜（就在你旁边）") and not npc.people_near(karen).has("anna"),
 			"Occlusion did not separate shop presence, exact position and conversation audience"):
+		return
+	submit_after_reading(dialogue,"安娜在哪？")
+	if not check(dialogue.speaker_id!="anna","An occluded person was treated as present and invited to answer"):
 		return
 	divider.free()
 	dialogue.close()
