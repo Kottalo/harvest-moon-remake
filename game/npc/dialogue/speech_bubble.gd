@@ -4,6 +4,7 @@ var label: Label
 var body: PanelContainer
 var actor: Node3D
 var remaining := 0.0
+var fade_duration := 0.65
 var streaming := false
 var tint := Color("#fff2d6")
 var _tail := Vector2.ZERO
@@ -14,6 +15,7 @@ func setup(speaker: Node3D, font: Font, player: bool) -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
 	if player:
 		tint = Color("#e3f2ff")
+		fade_duration = 0.0
 	body = PanelContainer.new()
 	body.mouse_filter = MOUSE_FILTER_IGNORE
 	var style := StyleBoxFlat.new()
@@ -45,7 +47,19 @@ func say(text: String, is_streaming: bool) -> void:
 	body.reset_size()
 	body.reset_size.call_deferred()
 	streaming = is_streaming
-	remaining = clampf(3.5+text.length()*0.08,4.0,12.0)
+	modulate.a = 1.0
+	if fade_duration>0.0:
+		remaining = clampf(7.0+text.length()*0.10,8.0,16.0)+fade_duration
+	else:
+		remaining = clampf(3.5+text.length()*0.08,4.0,12.0)
+
+func advance(delta: float) -> bool:
+	if streaming:
+		return true
+	remaining = maxf(0.0,remaining-delta)
+	if fade_duration>0.0:
+		modulate.a = minf(1.0,remaining/fade_duration)
+	return remaining>0.0
 
 func follow(camera: Camera3D, bounds: Vector2, used: Array[Rect2]) -> void:
 	var transform_on_screen := actor.get_global_transform_interpolated()

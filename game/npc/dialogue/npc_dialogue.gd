@@ -334,8 +334,8 @@ func close() -> void:
 	overlay.hide()
 	get_tree().paused = was_paused
 
-func close_chat() -> void:
-	if not composer.visible:
+func close_chat(keep_finished := false) -> void:
+	if not composer.visible and bubbles.is_empty():
 		return
 	client.cancel_request()
 	pending = false
@@ -351,7 +351,8 @@ func close_chat() -> void:
 	first_line = ""
 	first_speaker = ""
 	for id in bubbles.keys():
-		_remove_bubble(id)
+		if not keep_finished or bubbles[id].streaming:
+			_remove_bubble(id)
 	entry.release_focus()
 	composer.hide()
 	_set_status("")
@@ -557,19 +558,20 @@ func _remove_bubble(id: String) -> void:
 	bubbles.erase(id)
 
 func _process(delta: float) -> void:
-	if not composer.visible or get_tree().paused:
+	if get_tree().paused or (not composer.visible and bubbles.is_empty()):
 		return
-	if world.transitioning or (not npc_id.is_empty() and not _speaker_in_range(npc_id)):
+	if world.transitioning:
 		close_chat()
 		return
+	if not npc_id.is_empty() and not _speaker_in_range(npc_id):
+		close_chat(true)
 	var camera := get_viewport().get_camera_3d()
 	if camera==null:
 		return
 	var used: Array[Rect2] = []
 	for id in bubbles.keys():
 		var bubble = bubbles[id]
-		bubble.remaining -= delta
-		if not is_instance_valid(bubble.actor) or (not bubble.streaming and bubble.remaining<=0):
+		if not is_instance_valid(bubble.actor) or not bubble.advance(delta):
 			_remove_bubble(id)
 		else:
 			bubble.follow(camera,bubble_layer.size,used)

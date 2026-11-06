@@ -339,6 +339,11 @@ func run() -> void:
 	if not check(transport.sent_prompts.size()==2 and transport.prompt.message=="下次见。" and dialogue.pending,
 			"Queued live speech did not reach Pi after the current reply"):
 		return
+	transport.partial.emit("今天想")
+	var npc_bubble = dialogue.bubbles.nappy
+	if not check(npc_bubble.advance(30.0) and npc_bubble.modulate.a==1.0,
+			"A streaming NPC bubble started expiring before the reply finished"):
+		return
 	transport.hold = false
 	transport.finish()
 	await process_frame
@@ -346,9 +351,21 @@ func run() -> void:
 			and dialogue.bubbles.player.visible and dialogue.bubbles.nappy.visible,
 			"Composer or head-anchored bubbles are outside the viewport"):
 		return
-	dialogue.close()
-	if not check(not paused and not dialogue.composer.visible,"Closing dialogue did not restore gameplay"):
+	var player_position: Vector3 = world.player.global_position
+	world.player.global_position = player_position+Vector3(5,0,0)
+	dialogue._process(6.0)
+	if not check(not paused and not dialogue.composer.visible and dialogue.bubbles.has("nappy")
+			and npc_bubble.modulate.a==1.0,"Leaving chat range cut off a finished NPC bubble"):
 		return
+	dialogue._process(npc_bubble.remaining-0.3)
+	if not check(dialogue.bubbles.has("nappy") and npc_bubble.modulate.a>0.0 and npc_bubble.modulate.a<1.0,
+			"NPC speech did not fade before being removed"):
+		return
+	dialogue._process(0.31)
+	if not check(not dialogue.bubbles.has("nappy"),"NPC bubble survived its fade"):
+		return
+	world.player.global_position = player_position
+	dialogue.close()
 	wall.free()
 	await physics_frame
 	dialogue.begin(chef)
