@@ -59,6 +59,33 @@ func build_step(budget: int) -> bool:
 	return scanned == total
 
 
+func refresh_near(point: Vector3) -> void:
+	var margin := Vector2i.ONE*2
+	var patch := region.intersection(Rect2i(cell_at(point)-margin,margin*2+Vector2i.ONE))
+	for y in range(patch.position.y,patch.end.y):
+		for x in range(patch.position.x,patch.end.x):
+			var cell := Vector2i(x,y)
+			if positions.erase(cell):
+				graph.remove_point(_id(cell))
+	for y in range(patch.position.y,patch.end.y):
+		for x in range(patch.position.x,patch.end.x):
+			_add_cell(Vector2i(x,y))
+
+
+func segment_clear(from: Vector3, to: Vector3) -> bool:
+	if ground_shadow != null and ground_shadow.motion_fraction(from,to-from)<1.0:
+		return false
+	if not _sweep_clear(from,to):
+		return false
+	var samples := ceili(Vector2(to.x-from.x,to.z-from.z).length()/(CELL_SIZE*0.5))
+	for i in range(1,samples):
+		var point := from.lerp(to,float(i)/samples)
+		var support := _ground(Vector2(point.x,point.z))
+		if not support.is_finite() or absf(support.y-point.y)>0.015:
+			return false
+	return true
+
+
 func path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	if not positions.has(start) or not positions.has(goal):
@@ -107,8 +134,7 @@ func _add_cell(cell: Vector2i) -> void:
 	positions[cell] = point
 	var id := _id(cell)
 	graph.add_point(id,Vector2(cell))
-	# Row-major order means only these two neighbours have already been sampled.
-	for direction in [Vector2i.LEFT,Vector2i.UP]:
+	for direction in DIRECTIONS:
 		var neighbour: Vector2i = cell + direction
 		if positions.has(neighbour) and _edge_clear(point,positions[neighbour]):
 			graph.connect_points(id,_id(neighbour))

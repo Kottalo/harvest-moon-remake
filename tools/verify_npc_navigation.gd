@@ -54,6 +54,9 @@ func _run() -> void:
 		var difference := (path[i]-path[i-1]).abs()
 		if not _require(difference.x + difference.y == 1,"A* used a non-cardinal step"):
 			return
+	if not _require(npc.path.size()<path.size() and npc.path.back()==goal,
+			"NPC walked every grid centre or lost its original goal: "+str(npc.path)):
+		return
 	if not _require(npc.grid.path(start,Vector2i(14,0)).is_empty(),"Initial debris remained reachable"):
 		return
 	var screen: Vector2 = world.camera.unproject_position(npc.global_position + Vector3.UP*0.15)
@@ -70,19 +73,23 @@ func _run() -> void:
 	probe.begin(world.get_world_3d().direct_space_state,npc.grid.region,npc,npc.footprint.shape,
 		npc.footprint.position.y,0.0)
 	probe.build_step(1000)
-	if not _require(probe.positions.has(a) and probe.positions.has(b) and probe.path(a,b).size() != 2,
-			"Thin wall should break the connection between two otherwise open cells"):
+	if not _require(probe.positions.has(a) and probe.positions.has(b) and probe.path(a,b).size()!=2
+			and not probe.segment_clear(a_point,b_point),
+			"Neither the grid nor a shortcut should cross a thin wall"):
 		return
 	wall.free()
 	# Place a new solid object across an already-planned route.
-	var blocked: Vector2i = path[2]
+	var blocked: Vector2i = npc.path[0] if npc.path[0]!=start else npc.path[1]
 	var point: Vector3 = npc.grid.positions[blocked]
 	var blocker := _obstacle(world,point,Vector3(0.18,0.5,0.18))
 	var replanned := false
 	var frames := {}
 	for tick in 9 * Engine.physics_ticks_per_second:
 		await physics_frame
-		if not npc.grid.positions.has(blocked) and not npc.building:
+		if not replanned and not npc.grid.positions.has(blocked):
+			if not _require(npc.wait<=0.0 and (npc.building or not npc.path.is_empty()),
+					"NPC delayed replanning after the first collision"):
+				return
 			replanned = true
 		if npc.walking:
 			frames[npc.sprite.texture] = true
@@ -103,7 +110,7 @@ func _run() -> void:
 	if not _require(not is_instance_valid(thomas) and not world.npcs.active.has("mayor_thomas"),
 			"Thomas was in two areas at the same time"):
 		return
-	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, native debris detour, dynamic replan, walking animation, mutual shadow clearance and location lifecycle")
+	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, collision-checked shortcuts, immediate replanning, walking animation, mutual shadow clearance and location lifecycle")
 	quit()
 
 

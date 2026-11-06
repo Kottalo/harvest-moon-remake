@@ -3,6 +3,7 @@ extends CharacterBody3D
 const Grid := preload("res://game/npc/manhattan_grid.gd")
 const CELLS_PER_TICK := 16
 const RETRY_SECONDS := 0.5
+const SHORTCUT_LOOKAHEAD := 6
 
 @onready var sprite: Sprite3D = $Sprite3D
 @onready var footprint: CollisionShape3D = $Footprint
@@ -18,6 +19,7 @@ var loop_start: int
 var speed: float
 var grid := Grid.new()
 var path: Array[Vector2i] = []
+var route_goal: Variant = null
 var last_cell: Vector2i
 var waypoint := 0
 var attempts := 0
@@ -51,6 +53,7 @@ func set_itinerary(points: Array, repeat_from: int, seconds_since_start := 0.0, 
 		_resume_itinerary(seconds_since_start)
 	# Every new row takes its facing and pauses from the same source cells.
 	path.clear()
+	route_goal = null
 	wait = 0.0
 	attempts = 0
 	spawn_pass = 0
@@ -111,10 +114,11 @@ func _physics_process(delta: float) -> void:
 	var clearance: float = ground_shadow.motion_fraction(global_position,step)
 	if move_and_collide(step*clearance) != null or clearance < 1.0:
 		path.clear()
-		grid.positions.clear()
-		attempts = mini(attempts+1,2)
-		wait = RETRY_SECONDS
-		_idle()
+		grid.refresh_near(global_position+step)
+		if not _find_path(point):
+			attempts = mini(attempts+1,2)
+			_begin_path(point)
+			_idle()
 		return
 	_walk(_facing_for(difference),delta)
 
@@ -167,7 +171,9 @@ func _find_path(point: Vector3) -> bool:
 		return false
 	var goal_cell := Grid.cell_at(point)
 	var goals: Array[Vector2i] = []
-	if grid.positions.has(goal_cell):
+	if route_goal != null:
+		goals.append(route_goal)
+	elif grid.positions.has(goal_cell):
 		goals.append(goal_cell)
 	else:
 		goals = grid.nearby_cells(point,2)
@@ -180,10 +186,30 @@ func _find_path(point: Vector3) -> bool:
 		reachable.append(start)
 	for goal in goals:
 		for start in reachable:
-			path = grid.path(start,goal)
-			if not path.is_empty():
+			var cells := grid.path(start,goal)
+			if not cells.is_empty():
+				path = _shorten_path(cells)
+				route_goal = goal
 				return true
 	return false
+
+
+func _shorten_path(cells: Array[Vector2i]) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	var from := global_position
+	if cells.size()>1 and grid.segment_clear(from,grid.positions[cells.back()]):
+		return [cells.back()]
+	var next := 0
+	while next<cells.size():
+		var chosen := next
+		for candidate in range(mini(next+SHORTCUT_LOOKAHEAD,cells.size()-1),next,-1):
+			if grid.segment_clear(from,grid.positions[cells[candidate]]):
+				chosen = candidate
+				break
+		result.append(cells[chosen])
+		from = grid.positions[cells[chosen]]
+		next = chosen+1
+	return result
 
 
 func _arrive() -> void:
@@ -192,6 +218,7 @@ func _arrive() -> void:
 	wait = maxf(wait,float(record[2])-elapsed_at_spawn)
 	elapsed_at_spawn = 0.0
 	attempts = 0
+	route_goal = null
 	waypoint += 1
 	if waypoint == itinerary.size() and loop_start >= 0:
 		waypoint = loop_start
