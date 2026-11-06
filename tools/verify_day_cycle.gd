@@ -57,14 +57,21 @@ func _run() -> void:
 	for hz in [30,60,120]:
 		clock.minute = 360
 		clock.elapsed = 0
-		for i in hz*10-1: clock.advance(1.0/hz,false)
-		if not _require(clock.minute==360,"Clock ticked before 10 seconds"): return
+		for i in hz*2-1: clock.advance(1.0/hz,false)
+		if not _require(clock.minute==360,"Clock ticked before 2 seconds"): return
 		clock.advance(1.0/hz,false)
-		if not _require(clock.minute==361,"Clock must advance one minute in 10 seconds at every FPS"): return
+		if not _require(clock.minute==361,"Clock must advance one minute in 2 seconds at every FPS"): return
+	clock.elapsed = 0.0
+	clock.advance(0.75,false)
 	world._change_area(80,Vector3(-0.8,0.05,0.5))
 	var before: int = clock.minute
-	clock.advance(120,false)
-	if not _require(clock.minute==before,"Source indoor place must pause the clock"): return
+	clock.advance(1.0,false)
+	if not _require(clock.minute==before,"Indoor clock ticked early after crossing the door"): return
+	clock.advance(0.25,false)
+	if not _require(clock.minute==before+1,"Outdoor and indoor seconds must count toward the same minute"): return
+	clock.advance(2.0,false)
+	if not _require(clock.minute==before+2,"Indoor clock must advance at one minute per 2 seconds"): return
+	before = clock.minute
 	world._change_area(0,Vector3.ZERO)
 	clock.advance(30,true)
 	clock.menu_open = true
@@ -88,10 +95,10 @@ func _run() -> void:
 	clock.tint_from = Vector3.ZERO
 	clock.tint_to = Vector3.ZERO
 	clock.elapsed = 0
-	clock.advance(10.0,false)
+	clock.advance(2.0,false)
 	clock.advance(128.0/30.0,false)
 	if not _require(clock.tint_rgb.distance_to(Vector3(2.5,15,20))<0.001,"Original tint must interpolate over 256 ticks"): return
-	print("CLOCK_OK: 10 s/min at 30/60/120 FPS; indoor/menu/overview pause; source four periods and 256-tick subtractive tint")
+	print("CLOCK_OK: 2 s/min at 30/60/120 FPS; continuous indoor/outdoor time; menu/overview pause; source four periods and 256-tick subtractive tint")
 	world._change_area(80,Vector3(-0.98,0.03,0.5))
 	world.player.facing = 1
 	await _frames(8)
@@ -128,14 +135,14 @@ func _run() -> void:
 	await _frames(5)
 	if not _require(world.player.is_on_floor() and not world.player.input_locked,"Morning player was not grounded/unlocked"): return
 	print("SLEEP_OK: physical Z menu, X cancel, Z sleep; original ANI, blanket morphs, 18-tick bed arc and live fade; spring 30 -> summer 1, 06:00, farmhouse spawn grounded")
-	world._change_area(0,Vector3.ZERO)
+	world._change_area(180,Vector3.ZERO)
 	clock.day = 29
 	clock.season = 3
 	clock.year = 0
 	clock.minute = 359
 	clock.elapsed = 0
-	clock.advance(10.0,false)
-	if not _require(await _wait_wake(world),"Natural 06:00 rollover failed"): return
+	clock.advance(2.0,false)
+	if not _require(await _wait_wake(world),"Natural 06:00 rollover from an indoor location failed"): return
 	if not _require(clock.year==1 and clock.season==0 and clock.day==0 and clock.minute==360 and world.current_area==80,"Natural overnight/year rollover advanced the day twice"): return
 	print("OVERNIGHT_OK: natural 06:00 returns home; winter 30 -> year 2 spring 1 exactly once")
 	world.free()

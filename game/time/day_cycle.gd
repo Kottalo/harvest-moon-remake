@@ -3,7 +3,7 @@ extends Node
 signal sleep_requested(automatic: bool)
 signal day_started(previous_season: int)
 signal minute_changed(minute: int)
-const SECONDS_PER_MINUTE := 10.0
+const SECONDS_PER_MINUTE := 2.0
 
 var catalogue: Dictionary
 var world
@@ -88,8 +88,6 @@ func advance(delta: float, paused: bool) -> void:
 		tint_elapsed = minf(tint_elapsed+delta,256.0/30.0)
 		tint_rgb = tint_from.lerp(tint_to,tint_elapsed/(256.0/30.0))
 		_apply_tint()
-	if catalogue.areas[str(world.current_area)].clock_paused:
-		return
 	elapsed += delta
 	var previous_minute := minute
 	while elapsed+0.00000001 >= SECONDS_PER_MINUTE:
