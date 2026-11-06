@@ -76,6 +76,12 @@ func finish_reading(dialogue) -> void:
 		bubble.advance(60.0)
 
 
+func finish_group(dialogue) -> void:
+	while dialogue.waiting_for_text:
+		finish_reading(dialogue)
+		dialogue._process(0.0)
+
+
 func submit_after_reading(dialogue, text: String) -> void:
 	finish_reading(dialogue)
 	if not dialogue.composer.visible:
@@ -364,7 +370,19 @@ func run() -> void:
 			and not plan.present.has("hoggy") and not JSON.stringify(plan).contains("这是我们的秘密"),
 			"The planner missed an eligible participant or received hidden/private information"):
 		return
-	if not check(transport.sent_prompts.size()==2 and dialogue.bubbles.has("chef") and dialogue.bubbles.has("nappy")
+	if not check(transport.sent_prompts.size()==1 and dialogue.bubbles.has("chef") and dialogue.waiting_for_text,
+			"The second NPC started while the first bubble was visible"):
+		return
+	dialogue._process(3.0)
+	if not check(transport.sent_prompts.size()==1 and dialogue.bubbles.chef.modulate.a==1.0,
+			"The next NPC started before the reading hold finished"):
+		return
+	dialogue._process(dialogue.bubbles.chef.remaining-0.2)
+	if not check(transport.sent_prompts.size()==1 and dialogue.bubbles.chef.modulate.a>0.0
+			and dialogue.bubbles.chef.modulate.a<1.0,"The next NPC started during the fade"):
+		return
+	dialogue._process(0.21)
+	if not check(transport.sent_prompts.size()==2 and not dialogue.bubbles.has("chef") and dialogue.bubbles.has("nappy")
 			and transport.sent_prompts[1].context.contains("角色：纳皮。")
 			and transport.sent_prompts[1].context.contains("你刚听见切夫回答：今天想尝点什么？")
 			and not transport.sent_prompts[0].memory.contains("这是我们的秘密")
@@ -374,11 +392,13 @@ func run() -> void:
 		return
 	transport.sent_prompts.clear()
 	submit_after_reading(dialogue,"那怎么玩游戏？")
+	finish_group(dialogue)
 	if not check(transport.sent_prompts.size()==2 and transport.sent_prompts[1].context.contains("角色：纳皮。"),
 			"A guest could only contribute once in the entire conversation"):
 		return
 	transport.sent_prompts.clear()
 	submit_after_reading(dialogue,"切夫，你知道怎么玩游戏吗？")
+	finish_group(dialogue)
 	if not check(transport.sent_prompts.size()==2 and transport.plans.back().addressed=="chef"
 			and transport.sent_prompts[0].context.contains("角色：切夫。")
 			and transport.sent_prompts[1].context.contains("角色：纳皮。"),
@@ -386,12 +406,17 @@ func run() -> void:
 		return
 	transport.sent_prompts.clear()
 	submit_after_reading(dialogue,"大家都说说吧。")
-	if not check(transport.sent_prompts.size()==3 and dialogue.bubbles.has("chef") and dialogue.bubbles.has("nappy")
+	if not check(transport.sent_prompts.size()==1 and dialogue.bubbles.has("chef") and not dialogue.bubbles.has("aqua"),
+			"The three-person reply started multiple speakers together"):
+		return
+	finish_group(dialogue)
+	if not check(transport.sent_prompts.size()==3 and not dialogue.bubbles.has("chef") and not dialogue.bubbles.has("nappy")
 			and dialogue.bubbles.has("aqua") and transport.sent_prompts[2].context.contains("角色：阿库亚。"),
 			"An explicit three-person plan did not produce three distinct speech bubbles"):
 		return
 	transport.sent_prompts.clear()
 	submit_after_reading(dialogue,"大家怎么看？")
+	finish_group(dialogue)
 	if not check(transport.sent_prompts.size()==2 and dialogue.speaker_id!="chef",
 			"An explicit group invitation still produced only a single response"):
 		return
@@ -401,8 +426,9 @@ func run() -> void:
 	# Select the closest guest on this explicit group request.
 	dialogue.last_guest = ""
 	submit_after_reading(dialogue,"你们觉得呢？")
+	finish_group(dialogue)
 	if not check(transport.sent_prompts.size()==2 and dialogue.status.text=="第二个角色断线"
-			and world.history.entries.size()==before_group+2 and dialogue.bubbles.has("chef"),
+			and world.history.entries.size()==before_group+2 and world.history.entries.back().actor=="chef",
 			"Failure of the second speaker lost the first reply or duplicated the turn"):
 		return
 	transport.fail_speaker = ""

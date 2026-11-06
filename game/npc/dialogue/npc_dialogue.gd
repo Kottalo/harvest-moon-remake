@@ -636,10 +636,13 @@ func _ask() -> void:
 			_start_next()
 		return
 	pending = true
-	var prior = bubbles.get(speaker_id)
-	if prior!=null and prior.revealing():
-		waiting_for_text = true
-		return
+	for id in bubbles:
+		if id=="player":
+			continue
+		var bubble = bubbles[id]
+		if bubble.remaining>0.0 and (id!=speaker_id or bubble.revealing()):
+			waiting_for_text = true
+			return
 	_set_status("")
 	var memory: Array[Dictionary] = world.history.memory_for(
 		speaker_id,pending_text if pending_record>=0 else "",pending_record,
@@ -657,6 +660,8 @@ func _ask() -> void:
 	if not first_line.is_empty():
 		context += "\n你刚听见%s回答：%s\n顺着现场对白，只用一句话补充自己的看法。" % [
 			world.npcs.NAMES[first_speaker],first_line]
+	if not next_speakers.is_empty():
+		context += "\n这一轮还有其他人接话。先说完你的看法，把需要玩家回答的问题留到最后一位。"
 	actor.greet(world.player.global_position)
 	var messages := [{"role":"system","content":SYSTEM+"\n"+context},
 		{"role":"user","content":JSON.stringify({"message":pending_text,"memory":memory})}]
