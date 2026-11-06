@@ -90,8 +90,57 @@ func path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 	result = _elbow_path(start,goal,second,first)
 	if not result.is_empty():
 		return result
-	for point in graph.get_point_path(_id(start),_id(goal)):
-		result.append(Vector2i(point))
+	var shortest := graph.get_id_path(_id(start),_id(goal))
+	if shortest.is_empty():
+		return result
+	return _fewest_turns(start,goal,shortest.size()-1)
+
+
+func _fewest_turns(start: Vector2i, goal: Vector2i, length: int) -> Array[Vector2i]:
+	# Work outward from the goal. Only edges to the previous layer are
+	# eligible, so reducing turns cannot make the route longer.
+	var pending: Array[Vector2i] = [goal]
+	var distances := {goal:0}
+	var turn_costs := {goal:[0,0,0,0]}
+	var next_steps := {}
+	var head := 0
+	while head<pending.size():
+		var cell := pending[head]
+		head += 1
+		var distance: int = distances[cell]
+		var costs := [length,length,length,length,length]
+		var choices := [0,0,0,0,0]
+		for direction in DIRECTIONS.size():
+			var neighbour: Vector2i = cell+DIRECTIONS[direction]
+			if not positions.has(neighbour) or not graph.are_points_connected(_id(cell),_id(neighbour)):
+				continue
+			var other_distance: int = distances.get(neighbour,-1)
+			if distance>0 and other_distance==distance-1:
+				var remaining: int = turn_costs[neighbour][direction]
+				# Entry 4 is the start state, with no incoming direction.
+				for incoming in costs.size():
+					var cost := remaining+int(incoming<4 and incoming!=direction)
+					if cost<costs[incoming] or (cost==costs[incoming] and incoming==direction):
+						costs[incoming] = cost
+						choices[incoming] = direction
+			elif other_distance<0:
+				var offset := (neighbour-start).abs()
+				if distance+1+offset.x+offset.y<=length:
+					distances[neighbour] = distance+1
+					pending.append(neighbour)
+		if distance>0:
+			turn_costs[cell] = costs
+			next_steps[cell] = choices
+		if cell==start:
+			break
+
+	var result: Array[Vector2i] = [start]
+	var cell := start
+	var incoming := 4
+	for step in length:
+		incoming = next_steps[cell][incoming]
+		cell += DIRECTIONS[incoming]
+		result.append(cell)
 	return result
 
 

@@ -16,6 +16,8 @@ func _require(condition: bool, message: String) -> bool:
 func _run() -> void:
 	if OS.get_cmdline_user_args().has("--120hz"):
 		Engine.physics_ticks_per_second = 120
+	if not _verify_fewest_turns():
+		return
 	var world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
 	world._change_area(0,Vector3(0,0.035,0))
@@ -113,8 +115,42 @@ func _run() -> void:
 	if not _require(not is_instance_valid(thomas) and not world.npcs.active.has("mayor_thomas"),
 			"Thomas was in two areas at the same time"):
 		return
-	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, adjacent-only movement, immediate replanning, walking animation, mutual shadow clearance and location lifecycle")
+	print("NPC_NAVIGATION_OK: 0.2 m grid aligned 2x2 per soil tile; cardinal A*, fewest turns among shortest paths, adjacent-only movement, immediate replanning, walking animation, mutual shadow clearance and location lifecycle")
 	quit()
+
+
+func _verify_fewest_turns() -> bool:
+	var start := Vector2i.ZERO
+	var goal := Vector2i(8,6)
+	var grid := Grid.new()
+	grid.region = Rect2i(start,goal+Vector2i.ONE)
+	for y in range(goal.y+1):
+		for x in range(goal.x+1):
+			var cell := Vector2i(x,y)
+			# Both one-turn paths are blocked. A shortest route with two
+			# turns exists, but native A* takes three on this fixture.
+			if cell in [Vector2i(goal.x,0),Vector2i(0,goal.y)]:
+				continue
+			grid.positions[cell] = Vector3.ZERO
+			grid.graph.add_point(grid._id(cell),Vector2(cell))
+			for direction in [Vector2i.LEFT,Vector2i.UP]:
+				if grid.positions.has(cell+direction):
+					grid.graph.connect_points(grid._id(cell),grid._id(cell+direction))
+	var route := grid.path(start,goal)
+	if not _require(route.size()==goal.x+goal.y+1 and route[0]==start and route[-1]==goal,
+			"Fewer turns changed the minimum route length or endpoint"):
+		return false
+	var turns := 0
+	var previous := route[1]-route[0]
+	for index in range(1,route.size()):
+		var step := route[index]-route[index-1]
+		if not _require(step.abs().x+step.abs().y==1
+				and grid.graph.are_points_connected(grid._id(route[index-1]),grid._id(route[index])),
+				"Turn preference stepped outside the four-connected graph"):
+			return false
+		turns += int(step!=previous)
+		previous = step
+	return _require(turns==2,"Shortest obstacle detour made unnecessary turns: "+str(route))
 
 
 func _verify_shadow_clearance(player: CharacterBody3D, npc: CharacterBody3D) -> bool:
