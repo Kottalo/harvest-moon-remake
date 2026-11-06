@@ -140,6 +140,10 @@ func _ready() -> void:
 	economy.dialogue = npcs.dialogue
 	npcs.enter_location(location)
 	player.actions.interact_requested.connect(_interact)
+	if OS.is_debug_build():
+		var debug_scenes = load("res://game/debug/test_scene_menu.gd").new()
+		debug_scenes.setup(self,ui_font)
+		add_child(debug_scenes)
 	print("WORLD_READY: ", world.size(), " native locations")
 
 func _wireframe_colliders(location: Node3D) -> void:

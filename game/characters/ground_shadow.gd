@@ -67,4 +67,5 @@ func motion_fraction(point: Vector3, motion: Vector3) -> float:
 
 
 func _shares_ground(other: Sprite3D, height: float) -> bool:
-	return other != self and other.is_visible_in_tree() and absf(other.global_position.y-height) < SAME_LEVEL_HEIGHT
+	return other!=self and other.is_visible_in_tree() and other.get_world_3d()==get_world_3d() \
+		and absf(other.global_position.y-height)<SAME_LEVEL_HEIGHT

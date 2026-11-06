@@ -81,7 +81,7 @@ func _resume_itinerary(elapsed: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if (world.transitioning and placed) or world.day_cycle.menu_open or world.day_cycle.sleeping:
+	if world!=null and ((world.transitioning and placed) or world.day_cycle.menu_open or world.day_cycle.sleeping):
 		return
 	if talk_wait > 0.0:
 		talk_wait -= delta

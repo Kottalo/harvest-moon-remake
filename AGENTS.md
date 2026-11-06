@@ -15,6 +15,7 @@ Start in the named runtime folder. Read its linked rules for implementation and 
 | Locations, doors, signs, transitions, world history | `game/world/`, `game/locations/` | [World](docs/engineering/world.md) | `world` |
 | NPC schedules, pathfinding, personas and dialogue | `game/npc/` | [NPCs](docs/engineering/npc.md), [world history](docs/engineering/world.md) for journal changes | `npc` |
 | Shops, money, stock, upgrades, livestock and shipping | `game/economy/` | Use the USA source prices and the existing NPC dialogue frame | `economy` |
+| F2 test scene launcher and playable fixtures | `game/debug/` | [Verification workflow](docs/engineering/workflow.md) | `debug` |
 | Clock, bedtime and time debug panel | `game/time/` | [Time](docs/engineering/time.md) | `time` |
 | Shaders, atlases and conversion | `game/rendering/`, `game/original_sprites/`, `tools/` | [Assets](docs/engineering/assets.md) | Use its importer and GPU checks |
 

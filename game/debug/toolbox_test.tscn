@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/debug/toolbox_test.gd" id="1"]
+[ext_resource type="PackedScene" path="res://game/player/player.tscn" id="2"]
+
+[node name="ToolboxTest" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.14, 0.20, 0.18, 1)
+
+[node name="Player" parent="." instance=ExtResource("2")]
+visible = false
+collision_layer = 0
+
+[node name="Hint" type="Label" parent="."]
+offset_left = 24.0
+offset_top = 20.0
+theme_override_font_sizes/font_size = 18
+text = "独立工具箱   ·   F2 测试面板"
+
+[node name="Center" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="OpenButton" type="Button" parent="Center"]
+custom_minimum_size = Vector2(180, 46)
+text = "打开工具箱（I）"
+
+[node name="Status" type="Label" parent="Center/OpenButton"]
+visible = false

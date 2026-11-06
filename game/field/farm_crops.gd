@@ -10,7 +10,7 @@ var plants := {}
 var batches := {}
 var pictures := {}
 var atlas_pages := {}
-var crop_body := StaticBody3D.new()
+var crop_body: StaticBody3D
 var crop_shape := BoxShape3D.new()
 var colliders := {}
 var water_remaining := 100
@@ -20,15 +20,19 @@ var message := ""
 func setup(owner_field) -> void:
 	field = owner_field
 	world = field.world
-	data = JSON.parse_string(FileAccess.get_file_as_string(CATALOGUE))
-	var actions = world.player.actions
-	actions.seed_catalogue = data.seeds
-	actions.crop_picture_provider = picture
+	configure_seed_art(world.player.actions)
 	world.day_cycle.day_started.connect(next_day)
+	crop_body = StaticBody3D.new()
 	crop_body.name = "CropObstructions"
 	crop_body.collision_mask = 0
 	crop_shape.size = Vector3(0.4,0.28,0.4)
 	add_child(crop_body)
+
+
+func configure_seed_art(actions) -> void:
+	data = JSON.parse_string(FileAccess.get_file_as_string(CATALOGUE))
+	actions.seed_catalogue = data.seeds
+	actions.crop_picture_provider = picture
 
 
 func picture(entry: Array) -> AtlasTexture:

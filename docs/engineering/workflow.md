@@ -14,6 +14,12 @@ If the Windows `python` alias points to the Store, use the installed Python exec
 
 Run `python tools/test_check.py` after editing the runner or structure checker. The grouped checks cover runtime behavior. Shader output, asset provenance and live frame pacing have their own checks in the scoped rules.
 
+## Playable test scenes
+
+In a debug build, press F2 in gameplay to open the test scene menu. Pick a scene with the mouse or the arrow keys and Z. F2 opens the same menu inside a test, where choosing its entry again resets it and Return to game resumes the suspended session. The NPC scene uses real player movement and B to toggle its wall. The toolbox scene opens the runtime picker and I reopens it.
+
+Add each fixture as a standalone scene under `game/debug/` and add its label and scene path to `test_scene_menu.gd`. Keep test data local to its scene. The launcher uses its own 3D world and suspends the live game. Use `python tools/check.py debug` to check isolation, input and return to gameplay.
+
 ## Project constraints
 
 - Do not call RenderingServer.force_draw from editor test callbacks or force asynchronous GPU checks through synchronous MCP test methods: a trial hung the editor and required user-approved recovery. The failed temporary GPU test/runner were removed. Do not repeat it, stop the editor without approval, or claim GPU acceptance from headless tests. Use ordinary isolated-process GPU checks when the platform supports them; preserve the user's editor/game/focus.
