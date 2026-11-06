@@ -81,7 +81,8 @@ func _input(event: InputEvent) -> void:
 		KEY_F2:
 			if menu.visible:
 				_close()
-			elif fixture!=null or (not get_tree().paused and not world.transitioning and not world.day_cycle.sleeping):
+			elif fixture!=null or (not get_tree().paused and not world.day_cycle.debug_panel.panel.visible
+					and not world.transitioning and not world.day_cycle.sleeping):
 				was_paused = get_tree().paused
 				get_tree().paused = true
 				viewport.gui_disable_input = true

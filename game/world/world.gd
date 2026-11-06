@@ -165,7 +165,7 @@ func _physics_process(delta: float) -> void:
 		player.velocity = Vector3.ZERO
 		player.reset_physics_interpolation()
 		_update_camera()
-	if player.actions.busy():
+	if player.actions.busy() or day_cycle.debug_panel.live_tracking:
 		return
 	_check_exits(delta)
 
@@ -435,7 +435,7 @@ func _wake_entry() -> Vector3:
 	return Vector3(wake[0],wake[1],wake[2])
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if transitioning or day_cycle.menu_open or day_cycle.sleeping:
+	if transitioning or day_cycle.menu_open or day_cycle.sleeping or day_cycle.debug_panel.live_tracking:
 		return
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return

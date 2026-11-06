@@ -81,6 +81,44 @@ func run() -> void:
 			"Jeff did not receive his current shop and duty"):
 		return
 	dialogue.close()
+	var offscreen: Dictionary = npc.presence("rick")
+	if not check(npc.presence("jeff").live and not offscreen.live and offscreen.area>=0 and offscreen.point.is_finite(),
+			"Presence did not distinguish a live actor from an offscreen scheduled point"):
+		return
+	clock.minute = 840
+	npc.update(0.0)
+	for tick in 45:
+		await physics_frame
+	var karen = npc.active.karen
+	var anna = npc.active.anna
+	if not check(karen.placed and anna.placed,"The source store visitors failed to spawn"):
+		return
+	karen.global_position = Vector3(0.2,0,1.2)
+	anna.global_position = Vector3(0.65,0,1.2)
+	await physics_frame
+	dialogue.begin(karen)
+	var shop_context: String = transport.last_messages[0].content
+	if not check(shop_context.contains("安娜（就在你东南侧）") and shop_context.contains("杰夫")
+			and not shop_context.contains("里克（"),"Karen did not know the nearby visitor and shopkeeper without leaking Rick's remote location"):
+		return
+	var divider := StaticBody3D.new()
+	var divider_collision := CollisionShape3D.new()
+	var divider_box := BoxShape3D.new()
+	divider_box.size = Vector3(0.1,1.2,0.18)
+	divider_collision.shape = divider_box
+	divider.add_child(divider_collision)
+	world.get_node("Location").add_child(divider)
+	divider.global_position = Vector3(0.425,0.4,1.2)
+	divider.force_update_transform()
+	await physics_frame
+	dialogue._submit("店里还有谁？")
+	shop_context = transport.last_messages[0].content
+	if not check(shop_context.get_slice("没看清他们的站位：",1).contains("安娜")
+			and not shop_context.contains("安娜（就在你东南侧）") and not npc.people_near(karen).has("anna"),
+			"Occlusion did not separate shop presence, exact position and conversation audience"):
+		return
+	divider.free()
+	dialogue.close()
 	clock.minute = 1080
 	npc.update(0.0)
 	if not check(not npc.active.has("jeff"),"Jeff stayed in the shop after leaving"):

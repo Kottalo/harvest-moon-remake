@@ -24,6 +24,7 @@ var library
 var location: Node3D
 var active := {}
 var scheduled_areas := {}
+var scheduled_spots := {}
 var clock_key := Vector4i(-1,-1,-1,-1)
 var dialogue
 
@@ -47,27 +48,46 @@ func update(_delta: float) -> void:
 	var day_index: int = (0 if clock.year==0 else 28)+clock.season*7+clock.weekday
 	var minute := posmod(clock.minute-DAY_START,1440)
 	var areas: Array = COAST if world.current_area in COAST else [world.current_area]
+	scheduled_spots.clear()
 	for name in library.catalogue.actors:
 		var record: Dictionary = library.catalogue.actors[name]
 		var variant := int(record.days[day_index])
 		var step: Array = _current_step(record.schedules[variant],minute) if variant>=0 else []
 		var scheduled_area := -1 if step.is_empty() else int(step[1])
 		scheduled_areas[name] = scheduled_area
-		if scheduled_area not in areas:
+		if scheduled_area<0:
 			_remove(name)
 			continue
 		var area := str(scheduled_area)
 		var row := str(int(step[2]))
 		var itinerary: Array = library.catalogue.routes[area][row]
-		if itinerary[0].is_empty():
+		if not itinerary[0].is_empty():
+			scheduled_spots[name] = _local_point(itinerary[0][0])
+		if scheduled_area not in areas or itinerary[0].is_empty():
 			_remove(name)
 			continue
 		var pack := str(int(record.area_art.get(area,record.default_art)))
 		_place(name,int(area),row,record.art[pack],itinerary,(minute-float(step[0]))*0.5)
-	if world.current_area==200:
-		for name in library.catalogue.helpers:
-			var helper: Dictionary = library.catalogue.helpers[name]
+	for name in library.catalogue.helpers:
+		var helper: Dictionary = library.catalogue.helpers[name]
+		scheduled_areas[name] = 200
+		scheduled_spots[name] = _local_point(helper.spot)
+		if world.current_area==200:
 			_place(name,200,"home",helper.poses,[[helper.spot],-1,false],0.0)
+
+
+func _local_point(cell: Array) -> Vector3:
+	return Vector3(cell[0],cell[1],cell[2])*0.001
+
+
+func presence(id: String) -> Dictionary:
+	var actor = active.get(id)
+	if actor!=null and actor.placed:
+		var area: int = world.area_at(actor.global_position)
+		return {"area":area,"point":world.world_to_area(area,actor.global_position),"live":true,
+			"activity":"走动" if actor.walking else "停留"}
+	return {"area":scheduled_areas.get(id,-1),"point":scheduled_spots.get(id,Vector3.INF),"live":false,
+		"activity":"日程位置" if scheduled_spots.has(id) else "暂无定位"}
 
 
 func _current_step(schedule: Array, minute: int) -> Array:
@@ -95,7 +115,7 @@ func _place(name: String, area: int, row: String, poses: Array, route: Array, el
 		return
 	var points := []
 	for cell: Array in route[0]:
-		var point: Vector3 = world.area_to_world(area,Vector3(cell[0],cell[1],cell[2])*0.001)
+		var point: Vector3 = world.area_to_world(area,_local_point(cell))
 		points.append([point,int(cell[3]),float(cell[4])/30.0])
 	if actor == null:
 		actor = Villager.instantiate()
@@ -135,8 +155,6 @@ func _nearby():
 func people_near(observer: CharacterBody3D) -> PackedStringArray:
 	var result := PackedStringArray()
 	var origin := observer.global_position
-	var space := observer.get_world_3d().direct_space_state
-	var eye := Vector3.UP*0.35
 	for id in active:
 		var actor = active[id]
 		if actor == observer or not actor.placed or not actor.is_visible_in_tree():
@@ -145,11 +163,46 @@ func people_near(observer: CharacterBody3D) -> PackedStringArray:
 		var offset := position-origin
 		if absf(offset.y)>0.4 or offset.length_squared()>4.0:
 			continue
-		# Solid props, ground and closed doorway stops can block sight.
-		var query := PhysicsRayQueryParameters3D.create(
-			origin+eye,position+eye,1|2|16,[observer.get_rid(),actor.get_rid()])
-		if space.intersect_ray(query).is_empty():
+		if _clear_sight(observer,actor,0.35):
 			result.append(id)
+	return result
+
+
+func _clear_sight(observer: CharacterBody3D, actor: CharacterBody3D, height: float) -> bool:
+	var eye := Vector3.UP*height
+	var query := PhysicsRayQueryParameters3D.create(observer.global_position+eye,actor.global_position+eye,
+		1|2|16,[observer.get_rid(),actor.get_rid()])
+	return observer.get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+
+func known_people(observer: CharacterBody3D) -> Dictionary:
+	# Spatial awareness is wider than the radius for hearing a conversation.
+	var result := {"near":PackedStringArray(),"elsewhere":PackedStringArray(),"same_shop":PackedStringArray()}
+	var origin := observer.global_position
+	var area: int = world.area_at(origin)
+	var indoors: bool = int(world.day_cycle.catalogue.areas[str(area)].source_flags)&0x1000!=0
+	for id in active:
+		var actor = active[id]
+		if actor==observer or not actor.placed or not actor.is_visible_in_tree():
+			continue
+		var offset: Vector3 = actor.global_position-origin
+		var distance := Vector2(offset.x,offset.z).length()
+		var same_area: bool = world.area_at(actor.global_position)==area
+		if absf(offset.y)>0.4 or distance>6.0 or (distance>2.5 and not (indoors and same_area)):
+			continue
+		# A second sight line clears low counters while solid walls and floors still occlude.
+		if not _clear_sight(observer,actor,0.35) and not _clear_sight(observer,actor,0.55):
+			# The supermarket floor is one public room. Know who is in it,
+			# but do not claim a precise position through an obstruction.
+			if same_area and world.world[str(area)].slug=="supermarket":
+				result.same_shop.append(NAMES[id])
+			continue
+		var side := "西北" if offset.x<0 else "东南"
+		if absf(offset.z)>=absf(offset.x):
+			side = "东北" if offset.z<0 else "西南"
+		var relation := "就在身旁" if distance<0.08 else ("就在你%s侧" if distance<=0.8 else "在你%s侧") % side
+		var group := "near" if distance<=2.5 else "elsewhere"
+		result[group].append("%s（%s）" % [NAMES[id],relation])
 	return result
 
 

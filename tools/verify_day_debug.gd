@@ -108,8 +108,42 @@ func run() -> void:
 	await tap(KEY_F1)
 	if not require_ok(paused,"Debug panel cleared a pre-existing tree pause"): return
 	paused = false
+	clock.weekday = 1
+	clock.minute = 360
+	world.npcs.update(0.0)
+	await tap(KEY_F1)
+	debug.map_button.pressed.emit()
+	await frames(3)
+	var map_view = debug.map_view
+	if not require_ok(map_view.visible and paused and map_view.area_choice.item_count==43
+			and map_view.actor_choice.item_count==40 and map_view.geometry.size()==43
+			and viewport.get_visible_rect().encloses(debug.panel.get_global_rect()),
+			"The NPC map clipped its layout or omitted a location or actor"): return
+	var jeff_index := -1
+	for i in range(1,map_view.actor_choice.item_count):
+		if map_view.actor_choice.get_item_metadata(i)=="jeff":
+			jeff_index = i
+			break
+	if not require_ok(jeff_index>0,"Jeff is missing from the NPC map"): return
+	map_view.actor_choice.select(jeff_index)
+	map_view.actor_choice.item_selected.emit(jeff_index)
+	if not require_ok(map_view.selected_area==184 and not map_view.positions.jeff.live
+			and map_view.positions.jeff.point.is_finite(),"Tracking did not follow Jeff's offscreen schedule"): return
+	map_view.live_button.toggled.emit(true)
+	if not require_ok(debug.live_tracking and not paused and not world.player.is_physics_processing(),
+			"Live tracking did not resume NPCs while suspending gameplay input"): return
+	clock.minute = 480
+	await frames(20)
+	if not require_ok(map_view.selected_area==180 and map_view.positions.jeff.area==180,
+			"Live tracking did not follow Jeff between areas"): return
+	await tap(KEY_F2)
+	if not require_ok(not paused and not world.get_node("DebugScenes").menu.visible,
+			"F2 opened a second debug modal during live map tracking"): return
+	await tap(KEY_F1)
+	if not require_ok(not debug.panel.visible and not paused and world.player.is_physics_processing(),
+			"Closing the map did not restore gameplay input"): return
 	await tap(KEY_F1)
 	viewport.free()
 	if not require_ok(not paused,"Removing an open panel left the tree paused"): return
-	print("DAY_DEBUG_CHECK_OK: viewport F1/repeat, popup input signal, native index_pressed selection/layout, frozen game/input, no date/time edit, retained preview, automatic indoor rules, lock/pause preservation and cleanup")
+	print("DAY_DEBUG_CHECK_OK: viewport F1/repeat, popup input signal, native index_pressed selection/layout, frozen game/input, no date/time edit, retained preview, automatic indoor rules, NPC map and live tracking, lock/pause preservation and cleanup")
 	quit()

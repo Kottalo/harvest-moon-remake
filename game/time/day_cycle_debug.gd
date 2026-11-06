@@ -4,6 +4,11 @@ var clock
 var panel: PanelContainer
 var selector: OptionButton
 var close_button: Button
+var rows: VBoxContainer
+var map_button: Button
+var map_view
+var live_tracking := false
+var player_was_processing := false
 var was_paused := false
 var timing_button: Button
 var timing_until := 0
@@ -27,7 +32,7 @@ func setup(owner_clock) -> void:
 	for edge in ["left","right","top","bottom"]:
 		margin.add_theme_constant_override("margin_"+edge,14)
 	panel.add_child(margin)
-	var rows := VBoxContainer.new()
+	rows = VBoxContainer.new()
 	rows.add_theme_constant_override("separation",12)
 	margin.add_child(rows)
 	var title := Label.new()
@@ -54,12 +59,56 @@ func setup(owner_clock) -> void:
 		timing_button.text = "采样画面卡顿（30 秒）"
 		timing_button.pressed.connect(_start_timing)
 		rows.add_child(timing_button)
+		map_button = Button.new()
+		map_button.text = "地图与角色追踪"
+		map_button.pressed.connect(_open_map.bind(margin))
+		rows.add_child(map_button)
 	close_button = Button.new()
 	close_button.text = "继续游戏（F1）"
 	close_button.focus_mode = Control.FOCUS_NONE # Keyboard closing uses F1, never a gameplay accept key.
 	close_button.pressed.connect(func(): set_open(false))
 	rows.add_child(close_button)
 	panel.hide()
+
+func _open_map(margin: MarginContainer) -> void:
+	if map_view==null:
+		map_view = load("res://game/npc/npc_map_debug.gd").new()
+		margin.add_child(map_view)
+		map_view.setup(clock.world,clock.clock_label.get_theme_font("font"))
+		map_view.back_requested.connect(_close_map)
+		map_view.live_requested.connect(_set_live_tracking)
+		for dropdown: OptionButton in [map_view.area_choice,map_view.actor_choice]:
+			dropdown.get_popup().window_input.connect(_input)
+	rows.hide()
+	map_view.open(not was_paused and not clock.world.transitioning and not clock.world.player.actions.busy())
+	panel.reset_size()
+	map_view.area_choice.grab_focus()
+
+
+func _close_map() -> void:
+	if map_view==null or not map_view.visible:
+		return
+	_set_live_tracking(false)
+	map_view.area_choice.get_popup().hide()
+	map_view.actor_choice.get_popup().hide()
+	map_view.hide()
+	rows.show()
+	panel.reset_size()
+
+
+func _set_live_tracking(enabled: bool) -> void:
+	if live_tracking==enabled:
+		return
+	var player = clock.world.player
+	if enabled:
+		player_was_processing = player.is_physics_processing()
+		player.set_physics_process(false)
+	else:
+		player.set_physics_process(player_was_processing)
+	live_tracking = enabled
+	get_tree().paused = not enabled
+	map_view.set_live(enabled)
+
 
 func _start_timing() -> void:
 	frame_times.clear()
@@ -122,6 +171,7 @@ func set_open(open: bool) -> void:
 		get_tree().paused = true
 		selector.select(clock.debug_period+1)
 	else:
+		_close_map()
 		selector.get_popup().hide()
 		get_tree().paused = was_paused
 	panel.visible = open
@@ -129,5 +179,7 @@ func set_open(open: bool) -> void:
 	else: selector.release_focus()
 
 func _exit_tree() -> void:
+	if live_tracking and is_instance_valid(clock.world.player):
+		clock.world.player.set_physics_process(player_was_processing)
 	if is_instance_valid(panel) and panel.visible:
 		get_tree().paused = was_paused
