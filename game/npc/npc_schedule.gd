@@ -189,6 +189,7 @@ func _notice_player() -> void:
 		var actor = active[id]
 		if not actor.walking:
 			actor.greet(world.player.global_position,0.35)
+	dialogue.consider_proactive(visible)
 
 
 func _clear_sight(observer: CharacterBody3D, actor: CharacterBody3D, height: float) -> bool:

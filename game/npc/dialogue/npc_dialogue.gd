@@ -3,6 +3,9 @@ extends CanvasLayer
 const PiAgent := preload("res://game/npc/dialogue/pi_agent.gd")
 const SpeechBubble := preload("res://game/npc/dialogue/speech_bubble.gd")
 const QUEUE_LIMIT := 4
+const PROACTIVE_COOLDOWN_MS := 20_000
+const PROACTIVE_DWELL_MS := 900
+const PROACTIVE_RANGE_SQUARED := 1.35*1.35
 const PERSONAS := "res://game/npc/dialogue/personas.json"
 # Roles at known workplaces. These describe duties, not the current animation.
 const WORKPLACE_DUTIES := {
@@ -52,6 +55,11 @@ var waiting_for_text := false
 var group_addressed := false
 var awaiting_reply := ""
 var reply_wait_started := false
+var proactive_enabled := DisplayServer.get_name()!="headless"
+var npc_initiated := false
+var next_proactive_at := 0
+var proactive_day := Vector3i(-1,-1,-1)
+var greeted_today := {}
 var was_paused := false
 var notice_open := false
 var overlay: Control
@@ -204,7 +212,7 @@ func _layout() -> void:
 		composer.offset_top = -18-composer.get_combined_minimum_size().y
 		composer.offset_bottom = -18
 
-func begin(actor) -> void:
+func begin(actor, proactive := false) -> void:
 	var id := str(actor.name)
 	if overlay.visible or not actor.placed or not profiles.has(id):
 		return
@@ -216,9 +224,49 @@ func begin(actor) -> void:
 	actor.greet(world.player.global_position)
 	entry.clear()
 	composer.show()
-	entry.grab_focus()
-	pending_text = "玩家走到你面前打招呼。请根据此刻的场景自然回应。"
+	npc_initiated = proactive
+	if proactive:
+		pending_text = "你注意到玩家在附近停下来了。根据眼前的场景和角色设定，自然地主动说一句。玩家还没开口。"
+	else:
+		entry.grab_focus()
+		pending_text = "玩家走到你面前打招呼。请根据此刻的场景自然回应。"
 	_ask()
+
+func consider_proactive(visible: PackedStringArray) -> void:
+	if not proactive_enabled or visible.is_empty() or composer.visible or not bubbles.is_empty():
+		return
+	var now := Time.get_ticks_msec()
+	if now<next_proactive_at or get_tree().paused or world.transitioning or world.overview:
+		return
+	var clock = world.day_cycle
+	var player = world.player
+	if clock.menu_open or clock.sleeping or clock.debug_panel.panel.visible or player.input_locked:
+		return
+	if player.actions.busy() or player.actions.carried_id!=0 or not player.is_on_floor():
+		return
+	var motion: Vector3 = player.velocity
+	if Vector2(motion.x,motion.z).length_squared()>0.04:
+		return
+	var today := Vector3i(clock.year,clock.season,clock.day)
+	if today!=proactive_day:
+		proactive_day = today
+		greeted_today.clear()
+	var nearest := PROACTIVE_RANGE_SQUARED
+	var speaker = null
+	for id in visible:
+		if greeted_today.has(id) or not profiles.has(id) or now-world.npcs.player_arrivals.get(id,now)<PROACTIVE_DWELL_MS:
+			continue
+		var actor = world.npcs.active.get(id)
+		if not is_instance_valid(actor) or not actor.placed or actor.walking:
+			continue
+		var distance: float = actor.global_position.distance_squared_to(player.global_position)
+		if distance<nearest:
+			nearest = distance
+			speaker = actor
+	if speaker!=null:
+		next_proactive_at = now+PROACTIVE_COOLDOWN_MS
+		greeted_today[str(speaker.name)] = true
+		begin(speaker,true)
 
 func _set_host(actor) -> void:
 	npc_id = str(actor.name)
@@ -334,6 +382,7 @@ func close_chat(keep_finished := false) -> void:
 		return
 	client.cancel_request()
 	_clear_reply_wait()
+	npc_initiated = false
 	pending = false
 	planning = false
 	waiting_for_text = false
@@ -400,6 +449,7 @@ func _submit(value: String) -> void:
 		_set_status("等一下，还有几句话正在等待回应。")
 		return
 	_clear_reply_wait()
+	npc_initiated = false
 	entry.clear()
 	entry.release_focus()
 	_bubble("player",text)
@@ -685,5 +735,7 @@ func _process(delta: float) -> void:
 		else:
 			bubble.follow(camera,bubble_layer.size if id=="player" else bounds,used)
 	_check_reply_wait()
+	if npc_initiated and not pending and bubbles.is_empty() and not entry.has_focus():
+		close_chat()
 	if waiting_for_text:
 		_ask()

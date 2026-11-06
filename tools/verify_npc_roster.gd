@@ -290,10 +290,10 @@ func run() -> void:
 		return
 	var greeting = dialogue.bubbles.chef
 	if not check(greeting.label.visible_characters==1,"NPC text appeared all at once"): return
-	greeting.advance(0.29)
-	if not check(greeting.label.visible_characters==1,"NPC text advanced before 0.3 seconds"): return
+	greeting.advance(0.08)
+	if not check(greeting.label.visible_characters==1,"NPC text advanced before 0.09 seconds"): return
 	greeting.advance(0.01)
-	if not check(greeting.label.visible_characters==2,"NPC text did not advance at 0.3 seconds"): return
+	if not check(greeting.label.visible_characters==2,"NPC text did not advance at 0.09 seconds"): return
 	var people: String = transport.last_messages[0].content.get_slice("你附近可见的其他人：",1)
 	if not check(people.contains("纳皮") and not people.contains("霍格")
 			and not people.contains("博尔德") and not people.contains("切夫"),
@@ -406,8 +406,8 @@ func run() -> void:
 			"An offscreen NPC's bubble left the viewport"):
 		return
 	npc_bubble.actor.global_position = npc_position
-	npc_bubble.advance(0.3*(npc_bubble.label.text.length()-npc_bubble.label.visible_characters))
-	if not check(is_equal_approx(npc_bubble.remaining,10.65),"Hold did not start after the final character"):
+	npc_bubble.advance(0.09*(npc_bubble.label.text.length()-npc_bubble.label.visible_characters))
+	if not check(is_equal_approx(npc_bubble.remaining,8.65),"Hold did not start after the final character"):
 		return
 	var player_position: Vector3 = world.player.global_position
 	world.player.global_position = player_position+Vector3(5,0,0)
@@ -430,8 +430,8 @@ func run() -> void:
 	transport.partial.emit("我在做饭。你想帮忙吗？")
 	transport.answered.emit("我在做饭。你想帮忙吗？","")
 	var question = dialogue.bubbles.chef
-	dialogue._process(1.2)
-	dialogue._process(0.59)
+	dialogue._process(0.36)
+	dialogue._process(0.31)
 	if not check(question.label.text=="我在做饭。" and question.label.visible_characters==5
 			and not dialogue.reply_wait_started,"The next sentence started too soon or the reply timer ran during speech"):
 		return
@@ -439,13 +439,13 @@ func run() -> void:
 	if not check(question.label.text=="你想帮忙吗？" and question.label.visible_characters==1,
 			"The second sentence did not stream separately"):
 		return
-	dialogue._process(1.5)
-	if not check(dialogue.reply_wait_started and is_equal_approx(chef.talk_wait,10.0)
+	dialogue._process(0.45)
+	if not check(dialogue.reply_wait_started and is_equal_approx(chef.talk_wait,8.0)
 			and world.history.entries.back().content=="我在做饭。你想帮忙吗？",
 			"The NPC did not wait for the player after the last sentence"):
 		return
 	var requests_before_timeout := transport.sent_prompts.size()
-	dialogue._process(9.9)
+	dialogue._process(7.9)
 	if not check(dialogue.composer.visible and dialogue.bubbles.chef==question,"The question timed out too early"):
 		return
 	dialogue._process(0.11)
@@ -459,6 +459,40 @@ func run() -> void:
 		return
 	transport.hold = false
 	dialogue.close()
+	var preview = load("res://game/npc/dialogue/speech_bubble.gd").new()
+	root.add_child(preview)
+	preview.setup(chef,dialogue.ui_font,false)
+	preview.say("早上好。",false)
+	var short_hold: float = preview.remaining
+	preview.say("我刚刚把准备好的蔬菜和工具都拿到了厨房。",false)
+	if not check(preview.remaining>short_hold,"NPC text length did not affect the hold duration"):
+		return
+	preview.free()
+
+	world.player.set_physics_process(true)
+	for tick in 12:
+		await physics_frame
+	world.player.set_physics_process(false)
+	world.player.velocity = Vector3.ZERO
+	chef.walking = false
+	dialogue.proactive_enabled = true
+	var requests_before_greeting := transport.sent_prompts.size()
+	npc.player_arrivals["chef"] = Time.get_ticks_msec()
+	dialogue.consider_proactive(PackedStringArray(["chef"]))
+	if not check(transport.sent_prompts.size()==requests_before_greeting,"An NPC greeted a player who had just entered range"):
+		return
+	npc.player_arrivals["chef"] = Time.get_ticks_msec()-1200
+	dialogue.consider_proactive(PackedStringArray(["chef"]))
+	if not check(transport.sent_prompts.size()==requests_before_greeting+1 and dialogue.npc_id=="chef"
+			and dialogue.composer.visible and not dialogue.entry.has_focus() and transport.prompt.message.contains("玩家还没开口"),
+			"An eligible NPC did not start a conversation without taking keyboard focus"):
+		return
+	dialogue.close()
+	dialogue.next_proactive_at = 0
+	dialogue.consider_proactive(PackedStringArray(["chef"]))
+	if not check(transport.sent_prompts.size()==requests_before_greeting+1,"The same NPC greeted twice in one day"):
+		return
+	dialogue.proactive_enabled = false
 	wall.free()
 	await physics_frame
 	dialogue.begin(chef)
