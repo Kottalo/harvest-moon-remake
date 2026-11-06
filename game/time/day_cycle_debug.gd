@@ -37,7 +37,7 @@ func setup(owner_clock) -> void:
 	rows.add_theme_constant_override("separation",12)
 	margin.add_child(rows)
 	var title := Label.new()
-	title.text = "调试面板 · 游戏已暂停"
+	title.text = "调试面板"
 	rows.add_child(title)
 	var caption := Label.new()
 	caption.text = "天色预览"

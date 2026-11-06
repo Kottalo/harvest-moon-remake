@@ -51,12 +51,14 @@ func run() -> void:
 	var minute: int = clock.minute
 	var day: int = clock.day
 	var position: Vector3 = world.player.position
+	clock.elapsed = 1.9
 	Input.action_press("move_right")
 	Input.action_press("use_tool")
 	await frames(35)
 	Input.action_release("move_right")
 	Input.action_release("use_tool")
-	if not require_ok(clock.minute==minute and clock.day==day and world.player.position==position and not world.player.actions.busy(),"Panel allowed game time/movement/tool input to advance"): return
+	if not require_ok(clock.minute==minute+1 and clock.day==day and world.player.position==position
+			and not world.player.actions.busy(),"Debug panel must leave time running while suspending movement and tools"): return
 	var day_picture: Image
 	var night_picture: Image
 	# Activate the native popup's index_pressed path; headless windows have no OS focus.
@@ -70,7 +72,8 @@ func run() -> void:
 		if not require_ok(debug.selector.selected==index and clock.debug_period==index-1,"Native dropdown did not apply the selected sky: "+str([index,debug.selector.selected,clock.debug_period])): return
 		var expected: Vector3 = clock._period_rgb(index-1) if index>0 else clock.tint_rgb
 		var actual: Vector3 = clock.tint.material.get_shader_parameter("subtract_rgb")
-		if not require_ok(actual.is_equal_approx(expected/255.0) and clock.minute==minute and clock.day==day,"Preview changed the clock or applied the wrong source tint"): return
+		if not require_ok(actual.is_equal_approx(expected/255.0) and clock.minute>=minute+1
+				and clock.day==day,"Preview rewound time or applied the wrong source tint"): return
 		if DisplayServer.get_name()!="headless" and index in [2,4]:
 			var shot := await picture()
 			shot.save_png("res://verification/debug_day_panel.png" if index==2 else "res://verification/debug_night_panel.png")
@@ -145,5 +148,5 @@ func run() -> void:
 	await tap(KEY_F1)
 	viewport.free()
 	if not require_ok(not paused,"Removing an open panel left the tree paused"): return
-	print("DAY_DEBUG_CHECK_OK: viewport F1/repeat, popup input signal, native index_pressed selection/layout, frozen game/input, no date/time edit, retained preview, automatic indoor rules, NPC map and live tracking, lock/pause preservation and cleanup")
+	print("DAY_DEBUG_CHECK_OK: viewport F1/repeat, popup input signal, native index_pressed selection/layout, suspended input with a running clock, retained preview, automatic indoor rules, NPC map and live tracking, lock/pause preservation and cleanup")
 	quit()

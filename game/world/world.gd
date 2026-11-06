@@ -155,7 +155,6 @@ func _wireframe_colliders(location: Node3D) -> void:
 func _physics_process(delta: float) -> void:
 	if transitioning:
 		return
-	day_cycle.advance(delta,overview)
 	npcs.update(delta)
 	if transitioning or day_cycle.menu_open:
 		return
