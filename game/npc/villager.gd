@@ -219,9 +219,9 @@ func _arrive() -> void:
 	_idle()
 
 
-func greet(point: Vector3) -> void:
+func greet(point: Vector3, hold := 1.2) -> void:
 	facing = _facing_for(point-global_position)
-	talk_wait = 1.2
+	talk_wait = maxf(talk_wait,hold)
 	_idle()
 
 

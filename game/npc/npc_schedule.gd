@@ -27,17 +27,25 @@ var scheduled_areas := {}
 var scheduled_spots := {}
 var clock_key := Vector4i(-1,-1,-1,-1)
 var dialogue
+var player_arrivals := {}
+var awareness_elapsed := 0.0
 
 
 func enter_location(next_location: Node3D) -> void:
 	location = next_location
 	active.clear()
+	player_arrivals.clear()
+	awareness_elapsed = 0.0
 	dialogue.close()
 	clock_key = Vector4i(-1,-1,-1,-1)
 	update(0.0)
 
 
-func update(_delta: float) -> void:
+func update(delta: float) -> void:
+	awareness_elapsed += delta
+	if awareness_elapsed>=0.2:
+		awareness_elapsed = 0.0
+		_notice_player()
 	var clock = world.day_cycle
 	var key := Vector4i(clock.year,clock.season,clock.weekday,clock.minute)
 	if key == clock_key:
@@ -106,6 +114,7 @@ func _remove(name: String) -> void:
 	location.remove_child(actor)
 	actor.queue_free()
 	active.erase(name)
+	player_arrivals.erase(name)
 
 
 func _place(name: String, area: int, row: String, poses: Array, route: Array, elapsed: float) -> void:
@@ -166,6 +175,20 @@ func people_near(observer: CharacterBody3D) -> PackedStringArray:
 		if _clear_sight(observer,actor,0.35):
 			result.append(id)
 	return result
+
+
+func _notice_player() -> void:
+	var visible := people_near(world.player)
+	for id in player_arrivals.keys():
+		if not visible.has(id):
+			player_arrivals.erase(id)
+	for id in visible:
+		if player_arrivals.has(id):
+			continue
+		player_arrivals[id] = Time.get_ticks_msec()
+		var actor = active[id]
+		if not actor.walking:
+			actor.greet(world.player.global_position,0.35)
 
 
 func _clear_sight(observer: CharacterBody3D, actor: CharacterBody3D, height: float) -> bool:

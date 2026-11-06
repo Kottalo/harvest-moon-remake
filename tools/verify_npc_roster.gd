@@ -42,6 +42,17 @@ func check(condition: bool, message: String) -> bool:
 	return condition
 
 
+func tap_enter() -> void:
+	var event := InputEventKey.new()
+	event.keycode = KEY_ENTER
+	event.physical_keycode = KEY_ENTER
+	event.pressed = true
+	root.push_input(event,true)
+	var released := event.duplicate() as InputEventKey
+	released.pressed = false
+	root.push_input(released,true)
+
+
 func run() -> void:
 	var world = load("res://game/world/world.tscn").instantiate()
 	root.add_child(world)
@@ -64,6 +75,18 @@ func run() -> void:
 	transport.partial.connect(dialogue._on_partial)
 	transport.answered.connect(dialogue._on_answer)
 
+	world._change_area(80,Vector3.ZERO)
+	tap_enter()
+	if not check(dialogue.composer.visible and dialogue.entry.has_focus() and transport.sent_prompts.is_empty(),
+			"Enter did not focus the composer without an NPC or attempted an API call"):
+		return
+	dialogue.entry.text = "出门吧。"
+	tap_enter()
+	if not check(dialogue.bubbles.player.label.text=="出门吧。" and not dialogue.entry.has_focus()
+			and world.history.entries.back().known_by==PackedStringArray(["player"]) and transport.sent_prompts.is_empty(),
+			"Enter did not submit local speech without an NPC"):
+		return
+
 	clock.season = 0
 	clock.weekday = 1
 	clock.minute = 479
@@ -79,13 +102,35 @@ func run() -> void:
 		if jeff.placed:
 			break
 		await physics_frame
+	npc.update(0.2)
+	if not check(not npc.player_arrivals.has("jeff"),"Jeff noticed a player outside his range"):
+		return
 	world.player.global_position = jeff.global_position+Vector3(0.25,0,0)
-	dialogue.begin(jeff)
-	if not check(dialogue.composer.visible and transport.last_messages[0].content.contains("你在杂货店")
+	jeff.walking = false
+	jeff.facing = 1
+	npc.update(0.2)
+	if not check(npc.player_arrivals.has("jeff") and jeff.facing==3 and transport.sent_prompts.is_empty(),
+			"Entering Jeff's sight did not register and turn him, or used a model request"):
+		return
+	jeff.facing = 1
+	npc.update(0.2)
+	if not check(jeff.facing==1,"Staying in sight repeatedly triggered the arrival"):
+		return
+	tap_enter()
+	dialogue.entry.text = "杰夫，早上好。"
+	tap_enter()
+	if not check(dialogue.composer.visible and dialogue.bubbles.has("jeff")
+			and transport.sent_prompts.size()==1 and transport.prompt.message=="杰夫，早上好。"
+			and transport.last_messages[0].content.contains("你刚注意到玩家走近")
+			and transport.last_messages[0].content.contains("你在杂货店")
 			and transport.last_messages[0].content.contains("你在这里的职责是经营杂货店"),
 			"Jeff did not receive his current shop and duty"):
 		return
 	dialogue.close()
+	world.player.global_position = Vector3(-100,0,-100)
+	npc.update(0.2)
+	if not check(not npc.player_arrivals.has("jeff"),"Leaving sight retained Jeff's current awareness"):
+		return
 	var offscreen: Dictionary = npc.presence("rick")
 	if not check(npc.presence("jeff").live and not offscreen.live and offscreen.area>=0 and offscreen.point.is_finite(),
 			"Presence did not distinguish a live actor from an offscreen scheduled point"):

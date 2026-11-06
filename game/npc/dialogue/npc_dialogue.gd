@@ -217,17 +217,33 @@ func begin(actor) -> void:
 		entry.grab_focus()
 		return
 	close_chat()
-	npc_id = id
-	focus_id = id
-	speaker_id = id
-	listeners = PackedStringArray([id])
-	prior_activity[id] = actor.walking
+	_set_host(actor)
 	actor.greet(world.player.global_position)
 	entry.clear()
 	composer.show()
 	entry.grab_focus()
 	pending_text = "玩家走到你面前打招呼。请根据此刻的场景自然回应。"
 	_ask()
+
+func _set_host(actor) -> void:
+	npc_id = str(actor.name)
+	focus_id = npc_id
+	speaker_id = npc_id
+	listeners = PackedStringArray([npc_id])
+	prior_activity[npc_id] = actor.walking
+
+func _nearest_listener():
+	var best = null
+	var nearest := INF
+	for id in world.npcs.people_near(world.player):
+		if not profiles.has(id):
+			continue
+		var actor = world.npcs.active[id]
+		var distance: float = actor.global_position.distance_squared_to(world.player.global_position)
+		if distance < nearest:
+			nearest = distance
+			best = actor
+	return best
 
 func _refresh_guests() -> void:
 	guests.clear()
@@ -290,6 +306,9 @@ func _scene_context(actor) -> String:
 		actor.display_name,profiles[id],clock.year+1,["春","夏","秋","冬"][clock.season],
 		clock.day+1,int(clock.minute)/60,int(clock.minute)%60,place.name,activity]
 	context += "此刻你%s。" % ("正在走动" if actor.walking else "停在原地")
+	var arrival: int = world.npcs.player_arrivals.get(id,-1)
+	if arrival>=0 and Time.get_ticks_msec()-arrival<=5000:
+		context += "你刚注意到玩家走近。"
 	var duty: String = WORKPLACE_DUTIES.get(place.slug,{}).get(id,"")
 	if not duty.is_empty():
 		context += "你在这里的职责是%s。" % duty
@@ -316,7 +335,7 @@ func close() -> void:
 	get_tree().paused = was_paused
 
 func close_chat() -> void:
-	if npc_id.is_empty():
+	if not composer.visible:
 		return
 	client.cancel_request()
 	pending = false
@@ -356,12 +375,20 @@ func _input(event: InputEvent) -> void:
 		if event.keycode==KEY_ESCAPE:
 			get_viewport().set_input_as_handled()
 			close_chat()
-		elif event.keycode==KEY_ENTER and not entry.has_focus():
-			get_viewport().set_input_as_handled()
-			entry.grab_focus()
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+	if event.keycode not in [KEY_ENTER,KEY_KP_ENTER] or entry.has_focus():
+		return
+	if get_tree().paused or world.transitioning or world.overview or world.player.input_locked or world.day_cycle.debug_panel.live_tracking:
+		return
+	composer.show()
+	entry.grab_focus()
+	get_viewport().set_input_as_handled()
 
 func _submit(value: String) -> void:
-	if npc_id.is_empty() or get_tree().paused:
+	if not composer.visible or get_tree().paused:
 		return
 	var text := value.strip_edges().left(entry.max_length)
 	if text.is_empty():
@@ -376,6 +403,12 @@ func _submit(value: String) -> void:
 	entry.clear()
 	entry.release_focus()
 	_bubble("player",text)
+	if npc_id.is_empty():
+		var actor = _nearest_listener()
+		if actor==null:
+			world.record_history("speech","player",text,PackedStringArray())
+			return
+		_set_host(actor)
 	_refresh_guests()
 	var selection := _select_speakers(text)
 	var record: int = world.record_history("speech","player",text,selection.listeners)
@@ -524,9 +557,9 @@ func _remove_bubble(id: String) -> void:
 	bubbles.erase(id)
 
 func _process(delta: float) -> void:
-	if npc_id.is_empty() or get_tree().paused:
+	if not composer.visible or get_tree().paused:
 		return
-	if world.transitioning or not _speaker_in_range(npc_id):
+	if world.transitioning or (not npc_id.is_empty() and not _speaker_in_range(npc_id)):
 		close_chat()
 		return
 	var camera := get_viewport().get_camera_3d()
