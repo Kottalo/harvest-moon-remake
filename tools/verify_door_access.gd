@@ -110,7 +110,7 @@ func run() -> void:
 	await press_enter()
 	world._refresh_hud()
 	if not require_ok(not world.transitioning and world.doors.doors.is_empty()
-			and world.hud.text.contains("门锁着") and dialogue.notice_open and not dialogue.entry.visible
+			and world.hud.text.contains("门锁着") and dialogue.notice_open and not dialogue.composer.visible
 			and dialogue.reply.text.contains("开放时间"),"Locked supermarket accepted E or failed to show refusal"):
 		return
 	await press_enter()

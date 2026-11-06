@@ -1,30 +1,34 @@
 extends SceneTree
 ## Exercises the original schedule catalogue through normal world entry and clock updates.
 
-class TestDeepSeek extends "res://game/npc/dialogue/deepseek.gd":
+class TestPi extends "res://game/npc/dialogue/pi_agent.gd":
 	var last_messages: Array
 	var prompt: Dictionary
 	var memory: String
 	var problem := ""
-	var requests: Array[Dictionary] = []
+	var sent_prompts: Array[Dictionary] = []
 	var fail_speaker := ""
+	var hold := false
 
 	func ask(messages: Array) -> void:
 		last_messages = messages
 		prompt = JSON.parse_string(messages.back().content)
 		memory = JSON.stringify(prompt.memory)
-		requests.append({"context":messages[0].content,"memory":memory})
+		sent_prompts.append({"context":messages[0].content,"memory":memory})
 		if not fail_speaker.is_empty() and messages[0].content.contains("角色："+fail_speaker+"。"):
 			answered.emit("","第二个角色断线")
 			return
 		if not problem.is_empty():
 			answered.emit("",problem)
 			return
-		var event := 'data: {"choices":[{"delta":{"content":"今天想"}}]}\r\n\r\n'.to_utf8_buffer()
-		var split := event.find(0xe4)+1
-		_receive(event.slice(0,split))
-		_receive(event.slice(split))
-		_receive('data: {"choices":[{"delta":{"content":"尝点什么？"}}]}\n\ndata: [DONE]\n\n'.to_utf8_buffer())
+		if not hold:
+			finish()
+
+	func finish() -> void:
+		partial.emit("今天想")
+		partial.emit("今天想尝点什么？")
+		answered.emit("今天想尝点什么？","")
+
 
 
 func _initialize() -> void:
@@ -54,7 +58,7 @@ func run() -> void:
 			return
 	var dialogue = npc.dialogue
 	dialogue.client.free()
-	var transport := TestDeepSeek.new()
+	var transport := TestPi.new()
 	dialogue.client = transport
 	dialogue.add_child(transport)
 	transport.partial.connect(dialogue._on_partial)
@@ -75,8 +79,9 @@ func run() -> void:
 		if jeff.placed:
 			break
 		await physics_frame
+	world.player.global_position = jeff.global_position+Vector3(0.25,0,0)
 	dialogue.begin(jeff)
-	if not check(dialogue.overlay.visible and transport.last_messages[0].content.contains("你在杂货店")
+	if not check(dialogue.composer.visible and transport.last_messages[0].content.contains("你在杂货店")
 			and transport.last_messages[0].content.contains("你在这里的职责是经营杂货店"),
 			"Jeff did not receive his current shop and duty"):
 		return
@@ -96,6 +101,7 @@ func run() -> void:
 	karen.global_position = Vector3(0.2,0,1.2)
 	anna.global_position = Vector3(0.65,0,1.2)
 	await physics_frame
+	world.player.global_position = karen.global_position+Vector3(-0.25,0,0)
 	dialogue.begin(karen)
 	var shop_context: String = transport.last_messages[0].content
 	if not check(shop_context.contains("安娜（就在你东南侧）") and shop_context.contains("杰夫")
@@ -142,9 +148,10 @@ func run() -> void:
 	if not check(basil.placed and basil.global_position.distance_to(start)>0.3 and walk_frames.size()>3,
 			"Basil did not walk and animate on his source morning route"):
 		return
+	world.player.global_position = basil.global_position+Vector3(0.25,0,0)
 	dialogue.begin(basil)
 	dialogue._submit("你在哪儿？刚才在做什么？")
-	if not check(dialogue.overlay.visible and not basil.walking
+	if not check(dialogue.composer.visible and not basil.walking
 			and transport.last_messages[0].content.contains("你在图书馆街区。打招呼前，你正沿这里的路线走动")
 			and not transport.last_messages[0].content.contains("你在这里的职责"),
 			"Stopping to greet lost Basil's actual place or walking activity"):
@@ -200,12 +207,12 @@ func run() -> void:
 	var before_greeting: int = world.history.entries.size()
 	var snapshots: Array[String] = []
 	transport.partial.connect(func(_text: String):
-		snapshots.append(dialogue.reply.text if world.history.entries.size()==before_greeting else "saved too early"))
+		snapshots.append(dialogue.bubbles.chef.label.text if world.history.entries.size()==before_greeting else "saved too early"))
 	world.player.actions.interact_requested.emit()
-	if not check(dialogue.overlay.visible and paused and dialogue.npc_id=="chef" and chef.facing==3,
-			"Facing the helper and pressing interact did not open a paused conversation"):
+	if not check(dialogue.composer.visible and not paused and dialogue.npc_id=="chef" and chef.facing==3,
+			"Facing the helper and pressing interact did not open live conversation"):
 		return
-	if not check(dialogue.reply.text=="今天想尝点什么？" and transport.last_messages[0].content.contains("料理")
+	if not check(dialogue.bubbles.chef.label.text=="今天想尝点什么？" and transport.last_messages[0].content.contains("料理")
 			and snapshots==["今天想","今天想尝点什么？"]
 			and transport.last_messages[0].content.contains("你在小矮人之家。打招呼前，你在原地停留")
 			and transport.memory.contains("放下了树枝")
@@ -233,51 +240,69 @@ func run() -> void:
 			and transport.memory.contains("今天想尝点什么？"),
 			"Retry duplicated speech or lost this NPC's earlier reply"):
 		return
-	transport.requests.clear()
+	transport.sent_prompts.clear()
 	dialogue._submit("附近有谁？")
-	if not check(transport.requests.size()==1 and dialogue.title.text=="切夫",
+	if not check(transport.sent_prompts.size()==1 and dialogue.speaker_id=="chef",
 			"An ordinary private turn provoked an interruption"):
 		return
-	transport.requests.clear()
+	transport.sent_prompts.clear()
 	dialogue._submit("现在能玩游戏吗？")
-	if not check(transport.requests.size()==2 and dialogue.title.text=="切夫、纳皮"
-			and dialogue.reply.text.contains("切夫：") and dialogue.reply.text.contains("纳皮：")
-			and transport.requests[1].context.contains("角色：纳皮。")
-			and transport.requests[1].memory.contains('"actor":"切夫"')
-			and not transport.requests[0].memory.contains("这是我们的秘密")
-			and not transport.requests[1].memory.contains("这是我们的秘密")
+	if not check(transport.sent_prompts.size()==2 and dialogue.bubbles.has("chef") and dialogue.bubbles.has("nappy")
+			and transport.sent_prompts[1].context.contains("角色：纳皮。")
+			and transport.sent_prompts[1].memory.contains('"actor":"切夫"')
+			and not transport.sent_prompts[0].memory.contains("这是我们的秘密")
+			and not transport.sent_prompts[1].memory.contains("这是我们的秘密")
 			and world.history.entries.back().known_by.has("chef"),
 			"The relevant bystander failed to join or received earlier private speech"):
 		return
-	transport.requests.clear()
+	transport.sent_prompts.clear()
 	dialogue._submit("那怎么玩游戏？")
-	if not check(transport.requests.size()==1,"The same topic repeatedly provoked unsolicited replies"):
+	if not check(transport.sent_prompts.size()==1,"The same topic repeatedly provoked unsolicited replies"):
 		return
-	transport.requests.clear()
+	transport.sent_prompts.clear()
 	var before_group: int = world.history.entries.size()
 	transport.fail_speaker = "纳皮"
 	# Select the closest guest on this explicit group request.
 	dialogue.last_guest = ""
 	dialogue._submit("你们觉得呢？")
-	if not check(transport.requests.size()==2 and dialogue.status.text=="第二个角色断线"
-			and world.history.entries.size()==before_group+2 and dialogue.reply.text.contains("切夫："),
+	if not check(transport.sent_prompts.size()==2 and dialogue.status.text=="第二个角色断线"
+			and world.history.entries.size()==before_group+2 and dialogue.bubbles.has("chef"),
 			"Failure of the second speaker lost the first reply or duplicated the turn"):
 		return
 	transport.fail_speaker = ""
 	dialogue._submit("")
-	if not check(transport.requests.size()==3 and world.history.entries.size()==before_group+3
+	if not check(transport.sent_prompts.size()==3 and world.history.entries.size()==before_group+3
 			and world.history.entries.back().actor=="nappy"
 			and not world.history.entries.back().known_by.has("hoggy"),
 			"Group retry replayed the first speaker or included a neighbor behind a wall"):
 		return
-	transport.requests.clear()
+	transport.sent_prompts.clear()
 	dialogue._submit("纳皮，你呢？")
-	if not check(transport.requests.size()==1 and dialogue.title.text=="纳皮"
+	if not check(transport.sent_prompts.size()==1 and dialogue.speaker_id=="nappy"
 			and world.history.entries.back().known_by==PackedStringArray(["nappy","player"]),
 			"Directly addressing a nearby character did not switch to a private reply"):
 		return
+	transport.sent_prompts.clear()
+	transport.hold = true
+	dialogue._submit("还在营业吗？")
+	dialogue._submit("下次见。")
+	if not check(not paused and dialogue.entry.editable and dialogue.queued.size()==1
+			and dialogue.bubbles.player.label.text=="下次见。" and transport.sent_prompts.size()==1,
+			"Live composer failed to show or queue speech while Pi was streaming"):
+		return
+	transport.finish()
+	if not check(transport.sent_prompts.size()==2 and transport.prompt.message=="下次见。" and dialogue.pending,
+			"Queued live speech did not reach Pi after the current reply"):
+		return
+	transport.hold = false
+	transport.finish()
+	await process_frame
+	if not check(dialogue.composer.position.y>0 and dialogue.composer.get_rect().end.y<=dialogue.bubble_layer.size.y
+			and dialogue.bubbles.player.visible and dialogue.bubbles.nappy.visible,
+			"Composer or head-anchored bubbles are outside the viewport"):
+		return
 	dialogue.close()
-	if not check(not paused and not dialogue.overlay.visible,"Closing dialogue did not restore gameplay"):
+	if not check(not paused and not dialogue.composer.visible,"Closing dialogue did not restore gameplay"):
 		return
 	wall.free()
 	await physics_frame
@@ -288,6 +313,7 @@ func run() -> void:
 	dialogue.close()
 	if not await see_villager(world,"gray",data.actors.gray,data.routes):
 		return
+	world.player.global_position = npc.active.gray.global_position+Vector3(0.25,0,0)
 	dialogue.begin(npc.active.gray)
 	if not check(transport.last_messages[0].content.contains("赛巴拉")
 			and not transport.memory.contains("这是我们的秘密")

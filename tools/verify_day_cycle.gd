@@ -57,8 +57,10 @@ func _run() -> void:
 	for hz in [30,60,120]:
 		clock.minute = 360
 		clock.elapsed = 0
-		for i in hz*5: clock.advance(1.0/hz,false)
-		if not _require(clock.minute==370,"Clock must advance 10 minutes in 5 seconds at every FPS"): return
+		for i in hz*10-1: clock.advance(1.0/hz,false)
+		if not _require(clock.minute==360,"Clock ticked before 10 seconds"): return
+		clock.advance(1.0/hz,false)
+		if not _require(clock.minute==361,"Clock must advance one minute in 10 seconds at every FPS"): return
 	world._change_area(80,Vector3(-0.8,0.05,0.5))
 	var before: int = clock.minute
 	clock.advance(120,false)
@@ -86,10 +88,10 @@ func _run() -> void:
 	clock.tint_from = Vector3.ZERO
 	clock.tint_to = Vector3.ZERO
 	clock.elapsed = 0
-	clock.advance(0.5,false)
+	clock.advance(10.0,false)
 	clock.advance(128.0/30.0,false)
 	if not _require(clock.tint_rgb.distance_to(Vector3(2.5,15,20))<0.001,"Original tint must interpolate over 256 ticks"): return
-	print("CLOCK_OK: 0.5 s/min at 30/60/120 FPS; indoor/menu/overview pause; source four periods and 256-tick subtractive tint")
+	print("CLOCK_OK: 10 s/min at 30/60/120 FPS; indoor/menu/overview pause; source four periods and 256-tick subtractive tint")
 	world._change_area(80,Vector3(-0.98,0.03,0.5))
 	world.player.facing = 1
 	await _frames(8)
@@ -132,7 +134,7 @@ func _run() -> void:
 	clock.year = 0
 	clock.minute = 359
 	clock.elapsed = 0
-	clock.advance(0.5,false)
+	clock.advance(10.0,false)
 	if not _require(await _wait_wake(world),"Natural 06:00 rollover failed"): return
 	if not _require(clock.year==1 and clock.season==0 and clock.day==0 and clock.minute==360 and world.current_area==80,"Natural overnight/year rollover advanced the day twice"): return
 	print("OVERNIGHT_OK: natural 06:00 returns home; winter 30 -> year 2 spring 1 exactly once")

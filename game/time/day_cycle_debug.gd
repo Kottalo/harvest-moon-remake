@@ -10,6 +10,7 @@ var map_view
 var live_tracking := false
 var player_was_processing := false
 var was_paused := false
+var usage_label: Label
 var timing_button: Button
 var timing_until := 0
 var previous_frame := 0
@@ -59,6 +60,9 @@ func setup(owner_clock) -> void:
 		timing_button.text = "采样画面卡顿（30 秒）"
 		timing_button.pressed.connect(_start_timing)
 		rows.add_child(timing_button)
+		usage_label = Label.new()
+		usage_label.add_theme_font_size_override("font_size",15)
+		rows.add_child(usage_label)
 		map_button = Button.new()
 		map_button.text = "地图与角色追踪"
 		map_button.pressed.connect(_open_map.bind(margin))
@@ -175,11 +179,18 @@ func set_open(open: bool) -> void:
 		selector.get_popup().hide()
 		get_tree().paused = was_paused
 	panel.visible = open
-	if open: selector.grab_focus()
-	else: selector.release_focus()
+	if open:
+		refresh_usage()
+		selector.grab_focus()
+	else:
+		selector.release_focus()
 
 func _exit_tree() -> void:
 	if live_tracking and is_instance_valid(clock.world.player):
 		clock.world.player.set_physics_process(player_was_processing)
 	if is_instance_valid(panel) and panel.visible:
 		get_tree().paused = was_paused
+
+func refresh_usage() -> void:
+	if usage_label!=null and panel.visible:
+		usage_label.text = clock.world.npcs.dialogue.client.usage_summary()

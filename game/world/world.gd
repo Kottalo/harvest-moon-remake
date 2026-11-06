@@ -276,7 +276,7 @@ func _check_exits(_delta: float) -> void:
 	current_area = area_at(player.global_position)
 	if not Input.is_action_pressed("interact"):
 		awaiting_interact_release = false
-	var pressed := not awaiting_interact_release and Input.is_action_just_pressed("interact")
+	var pressed: bool = not npcs.dialogue.entry.has_focus() and not awaiting_interact_release and Input.is_action_just_pressed("interact")
 	var local := world_to_area(current_area, player.position)
 	var point := Vector2(local.x, local.z)
 	var ahead: Vector2 = point + [Vector2(0, 1), Vector2(-1, 0), Vector2(0, -1), Vector2(1, 0)][player.facing] * 0.224

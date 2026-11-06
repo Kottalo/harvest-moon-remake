@@ -67,7 +67,7 @@ func update(_delta: float) -> void:
 			_remove(name)
 			continue
 		var pack := str(int(record.area_art.get(area,record.default_art)))
-		_place(name,int(area),row,record.art[pack],itinerary,(minute-float(step[0]))*0.5)
+		_place(name,int(area),row,record.art[pack],itinerary,(minute-float(step[0]))*clock.SECONDS_PER_MINUTE)
 	for name in library.catalogue.helpers:
 		var helper: Dictionary = library.catalogue.helpers[name]
 		scheduled_areas[name] = 200

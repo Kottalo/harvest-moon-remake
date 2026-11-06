@@ -3,6 +3,8 @@ extends Node
 signal sleep_requested(automatic: bool)
 signal day_started(previous_season: int)
 signal minute_changed(minute: int)
+const SECONDS_PER_MINUTE := 10.0
+
 var catalogue: Dictionary
 var world
 var year := 0
@@ -90,8 +92,8 @@ func advance(delta: float, paused: bool) -> void:
 		return
 	elapsed += delta
 	var previous_minute := minute
-	while elapsed+0.00000001 >= 0.5:
-		elapsed -= 0.5
+	while elapsed+0.00000001 >= SECONDS_PER_MINUTE:
+		elapsed -= SECONDS_PER_MINUTE
 		_tick_minute()
 		if minute == 360:
 			sleeping = true
@@ -195,5 +197,5 @@ func set_debug_period(value: int) -> void:
 	_apply_tint()
 
 func refresh() -> void:
-	clock_label.text = "第 %d 年 · %s %d 日 · 周%s  %02d:%02d" % [year+1,["春","夏","秋","冬"][season],day+1,["日","一","二","三","四","五","六"][weekday],minute/60 as int,minute%60/10 as int*10]
+	clock_label.text = "第 %d 年 · %s %d 日 · 周%s  %02d:%02d" % [year+1,["春","夏","秋","冬"][season],day+1,["日","一","二","三","四","五","六"][weekday],minute/60 as int,minute%60]
 	_apply_tint()

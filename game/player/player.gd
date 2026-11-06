@@ -55,19 +55,21 @@ func _show_debug_footprint() -> void:
 	footprint.changed.connect(func(): wire.mesh = footprint.get_debug_mesh())
 
 func _physics_process(delta: float) -> void:
-	actions.poll_input()
+	var typing := get_viewport().gui_get_focus_owner() is LineEdit
+	if not typing:
+		actions.poll_input()
 	if hop.active:
 		hop.advance(delta)
 		return
 	if actions.cinematic:
 		if actions.busy(): actions.advance(delta)
 		return # Source bedtime arc owns motion until the morning scene is ready.
-	var direction := Vector2.ZERO if input_locked or actions.busy() else _movement_direction()
+	var direction := Vector2.ZERO if typing or input_locked or actions.busy() else _movement_direction()
 	if scripted_walk_time > 0:
 		direction = scripted_direction
 		scripted_walk_time = maxf(0,scripted_walk_time-delta)
 		if scripted_walk_time<0.000001: scripted_walk_time = 0
-	var running := Input.is_action_pressed("run") and not input_locked
+	var running := Input.is_action_pressed("run") and not input_locked and not typing
 	if running and not input_locked and not actions.busy() and scripted_walk_time<=0 and hop.try_start(Vector3(direction.x,0,direction.y),delta):
 		actions.sound_requested.emit("jump")
 		hop.advance(delta)

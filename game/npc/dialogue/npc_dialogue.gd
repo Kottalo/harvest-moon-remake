@@ -1,6 +1,8 @@
 extends CanvasLayer
-## One modal conversation with one streaming speaker at a time.
-const DeepSeek := preload("res://game/npc/dialogue/deepseek.gd")
+## Modal notices and live, proximity-based speech use separate controls.
+const PiAgent := preload("res://game/npc/dialogue/pi_agent.gd")
+const SpeechBubble := preload("res://game/npc/dialogue/speech_bubble.gd")
+const QUEUE_LIMIT := 4
 const PERSONAS := "res://game/npc/dialogue/personas.json"
 # Roles at known workplaces. These describe duties, not the current animation.
 const WORKPLACE_DUTIES := {
@@ -35,7 +37,11 @@ const SYSTEM := """你在 PS1《牧场物语：回归自然》中扮演矿石镇
 const SourceFrame := preload("res://game/rendering/source_window.gd")
 
 var world
-var client: DeepSeek
+var client: PiAgent
+var composer: VBoxContainer
+var bubble_layer: Control
+var bubbles := {}
+var queued: Array[Dictionary] = []
 var profiles: Dictionary
 var npc_id := ""
 var prior_activity := {}
@@ -70,10 +76,11 @@ func setup(owner_world, font: Font) -> void:
 	layer = 24
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	profiles = JSON.parse_string(FileAccess.get_file_as_string(PERSONAS))
-	client = DeepSeek.new()
+	client = PiAgent.new()
 	add_child(client)
 	client.partial.connect(_on_partial)
 	client.answered.connect(_on_answer)
+	client.usage_changed.connect(world.day_cycle.debug_panel.refresh_usage)
 
 	overlay = Control.new()
 	add_child(overlay)
@@ -107,11 +114,30 @@ func setup(owner_world, font: Font) -> void:
 	content.add_child(reply)
 	choices_panel = VBoxContainer.new()
 	content.add_child(choices_panel)
-	reply.resized.connect(func(): _follow_reply.call_deferred())
+	var leave := Button.new()
+	_style_button(leave,font)
+	leave.text = "结束"
+	leave.pressed.connect(close)
+	stack.add_child(leave)
+
+	bubble_layer = Control.new()
+	bubble_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bubble_layer)
+	bubble_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bubble_layer.resized.connect(_layout)
+	composer = VBoxContainer.new()
+	composer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	composer.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bubble_layer.add_child(composer)
+	composer.hide()
 	status = _label(font,15)
-	stack.add_child(status)
+	status.add_theme_color_override("font_color",Color("#fff4d3"))
+	status.add_theme_color_override("font_outline_color",Color("#2a1c17"))
+	status.add_theme_constant_override("outline_size",5)
+	composer.add_child(status)
+	status.hide()
 	var row := HBoxContainer.new()
-	stack.add_child(row)
+	composer.add_child(row)
 	entry = LineEdit.new()
 	entry.add_theme_font_override("font",font)
 	entry.add_theme_stylebox_override("normal",_input_style())
@@ -120,21 +146,25 @@ func setup(owner_world, font: Font) -> void:
 	entry.add_theme_color_override("font_uneditable_color",Color("#52697d"))
 	entry.add_theme_color_override("font_placeholder_color",Color("#52697d"))
 	entry.add_theme_color_override("caret_color",Color("#223344"))
-	entry.placeholder_text = "说点什么…也可以点名"
+	entry.placeholder_text = "说点什么…"
 	entry.max_length = 180
 	entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	entry.text_submitted.connect(_submit)
+	entry.focus_entered.connect(func(): world.awaiting_interact_release = true)
+	entry.focus_exited.connect(func(): world.awaiting_interact_release = true)
 	row.add_child(entry)
 	send = Button.new()
 	_style_button(send,font)
 	send.text = "发送"
 	send.pressed.connect(func(): _submit(entry.text))
 	row.add_child(send)
-	var leave := Button.new()
-	_style_button(leave,font)
-	leave.text = "结束"
-	leave.pressed.connect(close)
-	row.add_child(leave)
+	var leave_chat := Button.new()
+	_style_button(leave_chat,font)
+	leave_chat.text = "×"
+	leave_chat.focus_mode = Control.FOCUS_NONE
+	leave_chat.pressed.connect(close_chat)
+	row.add_child(leave_chat)
+	send.focus_mode = Control.FOCUS_NONE
 	_layout()
 
 func _label(font: Font, font_size: int) -> Label:
@@ -171,46 +201,57 @@ func _layout() -> void:
 	var width := minf(800.0,overlay.size.x-24.0)
 	frame.size = Vector2(maxf(width,1.0),206.0)
 	frame.position = Vector2((overlay.size.x-frame.size.x)*0.5,overlay.size.y-frame.size.y-24.0)
+	if is_instance_valid(composer):
+		var chat_width := minf(500.0,bubble_layer.size.x-24.0)
+		composer.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+		composer.offset_left = -chat_width*0.5
+		composer.offset_right = chat_width*0.5
+		composer.offset_top = -18-composer.get_combined_minimum_size().y
+		composer.offset_bottom = -18
 
 func begin(actor) -> void:
 	var id := str(actor.name)
 	if overlay.visible or not actor.placed or not profiles.has(id):
 		return
+	if id==npc_id:
+		entry.grab_focus()
+		return
+	close_chat()
 	npc_id = id
 	focus_id = id
 	speaker_id = id
 	listeners = PackedStringArray([id])
 	prior_activity[id] = actor.walking
-	var seen_by_player: PackedStringArray = world.npcs.people_near(world.player)
-	for neighbor in world.npcs.people_near(actor):
-		if seen_by_player.has(neighbor) and profiles.has(neighbor):
-			guests.append(neighbor)
-			prior_activity[neighbor] = world.npcs.active[neighbor].walking
-	guests.sort_custom(func(a: String,b: String):
-		var origin: Vector3 = actor.global_position
-		return origin.distance_squared_to(world.npcs.active[a].global_position)<origin.distance_squared_to(world.npcs.active[b].global_position))
-	if not guests.is_empty():
-		var neighbor = world.npcs.active[guests[0]]
-		if not neighbor.walking and actor.global_position.distance_squared_to(neighbor.global_position)<=0.8*0.8:
-			neighbor.greet(world.player.global_position)
 	actor.greet(world.player.global_position)
-	entry.text = ""
-	entry.show()
-	send.show()
-	_open()
+	entry.clear()
+	composer.show()
+	entry.grab_focus()
 	pending_text = "玩家走到你面前打招呼。请根据此刻的场景自然回应。"
 	_ask()
+
+func _refresh_guests() -> void:
+	guests.clear()
+	var host = world.npcs.active.get(npc_id)
+	if not is_instance_valid(host):
+		return
+	var seen_by_player: PackedStringArray = world.npcs.people_near(world.player)
+	for neighbor in world.npcs.people_near(host):
+		if seen_by_player.has(neighbor) and profiles.has(neighbor):
+			guests.append(neighbor)
+	var origin: Vector3 = host.global_position
+	guests.sort_custom(func(a: String,b: String):
+		return origin.distance_squared_to(world.npcs.active[a].global_position)<origin.distance_squared_to(world.npcs.active[b].global_position))
+	if focus_id!=npc_id and not guests.has(focus_id):
+		focus_id = npc_id
 
 func show_notice(heading: String, text: String) -> void:
 	if overlay.visible:
 		return
+	close_chat()
 	notice_open = true
 	title.text = heading
 	reply.text = text
 	reply_scroll.scroll_vertical = 0
-	status.text = ""
-	entry.hide()
-	send.hide()
 	_open()
 
 func show_choices(heading: String, text: String, choices: Array) -> void:
@@ -220,7 +261,6 @@ func show_choices(heading: String, text: String, choices: Array) -> void:
 		return
 	title.text = heading
 	reply.text = text
-	status.text = ""
 	for child in choices_panel.get_children():
 		choices_panel.remove_child(child)
 		child.queue_free()
@@ -249,6 +289,7 @@ func _scene_context(actor) -> String:
 	var context := "角色：%s。设定：%s。现在是第%d年%s季第%d天，%02d:%02d。玩家是镇上的牧场主。\n当前现场：你在%s。打招呼前，你%s。" % [
 		actor.display_name,profiles[id],clock.year+1,["春","夏","秋","冬"][clock.season],
 		clock.day+1,int(clock.minute)/60,int(clock.minute)%60,place.name,activity]
+	context += "此刻你%s。" % ("正在走动" if actor.walking else "停在原地")
 	var duty: String = WORKPLACE_DUTIES.get(place.slug,{}).get(id,"")
 	if not duty.is_empty():
 		context += "你在这里的职责是%s。" % duty
@@ -262,6 +303,7 @@ func _scene_context(actor) -> String:
 	return context
 
 func close() -> void:
+	close_chat()
 	if not overlay.visible:
 		return
 	if notice_open and Input.is_action_pressed("interact"):
@@ -270,6 +312,12 @@ func close() -> void:
 	for child in choices_panel.get_children():
 		choices_panel.remove_child(child)
 		child.queue_free()
+	overlay.hide()
+	get_tree().paused = was_paused
+
+func close_chat() -> void:
+	if npc_id.is_empty():
+		return
 	client.cancel_request()
 	pending = false
 	pending_text = ""
@@ -277,48 +325,78 @@ func close() -> void:
 	npc_id = ""
 	prior_activity.clear()
 	guests.clear()
+	queued.clear()
 	next_speaker = ""
 	last_guest = ""
 	automatic_join_used = false
 	first_line = ""
 	first_speaker = ""
-	overlay.hide()
-	get_tree().paused = was_paused
+	for id in bubbles.keys():
+		_remove_bubble(id)
+	entry.release_focus()
+	composer.hide()
+	_set_status("")
 
 func _exit_tree() -> void:
 	if is_instance_valid(overlay) and overlay.visible:
 		get_tree().paused = was_paused
 
 func _input(event: InputEvent) -> void:
-	if not is_instance_valid(overlay) or not overlay.visible or not event is InputEventKey or not event.pressed or event.echo:
+	if not is_instance_valid(overlay) or not event is InputEventKey or not event.pressed or event.echo:
 		return
-	var typing_x: bool = entry.visible and entry.has_focus() and event.physical_keycode==KEY_X
-	var close_notice := notice_open and choices_panel.get_child_count()==0 and event.is_action_pressed("interact")
-	if (event.is_action_pressed("ui_cancel") and not typing_x) or close_notice:
-		get_viewport().set_input_as_handled()
-		world.sound.cue("cancel")
-		close()
-	elif event.keycode == KEY_F1:
-		get_viewport().set_input_as_handled()
+	if overlay.visible:
+		var close_notice := notice_open and choices_panel.get_child_count()==0 and event.is_action_pressed("interact")
+		if event.is_action_pressed("ui_cancel") or close_notice:
+			get_viewport().set_input_as_handled()
+			world.sound.cue("cancel")
+			close()
+		elif event.keycode==KEY_F1:
+			get_viewport().set_input_as_handled()
+	elif composer.visible and not get_tree().paused and not world.transitioning:
+		if event.keycode==KEY_ESCAPE:
+			get_viewport().set_input_as_handled()
+			close_chat()
+		elif event.keycode==KEY_ENTER and not entry.has_focus():
+			get_viewport().set_input_as_handled()
+			entry.grab_focus()
 
 func _submit(value: String) -> void:
-	if pending or notice_open or not overlay.visible:
+	if npc_id.is_empty() or get_tree().paused:
 		return
-	var text := value.strip_edges()
+	var text := value.strip_edges().left(entry.max_length)
 	if text.is_empty():
-		if not pending_text.is_empty():
+		if not pending and not pending_text.is_empty():
 			_ask()
+		else:
+			entry.release_focus()
+		return
+	if queued.size()>=QUEUE_LIMIT:
+		_set_status("等一下，还有几句话正在等待回应。")
 		return
 	entry.clear()
-	pending_text = text.left(entry.max_length)
+	entry.release_focus()
+	_bubble("player",text)
+	_refresh_guests()
+	var selection := _select_speakers(text)
+	var record: int = world.record_history("speech","player",text,selection.listeners)
+	queued.append({"text":text,"record":record,"selection":selection})
+	if not pending:
+		_start_next()
+
+func _start_next() -> void:
+	if queued.is_empty():
+		return
+	var line: Dictionary = queued.pop_front()
+	pending_text = line.text
+	pending_record = line.record
 	first_line = ""
 	first_speaker = ""
-	next_speaker = ""
-	_select_speakers(pending_text)
-	pending_record = world.record_history("speech","player",pending_text,listeners)
+	speaker_id = line.selection.speaker
+	next_speaker = line.selection.guest
+	listeners = line.selection.listeners
 	_ask()
 
-func _select_speakers(text: String) -> void:
+func _select_speakers(text: String) -> Dictionary:
 	var addressed := ""
 	for id in [npc_id]+guests:
 		var name: String = world.npcs.NAMES[id]
@@ -329,81 +407,74 @@ func _select_speakers(text: String) -> void:
 				break
 	if not addressed.is_empty():
 		focus_id = addressed
-	speaker_id = focus_id
-	listeners = PackedStringArray([speaker_id])
+	var chosen := focus_id
+	var audience := PackedStringArray([chosen])
+	var second := ""
 	if guests.is_empty() or ["秘密","私下","悄悄","只跟你说","别告诉","不要告诉"].any(func(word): return text.contains(word)):
-		return
+		return {"speaker":chosen,"guest":second,"listeners":audience}
 	if ["你们","两位","各位","大家觉得","大家好","大家怎么看"].any(func(word): return text.contains(word)):
 		var group: Array = [npc_id]+guests
-		listeners = PackedStringArray(group)
-		group.erase(speaker_id)
-		next_speaker = group[(group.find(last_guest)+1)%group.size()]
+		audience = PackedStringArray(group)
+		group.erase(chosen)
+		second = group[(group.find(last_guest)+1)%group.size()]
 		for id in group:
 			if text.contains(world.npcs.NAMES[id]):
-				next_speaker = id
+				second = id
 				break
 	elif addressed.is_empty() and not automatic_join_used and (
 			text.ends_with("？") or text.ends_with("?") or text.ends_with("吗") or text.contains("怎么")):
 		for id in [npc_id]+guests:
-			if id==speaker_id:
+			if id==chosen:
 				continue
 			if JOIN_TOPICS.get(id,[]).any(func(word): return text.contains(word)):
-				next_speaker = id
-				listeners.append(id)
+				second = id
+				audience.append(id)
 				automatic_join_used = true
 				break
+	return {"speaker":chosen,"guest":second,"listeners":audience}
 
 func _ask() -> void:
+	if not _speaker_in_range(speaker_id):
+		pending = false
+		pending_text = ""
+		_start_next()
+		return
 	pending = true
-	if first_line.is_empty():
-		reply_scroll.scroll_vertical = 0
-	_render_reply("")
-	entry.editable = false
-	send.disabled = true
-	send.text = "发送"
-	status.text = "正在等待%s回应…" % world.npcs.NAMES[speaker_id]
+	_set_status("")
+	var withheld := PackedInt32Array()
+	for line in queued:
+		withheld.append(line.record)
 	var memory: Array[Dictionary] = world.history.memory_for(
 		speaker_id,pending_text if pending_record>=0 else "",pending_record,
-		listeners if listeners.size()>1 else PackedStringArray())
+		listeners if listeners.size()>1 else PackedStringArray(),withheld)
 	for event in memory:
 		event.actor = "玩家" if event.actor=="player" else world.npcs.NAMES.get(event.actor,event.actor)
 	var actor = world.npcs.active[speaker_id]
 	var context := _scene_context(actor)
 	if not first_line.is_empty():
 		context += "\n%s刚回答过这个问题。顺着现场对白，只用一句话补充自己的看法。" % world.npcs.NAMES[first_speaker]
-	if speaker_id!=npc_id:
-		actor.greet(world.player.global_position)
+	actor.greet(world.player.global_position)
 	var messages := [{"role":"system","content":SYSTEM+"\n"+context},
 		{"role":"user","content":JSON.stringify({"message":pending_text,"memory":memory})}]
 	client.ask(messages)
 
 func _on_partial(text: String) -> void:
-	if overlay.visible and pending and not text.is_empty():
-		_render_reply(text)
-		status.text = ""
-
-func _render_reply(text: String) -> void:
-	var name: String = world.npcs.NAMES[speaker_id]
-	title.text = name
-	if first_line.is_empty():
-		reply.text = text
-	else:
-		var first_name: String = world.npcs.NAMES[first_speaker]
-		title.text = first_name+"、"+name
-		reply.text = first_name+"："+first_line+"\n"+name+"："+text
-
-func _follow_reply() -> void:
-	if overlay.visible and not first_line.is_empty():
-		reply_scroll.scroll_vertical = int(reply_scroll.get_v_scroll_bar().max_value)
+	if pending and not text.is_empty() and _speaker_in_range(speaker_id):
+		_bubble(speaker_id,text,true)
 
 func _on_answer(text: String, problem: String) -> void:
-	if not overlay.visible or not pending:
+	if npc_id.is_empty() or not pending:
 		return
-	if problem.is_empty():
-		var heard_by := listeners.duplicate()
+	var present := _speaker_in_range(speaker_id)
+	if problem.is_empty() and present:
+		var heard_by := PackedStringArray()
+		var nearby: PackedStringArray = world.npcs.people_near(world.npcs.active[speaker_id]) if listeners.size()>1 else PackedStringArray()
+		for id in listeners:
+			if id==speaker_id or (_speaker_in_range(id) and nearby.has(id)):
+				heard_by.append(id)
 		heard_by.append("player")
 		world.record_history("speech",speaker_id,text,heard_by)
-		_render_reply(text)
+		_bubble(speaker_id,text)
 		if not next_speaker.is_empty():
 			first_line = text
 			first_speaker = speaker_id
@@ -412,11 +483,60 @@ func _on_answer(text: String, problem: String) -> void:
 			next_speaker = ""
 			_ask()
 			return
+	elif bubbles.has(speaker_id) and bubbles[speaker_id].streaming:
+		_remove_bubble(speaker_id)
+	pending = false
+	if problem.is_empty() or not present:
 		pending_text = ""
 		pending_record = -1
-	pending = false
-	entry.editable = true
-	send.disabled = false
-	status.text = problem
-	send.text = "发送" if problem.is_empty() else "重试 / 发送"
-	entry.grab_focus()
+	_set_status(problem)
+	_start_next()
+
+func _set_status(message: String) -> void:
+	status.text = message
+	status.visible = not message.is_empty()
+	_layout()
+
+func _speaker_in_range(id: String) -> bool:
+	var actor = world.npcs.active.get(id)
+	if not is_instance_valid(actor) or not actor.placed:
+		return false
+	var offset: Vector3 = actor.global_position-world.player.global_position
+	return absf(offset.y)<=0.4 and offset.length_squared()<=2.4*2.4
+
+func _bubble(id: String, text: String, streaming := false) -> void:
+	var actor: Node3D = world.player if id=="player" else world.npcs.active.get(id)
+	if not is_instance_valid(actor):
+		return
+	if bubbles.has(id) and bubbles[id].actor!=actor:
+		_remove_bubble(id)
+	if not bubbles.has(id):
+		var bubble := SpeechBubble.new()
+		bubble_layer.add_child(bubble)
+		bubble_layer.move_child(bubble,0)
+		bubble.setup(actor,ui_font,id=="player")
+		bubbles[id] = bubble
+	bubbles[id].say(text,streaming)
+
+func _remove_bubble(id: String) -> void:
+	bubbles[id].hide()
+	bubbles[id].queue_free()
+	bubbles.erase(id)
+
+func _process(delta: float) -> void:
+	if npc_id.is_empty() or get_tree().paused:
+		return
+	if world.transitioning or not _speaker_in_range(npc_id):
+		close_chat()
+		return
+	var camera := get_viewport().get_camera_3d()
+	if camera==null:
+		return
+	var used: Array[Rect2] = []
+	for id in bubbles.keys():
+		var bubble = bubbles[id]
+		bubble.remaining -= delta
+		if not is_instance_valid(bubble.actor) or (not bubble.streaming and bubble.remaining<=0):
+			_remove_bubble(id)
+		else:
+			bubble.follow(camera,bubble_layer.size,used)
