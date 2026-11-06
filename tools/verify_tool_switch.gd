@@ -99,6 +99,9 @@ func run() -> void:
 	for slot: Button in [picker.held_slot,picker.bag_slots[0],picker.bag_slots[1]] + active.get_parent().get_children():
 		if not require_ok(slot.size.is_equal_approx(Vector2(52,52)),"Toolbox slot expanded beyond its square: "+str(slot.size)): return
 	var bag_seed: Label = picker.bag_slots[1].get_node("Quantity")
+	var seed_icon: TextureRect = picker.bag_slots[1].get_node("Icon")
+	if not require_ok(seed_icon.get_rect().intersects(bag_seed.get_rect()) and seed_icon.get_index()<bag_seed.get_index(),
+			"Seed quantity must overlay the icon"): return
 	if not require_ok(bag_seed.text=="×9999" and bag_seed.position.is_equal_approx(Vector2(3,37))
 			and bag_seed.horizontal_alignment==HORIZONTAL_ALIGNMENT_LEFT,"Seed count was not at the bottom left of its slot"): return
 	if not require_ok(not world.hud.visible and not world.day_cycle.clock_label.visible,
@@ -109,7 +112,8 @@ func run() -> void:
 		var button: Button = picker.entries[id]
 		var icon := button.get_node("Icon") as TextureRect
 		if not require_ok(icon.texture!=null and icon.texture.get_width()<=36 and icon.texture.get_height()<=37
-				and is_equal_approx(maxf(icon.size.x,icon.size.y),32.0)
+				and is_equal_approx(maxf(icon.size.x,icon.size.y),button.size.x)
+				and icon.get_rect().get_center().is_equal_approx(button.size*0.5)
 				and is_equal_approx(icon.size.aspect(),icon.texture.get_size().aspect()),
 				"Picker icon does not use the shared proportional size: "+str(id)): return
 	_picker_key(viewport,KEY_F1)

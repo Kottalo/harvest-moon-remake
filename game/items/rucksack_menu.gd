@@ -80,7 +80,10 @@ func setup(owner_economy, font: Font) -> void:
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	for index in 9:
-		seed_labels.append(_make_label("",Color("#3d291f"),strong))
+		var label := _make_label("",ToolboxStyle.DARK_INK,strong)
+		label.add_theme_color_override("font_outline_color",ToolboxStyle.HEADING)
+		label.add_theme_constant_override("outline_size",2)
+		seed_labels.append(label)
 
 	panel.hide()
 	panel.resized.connect(_layout)

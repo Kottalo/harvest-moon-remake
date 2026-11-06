@@ -280,6 +280,8 @@ func _slot(parent: Container) -> Button:
 	button.add_child(picture)
 	var quantity := _label(button,"",10,ToolboxStyle.DARK_INK)
 	quantity.name = "Quantity"
+	quantity.add_theme_color_override("font_outline_color",ToolboxStyle.HEADING)
+	quantity.add_theme_constant_override("outline_size",2)
 	quantity.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	quantity.clip_text = true
 	quantity.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
