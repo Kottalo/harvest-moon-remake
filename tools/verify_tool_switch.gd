@@ -112,10 +112,10 @@ func run() -> void:
 		var button: Button = picker.entries[id]
 		var icon := button.get_node("Icon") as TextureRect
 		if not require_ok(icon.texture!=null and icon.texture.get_width()<=36 and icon.texture.get_height()<=37
-				and is_equal_approx(maxf(icon.size.x,icon.size.y),button.size.x)
+				and is_equal_approx(maxf(icon.size.x,icon.size.y),46.0)
 				and icon.get_rect().get_center().is_equal_approx(button.size*0.5)
 				and is_equal_approx(icon.size.aspect(),icon.texture.get_size().aspect()),
-				"Picker icon does not use the shared proportional size: "+str(id)): return
+				"Picker icon does not fit the slot with 3 px padding: "+str(id)): return
 	_picker_key(viewport,KEY_F1)
 	if not require_ok(paused and picker.panel.visible and not world.day_cycle.debug_panel.panel.visible,"Picker let another pause menu open"): return
 	var previous_page: int = picker.tabs.current_tab

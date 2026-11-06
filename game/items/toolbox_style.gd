@@ -7,13 +7,15 @@ const HEADING := Color("#fff1ce")
 const PIN_PATH := "res://game/items/toolbox_brass_pin.svg"
 const FRAME_SIZE := Vector2(472,335)
 const SLOT_SIZE := Vector2(52,52)
+const ICON_PADDING := 3.0
 const SLOT_PITCH := 62
 const SLOT_COLUMNS := 4
 const QUANTITY_ORIGIN := Vector2(3,37)
 
 static func icon_rect(texture: Texture2D) -> Rect2:
 	var source := texture.get_size()
-	var fitted := source * (SLOT_SIZE.x / maxf(source.x,source.y))
+	var inner_width := SLOT_SIZE.x - 2.0*ICON_PADDING
+	var fitted := source * (inner_width / maxf(source.x,source.y))
 	return Rect2((SLOT_SIZE-fitted)*0.5,fitted)
 
 static func box(fill: Color, radius: int, edge := Color.TRANSPARENT, width := 0, padding := 0) -> StyleBoxFlat:
