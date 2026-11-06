@@ -8,6 +8,7 @@ const DAY_START := 360
 const OUTDOOR_SPEED := 1.44
 const INDOOR_SPEED := 0.48
 const COAST := [52,56]
+const CONVERSATION_RANGE := 2.4
 const NAMES := {
 	"jeff":"杰夫", "sasha":"莎夏", "karen":"卡莲", "saibara":"赛巴拉", "gray":"格雷",
 	"doug":"达特", "ann":"兰", "doctor":"多特", "elli":"艾丽", "pastor_carter":"卡特",
@@ -161,18 +162,19 @@ func _nearby():
 	return best
 
 
-func people_near(observer: CharacterBody3D) -> PackedStringArray:
+func people_near(observer: CharacterBody3D, conversation := false) -> PackedStringArray:
 	var result := PackedStringArray()
 	var origin := observer.global_position
+	var radius := CONVERSATION_RANGE if conversation else 2.0
 	for id in active:
 		var actor = active[id]
 		if actor == observer or not actor.placed or not actor.is_visible_in_tree():
 			continue
 		var position: Vector3 = actor.global_position
 		var offset := position-origin
-		if absf(offset.y)>0.4 or offset.length_squared()>4.0:
+		if absf(offset.y)>0.4 or offset.length_squared()>radius*radius:
 			continue
-		if _clear_sight(observer,actor,0.35):
+		if _clear_sight(observer,actor,0.35) or (conversation and _clear_sight(observer,actor,0.55)):
 			result.append(id)
 	return result
 

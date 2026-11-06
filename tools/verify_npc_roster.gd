@@ -17,9 +17,14 @@ class TestPi extends "res://game/npc/dialogue/pi_agent.gd":
 			plans.append(scene)
 			var roster: Dictionary = scene.present
 			var route: String = scene.focus
-			if roster.has("nappy") and (scene.group_addressed or (
-					scene.message.contains("玩游戏") and not messages[0].content.contains("这次只选主答"))):
+			if roster.has("nappy") and (scene.group_addressed or scene.message.contains("玩游戏")):
 				route += ",nappy"
+			if scene.message=="大家都说说吧。":
+				route = '["chef","nappy","aqua","chef","hoggy"]'
+			elif scene.message=="大家怎么看？":
+				route = "chef"
+			elif scene.message.begins_with("切夫，你知道怎么玩游戏"):
+				route = "nappy，chef"
 			if roster.has("nappy") and scene.message=="有谁了解游戏规则？":
 				route = "nappy"
 			answered.emit(route,"")
@@ -281,6 +286,7 @@ func run() -> void:
 			return
 	var origin: Vector3 = chef.global_position
 	npc.active.nappy.global_position = origin+Vector3(0,0,-0.35)
+	npc.active.aqua.global_position = origin+Vector3(0.48,0,-0.50)
 	npc.active.hoggy.global_position = origin+Vector3(0,0,0.75)
 	npc.active.bold.global_position = origin+Vector3(0,0,3.0)
 	var wall := StaticBody3D.new()
@@ -368,7 +374,26 @@ func run() -> void:
 		return
 	transport.sent_prompts.clear()
 	submit_after_reading(dialogue,"那怎么玩游戏？")
-	if not check(transport.sent_prompts.size()==1,"The same topic repeatedly provoked unsolicited replies"):
+	if not check(transport.sent_prompts.size()==2 and transport.sent_prompts[1].context.contains("角色：纳皮。"),
+			"A guest could only contribute once in the entire conversation"):
+		return
+	transport.sent_prompts.clear()
+	submit_after_reading(dialogue,"切夫，你知道怎么玩游戏吗？")
+	if not check(transport.sent_prompts.size()==2 and transport.plans.back().addressed=="chef"
+			and transport.sent_prompts[0].context.contains("角色：切夫。")
+			and transport.sent_prompts[1].context.contains("角色：纳皮。"),
+			"Naming a speaker excluded a relevant guest or let them speak first"):
+		return
+	transport.sent_prompts.clear()
+	submit_after_reading(dialogue,"大家都说说吧。")
+	if not check(transport.sent_prompts.size()==3 and dialogue.bubbles.has("chef") and dialogue.bubbles.has("nappy")
+			and dialogue.bubbles.has("aqua") and transport.sent_prompts[2].context.contains("角色：阿库亚。"),
+			"An explicit three-person plan did not produce three distinct speech bubbles"):
+		return
+	transport.sent_prompts.clear()
+	submit_after_reading(dialogue,"大家怎么看？")
+	if not check(transport.sent_prompts.size()==2 and dialogue.speaker_id!="chef",
+			"An explicit group invitation still produced only a single response"):
 		return
 	transport.sent_prompts.clear()
 	var before_group: int = world.history.entries.size()
@@ -393,10 +418,11 @@ func run() -> void:
 			"Pi could not choose a participant other than the default speaker"):
 		return
 	transport.sent_prompts.clear()
-	submit_after_reading(dialogue,"纳皮，你呢？")
-	if not check(transport.sent_prompts.size()==1 and dialogue.speaker_id=="nappy"
-			and world.history.entries.back().known_by==PackedStringArray(["nappy","player"]),
-			"Directly addressing a nearby character did not switch to a private reply"):
+	var plans_before_private := transport.plans.size()
+	submit_after_reading(dialogue,"纳皮，悄悄跟你说。")
+	if not check(transport.sent_prompts.size()==1 and transport.plans.size()==plans_before_private
+			and dialogue.speaker_id=="nappy" and world.history.entries.back().known_by==PackedStringArray(["nappy","player"]),
+			"A private aside was sent to group routing or disclosed to a bystander"):
 		return
 	transport.sent_prompts.clear()
 	transport.hold = true
