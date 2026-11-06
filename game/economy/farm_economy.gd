@@ -38,9 +38,10 @@ var dialogue
 var livestock
 var fishing
 var supermarket
+var shop_menu
 var message := ""
 
-func setup(owner_world) -> void:
+func setup(owner_world, font: Font) -> void:
 	world = owner_world
 	name = "FarmEconomy"
 	data = JSON.parse_string(FileAccess.get_file_as_string("res://game/economy/source_economy.json"))
@@ -63,6 +64,9 @@ func setup(owner_world) -> void:
 	supermarket.name = "SupermarketGoods"
 	add_child(supermarket)
 	supermarket.setup(self)
+	shop_menu = preload("res://game/economy/shop_menu.gd").new()
+	add_child(shop_menu)
+	shop_menu.setup(self,font)
 	world.player.actions.equipment_available = can_equip
 	world.player.actions.quick_switch = rucksack.cycle_tool.bind(world.player.actions)
 	world.player.actions.quick_seed_switch = rucksack.cycle_tool.bind(world.player.actions,true)
@@ -347,33 +351,24 @@ func shop_interact(actor) -> bool:
 	dialogue.show_choices(actor.display_name,"持有 %d G" % gold,options)
 	return true
 
-func show_shelf(items: Array, result := "") -> void:
-	var choices: Array = []
-	for item in items:
-		var id := int(item)
-		var purchase := func(): show_shelf(items,_purchase_from_menu("jeff",id))
-		if id not in SINGLE_PURCHASE or count(id)==0:
-			choices.append(["%s · %d G" % [item_name(id),buy_price(id)],purchase])
-	choices.append(["返回",dialogue.close])
-	var balance := "持有 %d G" % gold
-	dialogue.show_choices("杂货店",balance if result.is_empty() else result+"\n"+balance,choices)
+func show_shelf(items: Array) -> void:
+	shop_menu.open("jeff",items)
 
 
 func _chat(actor) -> void:
 	dialogue.close()
 	dialogue.begin(actor)
 
-func _show_goods(actor, animals_only: bool, result := "") -> void:
-	var options: Array = []
-	for raw in goods_for(str(actor.name)):
+
+func _show_goods(actor, animals_only: bool) -> void:
+	var items: Array = []
+	var seller := str(actor.name)
+	for raw in goods_for(seller):
 		var item := int(raw)
 		if ANIMALS.has(item)==animals_only:
-			options.append(["%s · %d G" % [item_name(item),buy_price(item)],_buy_choice.bind(actor,item,animals_only)])
-	options.append(["返回",shop_interact.bind(actor)])
-	dialogue.show_choices(actor.display_name,"%s\n持有 %d G" % [result,gold],options)
-
-func _buy_choice(actor, item: int, animals_only: bool) -> void:
-	_show_goods(actor,animals_only,_purchase_from_menu(str(actor.name),item))
+			items.append(item)
+	dialogue.close()
+	shop_menu.open(seller,items,shop_interact.bind(actor))
 
 
 func _purchase_from_menu(seller: String, item: int) -> String:

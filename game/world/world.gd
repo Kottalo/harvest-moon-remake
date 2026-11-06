@@ -119,7 +119,7 @@ func _ready() -> void:
 	mine_field.setup(self)
 	economy = preload("res://game/economy/farm_economy.gd").new()
 	add_child(economy)
-	economy.setup(self)
+	economy.setup(self,ui_font)
 	tool_picker = preload("res://game/player/tool_picker.gd").new()
 	add_child(tool_picker)
 	tool_picker.setup(player.actions,ui_font,economy.count,hud,day_cycle.clock_label,economy.rucksack,sound.cue)
@@ -245,7 +245,7 @@ func _front_zone(zones: Dictionary) -> Array:
 	return []
 
 func _interact() -> void:
-	if transitioning or awaiting_interact_release or npcs.dialogue.overlay.visible:
+	if transitioning or awaiting_interact_release or npcs.dialogue.overlay.visible or economy.shop_menu.overlay.visible:
 		return
 	if nearby_exit.is_empty():
 		if _toolbox_ahead():
@@ -412,6 +412,7 @@ func _change_area(area: int, entry: Vector3, during_transition := false) -> void
 	loose_items.set_area(area)
 	farm_field.bind_location()
 	mine_field.bind_location()
+	economy.shop_menu.close()
 	economy.livestock.bind_location()
 	economy.supermarket.bind_location()
 	economy.message = ""

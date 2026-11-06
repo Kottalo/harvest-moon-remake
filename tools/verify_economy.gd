@@ -50,7 +50,17 @@ func run() -> void:
 	world._interact()
 	var labels: Array = economy.dialogue.choices_panel.get_children().map(func(button): return button.text)
 	if not check(labels.has("交谈"),"The normal shop menu lost the AI conversation option"): return
-	if not click("购买商品") or not click("芜菁种子") or not check(economy.gold==380 and economy.count(34)==2,"The native counter purchase did not consume the USA price"): return
+	var shop = economy.shop_menu
+	if not click("购买商品") or not check(shop.overlay.visible and not economy.dialogue.overlay.visible
+			and paused and shop.products.has(34) and not world.hud.visible,"Counter did not open a dedicated purchase list"): return
+	shop.products[34].grab_focus()
+	await _press(KEY_Z)
+	if not check(economy.gold==380 and economy.count(34)==2 and shop.products[34].has_focus()
+			and shop.balance.text.contains("380") and shop.feedback.text.begins_with("已购买"),
+			"Keyboard purchase did not update price, balance, feedback or focus"): return
+	await _press(KEY_X)
+	if not check(not shop.overlay.visible and paused and economy.dialogue.overlay.visible,
+			"X did not return to the shopkeeper options"): return
 	economy.dialogue.close()
 	var display = economy.supermarket
 	if not check(display.sprites.size()==13 and display.sprites[0].visible and not display.sprites[1].visible,
@@ -58,10 +68,29 @@ func run() -> void:
 	player.position = Vector3(0,0,1.25)
 	player.facing = 2
 	world._interact()
-	var shelf_labels: Array = economy.dialogue.choices_panel.get_children().map(func(button): return button.text)
-	if not check(shelf_labels.any(func(label): return label.begins_with("芜菁种子")) and not shelf_labels.any(func(label): return label.begins_with("面包")),
-			"Selecting a seed stand did not open the goods on that display"): return
-	economy.dialogue.close()
+	if not check(shop.overlay.visible and shop.products.has(34) and not shop.products.has(154),
+			"Selecting a seed stand did not open only the goods on that display"): return
+	await _press(KEY_X)
+	if not check(not shop.overlay.visible and not paused and world.hud.visible,
+			"Closing a shelf purchase list did not resume gameplay"): return
+	player.position = Vector3(1.061,0,0.6)
+	player.facing = 3
+	world._interact()
+	await _frames(2)
+	if not check(shop.overlay.visible and shop.products.size()==1 and shop.products.has(100)
+			and shop.scroll.custom_minimum_size.y==shop.ROW_HEIGHT and not shop.scroll.get_v_scroll_bar().visible
+			and root.get_visible_rect().encloses(shop.panel.get_global_rect()),
+			"The basket shelf did not use the compact single-product layout"): return
+	var icon: TextureRect = shop.products[100].find_child("Icon",true,false)
+	if not check(icon.texture!=null,"The basket row did not display the original item art"): return
+	var price: Label = shop.products[100].find_child("Price",true,false)
+	if not check(price.text=="5000 G" and price.horizontal_alignment==HORIZONTAL_ALIGNMENT_RIGHT
+			and price.get_theme_color("font_color")==shop.REFUSAL_INK,
+			"The basket price was not right-aligned and marked unaffordable"): return
+	await _press(KEY_Z)
+	if not check(economy.gold==380 and economy.count(100)==0 and shop.feedback.text.contains("钱不够")
+			and shop.products[100].has_focus(),"Unaffordable basket purchase changed cash or lost focus"): return
+	await _press(KEY_X)
 	world.day_cycle.season = 1
 	display.refresh()
 	if not check(not display.sprites[0].visible and display.sprites[1].visible,"Seasonal stand visibility failed to change"): return
