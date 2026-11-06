@@ -65,8 +65,8 @@ func _sow_from_picker(seed: int, target: int) -> bool:
 	picker.held_slot.pressed.emit()
 	_key(KEY_I,true)
 	_key(KEY_I,false)
-	await _ticks(2)
-	if not _require(actions.state == "show_tool" and not paused,"Seed picker did not equip the seed bag"): return false
+	if not _require(actions.equipped==34 and actions.selected_seed==seed and not actions.busy() and not paused,
+			"The toolbox did not close with the selected seed immediately usable"): return false
 	_key(KEY_C,true)
 	await _ticks(2)
 	_key(KEY_C,false)
@@ -80,7 +80,7 @@ func _sow_from_picker(seed: int, target: int) -> bool:
 			if not _require(crops.plants.is_empty(),"Ground changed before the original sowing pose completed"): return false
 	world.player.set_physics_process(false)
 	return _require(poses.size()==3 and crops.plants.has(target) and field.pixels[target]==3,
-		"C during the equip pose lost the sowing action or source soil update: "+str(seed))
+		"C immediately after the toolbox closed lost the sowing action or source soil update: "+str(seed))
 
 func _dawn() -> void:
 	world.day_cycle.minute = 359

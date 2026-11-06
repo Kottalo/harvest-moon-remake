@@ -98,7 +98,6 @@ func _run() -> void:
 	toolbox.picker.held_slot.pressed.emit()
 	if not _check(paused and toolbox.picker.panel.visible,"Tool swap closed the test toolbox"): return
 	await _press(KEY_X)
-	await _frames(30)
 	if not _check(toolbox.player.actions.equipped==21 and not toolbox.player.actions.busy()
 			and world.economy.rucksack.tools==bag,"Toolbox selection did not stay in the fixture"): return
 	await _press(KEY_I)

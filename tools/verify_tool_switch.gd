@@ -199,10 +199,9 @@ func run() -> void:
 			and not action.busy() and not bag.toolbox.has(54),"Confirming the same slot did not swap it with the held slot"): return
 	_picker_click(viewport,close)
 	await frames(2)
-	if not require_ok(not paused and not picker.panel.visible and action.state=="show_tool"
-			and action.held_sprite.texture==action.tool_picture(34,54),"Closing the toolbox did not show the final equipped seed bag"): return
-	if not require_ok(world.sound.voices!=null and world.sound.cues.get("show_item") is AudioStreamWAV,
-			"Tool selection did not load the original sound into the native mixer"): return
+	if not require_ok(not paused and not picker.panel.visible and not action.busy()
+			and action.equipped==34 and action.selected_seed==54 and not action.held_sprite.visible,
+			"Closing the toolbox did not return control with the final seed equipped silently"): return
 	if not require_ok(world.hud.visible and world.day_cycle.clock_label.visible,
 			"Closing the toolbox did not restore the gameplay HUD"): return
 	while action.busy(): await frames(1)

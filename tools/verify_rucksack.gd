@@ -100,7 +100,9 @@ func run() -> void:
 	await tap(KEY_Z)
 	if not check(actions.equipped==1 and economy.rucksack.tools[0]==6,"Z swap did not move the original held tool into the bag"): return
 	await tap(KEY_SPACE)
-	if not check(not paused and not menu.panel.visible and world.hud.visible and world.day_cycle.clock_label.visible,"Space did not close backpack"): return
+	if not check(not paused and not menu.panel.visible and world.hud.visible and world.day_cycle.clock_label.visible
+			and actions.equipped==1 and not actions.busy() and not actions.held_sprite.visible,
+			"Closing the backpack did not return control with the swapped tool equipped"): return
 	economy.rucksack.next_tool = 0
 	await tap(KEY_A)
 	if not check(actions.equipped==6 and actions.state=="show_tool","A did not quick-switch to the stored tool"): return

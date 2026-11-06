@@ -39,7 +39,6 @@ var seed_count: Callable
 var storage_slots: Array[Button] = []
 var marked: Button
 var marker: Panel
-var opened_tool := 0
 var gameplay_hud: Label
 var clock_label: Label
 var panel: ColorRect
@@ -259,7 +258,6 @@ func open(toolbox_lid: Node3D = null) -> void:
 				storage_slots.append(_slot(grid,Rucksack.TOOLBOX_FIRST_SLOT+page*PAGE_SIZE+slot))
 	rucksack.sync_toolbox(actions,seed_count)
 	_refresh_slots()
-	opened_tool = rucksack.active_tool(actions)
 	tabs.current_tab = 0
 	_update_page_label()
 	hud_visible = gameplay_hud.visible
@@ -483,9 +481,6 @@ func _close() -> void:
 		if is_instance_valid(lid):
 			await _move_lid(0.0)
 		_restore_world()
-		var equipped := rucksack.active_tool(actions)
-		if equipped!=0 and equipped!=opened_tool:
-			actions.select_tool(actions.equipped,equipped if actions.equipped==34 else -1)
 
 
 func _restore_world() -> void:
