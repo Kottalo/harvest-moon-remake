@@ -110,6 +110,8 @@ func run() -> void:
 	await tap(KEY_C)
 	if not check(actions.busy(),"C did not use the equipped tool"): return
 	await tick(90)
+	await tap(KEY_S)
+	if not check(actions.carried_id==0 and not actions.busy(),"S started an action with an empty hand and backpack"): return
 
 	if not check(economy.rucksack.add_item(124) and economy.rucksack.add_item(65) and not economy.rucksack.add_item(66),"Backpack capacity did not prevent overflow"): return
 	if not check(economy.receive(66) and actions.carried_id==66 and economy.count(66)==0,

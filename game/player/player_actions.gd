@@ -1,7 +1,7 @@
 extends Node
 ## Original ANI action ranges and 30 Hz timing; movement remains in player.gd.
 signal interact_requested
-signal stow_requested
+signal bag_item_requested
 signal stow_finished
 signal item_released(item: int, thrown: bool)
 signal tool_used(tool: int, charge: int)
@@ -163,8 +163,8 @@ func poll_input() -> void:
 			equipment_selected.emit(equipped)
 		elif equipped == 34 and quick_seed_switch.is_valid() and quick_seed_switch.call():
 			return
-	if Input.is_action_just_pressed("stow_item") and carried_id!=0 and player.is_on_floor():
-		stow_requested.emit()
+	if Input.is_action_just_pressed("bag_item_shortcut") and player.is_on_floor():
+		bag_item_requested.emit()
 	elif Input.is_action_just_pressed("interact"):
 		interact_requested.emit()
 	elif Input.is_action_just_pressed("use_tool"):
@@ -217,6 +217,14 @@ func start_pickup(item: int, from_ground := true) -> bool:
 	play("base",11+player.facing,"pickup")
 	if from_ground: # player_collect_target plays cue 7; mine_dig only calls player_show_item.
 		sound_requested.emit("show_item")
+	return true
+
+func start_bag_pickup(item: int) -> bool:
+	if not start_pickup(item):
+		return false
+	# R2 puts the item in the hand before playing the show pose.
+	carried_id = item
+	pending_item = 0
 	return true
 
 func start_stow() -> void:
@@ -322,7 +330,7 @@ func _finish() -> void:
 	if finished == "cast":
 		play("fishing",8,"fishing_wait",player.facing)
 		return
-	if finished == "pickup":
+	if finished == "pickup" and pending_item!=0:
 		carried_id = pending_item
 		pending_item = 0
 	if finished in ["drop","throw"]:
@@ -367,13 +375,14 @@ func update_held(running: bool) -> void:
 		held_sprite.hide()
 		return
 	held_sprite.material_override.set_shader_parameter("albedo_texture",held_sprite.texture)
-	var group := 0 if showing or pending_item != 0 or state in ["drop","throw"] else (2 if running else 1)
+	var handling_item := state in ["pickup","drop","throw"]
+	var group := 0 if showing or handling_item else (2 if running else 1)
 	var offset: Array = data.item_offsets[0 if showing else group*4+player.facing]
 	held_sprite.offset = Vector2(offset[0],player.sprite.offset.y-offset[1])
 	held_sprite.position = player.sprite.position
 	# PS1 addPrim prepends: item submitted before body is drawn AFTER it.
 	# Carry poses put the object in front; pickup/release use the facing order.
-	var carrying: bool = carried_id != 0 and state not in ["drop","throw"]
+	var carrying := carried_id!=0 and not handling_item
 	var behind: bool = not (showing or carrying or player.facing in [0,3])
 	held_sprite.material_override.set_shader_parameter("sort_bias",0.005 if behind else -0.005)
 

@@ -148,10 +148,21 @@ func run() -> void:
 			and economy.count(124)==0 and stow_cues==["stow"],
 			"S did not begin the original stow pose, sound and delayed transfer"): return
 	await _frames(42)
-	await _press(KEY_S)
 	if not check(player.actions.carried_id==0 and not player.actions.busy()
 			and economy.rucksack.items.slice(0,2)==[163,124] and economy.count(124)==1
 			and stow_cues==["stow"],"S did not compact the backpack and store exactly one copper ore"): return
+	await _press(KEY_S)
+	if not check(player.actions.carried_id==163 and player.actions.state=="pickup"
+			and player.actions.range_id==0x0B+player.facing and player.actions.held_sprite.visible
+			and economy.rucksack.items.slice(0,2)==[124,0] and stow_cues==["stow","show_item"],
+			"Empty-hand S did not take out and show the first item"): return
+	await _frames(45)
+	if not check(player.actions.carried_id==163 and not player.actions.busy() and economy.count(163)==0,
+			"The pickup pose lost or duplicated the withdrawn item"): return
+	await _press(KEY_S)
+	await _frames(42)
+	if not check(player.actions.carried_id==0 and economy.rucksack.items.slice(0,2)==[124,163]
+			and stow_cues==["stow","show_item","stow"],"Stowing again did not rotate the bag in R2 order"): return
 
 	world.day_cycle.minute = 11*60
 	world._change_area(156,Vector3.ZERO)

@@ -49,7 +49,7 @@ func setup(owner_world) -> void:
 	world.day_cycle.minute_changed.connect(_minute_changed)
 	world.day_cycle.day_started.connect(_new_day)
 	world.player.actions.tool_used.connect(_gain_experience)
-	world.player.actions.stow_requested.connect(_start_stow)
+	world.player.actions.bag_item_requested.connect(_use_bag_shortcut)
 	world.player.actions.stow_finished.connect(_finish_stow)
 	world.player.actions.equipment_selected.connect(_equip)
 	world.mine_field.found.connect(_mined)
@@ -171,14 +171,30 @@ func receive(item: int) -> bool:
 	actions.update_held(false)
 	return true
 
-func _start_stow() -> void:
+func _use_bag_shortcut() -> void:
 	var actions = world.player.actions
+	if actions.carried_id==0:
+		_take_out_item()
+		return
 	if not stowable.has(actions.carried_id):
 		return
 	if rucksack.free_item_slot()<0:
 		message = "背包已满。"
 		return
 	actions.start_stow()
+
+func _take_out_item() -> void:
+	var actions = world.player.actions
+	for slot in rucksack.capacity:
+		var item: int = rucksack.items[slot]
+		if item==0:
+			continue
+		if actions.start_bag_pickup(item):
+			rucksack.items[slot] = 0
+			rucksack.compact_items()
+			message = ""
+			world.record_player_action("从背包拿出了%s" % item_name(item))
+		return
 
 func _finish_stow() -> void:
 	var actions = world.player.actions
