@@ -1,5 +1,9 @@
 extends Control
 ## Screen-space text follows its world-space speaker without scaling with distance.
+const CHARACTER_SECONDS := 0.3
+const NPC_HOLD_SECONDS := 10.0
+const SENTENCE_PAUSE := 0.6
+
 var label: Label
 var body: PanelContainer
 var actor: Node3D
@@ -9,6 +13,10 @@ var streaming := false
 var tint := Color("#fff2d6")
 var _tail := Vector2.ZERO
 var _tail_base := 0.0
+var reveal_elapsed := 0.0
+var speech := ""
+var sentences := PackedStringArray()
+var sentence_index := 0
 
 func setup(speaker: Node3D, font: Font, player: bool) -> void:
 	actor = speaker
@@ -41,19 +49,50 @@ func setup(speaker: Node3D, font: Font, player: bool) -> void:
 	body.add_child(label)
 
 func say(text: String, is_streaming: bool) -> void:
+	speech = text
+	if fade_duration>0.0:
+		sentences = text.split("\n",false)
+		if not streaming:
+			sentence_index = 0
+			label.visible_characters = 1
+			reveal_elapsed = 0.0
+		sentence_index = mini(sentence_index,sentences.size()-1)
+		_set_line(sentences[sentence_index])
+	else:
+		_set_line(text)
+	streaming = is_streaming
+	modulate.a = 1.0
+	remaining = NPC_HOLD_SECONDS+fade_duration if fade_duration>0.0 else clampf(3.5+text.length()*0.08,4.0,12.0)
+
+func _set_line(text: String) -> void:
+	if label.text==text:
+		return
 	label.text = text
 	var font := label.get_theme_font("font")
 	label.custom_minimum_size.x = clampf(ceilf(font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,18).x)+2,24,216)
 	body.reset_size()
 	body.reset_size.call_deferred()
-	streaming = is_streaming
-	modulate.a = 1.0
-	if fade_duration>0.0:
-		remaining = clampf(7.0+text.length()*0.10,8.0,16.0)+fade_duration
-	else:
-		remaining = clampf(3.5+text.length()*0.08,4.0,12.0)
+
+func revealing() -> bool:
+	return fade_duration>0.0 and (
+		label.visible_characters<label.text.length() or sentence_index+1<sentences.size())
 
 func advance(delta: float) -> bool:
+	while revealing():
+		var next_char := label.visible_characters<label.text.length()
+		var interval := CHARACTER_SECONDS if next_char else SENTENCE_PAUSE
+		var needed := interval-reveal_elapsed
+		if delta+0.000000001<needed:
+			reveal_elapsed += delta
+			return true
+		delta = maxf(0.0,delta-needed)
+		reveal_elapsed = 0.0
+		if next_char:
+			label.visible_characters += 1
+		else:
+			sentence_index += 1
+			label.visible_characters = 1
+			_set_line(sentences[sentence_index])
 	if streaming:
 		return true
 	remaining = maxf(0.0,remaining-delta)
@@ -64,33 +103,45 @@ func advance(delta: float) -> bool:
 func follow(camera: Camera3D, bounds: Vector2, used: Array[Rect2]) -> void:
 	var transform_on_screen := actor.get_global_transform_interpolated()
 	var head := transform_on_screen.origin+Vector3.UP*0.84
-	if camera.is_position_behind(head):
+	var tip := camera.unproject_position(head)
+	if fade_duration==0.0 and (camera.is_position_behind(head) or not Rect2(Vector2.ZERO,bounds).grow(24).has_point(tip)):
 		hide()
 		return
-	var tip := camera.unproject_position(head)
-	visible = Rect2(Vector2.ZERO,bounds).grow(24).has_point(tip)
-	if not visible:
-		return
+	show()
 	var extent := body.size
-	var top_left := Vector2(clampf(tip.x-extent.x*0.5,5,maxf(5,bounds.x-extent.x-5)),
-		clampf(tip.y-extent.y-9,4,maxf(4,bounds.y-extent.y-4)))
-	var rect := Rect2(top_left,extent)
-	for previous in used:
-		if rect.grow(3).intersects(previous) and previous.position.y-extent.y-6>=4:
-			rect.position.y = previous.position.y-extent.y-6
+	var max_top := maxf(8,bounds.y-extent.y-14)
+	var top := tip.y-extent.y-10
+	if top<8 and tip.y+10<=max_top:
+		top = tip.y+10
+	var rect := Rect2(Vector2(clampf(tip.x-extent.x*0.5,8,maxf(8,bounds.x-extent.x-8)),
+		clampf(top,8,max_top)),extent)
+	if used.any(func(previous): return rect.grow(4).intersects(previous)):
+		var best_offset := INF
+		var original_y := rect.position.y
+		for previous in used:
+			for candidate_y: float in [previous.position.y-extent.y-12,previous.end.y+12]:
+				var offset := absf(candidate_y-original_y)
+				if candidate_y<8 or candidate_y>max_top or offset>=best_offset:
+					continue
+				var candidate := Rect2(Vector2(rect.position.x,candidate_y),extent)
+				if not used.any(func(placed): return candidate.grow(4).intersects(placed)):
+					rect = candidate
+					best_offset = offset
 	position = rect.position
 	used.append(rect)
 	var tail := tip-position
 	tail.x = clampf(tail.x,12,extent.x-12)
-	tail.y = clampf(tail.y,extent.y,extent.y+10)
-	if tail != _tail or extent.y != _tail_base:
+	var base := 0.0 if tail.y<extent.y*0.5 else extent.y
+	tail.y = clampf(tail.y,-8.0,extent.y+8.0)
+	if tail != _tail or base != _tail_base:
 		_tail = tail
-		_tail_base = extent.y
+		_tail_base = base
 		queue_redraw()
 
 func _draw() -> void:
-	if _tail.y<=_tail_base:
+	if _tail.y>=0 and _tail.y<=body.size.y:
 		return
-	var left := Vector2(_tail.x-6,_tail_base-2)
-	var right := Vector2(_tail.x+6,_tail_base-2)
+	var inset := 2.0 if _tail_base==0.0 else -2.0
+	var left := Vector2(_tail.x-6,_tail_base+inset)
+	var right := Vector2(_tail.x+6,_tail_base+inset)
 	draw_colored_polygon(PackedVector2Array([left,_tail,right]),tint)

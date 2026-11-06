@@ -9,8 +9,21 @@ class TestPi extends "res://game/npc/dialogue/pi_agent.gd":
 	var sent_prompts: Array[Dictionary] = []
 	var fail_speaker := ""
 	var hold := false
+	var plans: Array[Dictionary] = []
 
 	func ask(messages: Array) -> void:
+		if messages[0].content.begins_with("你是对话调度员"):
+			var scene: Dictionary = JSON.parse_string(messages[1].content)
+			plans.append(scene)
+			var roster: Dictionary = scene.present
+			var route: String = scene.focus
+			if roster.has("nappy") and (scene.group_addressed or (
+					scene.message.contains("玩游戏") and not messages[0].content.contains("这次只选主答"))):
+				route += ",nappy"
+			if roster.has("nappy") and scene.message=="有谁了解游戏规则？":
+				route = "nappy"
+			answered.emit(route,"")
+			return
 		last_messages = messages
 		prompt = JSON.parse_string(messages.back().content)
 		memory = JSON.stringify(prompt.memory)
@@ -26,8 +39,8 @@ class TestPi extends "res://game/npc/dialogue/pi_agent.gd":
 
 	func finish() -> void:
 		partial.emit("今天想")
-		partial.emit("今天想尝点什么？也可以尝尝新菜。")
-		answered.emit("今天想尝点什么？也可以尝尝新菜。","")
+		partial.emit("今天想尝点什么？")
+		answered.emit("今天想尝点什么？","")
 
 
 
@@ -51,6 +64,16 @@ func tap_enter() -> void:
 	var released := event.duplicate() as InputEventKey
 	released.pressed = false
 	root.push_input(released,true)
+
+
+func finish_reading(dialogue) -> void:
+	for bubble in dialogue.bubbles.values():
+		bubble.advance(60.0)
+
+
+func submit_after_reading(dialogue, text: String) -> void:
+	finish_reading(dialogue)
+	dialogue._submit(text)
 
 
 func run() -> void:
@@ -162,7 +185,7 @@ func run() -> void:
 	divider.global_position = Vector3(0.425,0.4,1.2)
 	divider.force_update_transform()
 	await physics_frame
-	dialogue._submit("店里还有谁？")
+	submit_after_reading(dialogue,"店里还有谁？")
 	shop_context = transport.last_messages[0].content
 	if not check(shop_context.get_slice("没看清他们的站位：",1).contains("安娜")
 			and not shop_context.contains("安娜（就在你东南侧）") and not npc.people_near(karen).has("anna"),
@@ -195,7 +218,7 @@ func run() -> void:
 		return
 	world.player.global_position = basil.global_position+Vector3(0.25,0,0)
 	dialogue.begin(basil)
-	dialogue._submit("你在哪儿？刚才在做什么？")
+	submit_after_reading(dialogue,"你在哪儿？刚才在做什么？")
 	if not check(dialogue.composer.visible and not basil.walking
 			and transport.last_messages[0].content.contains("你在图书馆街区。打招呼前，你正沿这里的路线走动")
 			and not transport.last_messages[0].content.contains("你在这里的职责"),
@@ -233,7 +256,7 @@ func run() -> void:
 	var wall := StaticBody3D.new()
 	var collision := CollisionShape3D.new()
 	var box := BoxShape3D.new()
-	box.size = Vector3(0.25,1.0,0.1)
+	box.size = Vector3(0.45,1.0,0.1)
 	collision.shape = box
 	wall.add_child(collision)
 	root.add_child(wall)
@@ -265,6 +288,12 @@ func run() -> void:
 			and world.history.entries.back().content=="今天想尝点什么？",
 			"NPC reply or persona was missing"):
 		return
+	var greeting = dialogue.bubbles.chef
+	if not check(greeting.label.visible_characters==1,"NPC text appeared all at once"): return
+	greeting.advance(0.29)
+	if not check(greeting.label.visible_characters==1,"NPC text advanced before 0.3 seconds"): return
+	greeting.advance(0.01)
+	if not check(greeting.label.visible_characters==2,"NPC text did not advance at 0.3 seconds"): return
 	var people: String = transport.last_messages[0].content.get_slice("你附近可见的其他人：",1)
 	if not check(people.contains("纳皮") and not people.contains("霍格")
 			and not people.contains("博尔德") and not people.contains("切夫"),
@@ -272,14 +301,14 @@ func run() -> void:
 		return
 	transport.problem = "连接失败"
 	var before_speech: int = world.history.entries.size()
-	dialogue._submit("这是我们的秘密")
+	submit_after_reading(dialogue,"这是我们的秘密")
 	if not check(dialogue.status.text==transport.problem and dialogue.entry.editable
 			and world.history.entries.size()==before_speech+1
 			and world.history.entries.back().known_by==PackedStringArray(["player","chef"]),
 			"A failed reply was stored as NPC speech or prevented recovery"):
 		return
 	transport.problem = ""
-	dialogue._submit("")
+	submit_after_reading(dialogue,"")
 	if not check(world.history.entries.size()==before_speech+2
 			and transport.prompt.message=="这是我们的秘密"
 			and not transport.memory.contains("这是我们的秘密")
@@ -287,22 +316,27 @@ func run() -> void:
 			"Retry duplicated speech or lost this NPC's earlier reply"):
 		return
 	transport.sent_prompts.clear()
-	dialogue._submit("附近有谁？")
+	submit_after_reading(dialogue,"附近有谁？")
 	if not check(transport.sent_prompts.size()==1 and dialogue.speaker_id=="chef",
 			"An ordinary private turn provoked an interruption"):
 		return
 	transport.sent_prompts.clear()
-	dialogue._submit("现在能玩游戏吗？")
+	submit_after_reading(dialogue,"现在能玩游戏吗？")
+	var plan: Dictionary = transport.plans.back()
+	if not check(plan.present.has("chef") and plan.present.has("nappy")
+			and not plan.present.has("hoggy") and not JSON.stringify(plan).contains("这是我们的秘密"),
+			"The planner missed an eligible participant or received hidden/private information"):
+		return
 	if not check(transport.sent_prompts.size()==2 and dialogue.bubbles.has("chef") and dialogue.bubbles.has("nappy")
 			and transport.sent_prompts[1].context.contains("角色：纳皮。")
-			and transport.sent_prompts[1].memory.contains('"actor":"切夫"')
+			and transport.sent_prompts[1].context.contains("你刚听见切夫回答：今天想尝点什么？")
 			and not transport.sent_prompts[0].memory.contains("这是我们的秘密")
 			and not transport.sent_prompts[1].memory.contains("这是我们的秘密")
 			and world.history.entries.back().known_by.has("chef"),
 			"The relevant bystander failed to join or received earlier private speech"):
 		return
 	transport.sent_prompts.clear()
-	dialogue._submit("那怎么玩游戏？")
+	submit_after_reading(dialogue,"那怎么玩游戏？")
 	if not check(transport.sent_prompts.size()==1,"The same topic repeatedly provoked unsolicited replies"):
 		return
 	transport.sent_prompts.clear()
@@ -310,33 +344,42 @@ func run() -> void:
 	transport.fail_speaker = "纳皮"
 	# Select the closest guest on this explicit group request.
 	dialogue.last_guest = ""
-	dialogue._submit("你们觉得呢？")
+	submit_after_reading(dialogue,"你们觉得呢？")
 	if not check(transport.sent_prompts.size()==2 and dialogue.status.text=="第二个角色断线"
 			and world.history.entries.size()==before_group+2 and dialogue.bubbles.has("chef"),
 			"Failure of the second speaker lost the first reply or duplicated the turn"):
 		return
 	transport.fail_speaker = ""
-	dialogue._submit("")
+	submit_after_reading(dialogue,"")
 	if not check(transport.sent_prompts.size()==3 and world.history.entries.size()==before_group+3
 			and world.history.entries.back().actor=="nappy"
 			and not world.history.entries.back().known_by.has("hoggy"),
 			"Group retry replayed the first speaker or included a neighbor behind a wall"):
 		return
 	transport.sent_prompts.clear()
-	dialogue._submit("纳皮，你呢？")
+	submit_after_reading(dialogue,"有谁了解游戏规则？")
+	if not check(transport.sent_prompts.size()==1 and dialogue.speaker_id=="nappy",
+			"Pi could not choose a participant other than the default speaker"):
+		return
+	transport.sent_prompts.clear()
+	submit_after_reading(dialogue,"纳皮，你呢？")
 	if not check(transport.sent_prompts.size()==1 and dialogue.speaker_id=="nappy"
 			and world.history.entries.back().known_by==PackedStringArray(["nappy","player"]),
 			"Directly addressing a nearby character did not switch to a private reply"):
 		return
 	transport.sent_prompts.clear()
 	transport.hold = true
-	dialogue._submit("还在营业吗？")
+	submit_after_reading(dialogue,"还在营业吗？")
 	dialogue._submit("下次见。")
 	if not check(not paused and dialogue.entry.editable and dialogue.queued.size()==1
 			and dialogue.bubbles.player.label.text=="下次见。" and transport.sent_prompts.size()==1,
 			"Live composer failed to show or queue speech while Pi was streaming"):
 		return
 	transport.finish()
+	if not check(transport.sent_prompts.size()==1 and dialogue.waiting_for_text,
+			"A queued response could replace unread text"):
+		return
+	dialogue._process(3.0)
 	if not check(transport.sent_prompts.size()==2 and transport.prompt.message=="下次见。" and dialogue.pending,
 			"Queued live speech did not reach Pi after the current reply"):
 		return
@@ -349,8 +392,22 @@ func run() -> void:
 	transport.finish()
 	await process_frame
 	if not check(dialogue.composer.position.y>0 and dialogue.composer.get_rect().end.y<=dialogue.bubble_layer.size.y
-			and dialogue.bubbles.player.visible and dialogue.bubbles.nappy.visible,
+			and dialogue.bubbles.nappy.visible,
 			"Composer or head-anchored bubbles are outside the viewport"):
+		return
+	var npc_position: Vector3 = npc_bubble.actor.global_position
+	var camera := root.get_camera_3d()
+	var bounds: Vector2 = dialogue.bubble_layer.size
+	npc_bubble.actor.global_position = camera.project_position(Vector2(-240,100),4.0)
+	npc_bubble.actor.reset_physics_interpolation()
+	var used: Array[Rect2] = []
+	npc_bubble.follow(camera,bounds,used)
+	if not check(npc_bubble.visible and used.size()==1 and Rect2(Vector2.ZERO,bounds).encloses(used[0]),
+			"An offscreen NPC's bubble left the viewport"):
+		return
+	npc_bubble.actor.global_position = npc_position
+	npc_bubble.advance(0.3*(npc_bubble.label.text.length()-npc_bubble.label.visible_characters))
+	if not check(is_equal_approx(npc_bubble.remaining,10.65),"Hold did not start after the final character"):
 		return
 	var player_position: Vector3 = world.player.global_position
 	world.player.global_position = player_position+Vector3(5,0,0)
@@ -366,6 +423,41 @@ func run() -> void:
 	if not check(not dialogue.bubbles.has("nappy"),"NPC bubble survived its fade"):
 		return
 	world.player.global_position = player_position
+	dialogue.close()
+	transport.hold = true
+	dialogue.begin(chef)
+	transport.partial.emit("我在做饭。")
+	transport.partial.emit("我在做饭。你想帮忙吗？")
+	transport.answered.emit("我在做饭。你想帮忙吗？","")
+	var question = dialogue.bubbles.chef
+	dialogue._process(1.2)
+	dialogue._process(0.59)
+	if not check(question.label.text=="我在做饭。" and question.label.visible_characters==5
+			and not dialogue.reply_wait_started,"The next sentence started too soon or the reply timer ran during speech"):
+		return
+	dialogue._process(0.01)
+	if not check(question.label.text=="你想帮忙吗？" and question.label.visible_characters==1,
+			"The second sentence did not stream separately"):
+		return
+	dialogue._process(1.5)
+	if not check(dialogue.reply_wait_started and is_equal_approx(chef.talk_wait,10.0)
+			and world.history.entries.back().content=="我在做饭。你想帮忙吗？",
+			"The NPC did not wait for the player after the last sentence"):
+		return
+	var requests_before_timeout := transport.sent_prompts.size()
+	dialogue._process(9.9)
+	if not check(dialogue.composer.visible and dialogue.bubbles.chef==question,"The question timed out too early"):
+		return
+	dialogue._process(0.11)
+	if not check(dialogue.bubbles.chef==question and question.modulate.a<1.0,
+			"The timed-out question was replaced before it faded"):
+		return
+	dialogue._process(0.65)
+	if not check(not dialogue.composer.visible and dialogue.bubbles.chef.speech=="那我们晚点再聊。"
+			and is_zero_approx(chef.talk_wait) and transport.sent_prompts.size()==requests_before_timeout,
+			"The NPC did not conclude and resume locally after an unanswered question"):
+		return
+	transport.hold = false
 	dialogue.close()
 	wall.free()
 	await physics_frame
@@ -383,7 +475,7 @@ func run() -> void:
 			and not transport.memory.contains("蓝色贝壳"),
 			"Another actor received the wrong persona or conversation history"):
 		return
-	dialogue._submit("蓝色贝壳和我们的秘密是什么？")
+	submit_after_reading(dialogue,"蓝色贝壳和我们的秘密是什么？")
 	if not check(transport.memory.contains("蓝色贝壳")
 			and not transport.memory.contains("这是我们的秘密")
 			and not transport.memory.contains("known_by")
