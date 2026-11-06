@@ -2,7 +2,6 @@ extends Control
 ## Screen-space text follows its world-space speaker without scaling with distance.
 const CHARACTER_SECONDS := 0.09
 const COMMA_SECONDS := 0.16
-const SENTENCE_PAUSE := 0.32
 
 var label: Label
 var body: PanelContainer
@@ -64,12 +63,15 @@ func say(text: String, is_streaming: bool) -> void:
 	modulate.a = 1.0
 	if fade_duration>0.0:
 		var last := sentences[-1]
-		var hold := clampf(1.8+last.length()*0.17,3.5,12.0)
+		var hold := _reading_hold(last)
 		if last.ends_with("？") or last.ends_with("?"):
 			hold = clampf(6.0+last.length()*0.14,8.0,14.0)
 		remaining = hold+fade_duration
 	else:
 		remaining = clampf(3.5+text.length()*0.08,4.0,12.0)
+
+func _reading_hold(text: String) -> float:
+	return clampf(1.8+text.length()*0.17,3.5,12.0)
 
 func _set_line(text: String) -> void:
 	if label.text==text:
@@ -87,7 +89,7 @@ func revealing() -> bool:
 func advance(delta: float) -> bool:
 	while revealing():
 		var next_char := label.visible_characters<label.text.length()
-		var interval := CHARACTER_SECONDS if next_char else SENTENCE_PAUSE
+		var interval := CHARACTER_SECONDS if next_char else _reading_hold(label.text)
 		if next_char and label.visible_characters>0 and "，、；：,;:".contains(label.text[label.visible_characters-1]):
 			interval = COMMA_SECONDS
 		var needed := interval-reveal_elapsed

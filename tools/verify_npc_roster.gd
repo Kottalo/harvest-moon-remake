@@ -73,6 +73,8 @@ func finish_reading(dialogue) -> void:
 
 func submit_after_reading(dialogue, text: String) -> void:
 	finish_reading(dialogue)
+	if not dialogue.composer.visible:
+		tap_enter()
 	dialogue._submit(text)
 
 
@@ -105,7 +107,7 @@ func run() -> void:
 		return
 	dialogue.entry.text = "出门吧。"
 	tap_enter()
-	if not check(dialogue.bubbles.player.label.text=="出门吧。" and not dialogue.entry.has_focus()
+	if not check(dialogue.bubbles.player.label.text=="出门吧。" and not dialogue.entry.has_focus() and not dialogue.composer.visible
 			and world.history.entries.back().known_by==PackedStringArray(["player"]) and transport.sent_prompts.is_empty(),
 			"Enter did not submit local speech without an NPC"):
 		return
@@ -142,7 +144,7 @@ func run() -> void:
 	tap_enter()
 	dialogue.entry.text = "杰夫，早上好。"
 	tap_enter()
-	if not check(dialogue.composer.visible and dialogue.bubbles.has("jeff")
+	if not check(not dialogue.composer.visible and dialogue.bubbles.has("jeff")
 			and transport.sent_prompts.size()==1 and transport.prompt.message=="杰夫，早上好。"
 			and transport.last_messages[0].content.contains("你刚注意到玩家走近")
 			and transport.last_messages[0].content.contains("你在杂货店")
@@ -247,7 +249,7 @@ func run() -> void:
 	world.player.global_position = basil.global_position+Vector3(0.25,0,0)
 	dialogue.begin(basil)
 	submit_after_reading(dialogue,"你在哪儿？刚才在做什么？")
-	if not check(dialogue.composer.visible and not basil.walking
+	if not check(not dialogue.composer.visible and not basil.walking
 			and transport.last_messages[0].content.contains("你在图书馆街区。打招呼前，你正沿这里的路线走动")
 			and not transport.last_messages[0].content.contains("你在这里的职责"),
 			"Stopping to greet lost Basil's actual place or walking activity"):
@@ -305,7 +307,8 @@ func run() -> void:
 	transport.partial.connect(func(_text: String):
 		snapshots.append(dialogue.bubbles.chef.label.text if world.history.entries.size()==before_greeting else "saved too early"))
 	world.player.actions.interact_requested.emit()
-	if not check(dialogue.composer.visible and not paused and dialogue.npc_id=="chef" and chef.facing==3,
+	if not check(not dialogue.composer.visible and not dialogue.entry.has_focus() and not paused
+			and dialogue.npc_id=="chef" and chef.facing==3,
 			"Facing the helper and pressing interact did not open live conversation"):
 		return
 	if not check(dialogue.bubbles.chef.label.text=="今天想尝点什么？" and transport.last_messages[0].content.contains("料理")
@@ -398,8 +401,9 @@ func run() -> void:
 	transport.sent_prompts.clear()
 	transport.hold = true
 	submit_after_reading(dialogue,"还在营业吗？")
+	tap_enter()
 	dialogue._submit("下次见。")
-	if not check(not paused and dialogue.entry.editable and dialogue.queued.size()==1
+	if not check(not paused and not dialogue.composer.visible and dialogue.entry.editable and dialogue.queued.size()==1
 			and dialogue.bubbles.player.label.text=="下次见。" and transport.sent_prompts.size()==1,
 			"Live composer failed to show or queue speech while Pi was streaming"):
 		return
@@ -419,7 +423,9 @@ func run() -> void:
 	transport.hold = false
 	transport.finish()
 	await process_frame
-	if not check(dialogue.composer.position.y>0 and dialogue.composer.get_rect().end.y<=dialogue.bubble_layer.size.y
+	tap_enter()
+	if not check(dialogue.composer.visible and dialogue.entry.has_focus()
+			and dialogue.composer.position.y>0 and dialogue.composer.get_rect().end.y<=dialogue.bubble_layer.size.y
 			and dialogue.bubbles.nappy.visible,
 			"Composer or head-anchored bubbles are outside the viewport"):
 		return
@@ -459,9 +465,9 @@ func run() -> void:
 	transport.answered.emit("我在做饭。你想帮忙吗？","")
 	var question = dialogue.bubbles.chef
 	dialogue._process(0.36)
-	dialogue._process(0.31)
+	dialogue._process(3.49)
 	if not check(question.label.text=="我在做饭。" and question.label.visible_characters==5
-			and not dialogue.reply_wait_started,"The next sentence started too soon or the reply timer ran during speech"):
+			and not dialogue.reply_wait_started,"The first sentence did not stay readable or the reply timer ran during speech"):
 		return
 	dialogue._process(0.01)
 	if not check(question.label.text=="你想帮忙吗？" and question.label.visible_characters==1,
@@ -474,7 +480,8 @@ func run() -> void:
 		return
 	var requests_before_timeout := transport.sent_prompts.size()
 	dialogue._process(7.9)
-	if not check(dialogue.composer.visible and dialogue.bubbles.chef==question,"The question timed out too early"):
+	if not check(dialogue.npc_id=="chef" and not dialogue.composer.visible and dialogue.bubbles.chef==question,
+			"The question timed out early or opened the input field"):
 		return
 	dialogue._process(0.11)
 	if not check(dialogue.bubbles.chef==question and question.modulate.a<1.0,
@@ -512,7 +519,7 @@ func run() -> void:
 	npc.player_arrivals["chef"] = Time.get_ticks_msec()-1200
 	dialogue.consider_proactive(PackedStringArray(["chef"]))
 	if not check(transport.sent_prompts.size()==requests_before_greeting+1 and dialogue.npc_id=="chef"
-			and dialogue.composer.visible and not dialogue.entry.has_focus() and transport.prompt.message.contains("玩家还没开口"),
+			and not dialogue.composer.visible and not dialogue.entry.has_focus() and transport.prompt.message.contains("玩家还没开口"),
 			"An eligible NPC did not start a conversation without taking keyboard focus"):
 		return
 	dialogue.close()

@@ -222,23 +222,19 @@ func begin(actor, proactive := false) -> void:
 	if overlay.visible or not actor.placed or not profiles.has(id):
 		return
 	if id==npc_id:
-		entry.grab_focus()
 		return
 	close_chat()
 	_set_host(actor)
 	actor.greet(world.player.global_position)
-	entry.clear()
-	composer.show()
 	npc_initiated = proactive
 	if proactive:
 		pending_text = "你注意到玩家在附近停下来了。根据眼前的场景和角色设定，自然地主动说一句。玩家还没开口。"
 	else:
-		entry.grab_focus()
 		pending_text = "玩家走到你面前打招呼。请根据此刻的场景自然回应。"
 	_ask()
 
 func consider_proactive(visible: PackedStringArray) -> void:
-	if not proactive_enabled or visible.is_empty() or composer.visible or not bubbles.is_empty():
+	if not proactive_enabled or visible.is_empty() or not npc_id.is_empty() or composer.visible or not bubbles.is_empty():
 		return
 	var now := Time.get_ticks_msec()
 	if now<next_proactive_at or get_tree().paused or world.transitioning or world.overview:
@@ -384,7 +380,7 @@ func close() -> void:
 	get_tree().paused = was_paused
 
 func close_chat(keep_finished := false) -> void:
-	if not composer.visible and bubbles.is_empty():
+	if npc_id.is_empty() and not composer.visible and bubbles.is_empty():
 		return
 	client.cancel_request()
 	_clear_reply_wait()
@@ -407,8 +403,8 @@ func close_chat(keep_finished := false) -> void:
 	for id in bubbles.keys():
 		if not keep_finished or bubbles[id].streaming:
 			_remove_bubble(id)
-	entry.release_focus()
-	composer.hide()
+	entry.clear()
+	_hide_composer()
 	_set_status("")
 
 func _exit_tree() -> void:
@@ -426,7 +422,7 @@ func _input(event: InputEvent) -> void:
 			close()
 		elif event.keycode==KEY_F1:
 			get_viewport().set_input_as_handled()
-	elif composer.visible and not get_tree().paused and not world.transitioning:
+	elif (composer.visible or not npc_id.is_empty()) and not get_tree().paused and not world.transitioning:
 		if event.keycode==KEY_ESCAPE:
 			get_viewport().set_input_as_handled()
 			close_chat()
@@ -442,15 +438,18 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	entry.grab_focus()
 	get_viewport().set_input_as_handled()
 
+func _hide_composer() -> void:
+	entry.release_focus()
+	composer.hide()
+
 func _submit(value: String) -> void:
 	if not composer.visible or get_tree().paused:
 		return
 	var text := value.strip_edges().left(entry.max_length)
 	if text.is_empty():
+		_hide_composer()
 		if not pending and not pending_text.is_empty():
 			_ask()
-		else:
-			entry.release_focus()
 		return
 	if queued.size()>=QUEUE_LIMIT:
 		_set_status("等一下，还有几句话正在等待回应。")
@@ -458,7 +457,7 @@ func _submit(value: String) -> void:
 	_clear_reply_wait()
 	npc_initiated = false
 	entry.clear()
-	entry.release_focus()
+	_hide_composer()
 	_bubble("player",text)
 	if npc_id.is_empty():
 		var actor = _nearest_listener()
@@ -768,7 +767,7 @@ func _remove_bubble(id: String) -> void:
 	bubbles.erase(id)
 
 func _process(delta: float) -> void:
-	if get_tree().paused or (not composer.visible and bubbles.is_empty()):
+	if get_tree().paused or (npc_id.is_empty() and not composer.visible and bubbles.is_empty()):
 		return
 	if world.transitioning:
 		close_chat()
