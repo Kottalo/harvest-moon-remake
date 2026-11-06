@@ -231,7 +231,8 @@ func interact() -> void:
 		return
 	var actions = world.player.actions
 	if actions.carried_id != 0:
-		if not catalogue.pictures.has(str(actions.carried_id)):
+		if Input.is_action_pressed("run") or not catalogue.pictures.has(str(actions.carried_id)):
+			actions.start_drop(true)
 			return
 		placement = _placement(actions.carried_id)
 		if placement.get("blocked",false):

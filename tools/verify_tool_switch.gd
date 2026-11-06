@@ -102,8 +102,10 @@ func run() -> void:
 	var seed_icon: TextureRect = picker.bag_slots[1].get_node("Icon")
 	if not require_ok(seed_icon.get_rect().intersects(bag_seed.get_rect()) and seed_icon.get_index()<bag_seed.get_index(),
 			"Seed quantity must overlay the icon"): return
-	if not require_ok(bag_seed.text=="×9999" and bag_seed.position.is_equal_approx(Vector2(3,37))
-			and bag_seed.horizontal_alignment==HORIZONTAL_ALIGNMENT_LEFT,"Seed count was not at the bottom left of its slot"): return
+	if not require_ok(bag_seed.text=="×9999" and bag_seed.position.is_equal_approx(Vector2(3,34))
+			and bag_seed.get_rect().end.x==49 and bag_seed.get_rect().end.y<=52
+			and bag_seed.horizontal_alignment==HORIZONTAL_ALIGNMENT_RIGHT and bag_seed.get_theme_font("font").font_weight==700
+			and bag_seed.get_theme_constant("outline_size")==3,"Seed count was not bold and aligned bottom right"): return
 	if not require_ok(not world.hud.visible and not world.day_cycle.clock_label.visible,
 			"Gameplay HUD showed through the toolbox"): return
 	if not require_ok(viewport.get_visible_rect().encloses(active.get_global_rect()),

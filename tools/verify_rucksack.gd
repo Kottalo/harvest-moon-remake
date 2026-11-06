@@ -72,9 +72,11 @@ func run() -> void:
 	if not check(menu.frame.size==Vector2(472,335) and menu.brass_pin.get_size()==Vector2(5,5) and menu.capacity_label.text=="背包  2 格","Toolbox canvas, brass pin or capacity label differs from the reference"): return
 	if not check(menu.icon_cache.size()==cached_icons,"Opening the default bag loaded additional icons"): return
 	var scale_factor: float = menu.frame.scale.y
-	var quantity_position: Vector2 = (menu.frame.position+(menu._slot_origin(2)+Vector2(3,37))*scale_factor).round()
-	if not check(menu.seed_labels[2].visible and menu.seed_labels[2].position==quantity_position,
-			"Backpack seed quantity is not in the lower left corner"): return
+	var quantity: Label = menu.seed_labels[2]
+	var quantity_position: Vector2 = (menu.frame.position+(menu._slot_origin(2)+Vector2(3,34))*scale_factor).round()
+	if not check(quantity.visible and quantity.position==quantity_position and quantity.size.x==roundi(46*scale_factor)
+			and quantity.horizontal_alignment==HORIZONTAL_ALIGNMENT_RIGHT and quantity.get_theme_font("font").font_weight==700
+			and quantity.get_theme_constant("outline_size")==3,"Backpack seed quantity is not bold and aligned bottom right"): return
 	if not check(menu.detail.get_parent()==menu.panel and menu.detail.scale==Vector2.ONE
 			and menu.detail.get_theme_font_size("font_size")==roundi(10*scale_factor),"Text inherits pixel-art scaling"): return
 	if not check(menu._slot_origin(0)==Vector2(37,111) and menu._slot_origin(1)==Vector2(195,111)
@@ -108,9 +110,8 @@ func run() -> void:
 	await tick(90)
 
 	if not check(economy.rucksack.add_item(124) and economy.rucksack.add_item(65) and not economy.rucksack.add_item(66),"Backpack capacity did not prevent overflow"): return
-	actions.carried_id = 66
-	world._interact()
-	if not check(actions.carried_id==66 and economy.count(66)==0,"A full bag discarded the held item"): return
+	if not check(economy.receive(66) and actions.carried_id==66 and economy.count(66)==0,
+			"A full bag did not keep the received item in hand"): return
 	await tap(KEY_SPACE)
 	await tap(KEY_DOWN)
 	await tap(KEY_RIGHT)

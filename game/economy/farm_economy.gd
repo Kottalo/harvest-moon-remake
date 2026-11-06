@@ -166,20 +166,6 @@ func receive(item: int) -> bool:
 	actions.update_held(false)
 	return true
 
-func stow_held() -> bool:
-	var actions = world.player.actions
-	var item: int = actions.carried_id
-	if item==0 or actions.items.has(str(item)):
-		return false
-	if _add(item):
-		actions.carried_id = 0
-		actions.held_sprite.hide()
-		world.sound.cue("stow")
-		message = "已收入背包 · "+item_name(item)
-	else:
-		message = "背包已满。"
-	return true
-
 func _mined(item: int) -> void:
 	if item==102:
 		var amount := sell_price(item)

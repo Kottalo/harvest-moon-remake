@@ -147,7 +147,7 @@ func _run() -> void:
 			"Harvest was missing from history or a day change lost the earlier sowing"):
 		return
 	actions.interact_requested.emit()
-	if not _require(actions.carried_id == 0 and world.economy.take(65),"Rucksack did not receive crop"):
+	if not _require(actions.state=="throw","Interacting while holding a crop did not discard it") or not _finish():
 		return
 	var ids := range(34,55)
 	ids.append(377)
@@ -194,9 +194,8 @@ func _run() -> void:
 			actions.interact_requested.emit()
 			if not _finish() or not _require(actions.carried_id > 0,"Mature crop did not harvest: "+str(seed)):
 				return
-			var harvested: int = actions.carried_id
 			actions.interact_requested.emit()
-			if not _require(actions.carried_id==0 and world.economy.take(harvested),"Rucksack did not receive crop: "+str(seed)):
+			if not _finish() or not _require(actions.carried_id==0,"Could not release crop: "+str(seed)):
 				return
 			if not _require(crops.plants.has(target) == (row.regrow >= 0),"Wrong regrowth for seed "+str(seed)):
 				return

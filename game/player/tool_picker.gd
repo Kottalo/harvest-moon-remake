@@ -26,6 +26,7 @@ var tooltip_label: Label
 var tooltip_slot: Button
 var entries: Dictionary = {}
 var styles: Dictionary
+var strong_font: Font
 var hud_visible := false
 var clock_visible := false
 var owns_pause := false
@@ -42,6 +43,7 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	gameplay_hud = hud
 	clock_label = clock
 	styles = ToolboxStyle.materials()
+	strong_font = ToolboxStyle.font(font,700)
 	layer = 40
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
@@ -70,7 +72,7 @@ func setup(player_actions, font: Font, available_seeds: Callable, select_tool: C
 	var brass := ToolboxStyle.brass_pin()
 	_add_pin(heading,brass)
 	title = _label(heading,"工具箱",25,ToolboxStyle.HEADING)
-	title.add_theme_font_override("font",ToolboxStyle.font(font,700))
+	title.add_theme_font_override("font",strong_font)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var close := Button.new()
 	close.name = "CloseButton"
@@ -278,13 +280,8 @@ func _slot(parent: Container) -> Button:
 	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	button.add_child(picture)
-	var quantity := _label(button,"",10,ToolboxStyle.DARK_INK)
-	quantity.name = "Quantity"
-	quantity.add_theme_color_override("font_outline_color",ToolboxStyle.HEADING)
-	quantity.add_theme_constant_override("outline_size",2)
-	quantity.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	quantity.clip_text = true
-	quantity.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var quantity := ToolboxStyle.quantity_label(strong_font)
+	button.add_child(quantity)
 	quantity.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	quantity.offset_left = ToolboxStyle.QUANTITY_ORIGIN.x
 	quantity.offset_top = ToolboxStyle.QUANTITY_ORIGIN.y - ToolboxStyle.SLOT_SIZE.y

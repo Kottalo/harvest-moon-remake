@@ -80,9 +80,8 @@ func setup(owner_economy, font: Font) -> void:
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	for index in 9:
-		var label := _make_label("",ToolboxStyle.DARK_INK,strong)
-		label.add_theme_color_override("font_outline_color",ToolboxStyle.HEADING)
-		label.add_theme_constant_override("outline_size",2)
+		var label := ToolboxStyle.quantity_label(strong)
+		panel.add_child(label)
 		seed_labels.append(label)
 
 	panel.hide()
@@ -113,7 +112,8 @@ func _layout() -> void:
 	detail.size.x = roundi(394*amount)
 	for index in seed_labels.size():
 		var label := seed_labels[index]
-		_place_text(label,_slot_origin(index)+ToolboxStyle.QUANTITY_ORIGIN,10,amount)
+		_place_text(label,_slot_origin(index)+ToolboxStyle.QUANTITY_ORIGIN,ToolboxStyle.QUANTITY_FONT_SIZE,amount)
+		label.size.x = roundi((SLOT_SIZE.x-2.0*ToolboxStyle.QUANTITY_ORIGIN.x)*amount)
 	art.queue_redraw()
 
 func _place_text(label: Label, point: Vector2, font_size: int, amount: float) -> void:

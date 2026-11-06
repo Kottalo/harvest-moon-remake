@@ -160,16 +160,10 @@ func poll_input() -> void:
 			equipment_selected.emit(equipped)
 		elif equipped == 34 and not seed_catalogue.is_empty():
 			selected_seed = 34 + (selected_seed - 33) % seed_catalogue.size()
-	if Input.is_action_just_pressed("use_tool"):
-		if carried_id != 0:
-			if Input.is_action_pressed("run") or not items.has(str(carried_id)):
-				start_drop(true)
-			else:
-				interact_requested.emit()
-		else:
-			start_tool()
-	elif Input.is_action_just_pressed("interact"):
+	if Input.is_action_just_pressed("interact"):
 		interact_requested.emit()
+	elif Input.is_action_just_pressed("use_tool"):
+		start_tool()
 	elif Input.is_action_just_pressed("refill_can") and equipped == 21 and carried_id == 0:
 		play("refill", player.facing * 5 + upgrade, "refill")
 

@@ -10,7 +10,24 @@ const SLOT_SIZE := Vector2(52,52)
 const ICON_PADDING := 3.0
 const SLOT_PITCH := 62
 const SLOT_COLUMNS := 4
-const QUANTITY_ORIGIN := Vector2(3,37)
+const QUANTITY_ORIGIN := Vector2(3,34)
+const QUANTITY_FONT_SIZE := 12
+
+static func quantity_label(strong: Font) -> Label:
+	var label := Label.new()
+	label.name = "Quantity"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	label.add_theme_font_override("font",strong)
+	label.add_theme_font_size_override("font_size",QUANTITY_FONT_SIZE)
+	label.add_theme_color_override("font_color",INK)
+	label.add_theme_color_override("font_outline_color",DARK_INK)
+	label.add_theme_constant_override("outline_size",3)
+	label.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	return label
 
 static func icon_rect(texture: Texture2D) -> Rect2:
 	var source := texture.get_size()

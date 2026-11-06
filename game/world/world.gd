@@ -260,9 +260,9 @@ func _interact() -> void:
 			return
 		if economy.livestock.interact() or economy.supermarket.interact():
 			return
-	if economy.stow_held():
-		return
 	loose_items.interact()
+	if player.actions.carried_id != 0:
+		return
 	day_cycle.interact()
 	farm_field.crops.pick_crop()
 	npcs.greet()

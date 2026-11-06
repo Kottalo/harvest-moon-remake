@@ -119,6 +119,8 @@ func run() -> void:
 	if not check(showed_ore and player.actions.carried_id==124 and economy.count(124)==0,
 			"Dug ore bypassed the held pose or was put in the bag"): return
 	await _press(KEY_C)
+	if not check(player.actions.carried_id==124 and not player.actions.busy(),"C released the held ore"): return
+	await _press(KEY_Z)
 	var flew := false
 	for tick in 100:
 		await _frames(1)
@@ -136,8 +138,16 @@ func run() -> void:
 	await _press(KEY_C)
 	await _frames(75)
 	if not check(player.actions.carried_id==124,"Second mined ore did not return to the hand"): return
+	await _press(KEY_SPACE)
+	if not check(world.rucksack_menu.panel.visible,"Space did not open the backpack while carrying ore"): return
+	await _press(KEY_DOWN)
 	await _press(KEY_Z)
-	if not check(player.actions.carried_id==0 and economy.count(124)==1,"Z did not store exactly one held ore"): return
+	await _press(KEY_RIGHT)
+	await _press(KEY_RIGHT)
+	await _press(KEY_Z)
+	await _press(KEY_SPACE)
+	if not check(player.actions.carried_id==0 and economy.count(124)==1 and economy.count(163)==1,
+			"Backpack swap did not store the held ore in the empty slot"): return
 
 	world.day_cycle.minute = 11*60
 	world._change_area(156,Vector3.ZERO)

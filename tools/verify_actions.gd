@@ -119,7 +119,7 @@ func _run() -> void:
 	if not _require(recent.map(func(event): return event.content)==["拿起了杂草","扔出了杂草"],
 			"Physical pickup and discard did not reach world history"):
 		return
-	print("CARRY_OK: physical E pickup, real carry walking and E discard; no duplicated item")
+	print("CARRY_OK: physical Z pickup, real carry walking and Z discard; no duplicated item")
 	var stone: Dictionary
 	for record in world.loose_items.records[0]:
 		if record.active and record.id == 58:
