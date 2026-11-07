@@ -357,11 +357,14 @@ func run() -> void:
 	transport.problem = "连接失败"
 	var before_speech: int = world.history.entries.size()
 	submit_after_reading(dialogue,"这是我们的秘密")
-	if not check(dialogue.status.text==transport.problem and dialogue.entry.editable
+	if not check(dialogue.status.text==transport.problem and dialogue.status.is_visible_in_tree()
+			and not dialogue.composer.visible and dialogue.entry.editable
 			and world.history.entries.size()==before_speech+1
 			and world.history.entries.back().known_by==PackedStringArray(["player","chef"]),
-			"A failed reply was stored as NPC speech or prevented recovery"):
+			"A failed reply hid its error, was recorded as NPC speech or prevented recovery"):
 		return
+	dialogue._process(5.1)
+	if not check(not dialogue.status.visible,"The dialogue error did not dismiss itself"): return
 	transport.problem = ""
 	submit_after_reading(dialogue,"")
 	if not check(world.history.entries.size()==before_speech+2

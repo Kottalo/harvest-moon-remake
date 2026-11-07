@@ -54,7 +54,8 @@ func ask(messages: Array) -> void:
 		return
 	requests += 1
 	last_problem = ""
-	deadline = Time.get_ticks_msec()+30_000
+	# Allow two 20-second connection attempts and the short provider backoff.
+	deadline = Time.get_ticks_msec()+45_000
 	set_process(true)
 	usage_changed.emit()
 

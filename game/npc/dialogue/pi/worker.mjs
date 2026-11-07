@@ -30,7 +30,7 @@ async function respond({ key, messages }) {
     getApiKey: () => key,
     identity: { attribution: null },
     streamFn: (target, context, options) => streamSimple(target, context, {
-      ...options, maxTokens: 160, maxRetries: 0,
+      ...options, maxTokens: 160, timeoutMs: 20_000, maxRetries: 1, maxRetryDelayMs: 3000,
       onPayload: (payload) => ({
         ...payload, thinking: { type: "disabled" },
         ...(actionReply ? { response_format: { type: "json_object" } } : {}),
@@ -54,12 +54,14 @@ async function respond({ key, messages }) {
   await agent.prompt(messages[1].content);
   const answer = agent.state.messages.at(-1);
   if (answer?.role !== "assistant" || answer.stopReason === "error" || answer.stopReason === "aborted") {
-    const status = answer?.errorMessage?.match(/\b(401|402|429)\b/)?.[1];
+    const status = answer?.errorMessage?.match(/\b(401|402|429|5\d\d)\b/)?.[1];
     const problem = {
       401: "DeepSeek 密钥无效或已撤销。",
       402: "DeepSeek 账户余额不足。",
       429: "请求太频繁，请稍后再试。",
-    }[status] ?? "Pi Agent 未能取得 DeepSeek 回复。";
+    }[status] ?? (status?.startsWith("5")
+      ? `DeepSeek 服务暂时出错（${status}），请稍后再试。`
+      : "Pi Agent 未能取得 DeepSeek 回复。");
     write({ problem });
     return;
   }

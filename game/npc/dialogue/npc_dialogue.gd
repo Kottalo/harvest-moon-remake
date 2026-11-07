@@ -76,6 +76,7 @@ var reply_scroll: ScrollContainer
 var choices_panel: VBoxContainer
 var ui_font: Font
 var status: Label
+var status_remaining := 0.0
 var entry: LineEdit
 var send: Button
 
@@ -143,7 +144,8 @@ func setup(owner_world, font: Font) -> void:
 	status.add_theme_color_override("font_color",Color("#fff4d3"))
 	status.add_theme_color_override("font_outline_color",Color("#2a1c17"))
 	status.add_theme_constant_override("outline_size",5)
-	composer.add_child(status)
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bubble_layer.add_child(status)
 	status.hide()
 	var row := HBoxContainer.new()
 	composer.add_child(row)
@@ -217,6 +219,11 @@ func _layout() -> void:
 		composer.offset_right = chat_width*0.5
 		composer.offset_top = -18-composer.get_combined_minimum_size().y
 		composer.offset_bottom = -18
+		status.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+		status.offset_left = composer.offset_left
+		status.offset_right = composer.offset_right
+		status.offset_bottom = -48
+		status.offset_top = status.offset_bottom-status.get_combined_minimum_size().y
 
 func begin(actor, proactive := false) -> void:
 	var id := str(actor.name)
@@ -786,6 +793,7 @@ func _check_reply_wait() -> void:
 func _set_status(message: String) -> void:
 	status.text = message
 	status.visible = not message.is_empty()
+	status_remaining = 5.0 if status.visible else 0.0
 	_layout()
 
 func _hold_speaker(id: String) -> void:
@@ -838,6 +846,10 @@ func _remove_bubble(id: String) -> void:
 	bubbles.erase(id)
 
 func _process(delta: float) -> void:
+	if status_remaining>0.0:
+		status_remaining -= delta
+		if status_remaining<=0.0:
+			_set_status("")
 	if get_tree().paused or (npc_id.is_empty() and not composer.visible and bubbles.is_empty()):
 		return
 	if world.transitioning:
@@ -872,7 +884,7 @@ func _process(delta: float) -> void:
 			bubble.follow(camera,bubble_layer.size if id=="player" or not nearby else bounds,used,nearby)
 	_check_reply_wait()
 	_release_inactive_speakers()
-	if npc_initiated and not pending and bubbles.is_empty() and not entry.has_focus():
+	if npc_initiated and not pending and bubbles.is_empty() and not entry.has_focus() and not status.visible:
 		close_chat()
 	if waiting_for_text:
 		_ask()
