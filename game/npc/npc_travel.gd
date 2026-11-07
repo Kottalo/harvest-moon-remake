@@ -209,7 +209,7 @@ func tick(delta: float) -> void:
 		trip.route.pop_front()
 		trip.elapsed = 0.0
 		trip.door_blocked = 0.0
-		for key in ["arrival_panel","arrival_start","departure_panel"]:
+		for key in ["arrival_panel","arrival_start","arrival_end","arrival_facing","departure_panel"]:
 			trip.erase(key)
 		trip.phase = "visit" if trip.route.is_empty() else "walk"
 		if trip.destination<0:
@@ -232,10 +232,15 @@ func _pass_door(trip: Dictionary, exit: Dictionary, actor, delta: float) -> int:
 			trip.phase = "door"
 		return 0 if is_instance_valid(panel) else -1
 	var inward: Vector3 = stop.get_meta("inward")
-	var distance: float = (stop.global_position-actor.global_position).dot(inward)+0.09
+	var offset: Vector3 = stop.global_position-actor.global_position
+	var across := Vector3(inward.z,0,-inward.x)
+	var lateral := offset.dot(across)
+	var distance := offset.dot(inward)+0.09
 	if distance<=0.001:
 		return 1
-	if actor.step_through_door(inward,distance,delta):
+	var direction := across*signf(lateral) if absf(lateral)>0.035 else inward
+	var step := absf(lateral) if direction!=inward else distance
+	if actor.step_through_door(direction,step,delta):
 		trip.door_blocked = 0.0
 	else:
 		trip.door_blocked += delta
@@ -243,19 +248,35 @@ func _pass_door(trip: Dictionary, exit: Dictionary, actor, delta: float) -> int:
 
 
 func _prepare_arrival(trip: Dictionary) -> bool:
+	var origin := int(trip.get("arrived_from",-1))
+	if origin<0:
+		return true
+	var source_exits: Array = world.world[str(origin)].exits
+	var came_through_door := source_exits.any(func(exit): return int(exit.target)==trip.area and exit.has("door"))
 	for exit in world.world[str(trip.area)].exits:
-		if not exit.has("door") or int(exit.target)!=int(trip.get("arrived_from",-1)):
+		if int(exit.target)!=origin or int(exit.facing) not in range(4):
 			continue
-		var panel: Node3D = trip.get("arrival_panel") if is_instance_valid(trip.get("arrival_panel")) else null
-		if not world.doors.hold_open(panel):
-			if not world.doors.is_opening(panel):
-				panel = world.doors.open(roster.location,exit.door,int(exit.facing))
-				trip.arrival_panel = panel
-			return not is_instance_valid(panel)
-		var stop := _door_stop(exit)
-		if stop!=null:
-			var inward: Vector3 = stop.get_meta("inward")
-			trip.arrival_start = _surface(stop.global_position-inward*0.06)
+		if not exit.has("door") and not came_through_door:
+			continue
+		var outward: Vector3 = -FACING[int(exit.facing)]
+		var landing: Vector3 = world.area_to_world(trip.area,trip.point)
+		var threshold: Vector3 = world.area_to_world(trip.area,_exit_point(exit))
+		threshold = landing+outward*(threshold-landing).dot(outward)
+		if exit.has("door"):
+			var panel: Node3D = trip.get("arrival_panel") if is_instance_valid(trip.get("arrival_panel")) else null
+			if not world.doors.hold_open(panel):
+				if not world.doors.is_opening(panel):
+					panel = world.doors.open(roster.location,exit.door,int(exit.facing))
+					trip.arrival_panel = panel
+				return not is_instance_valid(panel)
+			var stop := _door_stop(exit)
+			if stop!=null:
+				threshold = stop.global_position
+		var start := _surface(threshold+outward*(0.14 if not exit.has("door") else -0.06))
+		var distance := maxf(0.52,(landing-start).dot(outward))
+		trip.arrival_start = start
+		trip.arrival_end = _surface(start+outward*distance)
+		trip.arrival_facing = posmod(int(exit.facing)+2,4)
 		break
 	return true
 
@@ -264,14 +285,16 @@ func _mount(id: String, trip: Dictionary, points: Array) -> void:
 	var actor = roster.active.get(id)
 	if not is_instance_valid(actor) or not actor.placed:
 		var landing: Vector3 = world.area_to_world(trip.area,trip.point)
+		var facing: int = trip.get("arrival_facing",0)
 		if trip.has("arrival_start"):
-			points.push_front([landing,0,0.0])
+			points.push_front([trip.arrival_end,facing,0.0])
 			landing = trip.arrival_start
-		points.push_front([landing,0,0.0])
+		points.push_front([landing,facing,0.0])
 	if points.is_empty():
 		return
 	actor = roster.place_traveller(id,trip.area,points)
 	actor.set_meta("travel_key",trip.key)
+	actor.entrance_spawn = not actor.placed and trip.has("arrival_start")
 
 
 func _finish(id: String, failed := false) -> void:

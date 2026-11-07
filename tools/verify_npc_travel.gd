@@ -126,6 +126,67 @@ func run() -> void:
 		stepped_inside = stepped_inside or (depth>0.05 and returning.walking)
 	if not check(saw_closed_approach and stepped_inside and not roster.active.has("jeff"),
 			"The departing NPC did not wait for the door and cross the threshold"): return
+	if not await verify_house_entries(world):
+		return
 	world.free()
-	print("NPC_TRAVEL_OK: dialogue intent, cardinal exit walking, and arrival at the authored entrance")
+	print("NPC_TRAVEL_OK: dialogue intent, cardinal exits and seven native building entrances")
 	quit()
+
+
+func verify_house_entries(world) -> bool:
+	var roster = world.npcs
+	world.day_cycle.minute = 600
+	for pair in [[0,80],[0,92],[36,160],[40,180],[40,188],[44,196],[48,204]]:
+		roster.travel.trips.clear()
+		world._change_area(pair[0],Vector3(-100,0,-100))
+		var exit: Dictionary
+		for candidate in world.world[str(pair[0])].exits:
+			if int(candidate.target)==pair[1]:
+				exit = candidate
+				break
+		await physics_frame
+		await physics_frame
+		var stop: StaticBody3D = world.get_node("Location/DoorStop_%02d" % int(exit.index))
+		var inward: Vector3 = stop.get_meta("inward")
+		var approach: Vector3 = roster.travel._surface(stop.global_position-inward*0.66)
+		roster.travel._begin("jeff",pair[0],world.world_to_area(pair[0],approach),[exit],pair[1],false)
+		var crossed := false
+		for frame in 750:
+			roster.travel.tick(1.0/60.0)
+			await physics_frame
+			var trip: Dictionary = roster.travel.trips.get("jeff",{})
+			if trip.is_empty() or trip.area==pair[1]:
+				crossed = not trip.is_empty()
+				break
+		if not check(crossed,"NPC did not cross the outside doorway: "+str(pair)):
+			return false
+		world._change_area(pair[1],Vector3(-100,0,-100))
+		var room_facing := -1
+		for reverse in world.world[str(pair[1])].exits:
+			if int(reverse.target)==pair[0]:
+				room_facing = posmod(int(reverse.facing)+2,4)
+				break
+		var into_room: Vector3 = roster.travel.FACING[room_facing]
+		var entry := Vector3.INF
+		var end := Vector3.INF
+		var previous := Vector3.INF
+		for frame in 370:
+			roster.travel.tick(1.0/60.0)
+			await physics_frame
+			var actor = roster.active.get("jeff")
+			if not is_instance_valid(actor) or not actor.placed:
+				continue
+			end = actor.global_position
+			if not entry.is_finite():
+				entry = end
+				if not check(actor.facing==room_facing,"NPC entered facing away from the room: "+str(pair)):
+					return false
+			if previous.is_finite() and not check(previous.distance_to(end)<0.04,"NPC snapped inside: "+str(pair)):
+				return false
+			previous = end
+			if not roster.travel.trips.has("jeff"):
+				break
+		if not check(entry.is_finite() and (end-entry).dot(into_room)>0.25 and not roster.travel.trips.has("jeff"),
+				"NPC did not take real steps into the room: "+str(pair)):
+			return false
+	return true

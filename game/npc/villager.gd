@@ -34,6 +34,7 @@ var talk_wait := 0.0
 var conversation_hold := false
 var elapsed_at_spawn := 0.0
 var spawn_pass := 0
+var entrance_spawn := false
 
 
 func _ready() -> void:
@@ -47,6 +48,7 @@ func _ready() -> void:
 
 func set_itinerary(points: Array, repeat_from: int, seconds_since_start := 0.0, keep_position := false) -> void:
 	itinerary = points
+	entrance_spawn = false
 	loop_start = repeat_from
 	waypoint = 1 if placed and keep_position and points.size()>1 else 0
 	elapsed_at_spawn = 0.0
@@ -150,6 +152,8 @@ func _finish_path(point: Vector3) -> void:
 		var goals := grid.nearby_cells(point,2 + spawn_pass*2)
 		for goal in goals:
 			var spawn: Vector3 = grid.positions[goal]
+			if entrance_spawn and Vector2(spawn.x-point.x,spawn.z-point.z).length_squared()>0.25*0.25:
+				continue
 			if ground_shadow.occupied(spawn):
 				continue
 			last_cell = goal
@@ -157,12 +161,15 @@ func _finish_path(point: Vector3) -> void:
 			reset_physics_interpolation()
 			collision_layer = 1
 			placed = true
+			entrance_spawn = false
 			sprite.show()
 			ground_shadow.place_on_ground(spawn)
 			ground_shadow.show()
 			_arrive()
 			return
 		wait = RETRY_SECONDS
+		if entrance_spawn:
+			return
 		# A scheduled waypoint can be outside the accessible part of a door.
 		waypoint += 1
 		if waypoint==itinerary.size() and spawn_pass==0:

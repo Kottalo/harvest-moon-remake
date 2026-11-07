@@ -61,7 +61,6 @@ var planning := false
 var waiting_for_text := false
 var group_addressed := false
 var awaiting_reply := ""
-var reply_wait_started := false
 var proactive_enabled := DisplayServer.get_name()!="headless"
 var npc_initiated := false
 var next_proactive_at := 0
@@ -384,11 +383,15 @@ func close_chat(keep_finished := false) -> void:
 	if npc_id.is_empty() and not composer.visible and bubbles.is_empty():
 		return
 	client.cancel_request()
-	for actor in held_speakers.values():
+	for id in held_speakers.keys():
+		var actor = held_speakers[id]
+		var bubble = bubbles.get(id)
+		if keep_finished and bubble!=null and not bubble.streaming and bubble.remaining>0.0:
+			continue
 		if is_instance_valid(actor):
 			actor.conversation_hold = false
-	held_speakers.clear()
-	_clear_reply_wait()
+		held_speakers.erase(id)
+	awaiting_reply = ""
 	npc_initiated = false
 	pending = false
 	planning = false
@@ -460,7 +463,7 @@ func _submit(value: String) -> void:
 	if queued.size()>=QUEUE_LIMIT:
 		_set_status("等一下，还有几句话正在等待回应。")
 		return
-	_clear_reply_wait()
+	awaiting_reply = ""
 	npc_initiated = false
 	entry.clear()
 	_hide_composer()
@@ -749,7 +752,6 @@ func _on_answer(text: String, problem: String) -> void:
 		if not option.is_empty():
 			var actor = world.npcs.active[speaker_id]
 			if world.npcs.travel.start(actor,int(option.area),true):
-				actor.talk_wait = maxf(actor.talk_wait,minf(5.0,text.length()*0.09+0.4))
 				world.record_history("action",speaker_id,"决定前往"+str(option.name),heard_by)
 		if _continue_group(text,heard_by):
 			return
@@ -766,31 +768,20 @@ func _on_answer(text: String, problem: String) -> void:
 	_set_status(problem)
 	_start_next()
 
-func _clear_reply_wait() -> void:
-	if reply_wait_started:
-		var actor = world.npcs.active.get(awaiting_reply)
-		if is_instance_valid(actor):
-			actor.talk_wait = 0.0
-	reply_wait_started = false
-	awaiting_reply = ""
-
 func _check_reply_wait() -> void:
 	if awaiting_reply.is_empty():
 		return
 	if not _speaker_in_range(awaiting_reply) or (entry.has_focus() and not entry.text.strip_edges().is_empty()):
-		_clear_reply_wait()
+		awaiting_reply = ""
 		return
-	var bubble = bubbles.get(awaiting_reply)
-	if bubble!=null:
-		if not reply_wait_started and not bubble.revealing() and bubble.remaining>bubble.fade_duration:
-			world.npcs.active[awaiting_reply].greet(world.player.global_position,bubble.remaining-bubble.fade_duration)
-			reply_wait_started = true
+	if bubbles.has(awaiting_reply):
 		return
 	var id := awaiting_reply
 	var goodbye := "那我们晚点再聊。"
 	close_chat(true)
 	world.record_history("speech",id,goodbye,PackedStringArray(["player"]))
 	_bubble(id,goodbye)
+	_hold_speaker(id)
 
 func _set_status(message: String) -> void:
 	status.text = message
@@ -812,9 +803,10 @@ func _release_inactive_speakers() -> void:
 		var actor = held_speakers[id]
 		if is_instance_valid(actor):
 			var bubble = bubbles.get(id)
+			if bubble!=null and bubble.remaining>0.0:
+				continue
 			if _speaker_in_range(id) and ((pending and (id==speaker_id or next_speakers.has(id)))
-					or queued.any(func(line): return line.target==id)
-					or (bubble!=null and (bubble.streaming or bubble.revealing()))):
+					or queued.any(func(line): return line.target==id)):
 				continue
 			actor.conversation_hold = false
 		held_speakers.erase(id)

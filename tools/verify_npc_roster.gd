@@ -519,20 +519,22 @@ func run() -> void:
 	if not check(is_equal_approx(npc_bubble.remaining,8.65),"Hold did not start after the final character"):
 		return
 	dialogue._process(0.0)
-	if not check(not listening_npc.conversation_hold,"The NPC did not resume its routine after the reply"):
+	if not check(listening_npc.conversation_hold,"The NPC resumed before the reading hold"):
 		return
 	var player_position: Vector3 = world.player.global_position
 	world.player.global_position = player_position+Vector3(5,0,0)
 	dialogue._process(6.0)
 	if not check(not paused and not dialogue.composer.visible and dialogue.bubbles.has("nappy")
-			and npc_bubble.modulate.a==1.0,"Leaving chat range cut off a finished NPC bubble"):
+			and npc_bubble.modulate.a==1.0 and listening_npc.conversation_hold,
+			"Leaving chat range cut off the finished bubble or ended its wait"):
 		return
 	dialogue._process(npc_bubble.remaining-0.3)
-	if not check(dialogue.bubbles.has("nappy") and npc_bubble.modulate.a>0.0 and npc_bubble.modulate.a<1.0,
-			"NPC speech did not fade before being removed"):
+	if not check(dialogue.bubbles.has("nappy") and npc_bubble.modulate.a>0.0 and npc_bubble.modulate.a<1.0
+			and listening_npc.conversation_hold,"NPC speech did not fade before the speaker resumed"):
 		return
 	dialogue._process(0.31)
-	if not check(not dialogue.bubbles.has("nappy"),"NPC bubble survived its fade"):
+	if not check(not dialogue.bubbles.has("nappy") and not listening_npc.conversation_hold,
+			"The NPC did not resume after its bubble finished fading"):
 		return
 	world.player.global_position = player_position
 	dialogue.close()
@@ -545,15 +547,16 @@ func run() -> void:
 	dialogue._process(0.36)
 	dialogue._process(3.49)
 	if not check(question.label.text=="我在做饭。" and question.label.visible_characters==5
-			and not dialogue.reply_wait_started,"The first sentence did not stay readable or the reply timer ran during speech"):
+			and is_equal_approx(question.remaining,8.65) and chef.conversation_hold,
+			"The first sentence did not stay readable or the reply timer ran during speech"):
 		return
 	dialogue._process(0.01)
 	if not check(question.label.text=="你想帮忙吗？" and question.label.visible_characters==1,
 			"The second sentence did not stream separately"):
 		return
 	dialogue._process(0.45)
-	if not check(dialogue.reply_wait_started and is_equal_approx(chef.talk_wait,8.0)
-			and world.history.entries.back().content=="我在做饭。你想帮忙吗？",
+	if not check(dialogue.awaiting_reply=="chef" and not question.revealing() and chef.conversation_hold
+			and is_equal_approx(question.remaining,8.65) and world.history.entries.back().content=="我在做饭。你想帮忙吗？",
 			"The NPC did not wait for the player after the last sentence"):
 		return
 	var requests_before_timeout := transport.sent_prompts.size()
@@ -567,9 +570,11 @@ func run() -> void:
 		return
 	dialogue._process(0.65)
 	if not check(not dialogue.composer.visible and dialogue.bubbles.chef.speech=="那我们晚点再聊。"
-			and is_zero_approx(chef.talk_wait) and transport.sent_prompts.size()==requests_before_timeout,
-			"The NPC did not conclude and resume locally after an unanswered question"):
+			and chef.conversation_hold and transport.sent_prompts.size()==requests_before_timeout,
+			"The NPC did not wait through its local farewell after an unanswered question"):
 		return
+	dialogue._process(20.0)
+	if not check(not chef.conversation_hold,"The NPC did not resume after the farewell faded"): return
 	transport.hold = false
 	dialogue.close()
 	var preview = load("res://game/npc/dialogue/speech_bubble.gd").new()

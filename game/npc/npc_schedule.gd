@@ -146,6 +146,27 @@ func _depart_for_schedule(id: String, destination: int) -> void:
 		_remove(id)
 
 
+func _scheduled_point(area: int, cell: Array) -> Vector3:
+	var point: Vector3 = world.area_to_world(area,_local_point(cell))
+	for exit in world.world[str(area)].exits:
+		if not exit.has("door"):
+			continue
+		var stop := location.get_node_or_null("DoorStop_%02d" % int(exit.index)) as StaticBody3D
+		if stop==null:
+			continue
+		var inward: Vector3 = stop.get_meta("inward")
+		var across := Vector3(inward.z,0,-inward.x)
+		var offset := point-stop.global_position
+		var depth := offset.dot(inward)
+		var side := offset.dot(across)
+		var half_width: float = stop.get_meta("half_width")
+		if depth>=-0.28 and depth<=0.35 and absf(side)<=half_width and absf(offset.y)<0.8:
+			# Regular schedule stops must leave the doorway available for travellers.
+			var clear := stop.global_position-inward*0.48+across*(half_width+0.23)*(-1.0 if side<0.0 else 1.0)
+			return Vector3(clear.x,point.y,clear.z)
+	return point
+
+
 func _place(name: String, area: int, row: String, poses: Array, route: Array, elapsed: float) -> void:
 	var actor = active.get(name)
 	var route_key := str(area)+"/"+row
@@ -153,8 +174,7 @@ func _place(name: String, area: int, row: String, poses: Array, route: Array, el
 		return
 	var points := []
 	for cell: Array in route[0]:
-		var point: Vector3 = world.area_to_world(area,_local_point(cell))
-		points.append([point,int(cell[3]),float(cell[4])/30.0])
+		points.append([_scheduled_point(area,cell),int(cell[3]),float(cell[4])/30.0])
 	actor = _install_route(name,area,poses,points,int(route[1]),elapsed,bool(route[2]))
 	actor.set_meta("route",route_key)
 
