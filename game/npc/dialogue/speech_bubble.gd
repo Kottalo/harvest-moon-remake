@@ -9,9 +9,6 @@ var actor: Node3D
 var remaining := 0.0
 var fade_duration := 0.65
 var streaming := false
-var tint := Color("#fff2d6")
-var _tail := Vector2.ZERO
-var _tail_base := 0.0
 var reveal_elapsed := 0.0
 var speech := ""
 var sentences := PackedStringArray()
@@ -21,12 +18,11 @@ func setup(speaker: Node3D, font: Font, player: bool) -> void:
 	actor = speaker
 	mouse_filter = MOUSE_FILTER_IGNORE
 	if player:
-		tint = Color("#e3f2ff")
 		fade_duration = 0.0
 	body = PanelContainer.new()
 	body.mouse_filter = MOUSE_FILTER_IGNORE
 	var style := StyleBoxFlat.new()
-	style.bg_color = tint
+	style.bg_color = Color("#e3f2ff") if player else Color("#fff2d6")
 	style.border_color = Color("#4a382c")
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(10)
@@ -114,17 +110,17 @@ func advance(delta: float) -> bool:
 func follow(camera: Camera3D, bounds: Vector2, used: Array[Rect2]) -> void:
 	var transform_on_screen := actor.get_global_transform_interpolated()
 	var head := transform_on_screen.origin+Vector3.UP*0.84
-	var tip := camera.unproject_position(head)
-	if fade_duration==0.0 and (camera.is_position_behind(head) or not Rect2(Vector2.ZERO,bounds).grow(24).has_point(tip)):
+	var projected_head := camera.unproject_position(head)
+	if fade_duration==0.0 and (camera.is_position_behind(head) or not Rect2(Vector2.ZERO,bounds).grow(24).has_point(projected_head)):
 		hide()
 		return
 	show()
 	var extent := body.size
 	var max_top := maxf(8,bounds.y-extent.y-14)
-	var top := tip.y-extent.y-10
-	if top<8 and tip.y+10<=max_top:
-		top = tip.y+10
-	var rect := Rect2(Vector2(clampf(tip.x-extent.x*0.5,8,maxf(8,bounds.x-extent.x-8)),
+	var top := projected_head.y-extent.y-10
+	if top<8 and projected_head.y+10<=max_top:
+		top = projected_head.y+10
+	var rect := Rect2(Vector2(clampf(projected_head.x-extent.x*0.5,8,maxf(8,bounds.x-extent.x-8)),
 		clampf(top,8,max_top)),extent)
 	if used.any(func(previous): return rect.grow(4).intersects(previous)):
 		var best_offset := INF
@@ -140,19 +136,3 @@ func follow(camera: Camera3D, bounds: Vector2, used: Array[Rect2]) -> void:
 					best_offset = offset
 	position = rect.position
 	used.append(rect)
-	var tail := tip-position
-	tail.x = clampf(tail.x,12,extent.x-12)
-	var base := 0.0 if tail.y<extent.y*0.5 else extent.y
-	tail.y = clampf(tail.y,-8.0,extent.y+8.0)
-	if tail != _tail or base != _tail_base:
-		_tail = tail
-		_tail_base = base
-		queue_redraw()
-
-func _draw() -> void:
-	if _tail.y>=0 and _tail.y<=body.size.y:
-		return
-	var inset := 2.0 if _tail_base==0.0 else -2.0
-	var left := Vector2(_tail.x-6,_tail_base+inset)
-	var right := Vector2(_tail.x+6,_tail_base+inset)
-	draw_colored_polygon(PackedVector2Array([left,_tail,right]),tint)
