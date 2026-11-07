@@ -31,6 +31,7 @@ var walk_frame := 0
 var walk_elapsed := 0.0
 var walking := false
 var talk_wait := 0.0
+var conversation_hold := false
 var elapsed_at_spawn := 0.0
 var spawn_pass := 0
 
@@ -85,6 +86,8 @@ func _physics_process(delta: float) -> void:
 		return
 	if talk_wait > 0.0:
 		talk_wait -= delta
+		return
+	if conversation_hold:
 		return
 	if wait > 0.0:
 		wait -= delta
@@ -217,6 +220,18 @@ func _arrive() -> void:
 	if waypoint == itinerary.size() and loop_start >= 0:
 		waypoint = loop_start
 	_idle()
+
+
+func step_through_door(direction: Vector3, distance: float, delta: float) -> bool:
+	var ahead := global_position+direction*minf(distance,speed*delta)
+	var target := grid._ground(Vector2(ahead.x,ahead.z))
+	var step := target-global_position
+	if not target.is_finite() or ground_shadow.motion_fraction(global_position,step)<1.0 or test_move(global_transform,step):
+		_idle()
+		return false
+	global_position += step
+	_walk(_facing_for(direction),delta)
+	return true
 
 
 func greet(point: Vector3, hold := 1.2) -> void:

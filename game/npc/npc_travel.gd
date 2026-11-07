@@ -61,8 +61,9 @@ func arrive_for_schedule(id: String, origin: int, point: Vector3, destination: i
 	# nearest their first scheduled stop when no earlier mapped position exists.
 	var distance := INF
 	var landing := Vector3.ZERO
-	for place in world.world.values():
-		for exit in place.exits:
+	var came_from := -1
+	for area in world.world:
+		for exit in world.world[area].exits:
 			if int(exit.target)!=destination:
 				continue
 			var entry := Vector3(exit.entry[0],exit.entry[1],exit.entry[2])
@@ -70,16 +71,18 @@ func arrive_for_schedule(id: String, origin: int, point: Vector3, destination: i
 			if squared<distance:
 				distance = squared
 				landing = entry
+				came_from = int(area)
 	if is_inf(distance):
 		return false
 	_begin(id,destination,landing,[],destination,false)
+	trips[id].arrived_from = came_from
 	return true
 
 
 func _begin(id: String, area: int, point: Vector3, route: Array, destination: int, requested: bool) -> void:
 	serial += 1
 	trips[id] = {"area":area,"point":point,"route":route,"requested":requested,"destination":destination,"key":serial,
-		"phase":"visit" if route.is_empty() else "walk","door_wait":0.0,"elapsed":0.0}
+		"phase":"visit" if route.is_empty() else "walk","door_blocked":0.0,"elapsed":0.0}
 
 
 func _route(origin: int, destination: int, requested: bool) -> Array:
@@ -129,15 +132,25 @@ func tick(delta: float) -> void:
 		var trip: Dictionary = trips[id]
 		var actor = roster.active.get(id)
 		var loaded := _loaded(trip.area)
+		if loaded and is_instance_valid(actor):
+			var arrival = trip.get("arrival_panel")
+			if actor.waypoint<=1 and trip.has("arrival_start") and is_instance_valid(arrival):
+				world.doors.hold_open(arrival)
+			if actor.conversation_hold:
+				var door = trip.get("departure_panel")
+				if is_instance_valid(door):
+					world.doors.hold_open(door)
+				continue
 		if trip.phase=="visit":
 			if loaded and not is_instance_valid(actor):
-				_open_arrival(trip)
+				if not _prepare_arrival(trip):
+					continue
 				_mount(id,trip,[])
 			if trip.requested:
 				trip.elapsed += delta
 				if trip.elapsed>=VISIT_SECONDS:
 					_finish(id)
-			elif not loaded or (is_instance_valid(actor) and actor.placed):
+			elif not loaded or (is_instance_valid(actor) and actor.placed and actor.waypoint>=actor.itinerary.size()):
 				_finish(id)
 			continue
 		var exit: Dictionary = trip.route[0]
@@ -148,9 +161,11 @@ func tick(delta: float) -> void:
 		trip.elapsed += delta
 		if loaded:
 			if not is_instance_valid(actor) or actor.get_meta("travel_key",-1)!=trip.key:
-				if not is_instance_valid(actor):
-					_open_arrival(trip)
-				trip.world_goal = _surface(world.area_to_world(trip.area,goal))
+				if not is_instance_valid(actor) and not _prepare_arrival(trip):
+					continue
+				var stop := _door_stop(exit) if exit.has("door") else null
+				var approach: Vector3 = stop.global_position-stop.get_meta("inward")*0.24 if stop!=null else world.area_to_world(trip.area,goal)
+				trip.world_goal = _surface(approach)
 				_mount(id,trip,[[trip.world_goal,clampi(int(exit.facing),0,3),0.0]])
 				continue
 			var destination: Vector3 = trip.world_goal
@@ -160,19 +175,18 @@ func tick(delta: float) -> void:
 				if trip.elapsed>90.0:
 					_finish(id,true)
 				continue
-			if actor.global_position.distance_to(destination)>0.55:
+			if trip.phase=="walk" and actor.global_position.distance_to(destination)>0.55:
 				_finish(id,true)
 				continue
 			if trip.requested and not _open(exit):
 				_finish(id,true)
 				continue
-			if exit.has("door") and trip.phase=="walk":
-				world.doors.open(roster.location,exit.door,int(exit.facing))
-				trip.phase = "door"
-				trip.door_wait = 0.55
-			if trip.door_wait>0.0:
-				trip.door_wait -= delta
-				continue
+			if exit.has("door"):
+				var passage := _pass_door(trip,exit,actor,delta)
+				if passage<0:
+					_finish(id,true)
+				if passage<=0:
+					continue
 		else:
 			if trip.requested and not _open(exit):
 				_finish(id,true)
@@ -194,23 +208,66 @@ func tick(delta: float) -> void:
 		trip.point = landing
 		trip.route.pop_front()
 		trip.elapsed = 0.0
-		trip.door_wait = 0.0
+		trip.door_blocked = 0.0
+		for key in ["arrival_panel","arrival_start","departure_panel"]:
+			trip.erase(key)
 		trip.phase = "visit" if trip.route.is_empty() else "walk"
 		if trip.destination<0:
 			_finish(id)
 
 
-func _open_arrival(trip: Dictionary) -> void:
+func _door_stop(exit: Dictionary) -> StaticBody3D:
+	return roster.location.get_node_or_null("DoorStop_%02d" % int(exit.index)) as StaticBody3D
+
+
+func _pass_door(trip: Dictionary, exit: Dictionary, actor, delta: float) -> int:
+	var stop := _door_stop(exit)
+	if stop==null:
+		return -1
+	var panel: Node3D = trip.get("departure_panel") if is_instance_valid(trip.get("departure_panel")) else null
+	if not world.doors.hold_open(panel):
+		if not world.doors.is_opening(panel):
+			panel = world.doors.open(roster.location,exit.door,int(exit.facing))
+			trip.departure_panel = panel
+			trip.phase = "door"
+		return 0 if is_instance_valid(panel) else -1
+	var inward: Vector3 = stop.get_meta("inward")
+	var distance: float = (stop.global_position-actor.global_position).dot(inward)+0.09
+	if distance<=0.001:
+		return 1
+	if actor.step_through_door(inward,distance,delta):
+		trip.door_blocked = 0.0
+	else:
+		trip.door_blocked += delta
+	return -1 if trip.door_blocked>=1.5 else 0
+
+
+func _prepare_arrival(trip: Dictionary) -> bool:
 	for exit in world.world[str(trip.area)].exits:
-		if exit.has("door") and int(exit.target)==int(trip.get("arrived_from",-1)):
-			world.doors.open(roster.location,exit.door,int(exit.facing),true)
-			return
+		if not exit.has("door") or int(exit.target)!=int(trip.get("arrived_from",-1)):
+			continue
+		var panel: Node3D = trip.get("arrival_panel") if is_instance_valid(trip.get("arrival_panel")) else null
+		if not world.doors.hold_open(panel):
+			if not world.doors.is_opening(panel):
+				panel = world.doors.open(roster.location,exit.door,int(exit.facing))
+				trip.arrival_panel = panel
+			return not is_instance_valid(panel)
+		var stop := _door_stop(exit)
+		if stop!=null:
+			var inward: Vector3 = stop.get_meta("inward")
+			trip.arrival_start = _surface(stop.global_position-inward*0.06)
+		break
+	return true
 
 
 func _mount(id: String, trip: Dictionary, points: Array) -> void:
 	var actor = roster.active.get(id)
 	if not is_instance_valid(actor) or not actor.placed:
-		points.push_front([world.area_to_world(trip.area,trip.point),0,0.0])
+		var landing: Vector3 = world.area_to_world(trip.area,trip.point)
+		if trip.has("arrival_start"):
+			points.push_front([landing,0,0.0])
+			landing = trip.arrival_start
+		points.push_front([landing,0,0.0])
 	if points.is_empty():
 		return
 	actor = roster.place_traveller(id,trip.area,points)

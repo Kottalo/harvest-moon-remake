@@ -142,9 +142,10 @@ func run() -> void:
 	for tick in 900:
 		npc.update(1.0/60.0)
 		await physics_frame
-		if npc.active.has("jeff") and npc.active.jeff.placed:
+		if npc.active.has("jeff") and npc.active.jeff.placed and not npc.travel.trips.has("jeff"):
 			break
-	if not check(npc.active.has("jeff") and npc.active.jeff.placed,"Jeff never walked into the shop for his shift"):
+	if not check(npc.active.has("jeff") and npc.active.jeff.placed and not npc.travel.trips.has("jeff"),
+			"Jeff never walked into the shop for his shift"):
 		return
 	var jeff = npc.active.jeff
 	npc.update(1.0/60.0)
@@ -480,6 +481,13 @@ func run() -> void:
 		return
 	transport.partial.emit("今天想")
 	var npc_bubble = dialogue.bubbles.nappy
+	var listening_npc = npc_bubble.actor
+	var listening_at: Vector3 = listening_npc.global_position
+	for tick in 85:
+		listening_npc._physics_process(1.0/60.0)
+	if not check(listening_npc.conversation_hold and listening_npc.global_position==listening_at,
+			"The addressed NPC walked away while still streaming"):
+		return
 	if not check(npc_bubble.advance(30.0) and npc_bubble.modulate.a==1.0,
 			"A streaming NPC bubble started expiring before the reply finished"):
 		return
@@ -502,9 +510,16 @@ func run() -> void:
 	if not check(npc_bubble.visible and used.size()==1 and Rect2(Vector2.ZERO,bounds).encloses(used[0]),
 			"An offscreen NPC's bubble left the viewport"):
 		return
+	used.clear()
+	npc_bubble.follow(camera,bounds,used,false)
+	if not check(not npc_bubble.visible and used.is_empty(),"A distant offscreen NPC's bubble was forced into view"):
+		return
 	npc_bubble.actor.global_position = npc_position
 	npc_bubble.advance(0.09*(npc_bubble.label.text.length()-npc_bubble.label.visible_characters))
 	if not check(is_equal_approx(npc_bubble.remaining,8.65),"Hold did not start after the final character"):
+		return
+	dialogue._process(0.0)
+	if not check(not listening_npc.conversation_hold,"The NPC did not resume its routine after the reply"):
 		return
 	var player_position: Vector3 = world.player.global_position
 	world.player.global_position = player_position+Vector3(5,0,0)

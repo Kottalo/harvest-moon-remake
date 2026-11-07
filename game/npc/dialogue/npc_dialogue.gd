@@ -37,6 +37,7 @@ var client: PiAgent
 var composer: VBoxContainer
 var bubble_layer: Control
 var bubbles := {}
+var held_speakers := {}
 var queued: Array[Dictionary] = []
 var profiles: Dictionary
 var npc_id := ""
@@ -226,7 +227,6 @@ func begin(actor, proactive := false) -> void:
 		return
 	close_chat()
 	_set_host(actor)
-	actor.greet(world.player.global_position)
 	npc_initiated = proactive
 	if proactive:
 		pending_text = "你注意到玩家在附近停下来了。根据眼前的场景和角色设定，自然地主动说一句。玩家还没开口。"
@@ -384,6 +384,10 @@ func close_chat(keep_finished := false) -> void:
 	if npc_id.is_empty() and not composer.visible and bubbles.is_empty():
 		return
 	client.cancel_request()
+	for actor in held_speakers.values():
+		if is_instance_valid(actor):
+			actor.conversation_hold = false
+	held_speakers.clear()
 	_clear_reply_wait()
 	npc_initiated = false
 	pending = false
@@ -469,8 +473,10 @@ func _submit(value: String) -> void:
 		_set_host(actor)
 	_refresh_guests()
 	var selection := _select_speakers(text)
+	var target: String = selection.subject if selection.listeners.has(selection.subject) else selection.speaker
+	_hold_speaker(target)
 	var record: int = world.record_history("speech","player",text,selection.listeners)
-	queued.append({"text":text,"record":record,"selection":selection})
+	queued.append({"text":text,"record":record,"selection":selection,"target":target})
 	if not pending:
 		_start_next()
 
@@ -612,6 +618,8 @@ func _apply_plan(text: String, problem: String) -> void:
 		return
 	speaker_id = chosen[0]
 	next_speakers = chosen.slice(1,3 if group_addressed else 2)
+	for id in next_speakers:
+		_hold_speaker(id)
 	_ask()
 
 func _continue_group(text := "", heard_by := PackedStringArray()) -> bool:
@@ -638,6 +646,7 @@ func _ask() -> void:
 			_start_next()
 		return
 	pending = true
+	_hold_speaker(speaker_id)
 	for id in bubbles:
 		if id=="player":
 			continue
@@ -669,7 +678,6 @@ func _ask() -> void:
 		context += "\n玩家的话可能让你临时改主意。你可以根据自己的性格和眼下的事拒绝或同意。此轮必须返回 JSON 对象，speech 是角色对白，destination 是 travel_options 中的地点编号，或空字符串表示留下。答应现在过去或说自己要马上过去时，必须填写对应的编号。只是谈到一个地点、约以后再去或拒绝时，destination 留空。"
 	else:
 		context += "\n本轮没有可执行的出行选项。你可以谈地点，但不要承诺现在动身。"
-	actor.greet(world.player.global_position)
 	var request := {"message":pending_text,"memory":memory}
 	if not travel_options.is_empty():
 		request.travel_options = travel_options
@@ -789,6 +797,28 @@ func _set_status(message: String) -> void:
 	status.visible = not message.is_empty()
 	_layout()
 
+func _hold_speaker(id: String) -> void:
+	if not _speaker_in_range(id):
+		return
+	var actor = world.npcs.active[id]
+	if held_speakers.get(id)==actor:
+		return
+	held_speakers[id] = actor
+	actor.conversation_hold = true
+	actor.greet(world.player.global_position,0.0)
+
+func _release_inactive_speakers() -> void:
+	for id in held_speakers.keys():
+		var actor = held_speakers[id]
+		if is_instance_valid(actor):
+			var bubble = bubbles.get(id)
+			if _speaker_in_range(id) and ((pending and (id==speaker_id or next_speakers.has(id)))
+					or queued.any(func(line): return line.target==id)
+					or (bubble!=null and (bubble.streaming or bubble.revealing()))):
+				continue
+			actor.conversation_hold = false
+		held_speakers.erase(id)
+
 func _speaker_in_range(id: String) -> bool:
 	var actor = world.npcs.active.get(id)
 	if not is_instance_valid(actor) or not actor.placed:
@@ -846,8 +876,10 @@ func _process(delta: float) -> void:
 		if not is_instance_valid(bubble.actor) or not bubble.advance(delta):
 			_remove_bubble(id)
 		else:
-			bubble.follow(camera,bubble_layer.size if id=="player" else bounds,used)
+			var nearby: bool = id=="player" or _speaker_in_range(id)
+			bubble.follow(camera,bubble_layer.size if id=="player" or not nearby else bounds,used,nearby)
 	_check_reply_wait()
+	_release_inactive_speakers()
 	if npc_initiated and not pending and bubbles.is_empty() and not entry.has_focus():
 		close_chat()
 	if waiting_for_text:

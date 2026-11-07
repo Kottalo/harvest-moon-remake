@@ -181,6 +181,19 @@ func open(location: Node3D, metadata: Dictionary, facing: int, arriving := false
 func is_open(panel: Node3D) -> bool:
 	return is_instance_valid(panel) and doors.has(panel.get_instance_id()) and doors[panel.get_instance_id()].phase != "opening"
 
+func hold_open(panel: Node3D) -> bool:
+	if not is_instance_valid(panel):
+		return false
+	var door: Dictionary = doors.get(panel.get_instance_id(),{})
+	if door.get("phase")!="hold":
+		return false
+	door.hold = maxi(door.hold,11)
+	return true
+
+func is_opening(panel: Node3D) -> bool:
+	return is_instance_valid(panel) and doors.get(panel.get_instance_id(),{}).get("phase")=="opening"
+
+
 func guard_arrival(panel: Node3D, player: CharacterBody3D, outward: Vector3) -> void:
 	var door: Dictionary = doors[panel.get_instance_id()]
 	var limit := -INF

@@ -107,7 +107,7 @@ func advance(delta: float) -> bool:
 		modulate.a = minf(1.0,remaining/fade_duration)
 	return remaining>0.0
 
-func follow(camera: Camera3D, bounds: Vector2, used: Array[Rect2]) -> void:
+func follow(camera: Camera3D, bounds: Vector2, used: Array[Rect2], keep_on_screen := true) -> void:
 	var transform_on_screen := actor.get_global_transform_interpolated()
 	var head := transform_on_screen.origin+Vector3.UP*0.84
 	var projected_head := camera.unproject_position(head)
@@ -116,6 +116,13 @@ func follow(camera: Camera3D, bounds: Vector2, used: Array[Rect2]) -> void:
 		return
 	show()
 	var extent := body.size
+	if not keep_on_screen:
+		var natural := Rect2(projected_head-Vector2(extent.x*0.5,extent.y+10),extent)
+		visible = not camera.is_position_behind(head) and Rect2(Vector2.ZERO,bounds).intersects(natural)
+		if visible:
+			position = natural.position
+			used.append(natural)
+		return
 	var max_top := maxf(8,bounds.y-extent.y-14)
 	var top := projected_head.y-extent.y-10
 	if top<8 and projected_head.y+10<=max_top:

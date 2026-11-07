@@ -79,14 +79,53 @@ func run() -> void:
 			"Jeff did not walk through the supermarket exit before changing maps: "+str([walked,previous,presence])): return
 	var entrance: Vector3 = presence.point
 	world._change_area(40,entrance+Vector3(0.45,0,0))
-	for frame in 90:
+	var opened_before_entry := false
+	var arrival_start := Vector3.INF
+	for frame in 180:
 		roster.update(1.0/60.0)
 		await physics_frame
-		if roster.active.has("jeff") and roster.active.jeff.placed:
+		if not roster.active.has("jeff"):
+			for door in world.doors.doors.values():
+				opened_before_entry = opened_before_entry or door.phase=="opening"
+			continue
+		var arrival = roster.active.jeff
+		if not arrival.placed:
+			continue
+		if not arrival_start.is_finite():
+			arrival_start = arrival.global_position
+		if arrival.waypoint>=arrival.itinerary.size():
 			break
 	presence = roster.presence("jeff")
-	if not check(presence.live and presence.area==40 and entrance.distance_to(presence.point)<0.45,
-			"The traveller did not arrive at the destination's authored entrance"): return
+	if not check(opened_before_entry and presence.live and presence.area==40
+			and arrival_start.distance_to(presence.point)>0.2 and entrance.distance_to(presence.point)<0.45,
+			"The traveller did not emerge from the open door and walk away: "+str([opened_before_entry,arrival_start,presence])): return
+	var returning = roster.active.jeff
+	for frame in 90:
+		await physics_frame
+		if world.doors.doors.values().all(func(door): return door.phase=="closed"):
+			break
+	if not check(world.doors.doors.values().all(func(door): return door.phase=="closed"),
+			"The arrival door did not close after the NPC cleared it"): return
+	roster.travel._finish("jeff")
+	world.player.global_position = entrance+Vector3(1.5,0,0)
+	var stepped_inside := false
+	var saw_closed_approach := false
+	for frame in 420:
+		roster.update(1.0/60.0)
+		await physics_frame
+		if not roster.active.has("jeff"):
+			break
+		var trip: Dictionary = roster.travel.trips.get("jeff",{})
+		var panel = trip.get("departure_panel")
+		if not is_instance_valid(panel):
+			continue
+		var stop: StaticBody3D = panel.get_meta("doorway_stop")
+		var inward: Vector3 = stop.get_meta("inward")
+		var depth: float = (returning.global_position-stop.global_position).dot(inward)
+		saw_closed_approach = saw_closed_approach or (depth<0.0 and world.doors.is_opening(panel))
+		stepped_inside = stepped_inside or (depth>0.05 and returning.walking)
+	if not check(saw_closed_approach and stepped_inside and not roster.active.has("jeff"),
+			"The departing NPC did not wait for the door and cross the threshold"): return
 	world.free()
 	print("NPC_TRAVEL_OK: dialogue intent, cardinal exit walking, and arrival at the authored entrance")
 	quit()
