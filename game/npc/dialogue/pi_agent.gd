@@ -18,6 +18,7 @@ var reported := 0
 var totals := {"input":0,"output":0,"cacheRead":0,"cacheWrite":0}
 var last_usage := {}
 var last_destination := ""
+var last_problem := ""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -29,30 +30,58 @@ func ask(messages: Array) -> void:
 	if key.is_empty() and FileAccess.file_exists(KEY_FILE):
 		key = FileAccess.get_file_as_string(KEY_FILE).strip_edges()
 	if key.is_empty():
-		answered.emit("","本机还没配置 DeepSeek 密钥。")
+		_answer("","本机还没配置 DeepSeek 密钥。")
 		return
 	if not process.is_empty() and not OS.is_process_running(process.pid):
 		_stop_worker()
 	if process.is_empty():
-		var node := "node"
-		if FileAccess.file_exists(NODE_FILE):
-			node = FileAccess.get_file_as_string(NODE_FILE).strip_edges()
-		var worker := ProjectSettings.globalize_path(WORKER)
-		if not FileAccess.file_exists(worker.get_base_dir()+"/node_modules/@earendil-works/pi-agent-core/package.json"):
-			answered.emit("","Pi Agent 依赖尚未安装。")
+		var worker := _worker_path()
+		if not FileAccess.file_exists(worker) or not FileAccess.file_exists(
+				worker.get_base_dir().path_join("node_modules/@earendil-works/pi-agent-core/package.json")):
+			_answer("","Pi Agent 依赖尚未安装。")
 			return
-		process = OS.execute_with_pipe(node,[worker],false)
+		var configured := FileAccess.get_file_as_string(NODE_FILE).strip_edges() if FileAccess.file_exists(NODE_FILE) else ""
+		for node in _node_candidates(worker,configured):
+			process = OS.execute_with_pipe(node,[worker],false)
+			if not process.is_empty():
+				break
 		if process.is_empty():
-			answered.emit("","无法启动 Pi Agent 的 Node.js。")
+			_answer("","找不到可启动的 Node.js。请安装 Node.js，或使用包含便携运行时的游戏版本。")
 			return
 		pipe = process.stdio
 	outbound = Marshalls.utf8_to_base64(JSON.stringify({"key":key,"messages":messages}))
 	if not _write_chunk():
 		return
 	requests += 1
+	last_problem = ""
 	deadline = Time.get_ticks_msec()+30_000
 	set_process(true)
 	usage_changed.emit()
+
+func _worker_path() -> String:
+	var source := ProjectSettings.globalize_path(WORKER)
+	if FileAccess.file_exists(source):
+		return source
+	return OS.get_executable_path().get_base_dir().path_join("pi/worker.mjs")
+
+func _node_candidates(worker: String, configured: String) -> PackedStringArray:
+	var windows := OS.get_name()=="Windows"
+	var executable := "node.exe" if windows else "node"
+	var paths := PackedStringArray()
+	if configured.is_absolute_path():
+		paths.append(configured)
+	paths.append(worker.get_base_dir().path_join("runtime").path_join(executable))
+	if windows:
+		for entry in [["LOCALAPPDATA","Programs/nodejs"],["ProgramFiles","nodejs"]]:
+			var base := OS.get_environment(entry[0])
+			if not base.is_empty():
+				paths.append(base.path_join(entry[1]).path_join(executable))
+	var candidates := PackedStringArray()
+	for path in paths:
+		if FileAccess.file_exists(path) and not candidates.has(path):
+			candidates.append(path)
+	candidates.append(executable)
+	return candidates
 
 func _write_chunk() -> bool:
 	# Windows' nonblocking byte pipe can partially write large prompts. Wait
@@ -82,7 +111,12 @@ func _stop_worker() -> void:
 
 func _fail(problem: String) -> void:
 	_stop_worker()
-	answered.emit("",problem)
+	_answer("",problem)
+
+func _answer(text: String, problem: String) -> void:
+	last_problem = problem
+	usage_changed.emit()
+	answered.emit(text,problem)
 
 func _process(_delta: float) -> void:
 	if Time.get_ticks_msec()>=deadline:
@@ -114,11 +148,10 @@ func _process(_delta: float) -> void:
 				reported += 1
 				for category in totals:
 					totals[category] += int(last_usage.get(category,0))
-				usage_changed.emit()
 			var problem: String = event.get("problem","")
 			if reply.is_empty() and problem.is_empty():
 				problem = "DeepSeek 返回了空白。"
-			answered.emit(reply,problem)
+			_answer(reply,problem)
 			return
 		end = buffer.find(10)
 	if not OS.is_process_running(process.pid):
@@ -128,5 +161,6 @@ func usage_summary() -> String:
 	var total_input: int = totals.input+totals.cacheRead+totals.cacheWrite
 	var last := "—" if last_usage.is_empty() else "%d 输入 / %d 输出" % [
 		last_usage.input+last_usage.cacheRead+last_usage.cacheWrite,last_usage.output]
-	return "Pi Agent · DeepSeek Flash\n请求 %d · 已回报用量 %d\n本次游戏  输入 %d（缓存命中 %d） / 输出 %d\n最近一次  %s" % [
+	var summary := "Pi Agent · DeepSeek Flash\n请求 %d · 已回报用量 %d\n本次游戏  输入 %d（缓存命中 %d） / 输出 %d\n最近一次  %s" % [
 		requests,reported,total_input,totals.cacheRead,totals.output,last]
+	return summary if last_problem.is_empty() else summary+"\n"+last_problem

@@ -104,6 +104,11 @@ func run() -> void:
 		if not await see_villager(world,name,data.actors[name],data.routes):
 			return
 	var dialogue = npc.dialogue
+	var stale := OS.get_executable_path().get_base_dir().path_join("removed-node-runtime/node.exe")
+	var candidates: PackedStringArray = dialogue.client._node_candidates(dialogue.client._worker_path(),stale)
+	if not check(not candidates.has(stale) and candidates.has("node.exe" if OS.get_name()=="Windows" else "node"),
+			"A stale runtime override prevented fallback to available Node executables"):
+		return
 	dialogue.client.free()
 	var transport := TestPi.new()
 	dialogue.client = transport

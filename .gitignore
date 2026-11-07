@@ -11,3 +11,4 @@ tools/texture_packer/node_modules/
 tools/texture_packer/frames/
 tools/texture_packer/projects/
 game/npc/dialogue/pi/node_modules/
+game/npc/dialogue/pi/runtime/
